@@ -20,11 +20,9 @@
  */
 package eionet.webq.model;
 
-import org.springframework.web.multipart.commons.CommonsMultipartFile;
-
 public class UploadedXmlFile {
     private String name;
-    private CommonsMultipartFile fileData;
+    private String fileContent;
     private String xmlSchema;
 
     public String getName() {
@@ -35,12 +33,12 @@ public class UploadedXmlFile {
         this.name = name;
     }
 
-    public CommonsMultipartFile getFileData() {
-        return fileData;
+    public String getFileContent() {
+        return fileContent;
     }
 
-    public void setFileData(CommonsMultipartFile fileData) {
-        this.fileData = fileData;
+    public void setFileContent(String fileContent) {
+        this.fileContent = fileContent;
     }
 
     /**

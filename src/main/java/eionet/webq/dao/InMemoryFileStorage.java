@@ -8,13 +8,13 @@ import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Date;
 import javax.servlet.http.HttpSession;
+
+import eionet.webq.model.UploadedXmlFile;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
-import org.springframework.web.multipart.MultipartFile;
 
 @Repository
 public class InMemoryFileStorage implements FileStorage {
@@ -24,9 +24,9 @@ public class InMemoryFileStorage implements FileStorage {
     private HttpSession session;
 
     @Override
-    public void save(MultipartFile file) {
-        Object[] params = {sessionId(), file.getOriginalFilename(), fileContent(file), new Date()};
-        jdbcTemplate.update("INSERT INTO user_xml(session_id, filename, xml, created) VALUES(?, ?, ?, ?)", params);
+    public void save(UploadedXmlFile file) {
+        Object[] params = {sessionId(), file.getName(), file.getXmlSchema(), file.getFileContent(), new Date()};
+        jdbcTemplate.update("INSERT INTO user_xml(session_id, filename, xml_schema, xml, created) VALUES(?, ?, ?, ?, ?)", params);
     }
 
     @Override
@@ -54,14 +54,6 @@ public class InMemoryFileStorage implements FileStorage {
                 return file;
             }
         };
-    }
-
-    private String fileContent(MultipartFile file) {
-        try {
-            return IOUtils.toString(file.getInputStream());
-        } catch (IOException e) {
-            throw new RuntimeException("Unable to transform xml file to string");
-        }
     }
 
     private String sessionId() {

@@ -14,6 +14,7 @@
         http://www.springframework.org/schema/beans/spring-beans-3.2.xsd">
 
     <context:component-scan base-package="eionet.webq" />
+    <mvc:annotation-driven conversion-service="conversionService" />
 
     <bean
         class="org.springframework.web.servlet.view.InternalResourceViewResolver">

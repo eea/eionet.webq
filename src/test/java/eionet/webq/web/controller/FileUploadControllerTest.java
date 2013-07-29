@@ -39,23 +39,24 @@ import org.springframework.test.web.servlet.ResultActions;
 @RunWith(SpringJUnit4ClassRunner.class)
 public class FileUploadControllerTest extends AbstractContextControllerTests {
     private MockHttpSession mockHttpSession = new MockHttpSession();
+    private final byte[] FILE_CONTENT = ("<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
+            "<foo xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:noNamespaceSchemaLocation=\"bar\" />").getBytes();
 
     @Test
     public void successfulUploadProducesMessage() throws Exception {
-        MockMultipartFile file = createMockMultipartFile("orig", null, "bar".getBytes());
+        MockMultipartFile file = createMockMultipartFile("orig");
         uploadFile(file).andExpect(model().attribute("message", "File 'orig' uploaded successfully"));
     }
 
     @Test
     public void downloadReturnsUploadedXmlFile() throws Exception {
         String fileName = "file.xml";
-        byte[] fileContent = "<?xml version=\"1.0\" encoding=\"UTF-8\">".getBytes();
 
-        uploadFile(createMockMultipartFile(fileName, MediaType.APPLICATION_XML_VALUE, fileContent));
+        uploadFile(createMockMultipartFile(fileName));
 
         mvc().perform(post("/download").param("fileName", fileName).session(mockHttpSession))
                 .andExpect(content().contentType(MediaType.APPLICATION_XML))
-                .andExpect(content().bytes(fileContent)).andReturn();
+                .andExpect(content().bytes(FILE_CONTENT)).andReturn();
     }
 
     @Test
@@ -69,12 +70,8 @@ public class FileUploadControllerTest extends AbstractContextControllerTests {
                 .andExpect(model().attribute("uploadedFiles", IsCollectionContaining.<String>hasItems(fileName, fileName1, fileName2)));
     }
 
-    private MockMultipartFile createMockMultipartFile(String fileName, String mediaType, byte[] fileContent) {
-        return new MockMultipartFile("uploadedXmlFile", fileName, mediaType, fileContent);
-    }
-
     private MockMultipartFile createMockMultipartFile(String fileName) {
-        return createMockMultipartFile(fileName, MediaType.TEXT_PLAIN_VALUE, "Hello world".getBytes());
+        return new MockMultipartFile("uploadedXmlFile", fileName, MediaType.APPLICATION_XML_VALUE, FILE_CONTENT);
     }
 
     private ResultActions uploadFile(MockMultipartFile file) throws Exception {

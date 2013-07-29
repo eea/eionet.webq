@@ -18,4 +18,12 @@
         <jdbc:script location="classpath:eionet/webq/dao/tables.sql"/>
     </jdbc:initialize-database>
 
+    <bean id="conversionService"
+          class="org.springframework.context.support.ConversionServiceFactoryBean">
+        <property name="converters">
+            <set>
+                <bean class="eionet.webq.converter.MultipartFileConverter"/>
+            </set>
+        </property>
+    </bean>
 </beans>
