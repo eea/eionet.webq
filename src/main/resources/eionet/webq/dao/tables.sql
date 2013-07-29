@@ -1,0 +1,1 @@
+CREATE TABLE IF NOT EXISTS USER_XML(id varchar2(255) primary key, fileName varchar2(255), xml nclob, created datetime);
