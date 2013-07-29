@@ -47,7 +47,6 @@ import java.io.IOException;
 public class BaseController {
 
     @Autowired
-    @Qualifier("inMemory")
     private FileStorage storage;
 
     @RequestMapping(value = "/", method = RequestMethod.GET)

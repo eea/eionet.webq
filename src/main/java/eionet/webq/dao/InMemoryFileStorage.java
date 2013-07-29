@@ -16,7 +16,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.multipart.MultipartFile;
 
-@Repository("inMemory")
+@Repository
 public class InMemoryFileStorage implements FileStorage {
 
     @Autowired
