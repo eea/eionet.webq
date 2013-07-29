@@ -38,11 +38,15 @@
 
             </fieldset>
         </form>
-            <fieldset>
-                <legend>Uploaded XMLs</legend>
-                testParam: ${testParam}
-            </fieldset>
-
+            <c:if test="${file ne null}">
+                <fieldset>
+                    <legend>Uploaded XMLs</legend>
+                    <form action="<c:url value="/download"/>" method="post">
+                        <input type="hidden" name="fileName" value="${file.originalFilename}"/>
+                        <input type="submit" value="Download ${file.originalFilename}"/>
+                    </form>
+                </fieldset>
+            </c:if>
         <footer></footer>
     </body>
 </html>

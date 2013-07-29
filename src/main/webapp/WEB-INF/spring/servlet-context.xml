@@ -13,7 +13,7 @@
         http://www.springframework.org/schema/beans
         http://www.springframework.org/schema/beans/spring-beans-3.2.xsd">
 
-    <context:component-scan base-package="eionet.webq.web.controller" />
+    <context:component-scan base-package="eionet.webq" />
 
     <bean
         class="org.springframework.web.servlet.view.InternalResourceViewResolver">

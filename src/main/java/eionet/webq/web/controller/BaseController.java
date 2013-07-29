@@ -20,16 +20,23 @@
  */
 package eionet.webq.web.controller;
 
+import eionet.webq.dao.FileStorage;
+import eionet.webq.model.UploadedXmlFile;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
-import eionet.webq.model.UploadedXmlFile;
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
 /**
  * Base controller for front page actions.
@@ -38,39 +45,41 @@ import eionet.webq.model.UploadedXmlFile;
  */
 @Controller
 @RequestMapping("/")
-// @SessionAttributes({"uploadedXmlFile"})
 public class BaseController {
+
+    @Autowired
+    private FileStorage storage;
 
     @RequestMapping(value = "/", method = RequestMethod.GET)
     public String welcome(ModelMap model) {
-
         model.addAttribute(new UploadedXmlFile());
         return "index";
-
-    }
-
-    // FIXME just for testing
-    @RequestMapping(value = "/testParam/{testParam}", method = RequestMethod.GET)
-    public String testParam(@PathVariable String testParam, ModelMap model) {
-
-        model.addAttribute(new UploadedXmlFile());
-        model.addAttribute(testParam);
-        return "index";
-
     }
 
     @RequestMapping(value = "/uploadXml", method = RequestMethod.POST)
     public String upload(@RequestParam MultipartFile uploadedXmlFile, Model model) {
-
         model.addAttribute("message", "File '" + uploadedXmlFile.getOriginalFilename() + "' uploaded successfully");
-
-        // FIXME remove debug lines
-        System.out.println("-------------------------------------------");
-        System.out.println("Test upload: " + uploadedXmlFile.getOriginalFilename());
-        System.out.println("Test upload: " + uploadedXmlFile.getSize());
-        System.out.println("-------------------------------------------");
-
+        model.addAttribute("file", uploadedXmlFile);
+        storage.save(uploadedXmlFile);
         return "index";
+    }
 
+    @RequestMapping(value = "/download")
+    public void downloadFile(@RequestParam String fileName, HttpServletResponse response) {
+        response.setContentType(MediaType.APPLICATION_XML_VALUE);
+        response.addHeader("Content-Disposition", "attachment;filename=" + fileName);
+        ServletOutputStream output = null;
+        try {
+            byte[] responseBytes = FileUtils.readFileToByteArray(storage.getByFilename(fileName));
+            response.setContentLength(responseBytes.length);
+
+            output = response.getOutputStream();
+            output.write(responseBytes);
+            output.flush();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } finally {
+            IOUtils.closeQuietly(output);
+        }
     }
 }
