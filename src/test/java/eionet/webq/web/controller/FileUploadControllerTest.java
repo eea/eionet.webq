@@ -30,6 +30,7 @@ import org.hamcrest.core.IsCollectionContaining;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockHttpSession;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.web.servlet.MockMvc;
@@ -37,6 +38,7 @@ import org.springframework.test.web.servlet.ResultActions;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 public class FileUploadControllerTest extends AbstractContextControllerTests {
+    private MockHttpSession mockHttpSession = new MockHttpSession();
 
     @Test
     public void successfulUploadProducesMessage() throws Exception {
@@ -51,7 +53,7 @@ public class FileUploadControllerTest extends AbstractContextControllerTests {
 
         uploadFile(createMockMultipartFile(fileName, MediaType.APPLICATION_XML_VALUE, fileContent));
 
-        mvc().perform(post("/download").param("fileName", fileName))
+        mvc().perform(post("/download").param("fileName", fileName).session(mockHttpSession))
                 .andExpect(content().contentType(MediaType.APPLICATION_XML))
                 .andExpect(content().bytes(fileContent)).andReturn();
     }
@@ -76,7 +78,7 @@ public class FileUploadControllerTest extends AbstractContextControllerTests {
     }
 
     private ResultActions uploadFile(MockMultipartFile file) throws Exception {
-        return mvc().perform(fileUpload("/uploadXml").file(file));
+        return mvc().perform(fileUpload("/uploadXml").file(file).session(mockHttpSession));
     }
 
     private MockMvc mvc() {
