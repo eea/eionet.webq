@@ -38,15 +38,17 @@
 
             </fieldset>
         </form>
-            <c:if test="${file ne null}">
-                <fieldset>
-                    <legend>Uploaded XMLs</legend>
-                    <form action="<c:url value="/download"/>" method="post">
-                        <input type="hidden" name="fileName" value="${file.originalFilename}"/>
-                        <input type="submit" value="Download ${file.originalFilename}"/>
-                    </form>
-                </fieldset>
-            </c:if>
+        <fieldset>
+            <legend>Uploaded XMLs</legend>
+            <c:forEach items="${uploadedFiles}" var="fileName">
+                <form action="<c:url value="/download"/>">
+                    ${fileName}
+                    <input type="button" value="Edit with webform"/>
+                    <input type="hidden" name="fileName" value="${fileName}"/>
+                    <input type="submit" value="Download ${fileName}"/>
+                </form>
+            </c:forEach>
+        </fieldset>
         <footer></footer>
     </body>
 </html>

@@ -20,7 +20,13 @@
  */
 package eionet.webq.web.controller;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.fileUpload;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
+import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 import eionet.webq.web.AbstractContextControllerTests;
+import org.hamcrest.core.IsCollectionContaining;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.http.MediaType;
@@ -29,17 +35,11 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.fileUpload;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
-import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
-
 @RunWith(SpringJUnit4ClassRunner.class)
 public class FileUploadControllerTest extends AbstractContextControllerTests {
 
     @Test
-    public void readString() throws Exception {
+    public void successfulUploadProducesMessage() throws Exception {
         MockMultipartFile file = createMockMultipartFile("orig", null, "bar".getBytes());
         uploadFile(file).andExpect(model().attribute("message", "File 'orig' uploaded successfully"));
     }
@@ -56,8 +56,23 @@ public class FileUploadControllerTest extends AbstractContextControllerTests {
                 .andExpect(content().bytes(fileContent)).andReturn();
     }
 
+    @Test
+    public void after3FilesUploadModelContainsAllUploadedFileNames() throws Exception {
+        String fileName = "file";
+        String fileName1 = "file1";
+        String fileName2 = "file2";
+        uploadFile(createMockMultipartFile(fileName));
+        uploadFile(createMockMultipartFile(fileName1));
+        uploadFile(createMockMultipartFile(fileName2))
+                .andExpect(model().attribute("uploadedFiles", IsCollectionContaining.<String>hasItems(fileName, fileName1, fileName2)));
+    }
+
     private MockMultipartFile createMockMultipartFile(String fileName, String mediaType, byte[] fileContent) {
         return new MockMultipartFile("uploadedXmlFile", fileName, mediaType, fileContent);
+    }
+
+    private MockMultipartFile createMockMultipartFile(String fileName) {
+        return createMockMultipartFile(fileName, MediaType.TEXT_PLAIN_VALUE, "Hello world".getBytes());
     }
 
     private ResultActions uploadFile(MockMultipartFile file) throws Exception {

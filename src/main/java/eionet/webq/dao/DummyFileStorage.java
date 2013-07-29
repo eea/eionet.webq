@@ -25,13 +25,14 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
 @Repository
 public class DummyFileStorage implements FileStorage {
 
-    private static final Map<String, File> files = new HashMap<String, File>();
+    private static final Map<String, File> FILES = new HashMap<String, File>();
 
     @Override
     public void save(MultipartFile file) {
@@ -39,7 +40,7 @@ public class DummyFileStorage implements FileStorage {
             File tempFile = File.createTempFile(file.getOriginalFilename(), "");
             tempFile.deleteOnExit();
             file.transferTo(tempFile);
-            files.put(file.getOriginalFilename(), tempFile);
+            FILES.put(file.getOriginalFilename(), tempFile);
         } catch (IOException e) {
             System.out.println("unable to create temporary file\n" + e);
         }
@@ -47,6 +48,11 @@ public class DummyFileStorage implements FileStorage {
 
     @Override
     public File getByFilename(String fileName) {
-        return files.get(fileName);
+        return FILES.get(fileName);
+    }
+
+    @Override
+    public Collection<String> allUploadedFiles() {
+        return FILES.keySet();
     }
 }

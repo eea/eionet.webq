@@ -21,14 +21,12 @@
 package eionet.webq.web.controller;
 
 import eionet.webq.dao.FileStorage;
-import eionet.webq.model.UploadedXmlFile;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -51,17 +49,16 @@ public class BaseController {
     private FileStorage storage;
 
     @RequestMapping(value = "/", method = RequestMethod.GET)
-    public String welcome(ModelMap model) {
-        model.addAttribute(new UploadedXmlFile());
+    public String welcome(Model model) {
+        model.addAttribute("uploadedFiles", storage.allUploadedFiles());
         return "index";
     }
 
     @RequestMapping(value = "/uploadXml", method = RequestMethod.POST)
     public String upload(@RequestParam MultipartFile uploadedXmlFile, Model model) {
         model.addAttribute("message", "File '" + uploadedXmlFile.getOriginalFilename() + "' uploaded successfully");
-        model.addAttribute("file", uploadedXmlFile);
         storage.save(uploadedXmlFile);
-        return "index";
+        return welcome(model);
     }
 
     @RequestMapping(value = "/download")

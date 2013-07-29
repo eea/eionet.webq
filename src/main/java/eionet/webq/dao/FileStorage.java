@@ -24,10 +24,13 @@ package eionet.webq.dao;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
+import java.util.Collection;
 
 
 public interface FileStorage {
     void save(MultipartFile file);
 
     File getByFilename(String fileName);
+
+    Collection<String> allUploadedFiles();
 }
