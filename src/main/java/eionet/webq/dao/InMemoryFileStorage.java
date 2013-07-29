@@ -47,12 +47,7 @@ public class InMemoryFileStorage implements FileStorage {
 
     @Override
     public Collection<String> allUploadedFiles() {
-        return jdbcTemplate.query("SELECT filename FROM user_xml", new RowMapper<String>() {
-            @Override
-            public String mapRow(ResultSet rs, int rowNum) throws SQLException {
-                return rs.getString(1);
-            }
-        });
+        return jdbcTemplate.queryForList("SELECT filename FROM user_xml", String.class);
     }
     
     private String fileContent(MultipartFile file) {
