@@ -24,6 +24,7 @@ import eionet.webq.dao.FileStorage;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -46,6 +47,7 @@ import java.io.IOException;
 public class BaseController {
 
     @Autowired
+    @Qualifier("inMemory")
     private FileStorage storage;
 
     @RequestMapping(value = "/", method = RequestMethod.GET)

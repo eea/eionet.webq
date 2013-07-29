@@ -29,7 +29,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-@Repository
+@Repository("dummy")
 public class DummyFileStorage implements FileStorage {
 
     private static final Map<String, File> FILES = new HashMap<String, File>();
