@@ -21,8 +21,8 @@
 package eionet.webq.converter;
 
 import eionet.webq.model.UploadedXmlFile;
-import org.apache.commons.io.IOUtils;
 import org.springframework.core.convert.converter.Converter;
+import org.springframework.http.MediaType;
 import org.springframework.web.multipart.MultipartFile;
 import org.w3c.dom.Document;
 
@@ -35,12 +35,17 @@ public class MultipartFileConverter implements Converter<MultipartFile, Uploaded
 
     @Override
     public UploadedXmlFile convert(MultipartFile multipartFile) {
+        if (!multipartFile.getContentType().equals(MediaType.APPLICATION_XML_VALUE)) {
+            throw new RuntimeException("xml file expected.");
+        }
         UploadedXmlFile uploadedXmlFile = new UploadedXmlFile();
-        InputStream inputStream = toInputStream(multipartFile);
-        String fileContent = fileContent(inputStream);
-        uploadedXmlFile.setFileContent(fileContent);
+        try {
+            uploadedXmlFile.setFileContent(multipartFile.getBytes());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
         uploadedXmlFile.setName(multipartFile.getOriginalFilename());
-        uploadedXmlFile.setXmlSchema(extractXmlSchema(inputStream));
+        uploadedXmlFile.setXmlSchema(extractXmlSchema(toInputStream(multipartFile)));
         return uploadedXmlFile;
     }
 
@@ -48,19 +53,10 @@ public class MultipartFileConverter implements Converter<MultipartFile, Uploaded
         DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
         XPathFactory xPathFactory = XPathFactory.newInstance();
         try {
-            stream.reset();
             Document xml = builderFactory.newDocumentBuilder().parse(stream);
             return xPathFactory.newXPath().evaluate("//@xsi:noNamespaceSchemaLocation", xml);
         } catch (Exception e) {
             throw new RuntimeException(e);
-        }
-    }
-
-    private String fileContent(InputStream inputStream) {
-        try {
-            return IOUtils.toString(inputStream);
-        } catch (IOException e) {
-            throw new RuntimeException("Unable to transform xml file to string", e);
         }
     }
 

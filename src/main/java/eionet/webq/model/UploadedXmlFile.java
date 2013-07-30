@@ -22,7 +22,7 @@ package eionet.webq.model;
 
 public class UploadedXmlFile {
     private String name;
-    private String fileContent;
+    private byte[] fileContent;
     private String xmlSchema;
 
     public String getName() {
@@ -33,11 +33,11 @@ public class UploadedXmlFile {
         this.name = name;
     }
 
-    public String getFileContent() {
+    public byte[] getFileContent() {
         return fileContent;
     }
 
-    public void setFileContent(String fileContent) {
+    public void setFileContent(byte[] fileContent) {
         this.fileContent = fileContent;
     }
 
@@ -54,6 +54,4 @@ public class UploadedXmlFile {
     public void setXmlSchema(String xmlSchema) {
         this.xmlSchema = xmlSchema;
     }
-
-
 }

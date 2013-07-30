@@ -18,6 +18,8 @@
         <jdbc:script location="classpath:eionet/webq/dao/tables.sql"/>
     </jdbc:initialize-database>
 
+    <bean id="lobHandler" class="org.springframework.jdbc.support.lob.DefaultLobHandler"/>
+
     <bean id="conversionService"
           class="org.springframework.context.support.ConversionServiceFactoryBean">
         <property name="converters">

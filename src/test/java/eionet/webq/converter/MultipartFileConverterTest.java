@@ -40,7 +40,7 @@ public class MultipartFileConverterTest {
         MultipartFileConverter multipartFileConverter = new MultipartFileConverter();
         UploadedXmlFile xmlFile = multipartFileConverter.convert(xmlFileUpload);
         assertThat(xmlFile.getName(), equalTo(originalFilename));
-        assertThat(xmlFile.getFileContent(), equalTo(xml));
+        assertThat(xmlFile.getFileContent(), equalTo(xml.getBytes()));
         assertThat(xmlFile.getXmlSchema(), equalTo("http://biodiversity.eionet.europa.eu/schemas/bernconvention/derogations.xsd"));
     }
 }
