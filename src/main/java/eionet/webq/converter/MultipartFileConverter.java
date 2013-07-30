@@ -35,7 +35,7 @@ public class MultipartFileConverter implements Converter<MultipartFile, Uploaded
     public UploadedXmlFile convert(MultipartFile multipartFile) {
         byte[] bytes = toByteArray(multipartFile);
         return new UploadedXmlFile().setFileContent(bytes).setName(multipartFile.getOriginalFilename())
-                .setXmlSchema(extractXmlSchema(bytes));
+                .setFileSizeInBytes(multipartFile.getSize()).setXmlSchema(extractXmlSchema(bytes));
     }
 
     private String extractXmlSchema(byte[] bytes) {

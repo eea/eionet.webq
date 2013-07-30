@@ -45,7 +45,7 @@ public class FileStorageImpl implements FileStorage {
 
     @Override
     public void save(final UploadedXmlFile file) {
-        jdbcTemplate.execute("INSERT INTO user_xml(session_id, filename, xml_schema, xml) VALUES(?, ?, ?, ?)",
+        jdbcTemplate.execute("INSERT INTO user_xml(session_id, filename, xml_schema, xml, file_size_in_bytes) VALUES(?, ?, ?, ?, ?)",
                 new AbstractLobCreatingPreparedStatementCallback(lobHandler) {
                     @Override
                     protected void setValues(PreparedStatement ps, LobCreator lobCreator) throws SQLException {
@@ -53,6 +53,7 @@ public class FileStorageImpl implements FileStorage {
                         ps.setString(2, file.getName());
                         ps.setString(3, file.getXmlSchema());
                         lobCreator.setBlobAsBytes(ps, 4, file.getFileContent());
+                        ps.setLong(5, file.getFileSizeInBytes());
                     }
                 });
     }
@@ -71,11 +72,12 @@ public class FileStorageImpl implements FileStorage {
 
     @Override
     public Collection<UploadedXmlFile> allUploadedFiles() {
-        return jdbcTemplate.query("SELECT id, filename FROM user_xml WHERE session_id = ?", new Object[] {sessionId()},
-                new RowMapper<UploadedXmlFile>() {
+        return jdbcTemplate.query("SELECT id, filename, file_size_in_bytes, created, updated FROM user_xml WHERE session_id = ?",
+                new Object[] {sessionId()}, new RowMapper<UploadedXmlFile>() {
                     @Override
                     public UploadedXmlFile mapRow(ResultSet rs, int rowNum) throws SQLException {
-                        return new UploadedXmlFile().setId(rs.getInt(1)).setName(rs.getString(2));
+                        return new UploadedXmlFile().setId(rs.getInt(1)).setName(rs.getString(2)).setFileSizeInBytes(rs.getLong(3))
+                                .setCreated(rs.getTimestamp(4)).setUpdated(rs.getTimestamp(5));
                     }
                 });
     }

@@ -20,11 +20,16 @@
  */
 package eionet.webq.dto;
 
+import java.util.Date;
+
 public class UploadedXmlFile {
     private int id;
     private String name;
     private byte[] fileContent;
     private String xmlSchema;
+    private long fileSizeInBytes;
+    private Date created;
+    private Date updated;
 
     public int getId() {
         return id;
@@ -53,6 +58,15 @@ public class UploadedXmlFile {
         return this;
     }
 
+    public long getFileSizeInBytes() {
+        return fileSizeInBytes;
+    }
+
+    public UploadedXmlFile setFileSizeInBytes(long fileSizeInBytes) {
+        this.fileSizeInBytes = fileSizeInBytes;
+        return this;
+    }
+
     /**
      * @return the xmlSchema
      */
@@ -65,6 +79,24 @@ public class UploadedXmlFile {
      */
     public UploadedXmlFile setXmlSchema(String xmlSchema) {
         this.xmlSchema = xmlSchema;
+        return this;
+    }
+
+    public Date getCreated() {
+        return created;
+    }
+
+    public UploadedXmlFile setCreated(Date created) {
+        this.created = created;
+        return this;
+    }
+
+    public Date getUpdated() {
+        return updated;
+    }
+
+    public UploadedXmlFile setUpdated(Date updated) {
+        this.updated = updated;
         return this;
     }
 }

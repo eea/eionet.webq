@@ -43,9 +43,12 @@
             <c:forEach items="${uploadedFiles}" var="file">
                 <form action="<c:url value="/download"/>">
                     ${file.name}
-                    <input type="button" value="Edit with webform"/>
+                    <a href="<c:url value="/forms/habides-factsheet-v4.xhtml?instance=http://127.0.0.1:8080/webq2/download?fileId=${file.id}"/>">Form</a>
                     <input type="hidden" name="fileId" value="${file.id}"/>
                     <input type="submit" value="Download ${file.name}"/>
+                    File size: ${file.fileSizeInBytes} bytes
+                    Created: ${file.created}
+                    Updated: ${file.updated}
                 </form>
             </c:forEach>
         </fieldset>

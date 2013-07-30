@@ -1,7 +1,9 @@
 CREATE TABLE IF NOT EXISTS USER_XML(
-id bigint auto_increment primary key,
+id identity primary key,
 session_id varchar2(255),
 fileName varchar2(255),
 xml_schema varchar2(255),
 xml blob,
-created datetime default current_timestamp);
+file_size_in_bytes bigint,
+created datetime default current_timestamp,
+updated datetime default current_timestamp);
