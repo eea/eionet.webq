@@ -20,7 +20,7 @@
  */
 package eionet.webq.dao;
 
-import eionet.webq.model.UploadedXmlFile;
+import eionet.webq.dto.UploadedXmlFile;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -58,21 +58,32 @@ public class FileStorageImpl implements FileStorage {
     }
 
     @Override
-    public byte[] getByFilename(final String fileName) {
-        Object[] params = {sessionId(), fileName};
-        return jdbcTemplate.queryForObject("SELECT xml FROM user_xml WHERE session_id = ? AND filename = ?", params,
-                new RowMapper<byte[]>() {
+    public UploadedXmlFile getById(int id) {
+        Object[] params = {id, sessionId()};
+        return jdbcTemplate.queryForObject("SELECT filename, xml FROM user_xml WHERE id = ? AND session_id = ?", params,
+                new RowMapper<UploadedXmlFile>() {
                     @Override
-                    public byte[] mapRow(ResultSet rs, int rowNum) throws SQLException {
-                        return lobHandler.getBlobAsBytes(rs, 1);
+                    public UploadedXmlFile mapRow(ResultSet rs, int rowNum) throws SQLException {
+                        UploadedXmlFile uploadedXmlFile = new UploadedXmlFile();
+                        uploadedXmlFile.setName(rs.getString(1));
+                        uploadedXmlFile.setFileContent(lobHandler.getBlobAsBytes(rs, 2));
+                        return uploadedXmlFile;
                     }
                 });
     }
 
     @Override
-    public Collection<String> allUploadedFiles() {
-        return jdbcTemplate.queryForList("SELECT filename FROM user_xml WHERE session_id = ?", new Object[] {sessionId()},
-                String.class);
+    public Collection<UploadedXmlFile> allUploadedFiles() {
+        return jdbcTemplate.query("SELECT id, filename FROM user_xml WHERE session_id = ?", new Object[]{sessionId()},
+                new RowMapper<UploadedXmlFile>() {
+                    @Override
+                    public UploadedXmlFile mapRow(ResultSet rs, int rowNum) throws SQLException {
+                        UploadedXmlFile file = new UploadedXmlFile();
+                        file.setId(rs.getInt(1));
+                        file.setName(rs.getString(2));
+                        return file;
+                    }
+                });
     }
 
     private String sessionId() {

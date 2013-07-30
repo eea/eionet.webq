@@ -40,12 +40,12 @@
         </form>
         <fieldset>
             <legend>Uploaded XMLs</legend>
-            <c:forEach items="${uploadedFiles}" var="fileName">
+            <c:forEach items="${uploadedFiles}" var="file">
                 <form action="<c:url value="/download"/>">
-                    ${fileName}
+                    ${file.name}
                     <input type="button" value="Edit with webform"/>
-                    <input type="hidden" name="fileName" value="${fileName}"/>
-                    <input type="submit" value="Download ${fileName}"/>
+                    <input type="hidden" name="fileId" value="${file.id}"/>
+                    <input type="submit" value="Download ${file.name}"/>
                 </form>
             </c:forEach>
         </fieldset>

@@ -21,8 +21,7 @@
 package eionet.webq.web.controller;
 
 import eionet.webq.dao.FileStorage;
-import eionet.webq.model.UploadedXmlFile;
-import org.apache.commons.io.FileUtils;
+import eionet.webq.dto.UploadedXmlFile;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -62,16 +61,17 @@ public class BaseController {
     }
 
     @RequestMapping(value = "/download")
-    public void downloadFile(@RequestParam String fileName, HttpServletResponse response) {
+    public void downloadFile(@RequestParam int fileId, HttpServletResponse response) {
+        UploadedXmlFile file = storage.getById(fileId);
         response.setContentType(MediaType.APPLICATION_XML_VALUE);
-        response.addHeader("Content-Disposition", "attachment;filename=" + fileName);
+        response.addHeader("Content-Disposition", "attachment;filename=" + file.getName());
         ServletOutputStream output = null;
         try {
-            byte[] responseBytes = storage.getByFilename(fileName);
-            response.setContentLength(responseBytes.length);
+            byte[] fileContent = file.getFileContent();
+            response.setContentLength(fileContent.length);
 
             output = response.getOutputStream();
-            output.write(responseBytes);
+            output.write(fileContent);
             output.flush();
         } catch (IOException e) {
             throw new RuntimeException(e);

@@ -20,9 +20,8 @@
  */
 package eionet.webq.converter;
 
-import eionet.webq.model.UploadedXmlFile;
+import eionet.webq.dto.UploadedXmlFile;
 import org.springframework.core.convert.converter.Converter;
-import org.springframework.http.MediaType;
 import org.springframework.web.multipart.MultipartFile;
 import org.w3c.dom.Document;
 

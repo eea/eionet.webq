@@ -21,7 +21,7 @@
 
 package eionet.webq.dao;
 
-import eionet.webq.model.UploadedXmlFile;
+import eionet.webq.dto.UploadedXmlFile;
 
 import java.util.Collection;
 
@@ -29,7 +29,7 @@ import java.util.Collection;
 public interface FileStorage {
     void save(UploadedXmlFile file);
 
-    byte[] getByFilename(String fileName);
+    UploadedXmlFile getById(int id);
 
-    Collection<String> allUploadedFiles();
+    Collection<UploadedXmlFile> allUploadedFiles();
 }

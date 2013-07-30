@@ -22,7 +22,7 @@ package eionet.webq.converter;
 
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertThat;
-import eionet.webq.model.UploadedXmlFile;
+import eionet.webq.dto.UploadedXmlFile;
 import org.junit.Test;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
