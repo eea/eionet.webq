@@ -35,9 +35,6 @@ public class MultipartFileConverter implements Converter<MultipartFile, Uploaded
 
     @Override
     public UploadedXmlFile convert(MultipartFile multipartFile) {
-        if (!multipartFile.getContentType().equals(MediaType.APPLICATION_XML_VALUE)) {
-            throw new RuntimeException("xml file expected.");
-        }
         UploadedXmlFile uploadedXmlFile = new UploadedXmlFile();
         try {
             uploadedXmlFile.setFileContent(multipartFile.getBytes());

@@ -23,14 +23,13 @@ package eionet.webq.dao;
 
 import eionet.webq.model.UploadedXmlFile;
 
-import java.io.File;
 import java.util.Collection;
 
 
 public interface FileStorage {
     void save(UploadedXmlFile file);
 
-    File getByFilename(String fileName);
+    byte[] getByFilename(String fileName);
 
     Collection<String> allUploadedFiles();
 }
