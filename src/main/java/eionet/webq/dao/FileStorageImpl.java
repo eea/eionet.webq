@@ -64,24 +64,18 @@ public class FileStorageImpl implements FileStorage {
                 new RowMapper<UploadedXmlFile>() {
                     @Override
                     public UploadedXmlFile mapRow(ResultSet rs, int rowNum) throws SQLException {
-                        UploadedXmlFile uploadedXmlFile = new UploadedXmlFile();
-                        uploadedXmlFile.setName(rs.getString(1));
-                        uploadedXmlFile.setFileContent(lobHandler.getBlobAsBytes(rs, 2));
-                        return uploadedXmlFile;
+                        return new UploadedXmlFile().setName(rs.getString(1)).setFileContent(lobHandler.getBlobAsBytes(rs, 2));
                     }
                 });
     }
 
     @Override
     public Collection<UploadedXmlFile> allUploadedFiles() {
-        return jdbcTemplate.query("SELECT id, filename FROM user_xml WHERE session_id = ?", new Object[]{sessionId()},
+        return jdbcTemplate.query("SELECT id, filename FROM user_xml WHERE session_id = ?", new Object[] {sessionId()},
                 new RowMapper<UploadedXmlFile>() {
                     @Override
                     public UploadedXmlFile mapRow(ResultSet rs, int rowNum) throws SQLException {
-                        UploadedXmlFile file = new UploadedXmlFile();
-                        file.setId(rs.getInt(1));
-                        file.setName(rs.getString(2));
-                        return file;
+                        return new UploadedXmlFile().setId(rs.getInt(1)).setName(rs.getString(2));
                     }
                 });
     }

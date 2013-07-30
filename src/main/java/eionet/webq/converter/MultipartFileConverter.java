@@ -21,44 +21,37 @@
 package eionet.webq.converter;
 
 import eionet.webq.dto.UploadedXmlFile;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.xpath.XPathFactory;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.web.multipart.MultipartFile;
 import org.w3c.dom.Document;
-
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.xpath.XPathFactory;
-import java.io.IOException;
-import java.io.InputStream;
 
 public class MultipartFileConverter implements Converter<MultipartFile, UploadedXmlFile> {
 
     @Override
     public UploadedXmlFile convert(MultipartFile multipartFile) {
-        UploadedXmlFile uploadedXmlFile = new UploadedXmlFile();
-        try {
-            uploadedXmlFile.setFileContent(multipartFile.getBytes());
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        uploadedXmlFile.setName(multipartFile.getOriginalFilename());
-        uploadedXmlFile.setXmlSchema(extractXmlSchema(toInputStream(multipartFile)));
-        return uploadedXmlFile;
+        byte[] bytes = toByteArray(multipartFile);
+        return new UploadedXmlFile().setFileContent(bytes).setName(multipartFile.getOriginalFilename())
+                .setXmlSchema(extractXmlSchema(bytes));
     }
 
-    private String extractXmlSchema(InputStream stream) {
+    private String extractXmlSchema(byte[] bytes) {
         DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
         XPathFactory xPathFactory = XPathFactory.newInstance();
         try {
-            Document xml = builderFactory.newDocumentBuilder().parse(stream);
+            Document xml = builderFactory.newDocumentBuilder().parse(new ByteArrayInputStream(bytes));
             return xPathFactory.newXPath().evaluate("//@xsi:noNamespaceSchemaLocation", xml);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
-    private InputStream toInputStream(MultipartFile multipartFile) {
+    private byte[] toByteArray(MultipartFile multipartFile) {
         try {
-            return multipartFile.getInputStream();
+            return multipartFile.getBytes();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

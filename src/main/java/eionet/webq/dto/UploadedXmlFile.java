@@ -30,24 +30,27 @@ public class UploadedXmlFile {
         return id;
     }
 
-    public void setId(int id) {
+    public UploadedXmlFile setId(int id) {
         this.id = id;
+        return this;
     }
 
     public String getName() {
         return name;
     }
 
-    public void setName(String name) {
+    public UploadedXmlFile setName(String name) {
         this.name = name;
+        return this;
     }
 
     public byte[] getFileContent() {
         return fileContent;
     }
 
-    public void setFileContent(byte[] fileContent) {
+    public UploadedXmlFile setFileContent(byte[] fileContent) {
         this.fileContent = fileContent;
+        return this;
     }
 
     /**
@@ -60,7 +63,8 @@ public class UploadedXmlFile {
     /**
      * @param xmlSchema the xmlSchema to set
      */
-    public void setXmlSchema(String xmlSchema) {
+    public UploadedXmlFile setXmlSchema(String xmlSchema) {
         this.xmlSchema = xmlSchema;
+        return this;
     }
 }
