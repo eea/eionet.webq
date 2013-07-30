@@ -41,15 +41,15 @@
         <fieldset>
             <legend>Uploaded XMLs</legend>
             <c:forEach items="${uploadedFiles}" var="file">
-                <form action="<c:url value="/download"/>">
+                <div>
+                    <c:url value="/download?fileId=${file.id}" var="downloadLink"/>
                     ${file.name}
-                    <a href="<c:url value="/forms/habides-factsheet-v4.xhtml?instance=http://127.0.0.1:8080/webq2/download?fileId=${file.id}"/>">Form</a>
-                    <input type="hidden" name="fileId" value="${file.id}"/>
-                    <input type="submit" value="Download ${file.name}"/>
+                    <a href="<c:url value="/forms/habides-factsheet-v4.xhtml?instance=${downloadLink}"/>">Edit with WebForm</a>
+                    <a href="${downloadLink}">Download ${file.name}</a>
                     File size: ${file.fileSizeInBytes} bytes
                     Created: ${file.created}
                     Updated: ${file.updated}
-                </form>
+                <div>
             </c:forEach>
         </fieldset>
         <footer></footer>
