@@ -16,7 +16,7 @@
  * (C) European Environment Agency.  All Rights Reserved.
  *
  * Contributor(s):
- *        Enriko Käsper
+ *        Anton Dmitrijev
  */
 
 package eionet.webq.dao;
