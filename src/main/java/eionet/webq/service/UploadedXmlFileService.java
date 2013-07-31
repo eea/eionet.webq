@@ -54,4 +54,11 @@ public interface UploadedXmlFileService {
      */
     Collection<UploadedXmlFile> allUploadedFiles();
 
+    /**
+     * Update file content and updated time in storage.
+     * Only {@link UploadedXmlFile#content}, {@link UploadedXmlFile#sizeInBytes} and {@link UploadedXmlFile#updated} will be set.
+     *
+     * @param file content to be updated in storage
+     */
+    void updateContent(UploadedXmlFile file);
 }

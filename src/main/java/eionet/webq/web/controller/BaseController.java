@@ -108,8 +108,8 @@ public class BaseController {
 
     /**
      * Update file content action. The action is called from XForms and it returns XML formatted result.
-     * @param fileId
-     * @param request
+     * @param fileId file id to update
+     * @param request current request
      * @return response as text/xml
      */
     @RequestMapping(value = "/saveXml", method = RequestMethod.POST)

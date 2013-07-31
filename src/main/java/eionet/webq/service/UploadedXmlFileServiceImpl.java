@@ -70,6 +70,13 @@ public class UploadedXmlFileServiceImpl implements UploadedXmlFileService {
         return uploadedXmlFiles;
     }
 
+    @Override
+    public void updateContent(UploadedXmlFile file) {
+        String userId = userId();
+        LOGGER.info("Updating file id=" + file.getId() + " for user=" + userId);
+        storage.updateContent(file, userId);
+    }
+
     /**
      * Provides current http session id.
      * @return current http session id
