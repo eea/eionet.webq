@@ -28,16 +28,17 @@
                 <legend>Upload XML file</legend>
 
                 <p>
-                    <label for="fileData">File</label><br/>
+                    <label for="uploadedXmlFile">File</label><br/>
                     <input id="uploadedXmlFile" type="file" name="uploadedXmlFile"/>
                 </p>
 
                 <p>
-                    <input type="submit" />
+                    <input type="submit" value="Upload"/>
                 </p>
 
             </fieldset>
         </form>
+        <c:if test="${not empty uploadedFiles}">
         <fieldset>
             <legend>Uploaded XML files</legend>
             <table class="datatable">
@@ -68,6 +69,7 @@
                 </tbody>
             </table>
         </fieldset>
+        </c:if>
         <footer></footer>
     </body>
 </html>
