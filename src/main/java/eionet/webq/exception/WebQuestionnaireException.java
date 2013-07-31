@@ -26,7 +26,7 @@ package eionet.webq.exception;
  */
 public class WebQuestionnaireException extends RuntimeException {
     /**
-     * Constructs new WebQuestionnaireException
+     * Constructs new WebQuestionnaireException.
      *
      * @param message exception reason
      * @param cause exception to wrap

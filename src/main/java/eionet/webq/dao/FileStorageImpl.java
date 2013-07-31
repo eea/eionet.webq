@@ -81,8 +81,8 @@ public class FileStorageImpl implements FileStorage {
 
     @Override
     public Collection<UploadedXmlFile> allUploadedFiles(String userId) {
-        return jdbcTemplate.query("SELECT id, filename, file_size_in_bytes, created, updated FROM user_xml WHERE user_id = ? " +
-                "ORDER BY updated DESC",
+        return jdbcTemplate.query("SELECT id, filename, file_size_in_bytes, created, updated FROM user_xml WHERE user_id = ? "
+                + "ORDER BY updated DESC",
                 new Object[] {userId}, new RowMapper<UploadedXmlFile>() {
                     @Override
                     public UploadedXmlFile mapRow(ResultSet rs, int rowNum) throws SQLException {
