@@ -56,7 +56,7 @@ public class FileUploadControllerTest extends AbstractContextControllerTests {
     @Test
     public void downloadReturnsUploadedXmlFile() throws Exception {
 
-        UploadedXmlFile uploadedXmlFile = uploadFileAndTakeFirstUploadedFile(createMockMultipartFile("file.xml"));
+        UploadedXmlFile uploadedXmlFile = uploadFileAndTakeFirstUploadedFile();
 
         downloadFile(uploadedXmlFile.getId()).andExpect(content().contentType(MediaType.APPLICATION_XML))
                 .andExpect(content().bytes(FILE_CONTENT)).andReturn();
@@ -82,7 +82,7 @@ public class FileUploadControllerTest extends AbstractContextControllerTests {
 
     @Test
     public void allowFileContentUpdateInStorage() throws Exception {
-        UploadedXmlFile uploadedXmlFile = uploadFileAndTakeFirstUploadedFile(createMockMultipartFile("file.txt"));
+        UploadedXmlFile uploadedXmlFile = uploadFileAndTakeFirstUploadedFile();
         String newContent = FILE_CONTENT_STRING.replace("/>", "><foobar></foobar></bar>");
         mvc().perform(
                 postWithMockSession("/saveXml").param("fileId", Integer.toString(uploadedXmlFile.getId()))
@@ -104,7 +104,7 @@ public class FileUploadControllerTest extends AbstractContextControllerTests {
         return (List<UploadedXmlFile>) uploadFile(file).andReturn().getModelAndView().getModelMap().get("uploadedFiles");
     }
 
-    private UploadedXmlFile uploadFileAndTakeFirstUploadedFile(MockMultipartFile file) throws Exception {
+    private UploadedXmlFile uploadFileAndTakeFirstUploadedFile() throws Exception {
         List<UploadedXmlFile> uploadedXmlFiles = uploadFileAndExtractUploadedFiles(createMockMultipartFile("file.xml"));
         return uploadedXmlFiles.iterator().next();
     }
