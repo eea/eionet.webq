@@ -25,6 +25,8 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.xpath.XPathFactory;
+
+import eionet.webq.exception.WebQuestionnaireException;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.web.multipart.MultipartFile;
 import org.w3c.dom.Document;
@@ -55,7 +57,7 @@ public class MultipartFileConverter implements Converter<MultipartFile, Uploaded
             Document xml = builderFactory.newDocumentBuilder().parse(new ByteArrayInputStream(bytes));
             return xPathFactory.newXPath().evaluate("//@xsi:noNamespaceSchemaLocation", xml);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new WebQuestionnaireException("Unable to retrieve xml schema", e);
         }
     }
 
@@ -69,7 +71,7 @@ public class MultipartFileConverter implements Converter<MultipartFile, Uploaded
         try {
             return multipartFile.getBytes();
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new WebQuestionnaireException("Unable to transform uploaded file to bytes", e);
         }
     }
 }
