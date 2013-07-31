@@ -94,7 +94,7 @@ public class FileStorageImpl implements FileStorage {
 
     @Override
     public void updateContent(final UploadedXmlFile file, final String userId) {
-        jdbcTemplate.execute("UPDATE user_xml SET xml = ?, file_size_in_bytes = ?, updated = ? WHERE id = ? and session_id= ?",
+        jdbcTemplate.execute("UPDATE user_xml SET xml = ?, file_size_in_bytes = ?, updated = ? WHERE id = ? and user_id= ?",
                 new AbstractLobCreatingPreparedStatementCallback(lobHandler) {
                     @Override
                     protected void setValues(PreparedStatement ps, LobCreator lobCreator) throws SQLException {
