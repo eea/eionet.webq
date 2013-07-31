@@ -371,4 +371,9 @@
             org.springframework.web.context.ContextLoaderListener
         </listener-class>
     </listener>
+
+    <!-- HTTP Session timeout in minutes -->
+    <session-config>
+        <session-timeout>540</session-timeout>
+    </session-config>
 </web-app>
