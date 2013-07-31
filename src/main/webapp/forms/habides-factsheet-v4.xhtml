@@ -2,78 +2,76 @@
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:xf="http://www.w3.org/2002/xforms"
       xmlns:ev="http://www.w3.org/2001/xml-events"
-	  xmlns:bf="http://betterform.sourceforge.net/xforms">
-	<head>
-		<title>HaBiDeS (Habitats and Birds Directive Derogation System)</title>
+      xmlns:bf="http://betterform.sourceforge.net/xforms">
+    <head>
+        <title>HaBiDeS (Habitats and Birds Directive Derogation System)</title>
         <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
         <meta http-equiv="pragma" content="no-cache" />
         <meta http-equiv="cache-control" content="no-cache" />
         <meta http-equiv="expires" content="-1" />
         <meta name="Publisher" content="EEA, The European Environment Agency" />
-      
-		<meta name="author" content="enriko at tripledev.ee"/>
-		<meta name="description" content="XForms for HaBiDeS (Habitats and Birds Directive Derogation System)"/>
-        
-		<link rel="stylesheet" type="text/css" href="http://www.eionet.europa.eu/styles/eionet2007/print.css" media="print" />
+
+        <meta name="author" content="enriko at tripledev.ee"/>
+        <meta name="description" content="XForms for HaBiDeS (Habitats and Birds Directive Derogation System)"/>
+
+        <link rel="stylesheet" type="text/css" href="http://www.eionet.europa.eu/styles/eionet2007/print.css" media="print" />
         <link rel="stylesheet" type="text/css" href="http://www.eionet.europa.eu/styles/eionet2007/handheld.css" media="handheld" />
         <link rel="stylesheet" type="text/css" href="http://www.eionet.europa.eu/styles/eionet2007/screen.css" media="screen" title="Eionet 2007 style" />
 
-
-		<style type="text/css">
-			.bold{
-				font-weight: bold;
-				padding-right:5px;
-			}
-			.bold label{
-				font-weight: bold;
-				padding-right:5px;
-				font-size:0.8em;
-			}
-			.section {
-			    margin-top: 10px;
-				padding: 5px;
-			}
-			div.section {
-				background: #f3f3f3;
-			}
-			div.header{
-				background-color: #dddddd;
-				border-color: #aaaaaa;
-			}
-			div.bottom-buttons{
-				background-color: #dddddd;
-				border-color: #aaaaaa;
-			}
-		</style>
-		<xf:model id="main-model">
-			<!-- ##########            DEFAULT instance          ############-->
+        <style type="text/css">
+            .bold{
+                font-weight: bold;
+                padding-right:5px;
+            }
+            .bold label{
+                font-weight: bold;
+                padding-right:5px;
+                font-size:0.8em;
+            }
+            .section {
+                margin-top: 10px;
+                padding: 5px;
+            }
+            div.section {
+                background: #f3f3f3;
+            }
+            div.header{
+                background-color: #dddddd;
+                border-color: #aaaaaa;
+            }
+            div.bottom-buttons{
+                background-color: #dddddd;
+                border-color: #aaaaaa;
+            }
+        </style>
+        <xf:model id="main-model">
+            <!-- ##########            DEFAULT instance          ############-->
             <xf:instance xmlns="" id="default">
-				<derogations/>
-			</xf:instance>
-			<!-- instance for EMPTY XML structure -->
+                <derogations/>
+            </xf:instance>
+            <!-- instance for EMPTY XML structure -->
             <xf:instance xmlns="" id="emptyinstance" src="http://webq.eionet.europa.eu/xml/habides-derogations-instance.xml">
-				<derogations/>
-			</xf:instance>
-			<!-- ##########            SUBMISSIONS          ############ -->
-			<xf:submission id="load-instance" method="GET" replace="instance" resource="{ instance('context')/instanceUrl }" instance="default">
-				<xf:action ev:event="xforms-submit-done"/>
-				<xf:action ev:event="xforms-submit-error">
-					<xf:message>An error occurred when loading instance data!</xf:message>
-				</xf:action>
-			</xf:submission>			
-			<xf:submission id="load-emptyinstance" method="GET" replace="instance" resource="{ instance('context')/emptyInstanceUrl }" instance="emptyinstance"/>
-			<!-- FIXME -->
-			<!--submission for finish filling webform - stores the data and loads webq front page -->
-            <xf:submission id="finish" action="{$base_uri}WebQServlet?mode=finish&amp;instance_id={$instance_id}" method="post" replace="instance" encoding="UTF-8" instance="saveresult" validate="false">
-                <xf:message ev:event="xforms-submit-error">Error on saving data!</xf:message>
-                <xf:load ev:event="xforms-submit-done" resource="{$base_uri}WebQServlet?mode=envelope&amp;instance_id={$instance_id}" show="replace"/>
+                <derogations/>
+            </xf:instance>
+            <!-- ##########            SUBMISSIONS          ############ -->
+            <xf:submission id="load-instance" method="GET" replace="instance" resource="{ instance('context')/instanceUrl }" instance="default">
+                <xf:action ev:event="xforms-submit-done"/>
+                <xf:action ev:event="xforms-submit-error">
+                    <xf:message>An error occurred when loading instance data!</xf:message>
+                </xf:action>
             </xf:submission>
-            <xf:submission id="savedraft" action="{$base_uri}WebQServlet?mode=save&amp;instance_id={$instance_id}" method="post" replace="instance" encoding="UTF-8" instance="saveresult" validate="false">
+            <xf:submission id="load-emptyinstance" method="GET" replace="instance" resource="{ instance('context')/emptyInstanceUrl }" instance="emptyinstance"/>
+            <!-- FIXME -->
+            <!--submission for finish filling webform - stores the data and loads webq front page -->
+            <xf:submission id="finish" action="{$base_uri}saveXml?fileId={$instance}" method="post" replace="instance" encoding="UTF-8" instance="saveresult" validate="false">
+                <xf:message ev:event="xforms-submit-error">Error on saving data!</xf:message>
+                <xf:load ev:event="xforms-submit-done" resource="{$base_uri}" show="replace"/>
+            </xf:submission>
+            <xf:submission id="savedraft" action="{$base_uri}saveXml?fileId={$fileId}" method="post" replace="instance" encoding="UTF-8" instance="saveresult" validate="false">
                 <xf:message ev:event="xforms-submit-done" ref="instance('saveresult')/message"/>
                 <xf:message ev:event="xforms-submit-error">Error on saving data!</xf:message>
-				<!--f:load  ev:event="xforms-submit-done" resource="{$base_uri}WebQServlet?mode=opensave" show="replace"/-->
             </xf:submission>
-			<!-- instance for showing save result messages from WebQ system -->
+            <!-- instance for showing save result messages from WebQ system -->
             <xf:instance xmlns="" id="saveresult">
                 <result>
                     <code desc="Result code: 0-ERROR;1-OK">-1</code>
@@ -82,62 +80,62 @@
                     <last_modified desc="Last modified"/>
                 </result>
             </xf:instance>
-			<!-- bindings for save result -->
+            <!-- bindings for save result -->
             <xf:bind nodeset="instance('saveresult')/code" id="has-save-info" relevant=". &gt; -1" type="integer"/>
             <xf:bind nodeset="instance('saveresult')/last_modified" id="save-success" relevant="../code=1"/>
             <xf:bind nodeset="instance('saveresult')/message" id="save-error" relevant="../code=0"/>
 
-			<!-- ##########            DEFAULT instance BINDINGS          ############-->
-				<!--xf:bind id="b-lang" nodeset="/derogations/@xml:lang" required="true()"/-->
+            <!-- ##########            DEFAULT instance BINDINGS          ############-->
+                <!--xf:bind id="b-lang" nodeset="/derogations/@xml:lang" required="true()"/-->
             <xf:bind id="b-country" nodeset="/derogations/@country" required="true()"/>
             <xf:bind id="b-derogation" nodeset="derogation">
-				<xf:bind nodeset="@derogation_reference"/>
-				<!--xf:bind id="b-user_derog_ref" nodeset="derogation/@user_derogation_ref"/-->
-				
-				<xf:bind id="b-directive" nodeset="@directive" required="true()"/>
-				<xf:bind id="b-licensingAuthority" nodeset="licensingAuthority"/>
-				<xf:bind id="b-validFrom" type="xs:date" nodeset="licenseValidFrom"/>
-				<xf:bind id="b-validUntil" type="xs:date" nodeset="licenseValidUntil"/>
-				<xf:bind id="b-sensitive" type="xs:boolean" nodeset="sensitive"/>
-				<xf:bind id="b-numberOfLicenses" type="integer" nodeset="numberOfLicenses"/>
-				<xf:bind id="b-alternativesAssessed" nodeset="alternativesAssessed" required="true()"/>		
-			</xf:bind>
+                <xf:bind nodeset="@derogation_reference"/>
+                <!--xf:bind id="b-user_derog_ref" nodeset="derogation/@user_derogation_ref"/-->
 
-			<!-- ##########       CONTEXT  INSTANCE         ############-->
-			<!-- CONTEXT parameters instance and bindings eg. webq-lang, envelope, ... -->
+                <xf:bind id="b-directive" nodeset="@directive" required="true()"/>
+                <xf:bind id="b-licensingAuthority" nodeset="licensingAuthority"/>
+                <xf:bind id="b-validFrom" type="xs:date" nodeset="licenseValidFrom"/>
+                <xf:bind id="b-validUntil" type="xs:date" nodeset="licenseValidUntil"/>
+                <xf:bind id="b-sensitive" type="xs:boolean" nodeset="sensitive"/>
+                <xf:bind id="b-numberOfLicenses" type="integer" nodeset="numberOfLicenses"/>
+                <xf:bind id="b-alternativesAssessed" nodeset="alternativesAssessed" required="true()"/>
+            </xf:bind>
+
+            <!-- ##########       CONTEXT  INSTANCE         ############-->
+            <!-- CONTEXT parameters instance and bindings eg. webq-lang, envelope, ... -->
             <xf:instance xmlns="" id="context">
                 <data>
-					<instanceUrl></instanceUrl>
-					<emptyInstanceUrl>http://webq.eionet.europa.eu/xml/habides-derogations-instance.xml</emptyInstanceUrl>
-					<user/>
-					<activeDirective/>
-				</data>
-			</xf:instance>
+                    <instanceUrl></instanceUrl>
+                    <emptyInstanceUrl>http://webq.eionet.europa.eu/xml/habides-derogations-instance.xml</emptyInstanceUrl>
+                    <user/>
+                    <activeDirective/>
+                </data>
+            </xf:instance>
             <xf:bind id="b-user" nodeset="instance('context')/user" required="true()"/>
 
             <xf:instance xmlns="" id="countries" src="http://webq.eionet.europa.eu/xml/habides_country_lookup.xml"/>
 
-			<!-- Directives -->
+            <!-- Directives -->
             <xf:instance xmlns="" id="directives">
                 <directives>
                     <directive id="http://rod.eionet.europa.eu/obligations/268" type="habitats">Habitats Directive</directive>
                     <directive id="http://rod.eionet.europa.eu/obligations/276" type="birds">Birds Directive</directive>
                 </directives>
             </xf:instance>
-			
-			<!-- ##########       ACTIONS         ############-->
-			
-			<xf:action ev:event="xforms-ready">
-				<xf:setvalue ref="instance('context')/instanceUrl" value="bf:appContext('instance')" if="string-length(bf:appContext('instance')) &gt; 0"/>
-				<xf:setvalue ref="instance('context')/instanceUrl" value="instance('context')/emptyInstanceUrl" if="string-length(bf:appContext('instance')) = 0"/>
-				<xf:send submission="load-instance" name="xforms-submit"/>
-				<xf:send submission="load-emptyinstance" name="xforms-submit"/>
-				<xf:refresh/>
-			</xf:action>
+
+            <!-- ##########       ACTIONS         ############-->
+
+            <xf:action ev:event="xforms-ready">
+                <xf:setvalue ref="instance('context')/instanceUrl" value="bf:appContext('instance')" if="string-length(bf:appContext('instance')) &gt; 0"/>
+                <xf:setvalue ref="instance('context')/instanceUrl" value="instance('context')/emptyInstanceUrl" if="string-length(bf:appContext('instance')) = 0"/>
+                <xf:send submission="load-instance" name="xforms-submit"/>
+                <xf:send submission="load-emptyinstance" name="xforms-submit"/>
+                <xf:refresh/>
+            </xf:action>
             <xf:action ev:event="my-insert">
                 <xf:setvalue ref="/derogations/derogation[index('rDerogList')]/@directive" value="instance('directives')/directive[@type=instance('context')/activeDirective]/@id"/>
                 <xf:setvalue ref="/derogations/derogation[index('rDerogList')]/@userIdentity" value="instance('context')/user"/>
-                <xf:setvalue ref="/derogations/derogation[index('rDerogList')]/@derogation_reference" value="concat(instance('default')/derogation[index('rDerogList')]/@userIdentity,'-',if(instance('context')/activeDirective='birds') then 'B'  else 'H','-',count(instance('default')/derogation[@directive=instance('directives')/directive[@type=instance('context')/activeDirective]/@id]),'-',substring(now(),1,4),substring(now(),6,2),substring(now(),9,2),substring(now(),12,2),substring(now(),15,2),substring(now(),18,2))"/>				
+                <xf:setvalue ref="/derogations/derogation[index('rDerogList')]/@derogation_reference" value="concat(instance('default')/derogation[index('rDerogList')]/@userIdentity,'-',if(instance('context')/activeDirective='birds') then 'B'  else 'H','-',count(instance('default')/derogation[@directive=instance('directives')/directive[@type=instance('context')/activeDirective]/@id]),'-',substring(now(),1,4),substring(now(),6,2),substring(now(),9,2),substring(now(),12,2),substring(now(),15,2),substring(now(),18,2))"/>
             </xf:action>
             <xf:action ev:event="my-reset-all">
                 <xf:setvalue ref="/derogations/derogation[index('rDerogList')]/@directive" value="''"/>
@@ -149,15 +147,15 @@
                 <xf:setvalue ref="/derogations/derogation[index('rDerogList')]/licenseValidUntil" value="''"/>
                 <xf:setvalue ref="/derogations/derogation[index('rDerogList')]/sensitive" value="false()"/>
                 <xf:setvalue ref="/derogations/derogation[index('rDerogList')]/numberOfLicenses" value="''"/>
-				<xf:refresh/>
-			</xf:action>
-		</xf:model>
-	</head>
-	<body>
-		<!-- ##################################            FORM HEADER            ############################################-->
+                <xf:refresh/>
+            </xf:action>
+        </xf:model>
+    </head>
+    <body>
+        <!-- ##################################            FORM HEADER            ############################################-->
         <h1>Habitats and Birds Derogations</h1>
 
-		<!-- ##################################          START QUESTIONNAIRE           ############################################-->
+        <!-- ##################################          START QUESTIONNAIRE           ############################################-->
         <div class="section header">
             <xf:select1 appearance="minimal" bind="b-country" incremental="true">
                 <xf:label class="bold">Country</xf:label>
@@ -166,65 +164,65 @@
                     <xf:hint ref="code"/>
                     <xf:value ref="code"/>
                 </xf:itemset>
-				<xf:alert>Mandatory field!</xf:alert>
+                <xf:alert>Mandatory field!</xf:alert>
             </xf:select1>
 
             <xf:input bind="b-user" incremental="true">
                 <xf:label class="bold">User Identity</xf:label>
-				<xf:alert>Mandatory field!</xf:alert>
+                <xf:alert>Mandatory field!</xf:alert>
             </xf:input>
         </div>
-		
-		<div class="section">
-		<!-- ##################################         DEROGATIONS LIST           ############################################-->
+
+        <div class="section">
+        <!-- ##################################         DEROGATIONS LIST           ############################################-->
             <xf:repeat id="rDerogList" bind="b-derogation" appearance="compact">
                 <xf:output ref="@derogation_reference">
                     <xf:label class="bold">Derogation Reference</xf:label>
                 </xf:output>
                 <xf:input ref="licenseValidFrom">
-					<xf:label class="bold">License Valid From</xf:label>
+                    <xf:label class="bold">License Valid From</xf:label>
                 </xf:input>
                 <xf:input ref="licenseValidUntil">
                     <xf:label class="bold">License Valid Until</xf:label>
                 </xf:input>
                 <xf:input ref="sensitive">
-					<xf:label class="bold">Sensitive</xf:label>
+                    <xf:label class="bold">Sensitive</xf:label>
                 </xf:input>
-			</xf:repeat>
-		</div>
-		<div class="section">
+            </xf:repeat>
+        </div>
+        <div class="section">
             <xf:group>
-				<xf:trigger>
+                <xf:trigger>
                     <xf:label>Create HABITATS derogation</xf:label>
                     <xf:action>
                         <xf:setvalue ref="instance('context')/activeDirective" value="'habitats'"/>
                         <xf:insert bind="b-derogation" at="last()" position="after" origin="instance('emptyinstance')/derogation"
-							if="count(instance('default')/derogation)&gt;1 or instance('default')/derogation[1]/@derogation_reference!=''"/>
+                            if="count(instance('default')/derogation)&gt;1 or instance('default')/derogation[1]/@derogation_reference!=''"/>
                         <xf:dispatch targetid="main-model" name="my-insert"/>
                     </xf:action>
-                </xf:trigger>		 
-				<xf:trigger>
+                </xf:trigger>
+                <xf:trigger>
                     <xf:label>Create BIRDS derogation</xf:label>
                     <xf:action>
                         <xf:setvalue ref="instance('context')/activeDirective" value="'birds'"/>
                         <xf:insert bind="b-derogation" at="last()" position="after" origin="instance('emptyinstance')/derogation"
-							if="count(instance('default')/derogation)&gt;1 or instance('default')/derogation[1]/@derogation_reference!=''"/>
+                            if="count(instance('default')/derogation)&gt;1 or instance('default')/derogation[1]/@derogation_reference!=''"/>
                         <xf:dispatch targetid="main-model" name="my-insert"/>
                     </xf:action>
-                </xf:trigger>		 
-				<xf:trigger>
-					<xf:label>Delete derogation</xf:label>
-					<xf:hint>Deletes selected derogation from report</xf:hint>
-					<xf:action>
+                </xf:trigger>
+                <xf:trigger>
+                    <xf:label>Delete derogation</xf:label>
+                    <xf:hint>Deletes selected derogation from report</xf:hint>
+                    <xf:action>
                         <xf:dispatch targetid="main-model" name="my-reset-all"
-							if="count(instance('default')/derogation)=1 and instance('default')/derogation[1]/@derogation_reference!=''"/>
-						<xf:delete bind="b-derogation" at="index('rDerogList')" if="count(instance('default')/derogation)&gt;1"/>
-					</xf:action>
-				</xf:trigger>
-			</xf:group>
-		</div>
-		<div class="section bottom-buttons">
-		<!-- ##################################          BUTTONS            ############################################-->
+                            if="count(instance('default')/derogation)=1 and instance('default')/derogation[1]/@derogation_reference!=''"/>
+                        <xf:delete bind="b-derogation" at="index('rDerogList')" if="count(instance('default')/derogation)&gt;1"/>
+                    </xf:action>
+                </xf:trigger>
+            </xf:group>
+        </div>
+        <div class="section bottom-buttons">
+        <!-- ##################################          BUTTONS            ############################################-->
         <xf:group appearance="minimal">
             <xf:trigger id="tr_savedraft">
                 <xf:label>Save</xf:label>
@@ -248,6 +246,6 @@
                 </xf:action>
             </xf:trigger>
         </xf:group>
-		</div>
-	</body>
+        </div>
+    </body>
 </html>
