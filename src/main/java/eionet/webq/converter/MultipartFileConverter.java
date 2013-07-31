@@ -29,6 +29,10 @@ import org.springframework.core.convert.converter.Converter;
 import org.springframework.web.multipart.MultipartFile;
 import org.w3c.dom.Document;
 
+/**
+ * Performs converting from {@link MultipartFile} to {@link UploadedXmlFile}.
+ * @see Converter
+ */
 public class MultipartFileConverter implements Converter<MultipartFile, UploadedXmlFile> {
 
     @Override
@@ -38,6 +42,12 @@ public class MultipartFileConverter implements Converter<MultipartFile, Uploaded
                 .setFileSizeInBytes(multipartFile.getSize()).setXmlSchema(extractXmlSchema(bytes));
     }
 
+    /**
+     * Extracts {@code @xsi:noNamespaceSchemaLocation} attribute value from xml root element.
+     * @param bytes
+     *            uploaded file bytes
+     * @return {@code @xsi:noNamespaceSchemaLocation} attribute value
+     */
     private String extractXmlSchema(byte[] bytes) {
         DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
         XPathFactory xPathFactory = XPathFactory.newInstance();
@@ -49,6 +59,12 @@ public class MultipartFileConverter implements Converter<MultipartFile, Uploaded
         }
     }
 
+    /**
+     * Calls {@link org.springframework.web.multipart.MultipartFile#getBytes()} wrapping {@link IOException}.
+     * @param multipartFile
+     *            uploaded file to be converted
+     * @return uploaded file bytes.
+     */
     private byte[] toByteArray(MultipartFile multipartFile) {
         try {
             return multipartFile.getBytes();

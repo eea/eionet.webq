@@ -34,18 +34,31 @@ import org.springframework.jdbc.support.lob.LobCreator;
 import org.springframework.jdbc.support.lob.LobHandler;
 import org.springframework.stereotype.Repository;
 
+/**
+ * {@link FileStorage} implementation.
+ */
 @Repository
 public class FileStorageImpl implements FileStorage {
+    /**
+     * {@link JdbcTemplate} to perform data access operations.
+     */
     @Autowired
     private JdbcTemplate jdbcTemplate;
+    /**
+     * Current http session.
+     */
     @Autowired
     private HttpSession session;
+    /**
+     * Large objects handles. Used for storing and retrieving {@link java.sql.Blob} object from database.
+     */
     @Autowired
     private LobHandler lobHandler;
 
     @Override
     public void save(final UploadedXmlFile file) {
-        jdbcTemplate.execute("INSERT INTO user_xml(session_id, filename, xml_schema, xml, file_size_in_bytes) VALUES(?, ?, ?, ?, ?)",
+        jdbcTemplate.execute(
+                "INSERT INTO user_xml(session_id, filename, xml_schema, xml, file_size_in_bytes) VALUES(?, ?, ?, ?, ?)",
                 new AbstractLobCreatingPreparedStatementCallback(lobHandler) {
                     @Override
                     protected void setValues(PreparedStatement ps, LobCreator lobCreator) throws SQLException {
@@ -76,12 +89,16 @@ public class FileStorageImpl implements FileStorage {
                 new Object[] {sessionId()}, new RowMapper<UploadedXmlFile>() {
                     @Override
                     public UploadedXmlFile mapRow(ResultSet rs, int rowNum) throws SQLException {
-                        return new UploadedXmlFile().setId(rs.getInt(1)).setName(rs.getString(2)).setFileSizeInBytes(rs.getLong(3))
-                                .setCreated(rs.getTimestamp(4)).setUpdated(rs.getTimestamp(5));
+                        return new UploadedXmlFile().setId(rs.getInt(1)).setName(rs.getString(2))
+                                .setFileSizeInBytes(rs.getLong(3)).setCreated(rs.getTimestamp(4)).setUpdated(rs.getTimestamp(5));
                     }
                 });
     }
 
+    /**
+     * Provides current http session id.
+     * @return current http session id
+     */
     private String sessionId() {
         return session.getId();
     }

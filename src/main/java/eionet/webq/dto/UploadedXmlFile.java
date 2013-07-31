@@ -22,19 +22,50 @@ package eionet.webq.dto;
 
 import java.util.Date;
 
+/**
+ * Data transfer object to pass uploaded file data across application.
+ */
 public class UploadedXmlFile {
+    /**
+     * File id in data storage.
+     */
     private int id;
+    /**
+     * File name.
+     */
     private String name;
+    /**
+     * File content bytes.
+     */
     private byte[] fileContent;
+    /**
+     * Xml schema name extracted during conversion.
+     * @see eionet.webq.converter.MultipartFileConverter
+     */
     private String xmlSchema;
+    /**
+     * File size in bytes.
+     */
     private long fileSizeInBytes;
+    /**
+     * File upload date.
+     */
     private Date created;
+    /**
+     * Last change date.
+     */
     private Date updated;
 
     public int getId() {
         return id;
     }
 
+    /**
+     * Id setter.
+     * @param id
+     *            file id
+     * @return current object for method call chaining
+     */
     public UploadedXmlFile setId(int id) {
         this.id = id;
         return this;
@@ -44,6 +75,12 @@ public class UploadedXmlFile {
         return name;
     }
 
+    /**
+     * File name setter.
+     * @param name
+     *            file name
+     * @return current object for method call chaining
+     */
     public UploadedXmlFile setName(String name) {
         this.name = name;
         return this;
@@ -53,6 +90,12 @@ public class UploadedXmlFile {
         return fileContent;
     }
 
+    /**
+     * File content in bytes setter.
+     * @param fileContent
+     *            file content
+     * @return current object for method call chaining
+     */
     public UploadedXmlFile setFileContent(byte[] fileContent) {
         this.fileContent = fileContent;
         return this;
@@ -62,6 +105,12 @@ public class UploadedXmlFile {
         return fileSizeInBytes;
     }
 
+    /**
+     * File size in bytes.
+     * @param fileSizeInBytes
+     *            file size in bytes
+     * @return current object for method call chaining
+     */
     public UploadedXmlFile setFileSizeInBytes(long fileSizeInBytes) {
         this.fileSizeInBytes = fileSizeInBytes;
         return this;
@@ -75,8 +124,10 @@ public class UploadedXmlFile {
     }
 
     /**
-     * @param xmlSchema the xmlSchema to set
-     */
+     * @param xmlSchema
+     *            the xmlSchema to set
+     * @return current object for method call chaining
+     * */
     public UploadedXmlFile setXmlSchema(String xmlSchema) {
         this.xmlSchema = xmlSchema;
         return this;
@@ -86,6 +137,12 @@ public class UploadedXmlFile {
         return created;
     }
 
+    /**
+     * Created date setter.
+     * @param created
+     *            date file was uploaded
+     * @return current object for method call chaining
+     */
     public UploadedXmlFile setCreated(Date created) {
         this.created = created;
         return this;
@@ -95,6 +152,12 @@ public class UploadedXmlFile {
         return updated;
     }
 
+    /**
+     * Updated date setter.
+     * @param updated
+     *            date when file was updated last time
+     * @return current object for method call chaining
+     */
     public UploadedXmlFile setUpdated(Date updated) {
         this.updated = updated;
         return this;

@@ -43,16 +43,29 @@ import java.io.IOException;
 @Controller
 @RequestMapping("/")
 public class BaseController {
-
+    /**
+     * File storage for user uploaded files.
+     */
     @Autowired
     private FileStorage storage;
 
+    /**
+     * Action to be performed on http GET method and path '/'.
+     * @param model holder for model attributes
+     * @return view name
+     */
     @RequestMapping(value = "/", method = RequestMethod.GET)
     public String welcome(Model model) {
         model.addAttribute("uploadedFiles", storage.allUploadedFiles());
         return "index";
     }
 
+    /**
+     * Upload action.
+     * @param uploadedXmlFile converted from {@link org.springframework.web.multipart.MultipartFile}
+     * @param model holder for model attributes
+     * @return view name
+     */
     @RequestMapping(value = "/uploadXml", method = RequestMethod.POST)
     public String upload(@RequestParam UploadedXmlFile uploadedXmlFile, Model model) {
         model.addAttribute("message", "File '" + uploadedXmlFile.getName() + "' uploaded successfully");
@@ -60,6 +73,11 @@ public class BaseController {
         return welcome(model);
     }
 
+    /**
+     * Download uploaded file action.
+     * @param fileId requested file id
+     * @param response http response to write file
+     */
     @RequestMapping(value = "/download")
     public void downloadFile(@RequestParam int fileId, HttpServletResponse response) {
         UploadedXmlFile file = storage.getById(fileId);

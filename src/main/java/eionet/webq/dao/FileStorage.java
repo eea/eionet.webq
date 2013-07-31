@@ -25,11 +25,35 @@ import eionet.webq.dto.UploadedXmlFile;
 
 import java.util.Collection;
 
-
+/**
+ * Interface for storing uploaded files.
+ *
+ * @see UploadedXmlFile
+ */
 public interface FileStorage {
+    /**
+     * Save data from uploaded file to storage.
+     *
+     * @param file uploaded file to be saved to storage
+     */
     void save(UploadedXmlFile file);
 
+    /**
+     * Fetches uploaded file from storage by specified id.
+     * User access to this file must be checked.
+     * Only {@link UploadedXmlFile#name} and {@link UploadedXmlFile#fileContent} will be set.
+     *
+     * @param id file id
+     * @return uploaded file
+     */
     UploadedXmlFile getById(int id);
 
+    /**
+     * All uploaded files by current session user.
+     * {@link UploadedXmlFile#fileContent} is not included into resulting collection.
+     * Use {@link FileStorage#getById(int)} for fetching specific file content.
+     *
+     * @return  All uploaded files by current session user.
+     */
     Collection<UploadedXmlFile> allUploadedFiles();
 }
