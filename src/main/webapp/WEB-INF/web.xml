@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <web-app xmlns="http://java.sun.com/xml/ns/javaee"
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:schemaLocation="http://java.sun.com/xml/ns/javaee
@@ -18,7 +19,6 @@
         </init-param>
         <load-on-startup>1</load-on-startup>
     </servlet>
-
     <servlet-mapping>
         <servlet-name>spring-mvc-dispatcher</servlet-name>
         <url-pattern>/</url-pattern>
@@ -29,27 +29,6 @@
         <filter-name>XFormsFilter</filter-name>
         <filter-class>de.betterform.agent.web.filter.XFormsFilter</filter-class>
     </filter>
-
-    <filter-mapping>
-        <filter-name>XFormsFilter</filter-name>
-        <url-pattern>*.xhtml</url-pattern>
-    </filter-mapping>
-
-    <!--  betterFORM servlets -->
-    <!--
-    <filter>
-        <filter-name>XSLTFilter</filter-name>
-        <filter-class>de.betterform.agent.web.filter.XSLTFilter</filter-class>
-        <init-param>
-            <param-name>xsltHome</param-name>
-            <param-value>resources/xslt</param-value>
-        </init-param>
-        <init-param>
-            <param-name>xsltFile</param-name>
-            <param-value>highlight.xsl</param-value>
-        </init-param>
-    </filter>
-    -->
 
 
     <!--  XForms filter mapping
