@@ -25,9 +25,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Collection;
-
-import javax.servlet.http.HttpSession;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -49,24 +46,19 @@ public class FileStorageImpl implements FileStorage {
     @Autowired
     private JdbcTemplate jdbcTemplate;
     /**
-     * Current http session.
-     */
-    @Autowired
-    private HttpSession session;
-    /**
      * Large objects handles. Used for storing and retrieving {@link java.sql.Blob} object from database.
      */
     @Autowired
     private LobHandler lobHandler;
 
     @Override
-    public void save(final UploadedXmlFile file) {
+    public void save(final UploadedXmlFile file, final String userId) {
         jdbcTemplate.execute(
-                "INSERT INTO user_xml(session_id, filename, xml_schema, xml, file_size_in_bytes) VALUES(?, ?, ?, ?, ?)",
+                "INSERT INTO user_xml(user_id, filename, xml_schema, xml, file_size_in_bytes) VALUES(?, ?, ?, ?, ?)",
                 new AbstractLobCreatingPreparedStatementCallback(lobHandler) {
                     @Override
                     protected void setValues(PreparedStatement ps, LobCreator lobCreator) throws SQLException {
-                        ps.setString(1, sessionId());
+                        ps.setString(1, userId);
                         ps.setString(2, file.getName());
                         ps.setString(3, file.getXmlSchema());
                         lobCreator.setBlobAsBytes(ps, 4, file.getContent());
@@ -76,9 +68,9 @@ public class FileStorageImpl implements FileStorage {
     }
 
     @Override
-    public UploadedXmlFile getById(int id) {
-        Object[] params = {id, sessionId()};
-        return jdbcTemplate.queryForObject("SELECT filename, xml FROM user_xml WHERE id = ? AND session_id = ?", params,
+    public UploadedXmlFile getById(int id, String userId) {
+        Object[] params = {id, userId};
+        return jdbcTemplate.queryForObject("SELECT filename, xml FROM user_xml WHERE id = ? AND user_id = ?", params,
                 new RowMapper<UploadedXmlFile>() {
                     @Override
                     public UploadedXmlFile mapRow(ResultSet rs, int rowNum) throws SQLException {
@@ -88,10 +80,10 @@ public class FileStorageImpl implements FileStorage {
     }
 
     @Override
-    public Collection<UploadedXmlFile> allUploadedFiles() {
-        return jdbcTemplate.query("SELECT id, filename, file_size_in_bytes, created, updated FROM user_xml WHERE session_id = ? " +
+    public Collection<UploadedXmlFile> allUploadedFiles(String userId) {
+        return jdbcTemplate.query("SELECT id, filename, file_size_in_bytes, created, updated FROM user_xml WHERE user_id = ? " +
                 "ORDER BY updated DESC",
-                new Object[] {sessionId()}, new RowMapper<UploadedXmlFile>() {
+                new Object[] {userId}, new RowMapper<UploadedXmlFile>() {
                     @Override
                     public UploadedXmlFile mapRow(ResultSet rs, int rowNum) throws SQLException {
                         return new UploadedXmlFile().setId(rs.getInt(1)).setName(rs.getString(2))
@@ -100,17 +92,8 @@ public class FileStorageImpl implements FileStorage {
                 });
     }
 
-    /**
-     * Provides current http session id.
-     *
-     * @return current http session id
-     */
-    private String sessionId() {
-        return session.getId();
-    }
-
     @Override
-    public void updateContent(final UploadedXmlFile file) {
+    public void updateContent(final UploadedXmlFile file, final String userId) {
         jdbcTemplate.execute("UPDATE user_xml SET xml = ?, file_size_in_bytes = ?, updated = ? WHERE id = ? and session_id= ?",
                 new AbstractLobCreatingPreparedStatementCallback(lobHandler) {
                     @Override
@@ -119,7 +102,7 @@ public class FileStorageImpl implements FileStorage {
                         ps.setLong(2, file.getSizeInBytes());
                         ps.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
                         ps.setInt(4, file.getId());
-                        ps.setString(5, sessionId());
+                        ps.setString(5, userId);
                     }
                 });
     }

@@ -1,3 +1,4 @@
+package eionet.webq.service;
 /*
  * The contents of this file are subject to the Mozilla Public
  * License Version 1.1 (the "License"); you may not use this file
@@ -19,54 +20,38 @@
  *        Anton Dmitrijev
  */
 
-package eionet.webq.dao;
+import eionet.webq.dto.UploadedXmlFile;
 
 import java.util.Collection;
 
-import eionet.webq.dto.UploadedXmlFile;
-
 /**
- * Interface for storing uploaded files.
- *
- * @see UploadedXmlFile
+ * Service for storing uploaded files.
  */
-public interface FileStorage {
+public interface UploadedXmlFileService {
     /**
      * Save data from uploaded file to storage.
      *
      * @param file uploaded file to be saved to storage
-     * @param userId current user id
      */
-    void save(UploadedXmlFile file, String userId);
+    void save(UploadedXmlFile file);
 
     /**
      * Fetches uploaded file from storage by specified id.
      * User access to this file must be checked.
-     * Only {@link UploadedXmlFile#name} and {@link UploadedXmlFile#content} will be set.
-     *
+     * Only {@link eionet.webq.dto.UploadedXmlFile#name} and {@link eionet.webq.dto.UploadedXmlFile#content} will be set.
      *
      * @param id file id
-     * @param userId current user id
      * @return uploaded file
      */
-    UploadedXmlFile getById(int id, String userId);
+    UploadedXmlFile getById(int id);
 
     /**
      * All uploaded files by current session user.
      * {@link UploadedXmlFile#content} is not included into resulting collection.
-     * Use {@link FileStorage#getById(int, String)} for fetching specific file content.
+     * Use {@link UploadedXmlFileService#getById(int)} for fetching specific file content.
      *
-     * @param userId current user id
      * @return  All uploaded files by current session user.
      */
-    Collection<UploadedXmlFile> allUploadedFiles(String userId);
+    Collection<UploadedXmlFile> allUploadedFiles();
 
-    /**
-     * Update file content and updated time in storage.
-     * Only {@link UploadedXmlFile#content}, {@link UploadedXmlFile#sizeInBytes} and {@link UploadedXmlFile#updated} will be set.
-     *
-     * @param file content to be updated in storage
-     * @param userId current user id
-     */
-    void updateContent(UploadedXmlFile file, String userId);
 }

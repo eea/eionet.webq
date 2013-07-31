@@ -162,4 +162,18 @@ public class UploadedXmlFile {
         this.updated = updated;
         return this;
     }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("UploadedXmlFile{");
+        sb.append("id=").append(id);
+        sb.append(", name='").append(name).append('\'');
+        sb.append(", contentLength=").append(content.length);
+        sb.append(", xmlSchema='").append(xmlSchema).append('\'');
+        sb.append(", sizeInBytes=").append(sizeInBytes);
+        sb.append(", created=").append(created);
+        sb.append(", updated=").append(updated);
+        sb.append('}');
+        return sb.toString();
+    }
 }

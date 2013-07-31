@@ -27,6 +27,8 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import eionet.webq.exception.WebQuestionnaireException;
+import eionet.webq.service.UploadedXmlFileService;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -36,7 +38,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import eionet.webq.dao.FileStorage;
 import eionet.webq.dto.UploadedXmlFile;
 
 /**
@@ -48,10 +49,10 @@ import eionet.webq.dto.UploadedXmlFile;
 @RequestMapping("/")
 public class BaseController {
     /**
-     * File storage for user uploaded files.
+     * File uploadedXmlFileService for user uploaded files.
      */
     @Autowired
-    private FileStorage storage;
+    private UploadedXmlFileService uploadedXmlFileService;
 
     /**
      * Action to be performed on http GET method and path '/'.
@@ -61,7 +62,7 @@ public class BaseController {
      */
     @RequestMapping(value = "/", method = RequestMethod.GET)
     public String welcome(Model model) {
-        model.addAttribute("uploadedFiles", storage.allUploadedFiles());
+        model.addAttribute("uploadedFiles", uploadedXmlFileService.allUploadedFiles());
         return "index";
     }
 
@@ -75,7 +76,7 @@ public class BaseController {
     @RequestMapping(value = "/uploadXml", method = RequestMethod.POST)
     public String upload(@RequestParam UploadedXmlFile uploadedXmlFile, Model model) {
         model.addAttribute("message", "File '" + uploadedXmlFile.getName() + "' uploaded successfully");
-        storage.save(uploadedXmlFile);
+        uploadedXmlFileService.save(uploadedXmlFile);
         return welcome(model);
     }
 
@@ -87,7 +88,7 @@ public class BaseController {
      */
     @RequestMapping(value = "/download")
     public void downloadFile(@RequestParam int fileId, HttpServletResponse response) {
-        UploadedXmlFile file = storage.getById(fileId);
+        UploadedXmlFile file = uploadedXmlFileService.getById(fileId);
         response.setContentType(MediaType.APPLICATION_XML_VALUE);
         response.addHeader("Content-Disposition", "attachment;filename=" + file.getName());
         ServletOutputStream output = null;
@@ -99,7 +100,7 @@ public class BaseController {
             output.write(fileContent);
             output.flush();
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new WebQuestionnaireException("Unable to deliver requested file.", e);
         } finally {
             IOUtils.closeQuietly(output);
         }
@@ -121,7 +122,7 @@ public class BaseController {
             file.setContent(fileContent);
             file.setSizeInBytes(fileContent.length);
             file.setId(fileId);
-            storage.updateContent(file);
+            uploadedXmlFileService.updateContent(file);
         } catch (IOException e) {
             throw new RuntimeException(e);
         } finally {
