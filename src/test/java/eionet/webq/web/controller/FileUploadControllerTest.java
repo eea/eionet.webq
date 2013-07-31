@@ -27,9 +27,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
-
 import eionet.webq.dto.UploadedXmlFile;
 import eionet.webq.web.AbstractContextControllerTests;
+import java.util.List;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.http.MediaType;
@@ -38,14 +38,14 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
-
-import java.util.List;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 public class FileUploadControllerTest extends AbstractContextControllerTests {
     private MockHttpSession mockHttpSession = new MockHttpSession();
-    private final byte[] FILE_CONTENT = ("<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
-            "<foo xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:noNamespaceSchemaLocation=\"bar\" />").getBytes();
+    private final String FILE_CONTENT_STRING = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+            + "<foo xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:noNamespaceSchemaLocation=\"bar\" />";
+    private final byte[] FILE_CONTENT = FILE_CONTENT_STRING.getBytes();
 
     @Test
     public void successfulUploadProducesMessage() throws Exception {
@@ -56,11 +56,9 @@ public class FileUploadControllerTest extends AbstractContextControllerTests {
     @Test
     public void downloadReturnsUploadedXmlFile() throws Exception {
 
-        List<UploadedXmlFile> uploadedXmlFiles = uploadFileAndExtractUploadedFiles(createMockMultipartFile("file.xml"));
-        UploadedXmlFile first = uploadedXmlFiles.iterator().next();
+        UploadedXmlFile uploadedXmlFile = uploadFileAndTakeFirstUploadedFile(createMockMultipartFile("file.xml"));
 
-        mvc().perform(post("/download").param("fileId", Integer.toString(first.getId())).session(mockHttpSession))
-                .andExpect(content().contentType(MediaType.APPLICATION_XML))
+        downloadFile(uploadedXmlFile.getId()).andExpect(content().contentType(MediaType.APPLICATION_XML))
                 .andExpect(content().bytes(FILE_CONTENT)).andReturn();
     }
 
@@ -82,6 +80,17 @@ public class FileUploadControllerTest extends AbstractContextControllerTests {
         assertThat(uploadedXmlFiles.size(), is(2));
     }
 
+    @Test
+    public void allowFileContentUpdateInStorage() throws Exception {
+        UploadedXmlFile uploadedXmlFile = uploadFileAndTakeFirstUploadedFile(createMockMultipartFile("file.txt"));
+        String newContent = FILE_CONTENT_STRING.replace("/>", "><foobar></foobar></bar>");
+        mvc().perform(
+                postWithMockSession("/saveXml").param("fileId", Integer.toString(uploadedXmlFile.getId()))
+                        .content(newContent.getBytes()));
+
+        downloadFile(uploadedXmlFile.getId()).andExpect(content().string(newContent));
+    }
+
     private MockMultipartFile createMockMultipartFile(String fileName) {
         return new MockMultipartFile("uploadedXmlFile", fileName, MediaType.APPLICATION_XML_VALUE, FILE_CONTENT);
     }
@@ -93,6 +102,19 @@ public class FileUploadControllerTest extends AbstractContextControllerTests {
     @SuppressWarnings("unchecked")
     private List<UploadedXmlFile> uploadFileAndExtractUploadedFiles(MockMultipartFile file) throws Exception {
         return (List<UploadedXmlFile>) uploadFile(file).andReturn().getModelAndView().getModelMap().get("uploadedFiles");
+    }
+
+    private UploadedXmlFile uploadFileAndTakeFirstUploadedFile(MockMultipartFile file) throws Exception {
+        List<UploadedXmlFile> uploadedXmlFiles = uploadFileAndExtractUploadedFiles(createMockMultipartFile("file.xml"));
+        return uploadedXmlFiles.iterator().next();
+    }
+
+    private ResultActions downloadFile(int fileId) throws Exception {
+        return mvc().perform(postWithMockSession("/download").param("fileId", Integer.toString(fileId)));
+    }
+
+    private MockHttpServletRequestBuilder postWithMockSession(String path) {
+        return post(path).session(mockHttpSession);
     }
 
     private MockMvc mvc() {
