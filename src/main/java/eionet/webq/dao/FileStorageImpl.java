@@ -65,8 +65,8 @@ public class FileStorageImpl implements FileStorage {
                         ps.setString(1, sessionId());
                         ps.setString(2, file.getName());
                         ps.setString(3, file.getXmlSchema());
-                        lobCreator.setBlobAsBytes(ps, 4, file.getFileContent());
-                        ps.setLong(5, file.getFileSizeInBytes());
+                        lobCreator.setBlobAsBytes(ps, 4, file.getContent());
+                        ps.setLong(5, file.getSizeInBytes());
                     }
                 });
     }
@@ -78,7 +78,7 @@ public class FileStorageImpl implements FileStorage {
                 new RowMapper<UploadedXmlFile>() {
                     @Override
                     public UploadedXmlFile mapRow(ResultSet rs, int rowNum) throws SQLException {
-                        return new UploadedXmlFile().setName(rs.getString(1)).setFileContent(lobHandler.getBlobAsBytes(rs, 2));
+                        return new UploadedXmlFile().setName(rs.getString(1)).setContent(lobHandler.getBlobAsBytes(rs, 2));
                     }
                 });
     }
@@ -90,7 +90,7 @@ public class FileStorageImpl implements FileStorage {
                     @Override
                     public UploadedXmlFile mapRow(ResultSet rs, int rowNum) throws SQLException {
                         return new UploadedXmlFile().setId(rs.getInt(1)).setName(rs.getString(2))
-                                .setFileSizeInBytes(rs.getLong(3)).setCreated(rs.getTimestamp(4)).setUpdated(rs.getTimestamp(5));
+                                .setSizeInBytes(rs.getLong(3)).setCreated(rs.getTimestamp(4)).setUpdated(rs.getTimestamp(5));
                     }
                 });
     }

@@ -85,7 +85,7 @@ public class BaseController {
         response.addHeader("Content-Disposition", "attachment;filename=" + file.getName());
         ServletOutputStream output = null;
         try {
-            byte[] fileContent = file.getFileContent();
+            byte[] fileContent = file.getContent();
             response.setContentLength(fileContent.length);
 
             output = response.getOutputStream();

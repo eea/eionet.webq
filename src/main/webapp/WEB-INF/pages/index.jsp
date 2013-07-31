@@ -46,7 +46,7 @@
                     ${file.name}
                     <a href="<c:url value="/forms/habides-factsheet-v4.xhtml?instance=${downloadLink}"/>">Edit with WebForm</a>
                     <a href="${downloadLink}">Download ${file.name}</a>
-                    File size: ${file.fileSizeInBytes} bytes
+                    File size: ${file.sizeInBytes} bytes
                     Created: ${file.created}
                     Updated: ${file.updated}
                 <div>

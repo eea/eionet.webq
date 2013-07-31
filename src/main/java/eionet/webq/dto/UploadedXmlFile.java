@@ -37,7 +37,7 @@ public class UploadedXmlFile {
     /**
      * File content bytes.
      */
-    private byte[] fileContent;
+    private byte[] content;
     /**
      * Xml schema name extracted during conversion.
      * @see eionet.webq.converter.MultipartFileConverter
@@ -46,7 +46,7 @@ public class UploadedXmlFile {
     /**
      * File size in bytes.
      */
-    private long fileSizeInBytes;
+    private long sizeInBytes;
     /**
      * File upload date.
      */
@@ -86,33 +86,33 @@ public class UploadedXmlFile {
         return this;
     }
 
-    public byte[] getFileContent() {
-        return fileContent;
+    public byte[] getContent() {
+        return content;
     }
 
     /**
      * File content in bytes setter.
-     * @param fileContent
+     * @param content
      *            file content
      * @return current object for method call chaining
      */
-    public UploadedXmlFile setFileContent(byte[] fileContent) {
-        this.fileContent = fileContent;
+    public UploadedXmlFile setContent(byte[] content) {
+        this.content = content;
         return this;
     }
 
-    public long getFileSizeInBytes() {
-        return fileSizeInBytes;
+    public long getSizeInBytes() {
+        return sizeInBytes;
     }
 
     /**
      * File size in bytes.
-     * @param fileSizeInBytes
+     * @param sizeInBytes
      *            file size in bytes
      * @return current object for method call chaining
      */
-    public UploadedXmlFile setFileSizeInBytes(long fileSizeInBytes) {
-        this.fileSizeInBytes = fileSizeInBytes;
+    public UploadedXmlFile setSizeInBytes(long sizeInBytes) {
+        this.sizeInBytes = sizeInBytes;
         return this;
     }
 

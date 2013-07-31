@@ -41,7 +41,7 @@ public interface FileStorage {
     /**
      * Fetches uploaded file from storage by specified id.
      * User access to this file must be checked.
-     * Only {@link UploadedXmlFile#name} and {@link UploadedXmlFile#fileContent} will be set.
+     * Only {@link UploadedXmlFile#name} and {@link UploadedXmlFile#content} will be set.
      *
      * @param id file id
      * @return uploaded file
@@ -50,7 +50,7 @@ public interface FileStorage {
 
     /**
      * All uploaded files by current session user.
-     * {@link UploadedXmlFile#fileContent} is not included into resulting collection.
+     * {@link UploadedXmlFile#content} is not included into resulting collection.
      * Use {@link FileStorage#getById(int)} for fetching specific file content.
      *
      * @return  All uploaded files by current session user.

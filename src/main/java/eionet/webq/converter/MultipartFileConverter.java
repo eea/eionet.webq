@@ -38,8 +38,8 @@ public class MultipartFileConverter implements Converter<MultipartFile, Uploaded
     @Override
     public UploadedXmlFile convert(MultipartFile multipartFile) {
         byte[] bytes = toByteArray(multipartFile);
-        return new UploadedXmlFile().setFileContent(bytes).setName(multipartFile.getOriginalFilename())
-                .setFileSizeInBytes(multipartFile.getSize()).setXmlSchema(extractXmlSchema(bytes));
+        return new UploadedXmlFile().setContent(bytes).setName(multipartFile.getOriginalFilename())
+                .setSizeInBytes(multipartFile.getSize()).setXmlSchema(extractXmlSchema(bytes));
     }
 
     /**
