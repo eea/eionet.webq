@@ -63,11 +63,11 @@
             <xf:submission id="load-emptyinstance" method="GET" replace="instance" resource="{ instance('context')/emptyInstanceUrl }" instance="emptyinstance"/>
             <!-- FIXME -->
             <!--submission for finish filling webform - stores the data and loads webq front page -->
-            <xf:submission id="finish" action="{$base_uri}saveXml?fileId={$instance}" method="post" replace="instance" encoding="UTF-8" instance="saveresult" validate="false">
+            <xf:submission id="finish" action="{$base_uri}/saveXml?fileId={$instance}" method="post" replace="instance" encoding="UTF-8" instance="saveresult" validate="false">
                 <xf:message ev:event="xforms-submit-error">Error on saving data!</xf:message>
                 <xf:load ev:event="xforms-submit-done" resource="{$base_uri}" show="replace"/>
             </xf:submission>
-            <xf:submission id="savedraft" action="{$base_uri}saveXml?fileId={$fileId}" method="post" replace="instance" encoding="UTF-8" instance="saveresult" validate="false">
+            <xf:submission id="savedraft" action="{$base_uri}/saveXml?fileId={$fileId}" method="post" replace="instance" encoding="UTF-8" instance="saveresult" validate="false">
                 <xf:message ev:event="xforms-submit-done" ref="instance('saveresult')/message"/>
                 <xf:message ev:event="xforms-submit-error">Error on saving data!</xf:message>
             </xf:submission>

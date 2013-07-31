@@ -21,9 +21,9 @@
 
 package eionet.webq.dao;
 
-import eionet.webq.dto.UploadedXmlFile;
-
 import java.util.Collection;
+
+import eionet.webq.dto.UploadedXmlFile;
 
 /**
  * Interface for storing uploaded files.
@@ -56,4 +56,12 @@ public interface FileStorage {
      * @return  All uploaded files by current session user.
      */
     Collection<UploadedXmlFile> allUploadedFiles();
+
+    /**
+     * Update file content and updated time in storage.
+     * Only {@link UploadedXmlFile#content}, {@link UploadedXmlFile#sizeInBytes} and {@link UploadedXmlFile#updated} will be set.
+     *
+     * @param file content to be updated in storage
+     */
+    void updateContent(UploadedXmlFile file);
 }

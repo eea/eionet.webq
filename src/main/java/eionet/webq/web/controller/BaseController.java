@@ -20,8 +20,13 @@
  */
 package eionet.webq.web.controller;
 
-import eionet.webq.dao.FileStorage;
-import eionet.webq.dto.UploadedXmlFile;
+import java.io.IOException;
+import java.io.InputStream;
+
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -31,9 +36,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import javax.servlet.ServletOutputStream;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
+import eionet.webq.dao.FileStorage;
+import eionet.webq.dto.UploadedXmlFile;
 
 /**
  * Base controller for front page actions.
@@ -51,6 +55,7 @@ public class BaseController {
 
     /**
      * Action to be performed on http GET method and path '/'.
+     *
      * @param model holder for model attributes
      * @return view name
      */
@@ -62,6 +67,7 @@ public class BaseController {
 
     /**
      * Upload action.
+     *
      * @param uploadedXmlFile converted from {@link org.springframework.web.multipart.MultipartFile}
      * @param model holder for model attributes
      * @return view name
@@ -75,6 +81,7 @@ public class BaseController {
 
     /**
      * Download uploaded file action.
+     *
      * @param fileId requested file id
      * @param response http response to write file
      */
@@ -96,5 +103,32 @@ public class BaseController {
         } finally {
             IOUtils.closeQuietly(output);
         }
+    }
+
+    /**
+     * Update file content action. The action is called from XForms and it returns XML formatted result.
+     * @param fileId
+     * @param request
+     * @return response as text/xml
+     */
+    @RequestMapping(value = "/saveXml", method = RequestMethod.POST)
+    public String saveXml(@RequestParam int fileId, HttpServletRequest request) {
+        UploadedXmlFile file = new UploadedXmlFile();
+        InputStream input = null;
+        try {
+            input = request.getInputStream();
+            byte[] fileContent = IOUtils.toByteArray(input);
+            file.setContent(fileContent);
+            file.setSizeInBytes(fileContent.length);
+            file.setId(fileId);
+            storage.updateContent(file);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } finally {
+            IOUtils.closeQuietly(input);
+        }
+
+        //FIXME return save result in XML format for XForm
+        return "";
     }
 }

@@ -20,12 +20,14 @@
  */
 package eionet.webq.dao;
 
-import eionet.webq.dto.UploadedXmlFile;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.Collection;
+
 import javax.servlet.http.HttpSession;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -33,6 +35,8 @@ import org.springframework.jdbc.core.support.AbstractLobCreatingPreparedStatemen
 import org.springframework.jdbc.support.lob.LobCreator;
 import org.springframework.jdbc.support.lob.LobHandler;
 import org.springframework.stereotype.Repository;
+
+import eionet.webq.dto.UploadedXmlFile;
 
 /**
  * {@link FileStorage} implementation.
@@ -85,7 +89,8 @@ public class FileStorageImpl implements FileStorage {
 
     @Override
     public Collection<UploadedXmlFile> allUploadedFiles() {
-        return jdbcTemplate.query("SELECT id, filename, file_size_in_bytes, created, updated FROM user_xml WHERE session_id = ?",
+        return jdbcTemplate.query("SELECT id, filename, file_size_in_bytes, created, updated FROM user_xml WHERE session_id = ? " +
+                "ORDER BY updated DESC",
                 new Object[] {sessionId()}, new RowMapper<UploadedXmlFile>() {
                     @Override
                     public UploadedXmlFile mapRow(ResultSet rs, int rowNum) throws SQLException {
@@ -97,9 +102,25 @@ public class FileStorageImpl implements FileStorage {
 
     /**
      * Provides current http session id.
+     *
      * @return current http session id
      */
     private String sessionId() {
         return session.getId();
+    }
+
+    @Override
+    public void updateContent(final UploadedXmlFile file) {
+        jdbcTemplate.execute("UPDATE user_xml SET xml = ?, file_size_in_bytes = ?, updated = ? WHERE id = ? and session_id= ?",
+                new AbstractLobCreatingPreparedStatementCallback(lobHandler) {
+                    @Override
+                    protected void setValues(PreparedStatement ps, LobCreator lobCreator) throws SQLException {
+                        lobCreator.setBlobAsBytes(ps, 1, file.getContent());
+                        ps.setLong(2, file.getSizeInBytes());
+                        ps.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
+                        ps.setInt(4, file.getId());
+                        ps.setString(5, sessionId());
+                    }
+                });
     }
 }
