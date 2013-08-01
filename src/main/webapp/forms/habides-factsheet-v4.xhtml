@@ -61,29 +61,31 @@
                 </xf:action>
             </xf:submission>
             <xf:submission id="load-emptyinstance" method="GET" replace="instance" resource="{ instance('context')/emptyInstanceUrl }" instance="emptyinstance"/>
-            <!-- FIXME -->
-            <!--submission for finish filling webform - stores the data and loads webq front page -->
-            <xf:submission id="finish" action="{$base_uri}/saveXml?fileId={$instance}" method="post" replace="instance" encoding="UTF-8" instance="saveresult" validate="false">
-                <xf:message ev:event="xforms-submit-error">Error on saving data!</xf:message>
-                <xf:load ev:event="xforms-submit-done" resource="{$base_uri}" show="replace"/>
-            </xf:submission>
-            <xf:submission id="savedraft" action="{$base_uri}/saveXml?fileId={$fileId}" method="post" replace="instance" encoding="UTF-8" instance="saveresult" validate="false">
-                <xf:message ev:event="xforms-submit-done" ref="instance('saveresult')/message"/>
-                <xf:message ev:event="xforms-submit-error">Error on saving data!</xf:message>
+
+            <!--submission for saving XML -->
+            <xf:submission id="savexml" action="{$base_uri}/saveXml?fileId={$fileId}" method="post" replace="instance" encoding="UTF-8" instance="saveresult" validate="false">
+                <!--
+                <xf:message ev:event="xforms-submit-done" ref="instance('context')/save_message"/>
+                -->
+                <xf:action ev:event="xforms-submit-error">
+                    <xf:setvalue ref="instance('saveresult')/code" value="0"/>
+                    <xf:setvalue ref="instance('saveresult')/message" value="'Error on saving data!'"/>
+                    <xf:setvalue ref="instance('saveresult')/timestamp" value="current-dateTime()"/>
+                    <xf:message>Error on saving data!</xf:message>
+                </xf:action>
             </xf:submission>
             <!-- instance for showing save result messages from WebQ system -->
             <xf:instance xmlns="" id="saveresult">
-                <result>
+                <saveresult>
                     <code desc="Result code: 0-ERROR;1-OK">-1</code>
                     <message desc="Save result message"/>
-                    <result_time desc="Result time"/>
-                    <last_modified desc="Last modified"/>
-                </result>
+                    <timestamp desc="Result time"/>
+                </saveresult>
             </xf:instance>
             <!-- bindings for save result -->
-            <xf:bind nodeset="instance('saveresult')/code" id="has-save-info" relevant=". &gt; -1" type="integer"/>
-            <xf:bind nodeset="instance('saveresult')/last_modified" id="save-success" relevant="../code=1"/>
-            <xf:bind nodeset="instance('saveresult')/message" id="save-error" relevant="../code=0"/>
+            <xf:bind id="b-saveresult-message" nodeset="instance('context')/save_message" relevant="instance('saveresult')/code &gt; -1" calculate="concat(instance('saveresult')/message, ' (', translate(substring-before(instance('saveresult')/timestamp, '.'),'T',' '), ')')"/>
+            <xf:bind id="b-saveresult-message-ok" nodeset="instance('context')/save_message_ok" relevant="instance('saveresult')/code = 1" calculate="../save_message"/>
+            <xf:bind id="b-saveresult-message-err" nodeset="instance('context')/save_message_err" relevant="instance('saveresult')/code = 0" calculate="../save_message"/>
 
             <!-- ##########            DEFAULT instance BINDINGS          ############-->
                 <!--xf:bind id="b-lang" nodeset="/derogations/@xml:lang" required="true()"/-->
@@ -109,6 +111,9 @@
                     <emptyInstanceUrl>http://webq.eionet.europa.eu/xml/habides-derogations-instance.xml</emptyInstanceUrl>
                     <user/>
                     <activeDirective/>
+                    <save_message/>
+                    <save_message_ok/>
+                    <save_message_err/>
                 </data>
             </xf:instance>
             <xf:bind id="b-user" nodeset="instance('context')/user" required="true()"/>
@@ -154,7 +159,16 @@
     <body>
         <!-- ##################################            FORM HEADER            ############################################-->
         <h1>Habitats and Birds Derogations</h1>
-
+        <xf:group bind="b-saveresult-message-ok">
+            <div class="system-msg">
+                <xf:output bind="b-saveresult-message"/>
+            </div>
+        </xf:group>
+        <xf:group bind="b-saveresult-message-err">
+            <div class="error-msg">
+                <xf:output bind="b-saveresult-message"/>
+            </div>
+        </xf:group>
         <!-- ##################################          START QUESTIONNAIRE           ############################################-->
         <div class="section header">
             <xf:select1 appearance="minimal" bind="b-country" incremental="true">
@@ -228,14 +242,15 @@
                 <xf:label>Save</xf:label>
                 <xf:hint>Saves the current status of the data into XML file, without moving away from the web form</xf:hint>
                 <xf:action ev:event="DOMActivate">
-                    <xf:send submission="savedraft" name="xforms-submit"/>
+                    <xf:send submission="savexml" name="xforms-submit"/>
                 </xf:action>
             </xf:trigger>
             <xf:trigger id="tr_finish">
                 <xf:label>Save &amp; Close</xf:label>
                 <xf:hint>Saves the changes into XML file and opens the front page of WebQ</xf:hint>
                 <xf:action ev:event="DOMActivate">
-                    <xf:send submission="finish" name="xforms-submit"/>
+                    <xf:send submission="savexml" name="xforms-submit"/>
+                    <xf:load ev:event="xforms-submit-done" resource="{$base_uri}" show="replace" if="instance('saveresult')/code=1"/>
                 </xf:action>
             </xf:trigger>
             <xf:trigger id="tr_close">
