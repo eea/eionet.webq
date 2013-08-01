@@ -168,7 +168,7 @@ public class UploadedXmlFile {
         final StringBuilder sb = new StringBuilder("UploadedXmlFile{");
         sb.append("id=").append(id);
         sb.append(", name='").append(name).append('\'');
-        sb.append(", contentLength=").append(content.length);
+        sb.append(", contentLength=").append(content != null ? content.length : null);
         sb.append(", xmlSchema='").append(xmlSchema).append('\'');
         sb.append(", sizeInBytes=").append(sizeInBytes);
         sb.append(", created=").append(created);
