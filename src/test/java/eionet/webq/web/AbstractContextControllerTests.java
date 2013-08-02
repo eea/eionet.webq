@@ -7,7 +7,7 @@ import org.springframework.web.context.WebApplicationContext;
 
 @WebAppConfiguration
 @ContextConfiguration(locations = {"file:src/main/webapp/WEB-INF/spring/application-context.xml",
-        "file:src/main/webapp/WEB-INF/spring/servlet-context.xml"})
+        "file:src/main/webapp/WEB-INF/spring/servlet-context.xml", "file:src/test/resources/test-datasource-context.xml"})
 public class AbstractContextControllerTests {
 
     @Autowired
