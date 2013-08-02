@@ -2,7 +2,8 @@
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:xf="http://www.w3.org/2002/xforms"
       xmlns:ev="http://www.w3.org/2001/xml-events"
-      xmlns:bf="http://betterform.sourceforge.net/xforms">
+      xmlns:bf="http://betterform.sourceforge.net/xforms"
+      xmlns:bfc="http://betterform.sourceforge.net/xforms/controls">
     <head>
         <title>HaBiDeS (Habitats and Birds Directive Derogation System)</title>
         <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
@@ -17,6 +18,7 @@
         <link rel="stylesheet" type="text/css" href="http://www.eionet.europa.eu/styles/eionet2007/print.css" media="print" />
         <link rel="stylesheet" type="text/css" href="http://www.eionet.europa.eu/styles/eionet2007/handheld.css" media="handheld" />
         <link rel="stylesheet" type="text/css" href="http://www.eionet.europa.eu/styles/eionet2007/screen.css" media="screen" title="Eionet 2007 style" />
+        <link rel="stylesheet" type="text/css" href="../../bfResources/scripts/dojox/highlight/resources/highlight.css" />
 
         <style type="text/css">
             .bold{
@@ -67,11 +69,14 @@
                 <!--
                 <xf:message ev:event="xforms-submit-done" ref="instance('context')/save_message"/>
                 -->
+                <xf:dispatch targetid="main-model" name="reset-content-modified" ev:event="xforms-submit-done" />
+
                 <xf:action ev:event="xforms-submit-error">
                     <xf:setvalue ref="instance('saveresult')/code" value="0"/>
                     <xf:setvalue ref="instance('saveresult')/message" value="'Error on saving data!'"/>
                     <xf:setvalue ref="instance('saveresult')/timestamp" value="current-dateTime()"/>
                     <xf:message>Error on saving data!</xf:message>
+
                 </xf:action>
             </xf:submission>
             <!-- instance for showing save result messages from WebQ system -->
@@ -107,13 +112,18 @@
             <!-- CONTEXT parameters instance and bindings eg. webq-lang, envelope, ... -->
             <xf:instance xmlns="" id="context">
                 <data>
+                    <!-- common helper data -->
                     <instanceUrl></instanceUrl>
                     <emptyInstanceUrl>http://webq.eionet.europa.eu/xml/habides-derogations-instance.xml</emptyInstanceUrl>
-                    <user/>
-                    <activeDirective/>
                     <save_message/>
                     <save_message_ok/>
                     <save_message_err/>
+                    <contentModified>0</contentModified>
+
+
+                    <!-- Habides form specific helper data -->
+                    <user/>
+                    <activeDirective/>
                 </data>
             </xf:instance>
             <xf:bind id="b-user" nodeset="instance('context')/user" required="true()"/>
@@ -137,6 +147,14 @@
                 <xf:send submission="load-emptyinstance" name="xforms-submit"/>
                 <xf:refresh/>
             </xf:action>
+            <xf:action ev:event="set-content-modified">
+                <xf:setvalue ref="instance('context')/contentModified" value="1"/>
+            </xf:action>
+            <xf:action ev:event="reset-content-modified">
+                <xf:setvalue ref="instance('context')/contentModified" value="0"/>
+            </xf:action>
+
+
             <xf:action ev:event="my-insert">
                 <xf:setvalue ref="/derogations/derogation[index('rDerogList')]/@directive" value="instance('directives')/directive[@type=instance('context')/activeDirective]/@id"/>
                 <xf:setvalue ref="/derogations/derogation[index('rDerogList')]/@userIdentity" value="instance('context')/user"/>
@@ -169,26 +187,76 @@
                 <xf:output bind="b-saveresult-message"/>
             </div>
         </xf:group>
+
         <!-- ##################################          START QUESTIONNAIRE           ############################################-->
         <div class="section header">
-            <xf:select1 appearance="minimal" bind="b-country" incremental="true">
-                <xf:label class="bold">Country</xf:label>
-                <xf:itemset nodeset="instance('countries')/data">
-                    <xf:label ref="name"/>
-                    <xf:hint ref="code"/>
-                    <xf:value ref="code"/>
-                </xf:itemset>
-                <xf:alert>Mandatory field!</xf:alert>
-            </xf:select1>
+            <xf:group>
+                <xf:dispatch targetid="main-model" name="set-content-modified" ev:event="xforms-value-changed" />
+                <xf:select1 appearance="minimal" bind="b-country" incremental="true">
+                    <xf:label class="bold">Country</xf:label>
+                    <xf:itemset nodeset="instance('countries')/data">
+                        <xf:label ref="name"/>
+                        <xf:hint ref="code"/>
+                        <xf:value ref="code"/>
+                    </xf:itemset>
+                    <xf:alert>Mandatory field!</xf:alert>
+                </xf:select1>
 
-            <xf:input bind="b-user" incremental="true">
-                <xf:label class="bold">User Identity</xf:label>
-                <xf:alert>Mandatory field!</xf:alert>
-            </xf:input>
+                <xf:input bind="b-user" incremental="true">
+                    <xf:label class="bold">User Identity</xf:label>
+                    <xf:alert>Mandatory field!</xf:alert>
+                </xf:input>
+            </xf:group>
         </div>
+        <!-- ##################################          TABS          ############################################-->
+        <!--
+        <div>
+<xf:group>
+    <xf:label>Cases</xf:label>
+    <div style="display:none;">
+        <xf:trigger id="t-case-list">
+            <xf:label>Derogations list</xf:label>
+            <xf:toggle case="case-list"></xf:toggle>
+        </xf:trigger>
+        <xf:trigger id="t-case-edit">
+            <xf:label>Edit derogation</xf:label>
+            <xf:toggle case="case-edit"></xf:toggle>
+        </xf:trigger>
+        <xf:trigger id="t-case-view">
+            <xf:label>View derogation</xf:label>
+            <xf:toggle case="case-view"></xf:toggle>
+        </xf:trigger>
+    </div>
 
+    <xf:switch id="switch1" appearance="dijit:TabContainer">
+        <xf:case id="case-list" selected="true">
+            <xf:label>Case 1</xf:label>
+            <div class="caseContent" style="background:#bbbbff">
+                <h2>List</h2>
+            </div>
+        </xf:case>
+        <xf:case id="case-edit">
+            <xf:label>Case 2</xf:label>
+            <div class="caseContent" style="background:#ccccff">
+                <h2>Edit</h2>
+                <p>This is some content for the second case</p>
+            </div>
+        </xf:case>
+        <xf:case id="case-view">
+            <xf:label>View</xf:label>
+            <div class="caseContent" style="background:#ddddff">
+                <h2>CASE 3</h2>
+                <p>This is some content for the third case</p>
+            </div>
+        </xf:case>
+    </xf:switch>
+</xf:group>
+</div>
+-->
         <div class="section">
         <!-- ##################################         DEROGATIONS LIST           ############################################-->
+        <xf:group>
+            <xf:dispatch targetid="main-model" name="set-content-modified" ev:event="xforms-value-changed" />
             <xf:repeat id="rDerogList" bind="b-derogation" appearance="compact">
                 <xf:output ref="@derogation_reference">
                     <xf:label class="bold">Derogation Reference</xf:label>
@@ -203,6 +271,7 @@
                     <xf:label class="bold">Sensitive</xf:label>
                 </xf:input>
             </xf:repeat>
+        </xf:group>
         </div>
         <div class="section">
             <xf:group>
@@ -231,6 +300,8 @@
                         <xf:dispatch targetid="main-model" name="my-reset-all"
                             if="count(instance('default')/derogation)=1 and instance('default')/derogation[1]/@derogation_reference!=''"/>
                         <xf:delete bind="b-derogation" at="index('rDerogList')" if="count(instance('default')/derogation)&gt;1"/>
+                        <xf:dispatch targetid="main-model" name="set-content-modified"/>
+
                     </xf:action>
                 </xf:trigger>
             </xf:group>
@@ -256,11 +327,29 @@
             <xf:trigger id="tr_close">
                 <xf:label>Close</xf:label>
                 <xf:hint>Go back to WebQ front page.</xf:hint>
-                <xf:action ev:event="DOMActivate">
-                    <xf:load resource="{$base_uri}" show="replace"/>
-                </xf:action>
+                <bfc:show dialog="closeConfirmationDialog" ev:event="DOMActivate" if="instance('context')/contentModified=1"/>
+                <xf:load resource="{$base_uri}" show="replace" if="instance('context')/contentModified=0"/>
             </xf:trigger>
         </xf:group>
         </div>
+
+        <bfc:dialog id="closeConfirmationDialog">
+            <xf:label>The content is modified!</xf:label>
+            <xf:group appearance="minimal">
+                <p>You have unsaved modifications on the form.</p>
+                <p>Cancel and Save your content if you want to store the modifications, otherwise continue with Close button.</p>
+                <div class="section">
+                <xf:trigger>
+                    <xf:label>Cancel closing</xf:label>
+                    <bfc:hide dialog="closeConfirmationDialog" ev:event="DOMActivate"></bfc:hide>
+                </xf:trigger>
+                <xf:trigger>
+                    <xf:label>Close without saving</xf:label>
+                    <xf:load resource="{$base_uri}" show="replace"/>
+                </xf:trigger>
+                </div>
+            </xf:group>
+        </bfc:dialog>
+        <xf:output ref="instance('context')/contentModified"><xf:label>Content modified: </xf:label></xf:output>
     </body>
 </html>
