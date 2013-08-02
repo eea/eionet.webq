@@ -38,12 +38,12 @@ public class UploadedXmlFileServiceImpl implements UploadedXmlFileService {
      * Uploaded files storage.
      */
     @Autowired
-    private FileStorage storage;
+    FileStorage storage;
     /**
      * Current http session.
      */
     @Autowired
-    private HttpSession session;
+    HttpSession session;
     /**
      * Static logger for this class.
      */
@@ -58,7 +58,9 @@ public class UploadedXmlFileServiceImpl implements UploadedXmlFileService {
     @Override
     public UploadedXmlFile getById(int id) {
         UploadedXmlFile uploadedXmlFile = storage.getById(id, userId());
-        LOGGER.info("File loaded. Name=" + uploadedXmlFile.getName() + ", content size=" + uploadedXmlFile.getContent().length);
+        byte[] content = uploadedXmlFile.getContent();
+        LOGGER.info("File loaded. Name=" + uploadedXmlFile.getName() +
+                ", content size=" + (content != null ? content.length : 0));
         return uploadedXmlFile;
     }
 

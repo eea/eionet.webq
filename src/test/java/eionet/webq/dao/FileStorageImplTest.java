@@ -126,6 +126,17 @@ public class FileStorageImplTest {
         assertThat(storage.getById(uploadedFile.getId(), userId).getContent(), equalTo(newContentBytes));
     }
 
+    @Test(expected = DataAccessException.class)
+    public void userCannotChangeOtherUserContent() throws Exception {
+        uploadFileForUser(userId, new UploadedXmlFile().setContent((userId + " content").getBytes()));
+        UploadedXmlFile uploadedFileByOtherUser = getFirstUploadedFileAndAssertThatItIsTheOnlyOneAvailableFor(userId);
+
+        UploadedXmlFile contentChangeRequestFile =
+                new UploadedXmlFile().setContent((otherUserId + " content").getBytes()).setId(uploadedFileByOtherUser.getId());
+
+        storage.updateContent(contentChangeRequestFile, otherUserId);
+    }
+
     private void uploadSingleFileFor(String userId) {
         uploadFilesFor(userId, 1);
     }
