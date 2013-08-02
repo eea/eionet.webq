@@ -26,15 +26,11 @@
         </property>
     </bean>
 
-    <bean
-        class="org.springframework.web.servlet.view.InternalResourceViewResolver">
-        <property name="prefix">
-            <value>/WEB-INF/pages/</value>
-        </property>
-        <property name="suffix">
-            <value>.jsp</value>
-        </property>
+    <bean id="tilesViewResolver" class="org.springframework.web.servlet.view.tiles3.TilesViewResolver">
+        <property name="order" value="0"/>
     </bean>
+
+    <bean id="tilesConfigurer" class="org.springframework.web.servlet.view.tiles3.TilesConfigurer"/>
 
     <mvc:annotation-driven />
     <!-- resources exclusions from servlet mapping -->
