@@ -1,7 +1,6 @@
 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
-<div id="workarea" class="documentContent">
     <h1>Web Questionnaires</h1>
     <c:if test="${not empty message}">
         <div id="message" class="success">${message}</div>
@@ -55,4 +54,3 @@
         </fieldset>
     </c:if>
     <footer></footer>
-</div>

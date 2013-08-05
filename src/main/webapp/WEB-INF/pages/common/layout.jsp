@@ -27,7 +27,9 @@
             <li><a href="<c:url value="/"/>">My xml files & new file upload</a></li>
         </ul>
     </div>
-    <tiles:insertAttribute name="content" />
+    <div id="workarea" class="documentContent">
+        <tiles:insertAttribute name="content" />
+    </div>
     <tiles:insertAttribute name="footer" />
 </div>
 </body>
