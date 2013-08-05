@@ -40,21 +40,21 @@ public interface FileStorage {
     void save(UploadedXmlFile file, String userId);
 
     /**
-     * Fetches uploaded file from storage by specified id.
+     * Fetches uploaded file content from storage by specified id.
      * User access to this file must be checked.
-     * Only {@link UploadedXmlFile#name} and {@link UploadedXmlFile#content} will be set.
+     * Only {@link UploadedXmlFile#name} and {@link UploadedXmlFile#content} will be set to result.
      *
      *
      * @param id file id
      * @param userId current user id
      * @return uploaded file
      */
-    UploadedXmlFile getById(int id, String userId);
+    UploadedXmlFile fileContentById(int id, String userId);
 
     /**
      * All uploaded files by current session user.
      * {@link UploadedXmlFile#content} is not included into resulting collection.
-     * Use {@link FileStorage#getById(int, String)} for fetching specific file content.
+     * Use {@link FileStorage#fileContentById(int, String)} for fetching specific file content.
      *
      * @param userId current user id
      * @return  All uploaded files by current session user.

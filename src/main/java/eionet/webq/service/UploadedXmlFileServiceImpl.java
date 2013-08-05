@@ -57,7 +57,7 @@ public class UploadedXmlFileServiceImpl implements UploadedXmlFileService {
 
     @Override
     public UploadedXmlFile getById(int id) {
-        UploadedXmlFile uploadedXmlFile = storage.getById(id, userId());
+        UploadedXmlFile uploadedXmlFile = storage.fileContentById(id, userId());
         byte[] content = uploadedXmlFile.getContent();
         LOGGER.info("File loaded. Name=" + uploadedXmlFile.getName() +
                 ", content size=" + (content != null ? content.length : 0));

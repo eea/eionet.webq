@@ -68,7 +68,7 @@ public class FileStorageImpl implements FileStorage {
     }
 
     @Override
-    public UploadedXmlFile getById(int id, String userId) {
+    public UploadedXmlFile fileContentById(int id, String userId) {
         Object[] params = {id, userId};
         return jdbcTemplate.queryForObject("SELECT filename, xml FROM user_xml WHERE id = ? AND user_id = ?", params,
                 new RowMapper<UploadedXmlFile>() {

@@ -52,7 +52,7 @@ public class FileStorageImplTest {
 
         uploadFileForUser(userId, uploadedXmlFile);
 
-        storage.getById(15, userId);
+        storage.fileContentById(15, userId);
     }
 
     @Test(expected = DataAccessException.class)
@@ -62,7 +62,7 @@ public class FileStorageImplTest {
 
         UploadedXmlFile fileUploadedByAnotherUser = getFirstUploadedFileAndAssertThatItIsTheOnlyOneAvailableFor(otherUserId);
 
-        storage.getById(fileUploadedByAnotherUser.getId(), userId);
+        storage.fileContentById(fileUploadedByAnotherUser.getId(), userId);
     }
 
     @Test
@@ -110,9 +110,9 @@ public class FileStorageImplTest {
         storage.save(fileToUpload, userId);
 
         UploadedXmlFile uploadedFile = getFirstUploadedFileAndAssertThatItIsTheOnlyOneAvailableFor(userId);
-        UploadedXmlFile uploadedFileWithContent = storage.getById(uploadedFile.getId(), userId);
+        UploadedXmlFile fileContent = storage.fileContentById(uploadedFile.getId(), userId);
 
-        assertThat(uploadedFileWithContent.getContent(), equalTo(contentBytes));
+        assertThat(fileContent.getContent(), equalTo(contentBytes));
     }
 
     @Test
@@ -123,7 +123,7 @@ public class FileStorageImplTest {
 
         storage.updateContent(new UploadedXmlFile().setId(uploadedFile.getId()).setContent(newContentBytes), userId);
 
-        assertThat(storage.getById(uploadedFile.getId(), userId).getContent(), equalTo(newContentBytes));
+        assertThat(storage.fileContentById(uploadedFile.getId(), userId).getContent(), equalTo(newContentBytes));
     }
 
     @Test
@@ -137,7 +137,7 @@ public class FileStorageImplTest {
 
         storage.updateContent(contentChangeRequestFile, otherUserId);
 
-        assertThat(storage.getById(uploadedFileByOtherUser.getId(), userId).getContent(), equalTo(originalContent));
+        assertThat(storage.fileContentById(uploadedFileByOtherUser.getId(), userId).getContent(), equalTo(originalContent));
     }
 
     private void uploadSingleFileFor(String userId) {

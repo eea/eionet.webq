@@ -6,12 +6,10 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
-import org.springframework.mock.web.MockHttpSession;
 
 import javax.servlet.http.HttpSession;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
 
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertThat;
@@ -73,10 +71,10 @@ public class UploadedXmlFileServiceImplTest {
     public void testGetById() throws Exception {
         int fileId = 1;
         UploadedXmlFile fileInStorage = new UploadedXmlFile().setName("file.name");
-        when(storage.getById(fileId, userId)).thenReturn(fileInStorage);
+        when(storage.fileContentById(fileId, userId)).thenReturn(fileInStorage);
 
         assertThat(service.getById(fileId), equalTo(fileInStorage));
-        verify(storage, only()).getById(fileId, userId);
+        verify(storage, only()).fileContentById(fileId, userId);
     }
 
     @Test
