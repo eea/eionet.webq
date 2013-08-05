@@ -58,7 +58,6 @@ public class XmlSaveResult {
      *
      * @param code save result code
      * @param message result message
-     * @param timestamp timestamp the object was generated
      */
     private XmlSaveResult(int code, String message) {
         super();
@@ -79,6 +78,7 @@ public class XmlSaveResult {
     /**
      * Generates save result object with success code.
      *
+     * @param message error reason
      * @return the save result object
      */
     public static XmlSaveResult valueOfError(String message) {

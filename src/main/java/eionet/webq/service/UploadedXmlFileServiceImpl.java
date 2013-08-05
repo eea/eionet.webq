@@ -59,8 +59,7 @@ public class UploadedXmlFileServiceImpl implements UploadedXmlFileService {
     public UploadedXmlFile getById(int id) {
         UploadedXmlFile uploadedXmlFile = storage.fileContentById(id, userId());
         byte[] content = uploadedXmlFile.getContent();
-        LOGGER.info("File loaded. Name=" + uploadedXmlFile.getName() +
-                ", content size=" + (content != null ? content.length : 0));
+        LOGGER.info("File loaded. Name=" + uploadedXmlFile.getName() + ", content size=" + (content != null ? content.length : 0));
         return uploadedXmlFile;
     }
 
@@ -81,6 +80,7 @@ public class UploadedXmlFileServiceImpl implements UploadedXmlFileService {
 
     /**
      * Provides current http session id.
+     * 
      * @return current http session id
      */
     private String userId() {
