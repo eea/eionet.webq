@@ -23,24 +23,48 @@ package eionet.webq.converter;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertThat;
 import eionet.webq.dto.UploadedXmlFile;
+import eionet.webq.exception.WebQuestionnaireException;
 import org.junit.Test;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.web.multipart.MultipartFile;
 
 public class MultipartFileConverterTest {
+    private MultipartFileConverter fileConverter = new MultipartFileConverter();
+    private final String originalFilename = "file.xml";
 
     @Test
     public void convertToUploadedFile() throws Exception {
-        String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
-                "<derogations xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xml:lang=\"en\" xsi:noNamespaceSchemaLocation=\"http://biodiversity.eionet.europa.eu/schemas/bernconvention/derogations.xsd\" country=\"\">" +
-                "</derogations>";
-        String originalFilename = "file.xml";
-        MockMultipartFile xmlFileUpload = new MockMultipartFile("xmlFileUpload", originalFilename, MediaType.APPLICATION_XML_VALUE, xml.getBytes());
+        String schemaLocation = "testSchema";
+        String rootAttributesDeclaration = "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" " + noNamespaceSchemaAttribute(schemaLocation);
+        byte[] fileContent = xmlWithRootElementAttributes(rootAttributesDeclaration);
+        MultipartFile xmlFileUpload = createMultipartFile(fileContent);
 
-        MultipartFileConverter multipartFileConverter = new MultipartFileConverter();
-        UploadedXmlFile xmlFile = multipartFileConverter.convert(xmlFileUpload);
+        UploadedXmlFile xmlFile = fileConverter.convert(xmlFileUpload);
+
         assertThat(xmlFile.getName(), equalTo(originalFilename));
-        assertThat(xmlFile.getContent(), equalTo(xml.getBytes()));
-        assertThat(xmlFile.getXmlSchema(), equalTo("http://biodiversity.eionet.europa.eu/schemas/bernconvention/derogations.xsd"));
+        assertThat(xmlFile.getContent(), equalTo(fileContent));
+        assertThat(xmlFile.getXmlSchema(), equalTo(schemaLocation));
+        assertThat(xmlFile.getSizeInBytes(), equalTo(xmlFileUpload.getSize()));
+    }
+
+    @Test(expected = WebQuestionnaireException.class)
+    public void throwsExceptionIfNamespaceXsiNotDeclared() {
+        fileConverter.convert(createMultipartFile(xmlWithRootElementAttributes(noNamespaceSchemaAttribute("foo"))));
+    }
+
+    private String noNamespaceSchemaAttribute(String schemaLocation) {
+        return "xsi:noNamespaceSchemaLocation=\"" + schemaLocation + "\"";
+    }
+
+    private MultipartFile createMultipartFile(byte[] content) {
+        return new MockMultipartFile("xmlFileUpload", originalFilename, MediaType.APPLICATION_XML_VALUE, content);
+    }
+
+    private byte[] xmlWithRootElementAttributes(String rootAttributesDeclaration) {
+        String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
+                "<derogations " + rootAttributesDeclaration + " >" +
+                "</derogations>";
+        return xml.getBytes();
     }
 }
