@@ -155,7 +155,7 @@
                     <linkXref>false</linkXref>
                     <sourceEncoding>utf-8</sourceEncoding>
                     <minimumTokens>300</minimumTokens>
-                    <targetJdk>${javaVersion}</targetJdk>
+                    <targetJdk>${jdk.version}</targetJdk>
                 </configuration>
             </plugin>
             <plugin>
