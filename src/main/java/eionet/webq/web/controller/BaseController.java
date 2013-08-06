@@ -23,7 +23,6 @@ package eionet.webq.web.controller;
 import eionet.webq.dto.UploadForm;
 import eionet.webq.dto.UploadedXmlFile;
 import eionet.webq.dto.XmlSaveResult;
-import eionet.webq.exception.WebQuestionnaireException;
 import eionet.webq.service.UploadedXmlFileService;
 import java.io.IOException;
 import java.io.InputStream;
@@ -107,7 +106,7 @@ public class BaseController {
             output.write(fileContent);
             output.flush();
         } catch (IOException e) {
-            throw new WebQuestionnaireException("Unable to deliver requested file.", e);
+            throw new RuntimeException("Unable to deliver requested file.", e);
         } finally {
             IOUtils.closeQuietly(output);
         }

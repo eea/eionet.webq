@@ -15,8 +15,8 @@
     <bean id="exceptionHandler" class="org.springframework.web.servlet.handler.SimpleMappingExceptionResolver">
         <property name="exceptionMappings">
             <props>
-                <prop key="eionet.webq.exception.WebQuestionnaireException">technical_error</prop>
-                <prop key="*">technical_error</prop>
+                <prop key="org.springframework.web.multipart.MaxUploadSizeExceededException">max_upload_size_exceeded</prop>
+                <prop key="java.lang.Exception">technical_error</prop>
             </props>
         </property>
     </bean>
