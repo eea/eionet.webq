@@ -20,6 +20,9 @@
  */
 package eionet.webq.dto;
 
+import org.hibernate.validator.constraints.NotEmpty;
+
+import javax.validation.constraints.Size;
 import java.util.Date;
 
 /**
@@ -37,11 +40,13 @@ public class UploadedXmlFile {
     /**
      * File content bytes.
      */
+    @Size(min = 1)
     private byte[] content;
     /**
      * Xml schema name extracted during conversion.
      * @see eionet.webq.converter.MultipartFileConverter
      */
+    @NotEmpty
     private String xmlSchema;
     /**
      * File size in bytes.

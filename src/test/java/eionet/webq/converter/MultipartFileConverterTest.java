@@ -21,9 +21,9 @@
 package eionet.webq.converter;
 
 import static org.hamcrest.core.IsEqual.equalTo;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import eionet.webq.dto.UploadedXmlFile;
-import eionet.webq.exception.WebQuestionnaireException;
 import org.junit.Test;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
@@ -48,9 +48,10 @@ public class MultipartFileConverterTest {
         assertThat(xmlFile.getSizeInBytes(), equalTo(xmlFileUpload.getSize()));
     }
 
-    @Test(expected = WebQuestionnaireException.class)
-    public void throwsExceptionIfNamespaceXsiNotDeclared() {
-        fileConverter.convert(createMultipartFile(xmlWithRootElementAttributes(noNamespaceSchemaAttribute("foo"))));
+    @Test
+    public void setXmlSchemaToNullIfUnableToRead() {
+        UploadedXmlFile result = fileConverter.convert(createMultipartFile(xmlWithRootElementAttributes(noNamespaceSchemaAttribute("foo"))));
+        assertNull(result.getXmlSchema());
     }
 
     private String noNamespaceSchemaAttribute(String schemaLocation) {

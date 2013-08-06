@@ -16,7 +16,7 @@
         <property name="exceptionMappings">
             <props>
                 <prop key="eionet.webq.exception.WebQuestionnaireException">technical_error</prop>
-                <prop key="eionet.webq.exception.Exception">technical_error</prop>
+                <prop key="*">technical_error</prop>
             </props>
         </property>
     </bean>
@@ -37,6 +37,9 @@
     <mvc:resources mapping="/images/**" location="/images/" />
 
     <!-- Only needed because we require fileupload in the org.springframework.samples.mvc.fileupload package -->
-    <beans:bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver" />
+    <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+        <!--allow 5 megabytes-->
+        <property name="maxUploadSize" value="5242880"/>
+    </bean>
 
 </beans>

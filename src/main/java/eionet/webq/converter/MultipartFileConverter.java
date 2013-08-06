@@ -26,7 +26,7 @@ import java.io.IOException;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.xpath.XPathFactory;
 
-import eionet.webq.exception.WebQuestionnaireException;
+import org.apache.log4j.Logger;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.web.multipart.MultipartFile;
 import org.w3c.dom.Document;
@@ -36,6 +36,10 @@ import org.w3c.dom.Document;
  * @see Converter
  */
 public class MultipartFileConverter implements Converter<MultipartFile, UploadedXmlFile> {
+    /**
+     * Logger for this class.
+     */
+    private static final Logger LOGGER = Logger.getLogger(MultipartFileConverter.class);
 
     @Override
     public UploadedXmlFile convert(MultipartFile multipartFile) {
@@ -57,7 +61,8 @@ public class MultipartFileConverter implements Converter<MultipartFile, Uploaded
             Document xml = builderFactory.newDocumentBuilder().parse(new ByteArrayInputStream(bytes));
             return xPathFactory.newXPath().evaluate("//@xsi:noNamespaceSchemaLocation", xml);
         } catch (Exception e) {
-            throw new WebQuestionnaireException("Unable to retrieve xml schema", e);
+            LOGGER.warn("exception thrown during extracting xml schema", e);
+            return null;
         }
     }
 
@@ -71,7 +76,8 @@ public class MultipartFileConverter implements Converter<MultipartFile, Uploaded
         try {
             return multipartFile.getBytes();
         } catch (IOException e) {
-            throw new WebQuestionnaireException("Unable to transform uploaded file to bytes", e);
+            LOGGER.warn("unable to transform uploaded file to bytes", e);
+            return new byte[0];
         }
     }
 }

@@ -1,17 +1,18 @@
-<%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
+<%@ taglib prefix="f" uri="http://www.springframework.org/tags/form" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
     <h1>Web Questionnaires</h1>
     <c:if test="${not empty message}">
         <div id="message" class="success">${message}</div>
     </c:if>
-    <form action="uploadXml" method="POST" enctype="multipart/form-data">
+    <f:form modelAttribute="uploadForm" action="uploadXml" method="POST" enctype="multipart/form-data">
+        <f:errors path="*" element="div" cssClass="error-msg"/>
         <fieldset>
             <legend>Upload XML file</legend>
 
             <p>
                 <label for="uploadedXmlFile">File</label><br/>
-                <input id="uploadedXmlFile" type="file" name="uploadedXmlFile"/>
+                <f:input id="uploadedXmlFile" type="file" name="uploadedXmlFile" path="uploadedXmlFile"/>
             </p>
 
             <p>
@@ -19,7 +20,7 @@
             </p>
 
         </fieldset>
-    </form>
+    </f:form>
     <c:if test="${not empty uploadedFiles}">
         <fieldset>
             <legend>Uploaded XML files</legend>

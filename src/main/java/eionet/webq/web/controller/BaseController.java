@@ -20,27 +20,24 @@
  */
 package eionet.webq.web.controller;
 
+import eionet.webq.dto.UploadForm;
+import eionet.webq.dto.UploadedXmlFile;
+import eionet.webq.dto.XmlSaveResult;
+import eionet.webq.exception.WebQuestionnaireException;
+import eionet.webq.service.UploadedXmlFileService;
 import java.io.IOException;
 import java.io.InputStream;
-
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
+import javax.validation.Valid;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-
-import eionet.webq.dto.UploadedXmlFile;
-import eionet.webq.dto.XmlSaveResult;
-import eionet.webq.exception.WebQuestionnaireException;
-import eionet.webq.service.UploadedXmlFileService;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * Base controller for front page actions.
@@ -65,20 +62,28 @@ public class BaseController {
     @RequestMapping(value = "/", method = RequestMethod.GET)
     public String welcome(Model model) {
         model.addAttribute("uploadedFiles", uploadedXmlFileService.allUploadedFiles());
+        String uploadForm = "uploadForm";
+        if (!model.containsAttribute(uploadForm)) {
+            model.addAttribute(uploadForm, new UploadForm());
+        }
         return "index";
     }
 
     /**
      * Upload action.
-     *
-     * @param uploadedXmlFile converted from {@link org.springframework.web.multipart.MultipartFile}
+     * @param uploadForm represents form used in UI, {@link UploadForm#uploadedXmlFile} will be converted from
+     *            {@link org.springframework.web.multipart.MultipartFile}
+     * @param result binding result, contains validation errors
      * @param model holder for model attributes
      * @return view name
      */
     @RequestMapping(value = "/uploadXml", method = RequestMethod.POST)
-    public String upload(@RequestParam UploadedXmlFile uploadedXmlFile, Model model) {
-        model.addAttribute("message", "File '" + uploadedXmlFile.getName() + "' uploaded successfully");
-        uploadedXmlFileService.save(uploadedXmlFile);
+    public String upload(@Valid @ModelAttribute UploadForm uploadForm, BindingResult result, Model model) {
+        if (!result.hasErrors()) {
+            UploadedXmlFile file = uploadForm.getUploadedXmlFile();
+            uploadedXmlFileService.save(file);
+            model.addAttribute("message", "File '" + file.getName() + "' uploaded successfully");
+        }
         return welcome(model);
     }
 
