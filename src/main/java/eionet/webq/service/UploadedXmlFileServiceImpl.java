@@ -44,6 +44,8 @@ public class UploadedXmlFileServiceImpl implements UploadedXmlFileService {
      */
     @Autowired
     HttpSession session;
+    @Autowired
+    ConversionService conversionService;
     /**
      * Static logger for this class.
      */
@@ -67,6 +69,9 @@ public class UploadedXmlFileServiceImpl implements UploadedXmlFileService {
     public Collection<UploadedXmlFile> allUploadedFiles() {
         String userId = userId();
         Collection<UploadedXmlFile> uploadedXmlFiles = storage.allUploadedFiles(userId);
+        for (UploadedXmlFile uploadedXmlFile : uploadedXmlFiles) {
+            uploadedXmlFile.setAvailableConversions(conversionService.conversionsFor(uploadedXmlFile.getXmlSchema()));
+        }
         LOGGER.info("Loaded " + uploadedXmlFiles.size() + " files for user=" + userId);
         return uploadedXmlFiles;
     }
@@ -80,7 +85,7 @@ public class UploadedXmlFileServiceImpl implements UploadedXmlFileService {
 
     /**
      * Provides current http session id.
-     * 
+     *
      * @return current http session id
      */
     private String userId() {

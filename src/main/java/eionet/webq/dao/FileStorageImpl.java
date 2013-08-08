@@ -82,15 +82,13 @@ public class FileStorageImpl implements FileStorage {
 
     @Override
     public Collection<UploadedXmlFile> allUploadedFiles(String userId) {
-        return jdbcTemplate.query(
-                "SELECT id, filename, file_size_in_bytes, created, updated, xml_schema FROM user_xml WHERE user_id = ? "
-                        + "ORDER BY updated DESC",
+        return jdbcTemplate.query("SELECT id, filename, xml_schema, file_size_in_bytes, created, updated FROM user_xml WHERE user_id = ? "
+                + "ORDER BY updated DESC",
                 new Object[] {userId}, new RowMapper<UploadedXmlFile>() {
                     @Override
                     public UploadedXmlFile mapRow(ResultSet rs, int rowNum) throws SQLException {
-                        return new UploadedXmlFile().setId(rs.getInt(1)).setName(rs.getString(2))
-                                .setSizeInBytes(rs.getLong(3)).setCreated(rs.getTimestamp(4)).setUpdated(rs.getTimestamp(5))
-                                .setXmlSchema(rs.getString(6));
+                        return new UploadedXmlFile().setId(rs.getInt(1)).setName(rs.getString(2)).setXmlSchema(rs.getString(3))
+                                .setSizeInBytes(rs.getLong(4)).setCreated(rs.getTimestamp(5)).setUpdated(rs.getTimestamp(6));
                     }
                 });
     }

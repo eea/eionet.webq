@@ -23,6 +23,7 @@ package eionet.webq.dto;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.validation.constraints.Size;
+import java.util.Collection;
 import java.util.Date;
 
 /**
@@ -60,6 +61,10 @@ public class UploadedXmlFile {
      * Last change date.
      */
     private Date updated;
+    /**
+     * Available conversions for this file.
+     */
+    private Collection<Conversion> availableConversions;
 
     public int getId() {
         return id;
@@ -165,6 +170,20 @@ public class UploadedXmlFile {
      */
     public UploadedXmlFile setUpdated(Date updated) {
         this.updated = updated;
+        return this;
+    }
+
+    public Collection<Conversion> getAvailableConversions() {
+        return availableConversions;
+    }
+
+    /**
+     * Available conversions setter.
+     * @param availableConversions Collection of available conversion.
+     * @return current object for method call chaining.
+     */
+    public UploadedXmlFile setAvailableConversions(Collection<Conversion> availableConversions) {
+        this.availableConversions = availableConversions;
         return this;
     }
 

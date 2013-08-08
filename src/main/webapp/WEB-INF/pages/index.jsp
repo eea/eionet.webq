@@ -97,6 +97,9 @@
                             <a href="<c:url value="/forms/habides-factsheet-v4.xhtml?instance=${downloadLink}&amp;fileId=${file.id}&amp;base_uri=${pageContext.request.contextPath}"/>">Edit
                                 with web form</a>
                         </c:if>
+                        <c:forEach items="${file.availableConversions}" var="conversion">
+                            <a href="#">View as ${conversion.resultType}</a>
+                        </c:forEach>
                     </td>
                 </tr>
             </c:forEach>
