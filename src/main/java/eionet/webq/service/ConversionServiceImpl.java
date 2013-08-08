@@ -3,8 +3,8 @@ package eionet.webq.service;
 import eionet.webq.dto.Conversion;
 import eionet.webq.dto.ListConversionResponse;
 import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
@@ -40,13 +40,21 @@ public class ConversionServiceImpl implements ConversionService {
      */
     @Autowired
     RestTemplate restTemplate;
+    /**
+     * Url to converters api
+     */
+    @Value("#{application_properties['converters.api.url']}")
+    private String converterApiUrl;
+    /**
+     * Url to converters api
+     */
+    @Value("#{application_properties['conversions.list.call.template']}")
+    private String conversionListCallTemplate;
 
     @Cacheable(value = "conversions")
     @Override
     public List<Conversion> conversionsFor(String schema) {
-        ListConversionResponse availableConversions =
-                restTemplate.getForObject("http://converters.eionet.europa.eu/api/listConversions?schema={xml_schema}",
-                        ListConversionResponse.class, schema);
-        return availableConversions.getConversions();
+        String apiCallUrl = converterApiUrl + conversionListCallTemplate;
+        return restTemplate.getForObject(apiCallUrl, ListConversionResponse.class, schema).getConversions();
     }
 }
