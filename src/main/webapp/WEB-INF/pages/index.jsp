@@ -8,25 +8,41 @@
     }
 </script>
 <style type="text/css">
-    .row {
+    .container {
+        padding-top:1em;
+        width: 100%;
+    }
+    .col1 {
         float: left;
         width: 50%;
+    }
+    .col2 {
+        float: right;
+        width: 50%;
+    }
+    .container legend{
+        font-weight:bold;
+    }
+    .files{
+        padding-top:1em;
+        clear:both;
     }
 </style>
 
 <h1>Web Questionnaires</h1>
 <c:if test="${not empty message}">
-    <div id="message" class="success">${message}</div>
+    <div id="message" class="system-msg">${message}</div>
 </c:if>
-<div class="row">
+<div class="container">
     <f:form modelAttribute="uploadForm" action="uploadXml" method="POST" enctype="multipart/form-data">
         <f:errors path="*" element="div" cssClass="error-msg"/>
+        <div class="col1">
         <fieldset>
             <legend>Upload XML file</legend>
 
             <p>
-                <label for="uploadedXmlFile">File</label><br/>
-                <f:input id="uploadedXmlFile" type="file" name="uploadedXmlFile" path="uploadedXmlFile"/>
+                <label for="uploadedXmlFile">Select the file from My Computer</label>
+                <f:input id="uploadedXmlFile" type="file" path="uploadedXmlFile"/>
             </p>
 
             <p>
@@ -34,15 +50,15 @@
             </p>
 
         </fieldset>
+        </div>
     </f:form>
-</div>
-<div class="row">
+<div class="col2">
     <fieldset>
-        <legend>Start new form</legend>
+        <legend>Start a new web form</legend>
         <p>
-            <label for="selectFile">Form name</label><br/>
+            <label for="selectFile">Select the web form</label><br/>
             <select id="selectFile" name="selectFile" title="Select new webform">
-                <option value="<c:url value="/forms/habides-factsheet-v4.xhtml?base_uri=${pageContext.request.contextPath}"/>"/>Habides factsheet</option>
+                <option value="<c:url value="/forms/habides-factsheet-v4.xhtml?base_uri=${pageContext.request.contextPath}"/>">Habides factsheet</option>
             </select>
         </p>
         <p>
@@ -50,9 +66,11 @@
         </p>
     </fieldset>
 </div>
+</div>
 <c:if test="${not empty uploadedFiles}">
-    <fieldset>
-        <legend>Uploaded XML files</legend>
+<div class="files">
+    <h2>My XML files</h2>
+
         <table class="datatable">
             <thead>
             <tr>
@@ -74,13 +92,13 @@
                         Updated: ${file.updated}
                     </td>
                     <td>
-                        <a href="<c:url value="/forms/habides-factsheet-v4.xhtml?instance=${downloadLink}&fileId=${file.id}&base_uri=${pageContext.request.contextPath}"/>">Edit
-                            with WebForm</a>
+                        <a href="<c:url value="/forms/habides-factsheet-v4.xhtml?instance=${downloadLink}&amp;fileId=${file.id}&amp;base_uri=${pageContext.request.contextPath}"/>">Edit
+                            with web form</a>
                     </td>
                 </tr>
             </c:forEach>
             </tbody>
         </table>
-    </fieldset>
+</div>
 </c:if>
 <footer></footer>
