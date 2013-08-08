@@ -2,7 +2,6 @@ package eionet.webq.dto;
 
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.util.List;
 
@@ -26,11 +25,21 @@ import java.util.List;
  * Contributor(s):
  *        Anton Dmitrijev
  */
+
+/**
+ * Class represents response of conversion service.
+ */
 @XmlRootElement(name = "response")
 public class ListConversionResponse {
+    /**
+     * Http response code. 200 - OK.
+     */
     @XmlAttribute(name = "code")
     private int code;
 
+    /**
+     * List of conversions available.
+     */
     @XmlElement(name = "conversion")
     private List<Conversion> conversions;
 

@@ -44,6 +44,9 @@ public class UploadedXmlFileServiceImpl implements UploadedXmlFileService {
      */
     @Autowired
     HttpSession session;
+    /**
+     * Service for getting conversion available for file.
+     */
     @Autowired
     ConversionService conversionService;
     /**

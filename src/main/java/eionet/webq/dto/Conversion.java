@@ -29,16 +29,34 @@ import javax.xml.bind.annotation.XmlRootElement;
  */
 @XmlRootElement(name = "conversion")
 public class Conversion {
+    /**
+     * Conversion id.
+     */
     @XmlElement(name = "convert_id")
     private int id;
+    /**
+     * Conversion output type.
+     */
     @XmlElement(name = "content_type_out")
     private String outputType;
+    /**
+     * Xml schema for which this conversion is valid.
+     */
     @XmlElement(name = "xml_schema")
     private String xmlSchema;
+    /**
+     * Xsl file name.
+     */
     @XmlElement(name = "xsl")
     private String xslName;
+    /**
+     * Resulting type (e.g. HTML, RDF)
+     */
     @XmlElement(name = "result_type")
     private String resultType;
+    /**
+     * Description of this conversion
+     */
     @XmlElement(name = "description")
     private String description;
 
