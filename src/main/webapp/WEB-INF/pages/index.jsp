@@ -98,7 +98,7 @@
                                 with web form</a>
                         </c:if>
                         <c:forEach items="${file.availableConversions}" var="conversion">
-                            <a href="#">View as ${conversion.resultType}</a>
+                            <a href="<c:url value="/convert?fileId=${file.id}&conversionId=${conversion.id}"/>">${conversion.description}</a>
                         </c:forEach>
                     </td>
                 </tr>

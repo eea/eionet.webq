@@ -9,13 +9,7 @@
     <context:component-scan base-package="eionet.webq" />
     <cache:annotation-driven />
 
-    <bean id="restTemplate" class="org.springframework.web.client.RestTemplate">
-        <property name="messageConverters">
-            <list>
-                <ref bean="marshallingConverter"/>
-            </list>
-        </property>
-    </bean>
+    <bean id="restTemplate" class="org.springframework.web.client.RestTemplate"/>
 
     <bean id="cacheManager" class="org.springframework.cache.support.SimpleCacheManager">
         <property name="caches">

@@ -23,9 +23,11 @@ package eionet.webq.web.controller;
 import eionet.webq.dto.UploadForm;
 import eionet.webq.dto.UploadedXmlFile;
 import eionet.webq.dto.XmlSaveResult;
+import eionet.webq.service.ConversionService;
 import eionet.webq.service.UploadedXmlFileService;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collection;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -55,6 +57,11 @@ public class BaseController {
      */
     @Autowired
     private UploadedXmlFileService uploadedXmlFileService;
+    /**
+     * File conversion service.
+     */
+    @Autowired
+    private ConversionService conversionService;
 
     /**
      * Action to be performed on http GET method and path '/'.
@@ -64,7 +71,9 @@ public class BaseController {
      */
     @RequestMapping(value = "/", method = RequestMethod.GET)
     public String welcome(Model model) {
-        model.addAttribute("uploadedFiles", uploadedXmlFileService.allUploadedFiles());
+        Collection<UploadedXmlFile> allUploadedFiles = uploadedXmlFileService.allUploadedFiles();
+        conversionService.setAvailableConversionsFor(allUploadedFiles);
+        model.addAttribute("uploadedFiles", allUploadedFiles);
         String uploadForm = "uploadForm";
         if (!model.containsAttribute(uploadForm)) {
             model.addAttribute(uploadForm, new UploadForm());
@@ -101,19 +110,7 @@ public class BaseController {
         UploadedXmlFile file = uploadedXmlFileService.getById(fileId);
         response.setContentType(MediaType.APPLICATION_XML_VALUE);
         response.addHeader("Content-Disposition", "attachment;filename=" + file.getName());
-        ServletOutputStream output = null;
-        try {
-            byte[] fileContent = file.getContent();
-            response.setContentLength(fileContent.length);
-
-            output = response.getOutputStream();
-            output.write(fileContent);
-            output.flush();
-        } catch (IOException e) {
-            throw new RuntimeException("Unable to deliver requested file.", e);
-        } finally {
-            IOUtils.closeQuietly(output);
-        }
+        writeToResponse(response, file.getContent());
     }
 
     /**
@@ -143,5 +140,38 @@ public class BaseController {
             IOUtils.closeQuietly(input);
         }
         return saveResult;
+    }
+
+    /**
+     * Performs conversion of specified {@link UploadedXmlFile} to specific format.
+     * Format is defined by conversionId.
+     * @param fileId file id, which will be loaded and converted
+     * @param conversionId id of conversion to be used
+     * @param response object where conversion result will be written
+     */
+    @RequestMapping("convert")
+    public void convertXmlFile(@RequestParam int fileId, @RequestParam int conversionId, HttpServletResponse response) {
+        UploadedXmlFile fileContent = uploadedXmlFileService.getById(fileId);
+        writeToResponse(response, conversionService.convert(fileContent, conversionId));
+    }
+
+    /**
+     * Writes specified content to http response.
+     * @param response http response
+     * @param data content to be written to response
+     */
+    private void writeToResponse(HttpServletResponse response, byte[] data) {
+        ServletOutputStream output = null;
+        try {
+            response.setContentLength(data.length);
+
+            output = response.getOutputStream();
+            IOUtils.write(data, output);
+            output.flush();
+        } catch (IOException e) {
+            throw new RuntimeException("Unable to write response", e);
+        } finally {
+            IOUtils.closeQuietly(output);
+        }
     }
 }

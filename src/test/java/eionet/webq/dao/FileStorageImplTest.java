@@ -34,7 +34,8 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = {"file:src/main/webapp/WEB-INF/spring/application-context.xml",
-        "file:src/test/resources/test-datasource-context.xml", "file:src/test/resources/test-servlet-context.xml"})
+        "file:src/test/resources/test-datasource-context.xml", "file:src/test/resources/test-servlet-context.xml",
+        "file:src/main/webapp/WEB-INF/spring/properties-context.xml"})
 public class FileStorageImplTest {
     @Autowired
     private FileStorage storage;
