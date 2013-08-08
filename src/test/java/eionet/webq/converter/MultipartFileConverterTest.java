@@ -23,11 +23,13 @@ package eionet.webq.converter;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
-import eionet.webq.dto.UploadedXmlFile;
+
 import org.junit.Test;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
+
+import eionet.webq.dto.UploadedXmlFile;
 
 public class MultipartFileConverterTest {
     private MultipartFileConverter fileConverter = new MultipartFileConverter();
@@ -36,7 +38,7 @@ public class MultipartFileConverterTest {
     @Test
     public void convertToUploadedFile() throws Exception {
         String schemaLocation = "testSchema";
-        String rootAttributesDeclaration = "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" " + noNamespaceSchemaAttribute(schemaLocation);
+        String rootAttributesDeclaration = rootAttributesDeclaration(noNamespaceSchemaAttribute(schemaLocation));
         byte[] fileContent = xmlWithRootElementAttributes(rootAttributesDeclaration);
         MultipartFile xmlFileUpload = createMultipartFile(fileContent);
 
@@ -50,12 +52,32 @@ public class MultipartFileConverterTest {
 
     @Test
     public void setXmlSchemaToNullIfUnableToRead() {
-        UploadedXmlFile result = fileConverter.convert(createMultipartFile(xmlWithRootElementAttributes(noNamespaceSchemaAttribute("foo"))));
+        UploadedXmlFile result =
+                fileConverter.convert(createMultipartFile(xmlWithRootElementAttributes(noNamespaceSchemaAttribute("foo"))));
         assertNull(result.getXmlSchema());
+    }
+
+    @Test
+    public void setXmlSchemaWithNamespace() throws Exception {
+        String namespace = "namespace";
+        String schemaLocation = "testSchema";
+        UploadedXmlFile result =
+                fileConverter.convert(createMultipartFile(xmlWithRootElementAttributes(rootAttributesDeclaration(schemaAttribute(
+                        namespace, schemaLocation)))));
+
+        assertThat(result.getXmlSchema(), equalTo(namespace + " " + schemaLocation));
     }
 
     private String noNamespaceSchemaAttribute(String schemaLocation) {
         return "xsi:noNamespaceSchemaLocation=\"" + schemaLocation + "\"";
+    }
+
+    private String schemaAttribute(String namespace, String schemaLocation) {
+        return "xsi:schemaLocation=\"" + namespace + " " + schemaLocation + "\"";
+    }
+
+    private String rootAttributesDeclaration(String schemaAttribute) {
+        return "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" " + schemaAttribute;
     }
 
     private MultipartFile createMultipartFile(byte[] content) {

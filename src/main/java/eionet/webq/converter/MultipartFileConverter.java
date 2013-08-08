@@ -20,9 +20,9 @@
  */
 package eionet.webq.converter;
 
-import eionet.webq.dto.UploadedXmlFile;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.xpath.XPathFactory;
 
@@ -31,8 +31,11 @@ import org.springframework.core.convert.converter.Converter;
 import org.springframework.web.multipart.MultipartFile;
 import org.w3c.dom.Document;
 
+import eionet.webq.dto.UploadedXmlFile;
+
 /**
  * Performs converting from {@link MultipartFile} to {@link UploadedXmlFile}.
+ *
  * @see Converter
  */
 public class MultipartFileConverter implements Converter<MultipartFile, UploadedXmlFile> {
@@ -49,17 +52,18 @@ public class MultipartFileConverter implements Converter<MultipartFile, Uploaded
     }
 
     /**
-     * Extracts {@code @xsi:noNamespaceSchemaLocation} attribute value from xml root element.
-     * @param bytes
-     *            uploaded file bytes
-     * @return {@code @xsi:noNamespaceSchemaLocation} attribute value
+     * Extracts {@code @xsi:noNamespaceSchemaLocation} or {@code @xsi:schemaLocation} attribute value from xml root element.
+     *
+     * @param bytes uploaded file bytes
+     * @return {@code @xsi:noNamespaceSchemaLocation} or {@code @xsi:schemaLocation} attribute value
      */
     private String extractXmlSchema(byte[] bytes) {
         DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
         XPathFactory xPathFactory = XPathFactory.newInstance();
         try {
             Document xml = builderFactory.newDocumentBuilder().parse(new ByteArrayInputStream(bytes));
-            return xPathFactory.newXPath().evaluate("//@xsi:noNamespaceSchemaLocation", xml);
+            return xPathFactory.newXPath().evaluate(
+                    "/*/@xsi:noNamespaceSchemaLocation | /*[@xsi:schemaLocation]/@xsi:schemaLocation", xml);
         } catch (Exception e) {
             LOGGER.warn("exception thrown during extracting xml schema", e);
             return null;
@@ -68,8 +72,8 @@ public class MultipartFileConverter implements Converter<MultipartFile, Uploaded
 
     /**
      * Calls {@link org.springframework.web.multipart.MultipartFile#getBytes()} wrapping {@link IOException}.
-     * @param multipartFile
-     *            uploaded file to be converted
+     *
+     * @param multipartFile uploaded file to be converted
      * @return uploaded file bytes.
      */
     private byte[] toByteArray(MultipartFile multipartFile) {

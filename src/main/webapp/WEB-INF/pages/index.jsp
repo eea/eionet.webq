@@ -92,8 +92,11 @@
                         Updated: ${file.updated}
                     </td>
                     <td>
-                        <a href="<c:url value="/forms/habides-factsheet-v4.xhtml?instance=${downloadLink}&amp;fileId=${file.id}&amp;base_uri=${pageContext.request.contextPath}"/>">Edit
-                            with web form</a>
+                        <!-- FIXME - make the XML Schema check dynamic when Webforms repo is implemented -->
+                        <c:if test="${file.xmlSchema eq 'http://biodiversity.eionet.europa.eu/schemas/bernconvention/derogations.xsd'}">
+                            <a href="<c:url value="/forms/habides-factsheet-v4.xhtml?instance=${downloadLink}&amp;fileId=${file.id}&amp;base_uri=${pageContext.request.contextPath}"/>">Edit
+                                with web form</a>
+                        </c:if>
                     </td>
                 </tr>
             </c:forEach>
