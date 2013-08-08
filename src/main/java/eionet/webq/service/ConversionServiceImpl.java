@@ -5,6 +5,7 @@ import eionet.webq.dto.ListConversionResponse;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
@@ -40,6 +41,7 @@ public class ConversionServiceImpl implements ConversionService {
     @Autowired
     RestTemplate restTemplate;
 
+    @Cacheable(value = "conversions")
     @Override
     public List<Conversion> conversionsFor(String schema) {
         ListConversionResponse availableConversions =
