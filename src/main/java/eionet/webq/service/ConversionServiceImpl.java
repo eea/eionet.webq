@@ -3,7 +3,6 @@ package eionet.webq.service;
 import eionet.webq.dto.Conversion;
 import eionet.webq.dto.ListConversionResponse;
 
-import java.util.Collection;
 import java.util.List;
 
 import eionet.webq.dto.UploadedXmlFile;
@@ -17,7 +16,7 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.client.RestOperations;
 
 /*
  * The contents of this file are subject to the Mozilla Public
@@ -53,7 +52,7 @@ public class ConversionServiceImpl implements ConversionService {
      * Template for calling rest services.
      */
     @Autowired
-    RestTemplate restTemplate;
+    RestOperations restOperations;
     /**
      * Url to converters api.
      */
@@ -72,12 +71,10 @@ public class ConversionServiceImpl implements ConversionService {
         fileHttpHeaders.setContentDispositionFormData("convert_file", fileContent.getName());
         HttpEntity<byte[]> file = new HttpEntity<byte[]>(fileContent.getContent(), fileHttpHeaders);
 
-        HttpEntity<String> id = new HttpEntity<String>(Integer.toString(conversionId));
-
         MultiValueMap<String, Object> mvm = new LinkedMultiValueMap<String, Object>();
         mvm.add("convert_file", file);
-        mvm.add("convert_id", id);
-        String conversionResult = restTemplate.postForObject(converterApiUrl + "convertPush", mvm, String.class);
+        mvm.add("convert_id", new HttpEntity<String>(Integer.toString(conversionId)));
+        String conversionResult = restOperations.postForObject(converterApiUrl + "convertPush", mvm, String.class);
         LOGGER.info("Response from conversion service for file=" + fileContent.getName()
                 + ", conversionId=" + conversionId + "\n" + conversionResult);
         return conversionResult.getBytes();
@@ -87,6 +84,6 @@ public class ConversionServiceImpl implements ConversionService {
     @Override
     public List<Conversion> conversionsFor(String schema) {
         String apiCallUrl = converterApiUrl + conversionListCallTemplate;
-        return restTemplate.getForObject(apiCallUrl, ListConversionResponse.class, schema).getConversions();
+        return restOperations.getForObject(apiCallUrl, ListConversionResponse.class, schema).getConversions();
     }
 }
