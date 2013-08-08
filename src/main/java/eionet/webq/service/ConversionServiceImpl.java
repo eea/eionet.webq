@@ -2,10 +2,8 @@ package eionet.webq.service;
 
 import eionet.webq.dto.Conversion;
 import eionet.webq.dto.ListConversionResponse;
-
-import java.util.List;
-
 import eionet.webq.dto.UploadedXmlFile;
+import java.util.List;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -61,29 +59,63 @@ public class ConversionServiceImpl implements ConversionService {
     /**
      * Template for conversions list method call.
      */
-    @Value("#{application_properties['conversions.list.call.template']}")
-    private String conversionListCallTemplate;
+    @Value("#{application_properties['list.conversions.call.template']}")
+    private String listConversions;
+    /**
+     * Template for convertPush method call.
+     */
+    @Value("#{application_properties['convert.push.call.template']}")
+    private String convertPush;
+    /**
+     * Convert push file parameter name.
+     */
+    @Value("#{application_properties['convert.push.file.parameter']}")
+    private String convertPushFileParameter;
+    /**
+     * Convert push file parameter name.
+     */
+    @Value("#{application_properties['convert.push.conversion.id.parameter']}")
+    private String convertPushIdParameter;
 
     @Override
     public byte[] convert(UploadedXmlFile fileContent, int conversionId) {
-        HttpHeaders fileHttpHeaders = new HttpHeaders();
-        fileHttpHeaders.setContentType(MediaType.MULTIPART_FORM_DATA);
-        fileHttpHeaders.setContentDispositionFormData("convert_file", fileContent.getName());
-        HttpEntity<byte[]> file = new HttpEntity<byte[]>(fileContent.getContent(), fileHttpHeaders);
+        MultiValueMap<String, Object> request = new LinkedMultiValueMap<String, Object>();
+        request.add(convertPushFileParameter, createFileHttpEntity(fileContent));
+        request.add(convertPushIdParameter, new HttpEntity<String>(Integer.toString(conversionId)));
 
-        MultiValueMap<String, Object> mvm = new LinkedMultiValueMap<String, Object>();
-        mvm.add("convert_file", file);
-        mvm.add("convert_id", new HttpEntity<String>(Integer.toString(conversionId)));
-        String conversionResult = restOperations.postForObject(converterApiUrl + "convertPush", mvm, String.class);
-        LOGGER.info("Response from conversion service for file=" + fileContent.getName()
-                + ", conversionId=" + conversionId + "\n" + conversionResult);
+        String conversionResult = restOperations.postForObject(apiCallTo(convertPush), request, String.class);
+        LOGGER.info("Response from conversion service for file=" + fileContent.getName() + ", conversionId=" + conversionId + "\n"
+                + conversionResult);
         return conversionResult.getBytes();
     }
 
     @Cacheable(value = "conversions")
     @Override
     public List<Conversion> conversionsFor(String schema) {
-        String apiCallUrl = converterApiUrl + conversionListCallTemplate;
-        return restOperations.getForObject(apiCallUrl, ListConversionResponse.class, schema).getConversions();
+        return restOperations.getForObject(apiCallTo(listConversions), ListConversionResponse.class, schema).getConversions();
+    }
+
+    /**
+     * Creates and sets required headers for file push.
+     *
+     * @param fileContent
+     *            file content and name
+     * @return new {@link HttpEntity} with required headers and body set
+     */
+    private HttpEntity<byte[]> createFileHttpEntity(UploadedXmlFile fileContent) {
+        HttpHeaders fileHttpHeaders = new HttpHeaders();
+        fileHttpHeaders.setContentType(MediaType.MULTIPART_FORM_DATA);
+        fileHttpHeaders.setContentDispositionFormData(convertPushFileParameter, fileContent.getName());
+        return new HttpEntity<byte[]>(fileContent.getContent(), fileHttpHeaders);
+    }
+
+    /**
+     * Creates api call url.
+     *
+     * @param path call path
+     * @return api url
+     */
+    private String apiCallTo(String path) {
+        return converterApiUrl + path;
     }
 }
