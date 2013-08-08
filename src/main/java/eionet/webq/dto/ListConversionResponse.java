@@ -40,11 +40,14 @@ public class ListConversionResponse {
     /**
      * List of conversions available.
      */
-    @XmlElement(name = "conversion")
     private List<Conversion> conversions;
 
     public List<Conversion> getConversions() {
         return conversions;
+    }
+    @XmlElement(name = "conversion")
+    public void setConversions(List<Conversion> conversions) {
+        this.conversions = conversions;
     }
 
     public int getCode() {

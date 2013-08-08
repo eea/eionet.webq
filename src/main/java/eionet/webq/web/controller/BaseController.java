@@ -71,9 +71,7 @@ public class BaseController {
      */
     @RequestMapping(value = "/", method = RequestMethod.GET)
     public String welcome(Model model) {
-        Collection<UploadedXmlFile> allUploadedFiles = uploadedXmlFileService.allUploadedFiles();
-        conversionService.setAvailableConversionsFor(allUploadedFiles);
-        model.addAttribute("uploadedFiles", allUploadedFiles);
+        model.addAttribute("uploadedFiles", allFilesWithConversions());
         String uploadForm = "uploadForm";
         if (!model.containsAttribute(uploadForm)) {
             model.addAttribute(uploadForm, new UploadForm());
@@ -153,6 +151,17 @@ public class BaseController {
     public void convertXmlFile(@RequestParam int fileId, @RequestParam int conversionId, HttpServletResponse response) {
         UploadedXmlFile fileContent = uploadedXmlFileService.getById(fileId);
         writeToResponse(response, conversionService.convert(fileContent, conversionId));
+    }
+
+    /**
+     * Loads and sets conversions for files uploaded by user
+     */
+    private Collection<UploadedXmlFile> allFilesWithConversions() {
+        Collection<UploadedXmlFile> uploadedXmlFiles = uploadedXmlFileService.allUploadedFiles();
+        for (UploadedXmlFile uploadedXmlFile : uploadedXmlFiles) {
+            uploadedXmlFile.setAvailableConversions(conversionService.conversionsFor(uploadedXmlFile.getXmlSchema()));
+        }
+        return uploadedXmlFiles;
     }
 
     /**

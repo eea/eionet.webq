@@ -66,13 +66,6 @@ public class ConversionServiceImpl implements ConversionService {
     private String conversionListCallTemplate;
 
     @Override
-    public void setAvailableConversionsFor(Collection<UploadedXmlFile> uploadedXmlFiles) {
-        for (UploadedXmlFile uploadedXmlFile : uploadedXmlFiles) {
-            uploadedXmlFile.setAvailableConversions(conversionsFor(uploadedXmlFile.getXmlSchema()));
-        }
-    }
-
-    @Override
     public byte[] convert(UploadedXmlFile fileContent, int conversionId) {
         HttpHeaders fileHttpHeaders = new HttpHeaders();
         fileHttpHeaders.setContentType(MediaType.MULTIPART_FORM_DATA);
@@ -90,14 +83,9 @@ public class ConversionServiceImpl implements ConversionService {
         return conversionResult.getBytes();
     }
 
-    /**
-     * List all available conversions.
-     *
-     * @param schema xml schema
-     * @return collection of available conversions
-     */
     @Cacheable(value = "conversions")
-    private List<Conversion> conversionsFor(String schema) {
+    @Override
+    public List<Conversion> conversionsFor(String schema) {
         String apiCallUrl = converterApiUrl + conversionListCallTemplate;
         return restTemplate.getForObject(apiCallUrl, ListConversionResponse.class, schema).getConversions();
     }

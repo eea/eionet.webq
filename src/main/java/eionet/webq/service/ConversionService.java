@@ -1,5 +1,6 @@
 package eionet.webq.service;
 
+import eionet.webq.dto.Conversion;
 import eionet.webq.dto.UploadedXmlFile;
 
 import java.util.Collection;
@@ -31,13 +32,6 @@ import java.util.List;
  */
 public interface ConversionService {
     /**
-     * Set conversion options for each file.
-     *
-     * @param uploadedXmlFiles files for which conversion properties must be set
-     */
-    void setAvailableConversionsFor(Collection<UploadedXmlFile> uploadedXmlFiles);
-
-    /**
      * Convert xml to specified format.
      *
      * @param fileContent file content and name
@@ -45,4 +39,12 @@ public interface ConversionService {
      * @return conversion result as string
      */
     byte[] convert(UploadedXmlFile fileContent, int conversionId);
+
+    /**
+     * List all available conversions.
+     *
+     * @param schema xml schema
+     * @return collection of available conversions
+     */
+    List<Conversion> conversionsFor(String schema);
 }
