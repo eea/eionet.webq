@@ -1,6 +1,7 @@
 package eionet.webq.dao;
 
-import static junit.framework.Assert.assertNull;
+import static junit.framework.TestCase.assertNotNull;
+import static junit.framework.TestCase.assertNull;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertThat;
 import eionet.webq.dto.UploadedXmlFile;
@@ -45,6 +46,25 @@ public class FileStorageImplTest {
     @Test
     public void saveUploadedFileToStorageWithoutException() {
         uploadSingleFileFor(userId);
+    }
+
+    @Test
+    public void savesRequiredFields() throws Exception {
+        UploadedXmlFile uploadedXmlFile =
+                new UploadedXmlFile().setName("name").setXmlSchema("xmlSchema").setSizeInBytes(1000)
+                        .setContent("test_content".getBytes());
+
+        storage.save(uploadedXmlFile, userId);
+
+        UploadedXmlFile fileFromDb = getFirstUploadedFileAndAssertThatItIsTheOnlyOneAvailableFor(userId);
+        UploadedXmlFile fileContentFromDb = storage.fileContentById(fileFromDb.getId(), userId);
+
+        assertThat(fileFromDb.getName(), equalTo(uploadedXmlFile.getName()));
+        assertThat(fileContentFromDb.getContent(), equalTo(uploadedXmlFile.getContent()));
+        assertThat(fileFromDb.getSizeInBytes(), equalTo(uploadedXmlFile.getSizeInBytes()));
+        assertThat(fileFromDb.getXmlSchema(), equalTo(uploadedXmlFile.getXmlSchema()));
+        assertNotNull(fileFromDb.getCreated());
+        assertNotNull(fileFromDb.getUpdated());
     }
 
     @Test(expected = DataAccessException.class)
