@@ -3,6 +3,8 @@ package eionet.webq.service;
 import eionet.webq.dto.Conversion;
 import eionet.webq.dto.ListConversionResponse;
 import eionet.webq.dto.UploadedXmlFile;
+
+import java.nio.charset.Charset;
 import java.util.List;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -86,7 +88,7 @@ public class ConversionServiceImpl implements ConversionService {
         String conversionResult = restOperations.postForObject(apiCallTo(convertPush), request, String.class);
         LOGGER.info("Response from conversion service for file=" + fileContent.getName() + ", conversionId=" + conversionId + "\n"
                 + conversionResult);
-        return conversionResult.getBytes();
+        return conversionResult.getBytes(Charset.forName("UTF-8"));
     }
 
     @Cacheable(value = "conversions")
