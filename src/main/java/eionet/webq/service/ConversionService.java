@@ -3,7 +3,6 @@ package eionet.webq.service;
 import eionet.webq.dto.Conversion;
 import eionet.webq.dto.UploadedXmlFile;
 
-import java.util.Collection;
 import java.util.List;
 
 /*

@@ -50,12 +50,12 @@ public class Conversion {
     @XmlElement(name = "xsl")
     private String xslName;
     /**
-     * Resulting type (e.g. HTML, RDF)
+     * Resulting type (e.g. HTML, RDF).
      */
     @XmlElement(name = "result_type")
     private String resultType;
     /**
-     * Description of this conversion
+     * Description of this conversion.
      */
     @XmlElement(name = "description")
     private String description;

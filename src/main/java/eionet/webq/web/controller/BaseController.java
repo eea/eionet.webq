@@ -154,7 +154,9 @@ public class BaseController {
     }
 
     /**
-     * Loads and sets conversions for files uploaded by user
+     * Loads and sets conversions for files uploaded by user.
+     *
+     * @return all uploaded files with available conversions set.
      */
     private Collection<UploadedXmlFile> allFilesWithConversions() {
         Collection<UploadedXmlFile> uploadedXmlFiles = uploadedXmlFileService.allUploadedFiles();
