@@ -4,6 +4,8 @@ import static junit.framework.TestCase.assertNotNull;
 import static junit.framework.TestCase.assertNull;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertThat;
+
+import configuration.ApplicationTestContextWithMockSession;
 import eionet.webq.dto.UploadedXmlFile;
 import java.util.Collection;
 import org.junit.Test;
@@ -34,9 +36,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
  *        Anton Dmitrijev
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations = {"file:src/main/webapp/WEB-INF/spring/application-context.xml",
-        "file:src/test/resources/test-datasource-context.xml", "file:src/test/resources/test-servlet-context.xml",
-        "file:src/main/webapp/WEB-INF/spring/properties-context.xml"})
+@ContextConfiguration(classes = {ApplicationTestContextWithMockSession.class})
 public class FileStorageImplTest {
     @Autowired
     private FileStorage storage;

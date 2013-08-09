@@ -5,6 +5,7 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
+import configuration.ApplicationTestContextWithMockSession;
 import eionet.webq.dto.Conversion;
 import eionet.webq.dto.ListConversionResponse;
 import eionet.webq.dto.UploadedXmlFile;
@@ -12,7 +13,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import javax.annotation.PostConstruct;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -23,7 +24,6 @@ import org.springframework.aop.framework.Advised;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
-import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -53,10 +53,7 @@ import org.springframework.web.client.RestOperations;
  *        Anton Dmitrijev
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations = {"file:src/main/webapp/WEB-INF/spring/application-context.xml",
-        "file:src/test/resources/test-datasource-context.xml", "file:src/test/resources/test-servlet-context.xml",
-        "file:src/main/webapp/WEB-INF/spring/properties-context.xml"})
-@EnableCaching
+@ContextConfiguration(classes = {ApplicationTestContextWithMockSession.class})
 public class ConversionServiceImplTest {
     @Autowired
     private ConversionService conversionService;
@@ -66,10 +63,6 @@ public class ConversionServiceImplTest {
     private RestOperations restOperations;
     private Cache conversionsCache;
     private final String xmlSchema = "schema.xsd";
-
-    @PostConstruct
-    public void getImplementation() throws Exception {
-    }
 
     @Before
     public void prepare() throws Exception {

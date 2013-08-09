@@ -22,16 +22,28 @@ package eionet.webq.web.controller;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.fileUpload;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
+
+import eionet.webq.dto.Conversion;
+import eionet.webq.dto.ListConversionResponse;
 import eionet.webq.dto.UploadedXmlFile;
 import eionet.webq.web.AbstractContextControllerTests;
+
+import java.util.ArrayList;
 import java.util.List;
+
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.mock.web.MockMultipartFile;
@@ -39,13 +51,24 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.web.client.RestOperations;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-public class FileUploadControllerTest extends AbstractContextControllerTests {
+public class FileUploadControllerIntegrationTest extends AbstractContextControllerTests {
     private MockHttpSession mockHttpSession = new MockHttpSession();
     private final String FILE_CONTENT_STRING = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
             + "<foo xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:noNamespaceSchemaLocation=\"bar\" />";
     private final byte[] FILE_CONTENT = FILE_CONTENT_STRING.getBytes();
+
+    @Autowired
+    RestOperations operations;
+
+    @Before
+    public void mockConversionServiceApiCall() {
+        ListConversionResponse listConversionResponse = new ListConversionResponse();
+        listConversionResponse.setConversions(new ArrayList<Conversion>());
+        when(operations.getForObject(anyString(), eq(ListConversionResponse.class), any())).thenReturn(listConversionResponse);
+    }
 
     @Test
     public void successfulUploadProducesMessage() throws Exception {
