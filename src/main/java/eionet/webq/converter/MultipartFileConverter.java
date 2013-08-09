@@ -27,6 +27,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.xpath.XPathFactory;
 
 import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.web.multipart.MultipartFile;
 import org.w3c.dom.Document;
@@ -43,6 +44,9 @@ public class MultipartFileConverter implements Converter<MultipartFile, Uploaded
      * Logger for this class.
      */
     private static final Logger LOGGER = Logger.getLogger(MultipartFileConverter.class);
+
+    @Value("#{application_properties['xmlschema.extract.xpath']}")
+    private String xmlSchemaExtractXpath;
 
     @Override
     public UploadedXmlFile convert(MultipartFile multipartFile) {
@@ -63,7 +67,7 @@ public class MultipartFileConverter implements Converter<MultipartFile, Uploaded
         try {
             Document xml = builderFactory.newDocumentBuilder().parse(new ByteArrayInputStream(bytes));
             return xPathFactory.newXPath().evaluate(
-                    "/*/@xsi:noNamespaceSchemaLocation | /*[@xsi:schemaLocation]/@xsi:schemaLocation", xml);
+                    xmlSchemaExtractXpath, xml);
         } catch (Exception e) {
             LOGGER.warn("exception thrown during extracting xml schema", e);
             return null;
