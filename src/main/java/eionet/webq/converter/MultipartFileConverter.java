@@ -20,23 +20,21 @@
  */
 package eionet.webq.converter;
 
+import eionet.webq.dto.UploadedXmlFile;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Logger;
+import org.springframework.core.convert.converter.Converter;
+import org.springframework.web.multipart.MultipartFile;
+
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamConstants;
+import javax.xml.stream.XMLStreamReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.xpath.XPathFactory;
-
-import org.apache.log4j.Logger;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.convert.converter.Converter;
-import org.springframework.web.multipart.MultipartFile;
-import org.w3c.dom.Document;
-
-import eionet.webq.dto.UploadedXmlFile;
-
 /**
  * Performs converting from {@link MultipartFile} to {@link UploadedXmlFile}.
- *
+ * 
  * @see Converter
  */
 public class MultipartFileConverter implements Converter<MultipartFile, UploadedXmlFile> {
@@ -44,9 +42,10 @@ public class MultipartFileConverter implements Converter<MultipartFile, Uploaded
      * Logger for this class.
      */
     private static final Logger LOGGER = Logger.getLogger(MultipartFileConverter.class);
-
-    @Value("#{application_properties['xmlschema.extract.xpath']}")
-    private String xmlSchemaExtractXpath;
+    /**
+     * Xsi namespace URI.
+     */
+    private static final String XSI_NAMESPACE_URI = "http://www.w3.org/2001/XMLSchema-instance";
 
     @Override
     public UploadedXmlFile convert(MultipartFile multipartFile) {
@@ -62,16 +61,20 @@ public class MultipartFileConverter implements Converter<MultipartFile, Uploaded
      * @return {@code @xsi:noNamespaceSchemaLocation} or {@code @xsi:schemaLocation} attribute value
      */
     private String extractXmlSchema(byte[] bytes) {
-        DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
-        XPathFactory xPathFactory = XPathFactory.newInstance();
+        XMLInputFactory xmlInputFactory = XMLInputFactory.newInstance();
         try {
-            Document xml = builderFactory.newDocumentBuilder().parse(new ByteArrayInputStream(bytes));
-            return xPathFactory.newXPath().evaluate(
-                    xmlSchemaExtractXpath, xml);
+            XMLStreamReader xmlStreamReader = xmlInputFactory.createXMLStreamReader(new ByteArrayInputStream(bytes));
+            while (xmlStreamReader.hasNext()) {
+                if (xmlStreamReader.next() == XMLStreamConstants.START_ELEMENT) {
+                    return StringUtils.defaultString(
+                            xmlStreamReader.getAttributeValue(XSI_NAMESPACE_URI, "noNamespaceSchemaLocation"),
+                            xmlStreamReader.getAttributeValue(XSI_NAMESPACE_URI, "schemaLocation"));
+                }
+            }
         } catch (Exception e) {
             LOGGER.warn("exception thrown during extracting xml schema", e);
-            return null;
         }
+        return null;
     }
 
     /**
