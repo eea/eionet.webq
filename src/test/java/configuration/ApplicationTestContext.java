@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportResource;
 import org.springframework.web.client.RestOperations;
 import org.springframework.web.multipart.commons.CommonsMultipartResolver;
+import util.CacheCleaner;
 
 /*
  * The contents of this file are subject to the Mozilla Public
@@ -47,5 +48,10 @@ public class ApplicationTestContext {
     @Bean
     public MultipartFileConverter converterBean() {
         return new MultipartFileConverter();
+    }
+
+    @Bean
+    public CacheCleaner cacheCleaner() {
+        return new CacheCleaner();
     }
 }

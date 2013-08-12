@@ -1,19 +1,9 @@
 package eionet.webq.service;
 
-import static org.hamcrest.core.IsEqual.equalTo;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.*;
 import configuration.ApplicationTestContextWithMockSession;
 import eionet.webq.dto.Conversion;
 import eionet.webq.dto.ListConversionResponse;
 import eionet.webq.dto.UploadedXmlFile;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -23,7 +13,6 @@ import org.mockito.stubbing.Answer;
 import org.springframework.aop.framework.Advised;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.Cache;
-import org.springframework.cache.CacheManager;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -31,6 +20,18 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestOperations;
+import util.CacheCleaner;
+
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+
+import static org.hamcrest.core.IsEqual.equalTo;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.*;
 
 /*
  * The contents of this file are subject to the Mozilla Public
@@ -58,7 +59,7 @@ public class ConversionServiceImplTest {
     @Autowired
     private ConversionService conversionService;
     @Autowired
-    private CacheManager cacheManager;
+    private CacheCleaner cacheCleaner;
 
     private RestOperations restOperations;
     private Cache conversionsCache;
@@ -70,8 +71,7 @@ public class ConversionServiceImplTest {
         ConversionServiceImpl conversionServiceImpl =
                 (ConversionServiceImpl) ((Advised) conversionService).getTargetSource().getTarget();
         conversionServiceImpl.restOperations = restOperations;
-        conversionsCache = cacheManager.getCache("conversions");
-        conversionsCache.clear();
+        conversionsCache = cacheCleaner.cleanConversionsCacheAndReturnIt();
     }
 
     @Test
