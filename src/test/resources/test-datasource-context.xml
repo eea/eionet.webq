@@ -13,6 +13,6 @@
     </bean>
 
     <jdbc:initialize-database data-source="dataSource">
-        <jdbc:script location="classpath:eionet/webq/dao/tables.sql"/>
+        <jdbc:script location="classpath:eionet/webq/dao/test-tables.sql"/>
     </jdbc:initialize-database>
 </beans>
