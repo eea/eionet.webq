@@ -21,20 +21,23 @@
 package eionet.webq.converter;
 
 import eionet.webq.dto.UploadedXmlFile;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLStreamConstants;
+import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
+import static javax.xml.stream.XMLStreamConstants.START_ELEMENT;
+
 /**
  * Performs converting from {@link MultipartFile} to {@link UploadedXmlFile}.
- * 
+ *
  * @see Converter
  */
 public class MultipartFileConverter implements Converter<MultipartFile, UploadedXmlFile> {
@@ -62,10 +65,12 @@ public class MultipartFileConverter implements Converter<MultipartFile, Uploaded
      */
     private String extractXmlSchema(byte[] bytes) {
         XMLInputFactory xmlInputFactory = XMLInputFactory.newInstance();
+        XMLStreamReader xmlStreamReader = null;
+        ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
         try {
-            XMLStreamReader xmlStreamReader = xmlInputFactory.createXMLStreamReader(new ByteArrayInputStream(bytes));
+            xmlStreamReader = xmlInputFactory.createXMLStreamReader(bais);
             while (xmlStreamReader.hasNext()) {
-                if (xmlStreamReader.next() == XMLStreamConstants.START_ELEMENT) {
+                if (xmlStreamReader.next() == START_ELEMENT) {
                     return StringUtils.defaultString(
                             xmlStreamReader.getAttributeValue(XSI_NAMESPACE_URI, "noNamespaceSchemaLocation"),
                             xmlStreamReader.getAttributeValue(XSI_NAMESPACE_URI, "schemaLocation"));
@@ -73,6 +78,15 @@ public class MultipartFileConverter implements Converter<MultipartFile, Uploaded
             }
         } catch (Exception e) {
             LOGGER.warn("exception thrown during extracting xml schema", e);
+        } finally {
+            IOUtils.closeQuietly(bais);
+            if (xmlStreamReader != null) {
+                try {
+                    xmlStreamReader.close();
+                } catch (XMLStreamException e) {
+                    LOGGER.warn("unable to close xml stream", e);
+                }
+            }
         }
         return null;
     }
