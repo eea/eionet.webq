@@ -1,10 +1,12 @@
 package eionet.webq.dao;
 
 import eionet.webq.dto.ProjectEntry;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import java.util.Collection;
-import java.util.Collections;
 
 /*
  * The contents of this file are subject to the Mozilla Public
@@ -32,12 +34,20 @@ import java.util.Collections;
  */
 @Repository
 public class ProjectFoldersImpl implements ProjectFolders {
+    /**
+     * Jdbc template for accessing data storage
+     */
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
     @Override
     public Collection<ProjectEntry> getAllFolders() {
-        return Collections.emptyList();
+        return jdbcTemplate.query("SELECT * FROM project_folder", new BeanPropertyRowMapper<ProjectEntry>(ProjectEntry.class, true));
     }
 
     @Override
     public void save(ProjectEntry projectEntry) {
+        jdbcTemplate.update("INSERT INTO project_folder(id, description) VALUES(?, ?)", projectEntry.getId(),
+                projectEntry.getDescription());
     }
 }

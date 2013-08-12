@@ -2,9 +2,12 @@ package eionet.webq.dao;
 
 import configuration.ApplicationTestContextWithMockSession;
 import eionet.webq.dto.ProjectEntry;
+import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DuplicateKeyException;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
@@ -38,16 +41,51 @@ import static org.junit.Assert.assertThat;
 public class ProjectFoldersTest {
     @Autowired
     private ProjectFolders folders;
+    @Autowired
+    private JdbcTemplate template;
+
+    @After
+    public void removeAllProjectEntries() {
+        template.execute("DELETE FROM project_folder");
+    }
 
     @Test
     public void allowToSaveProjectDataWithoutException() throws Exception {
-        ProjectEntry projectEntry = new ProjectEntry("id", "label");
-        folders.save(projectEntry);
+        folders.save(projectEntry("id", "label"));
     }
 
     @Test
     public void returnsEmptyCollectionIfNoFoldersInStorage() throws Exception {
         Collection<ProjectEntry> entries = folders.getAllFolders();
         assertThat(entries.size(), equalTo(0));
+    }
+
+    @Test
+    public void allowToRetrieveSavedProjectDataFromStorage() throws Exception {
+        folders.save(projectEntry("myId", "description"));
+
+        assertThat(folders.getAllFolders().size(), equalTo(1));
+    }
+
+    @Test(expected = DuplicateKeyException.class)
+    public void saveWithSameIdCausesException() throws Exception {
+        folders.save(projectEntry("myId", "description"));
+        folders.save(projectEntry("myId", "description2"));
+    }
+
+    @Test
+    public void multipleProjectEntriesCanBeSavedToDb() throws Exception {
+        folders.save(projectEntry("1", "description"));
+        folders.save(projectEntry("2", "description"));
+        folders.save(projectEntry("3", "description"));
+
+        assertThat(folders.getAllFolders().size(), equalTo(3));
+    }
+
+    private ProjectEntry projectEntry(String id, String description) {
+        ProjectEntry projectEntry = new ProjectEntry();
+        projectEntry.setId(id);
+        projectEntry.setDescription(description);
+        return projectEntry;
     }
 }

@@ -7,3 +7,8 @@ xml blob,
 file_size_in_bytes bigint,
 created datetime default current_timestamp,
 updated datetime default current_timestamp);
+
+CREATE TABLE IF NOT EXISTS PROJECT_FOLDER(
+  id varchar2(255) primary key,
+  description varchar2(2000)
+)

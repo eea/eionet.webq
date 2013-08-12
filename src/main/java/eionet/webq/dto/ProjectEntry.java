@@ -26,12 +26,27 @@ package eionet.webq.dto;
  */
 public class ProjectEntry {
     /**
-     * Constructor to create a new project entry with user defined id and description.
-     *
-     * @param id unique id of a project, defined by user
-     * @param description project entry description
+     * project entry id.
      */
-    public ProjectEntry(String id, String description) {
+    private String id;
+    /**
+     * project entry description.
+     */
+    private String description;
 
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 }
