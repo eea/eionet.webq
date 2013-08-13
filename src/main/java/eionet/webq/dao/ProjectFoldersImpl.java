@@ -42,13 +42,12 @@ public class ProjectFoldersImpl implements ProjectFolders {
 
     @Override
     public Collection<ProjectEntry> getAllFolders() {
-        return jdbcTemplate.query("SELECT * FROM project_folder",
-                new BeanPropertyRowMapper<ProjectEntry>(ProjectEntry.class));
+        return jdbcTemplate.query("SELECT * FROM project_folder", BeanPropertyRowMapper.newInstance(ProjectEntry.class));
     }
 
     @Override
     public void save(ProjectEntry projectEntry) {
-        jdbcTemplate.update("INSERT INTO project_folder(id, description) VALUES(?, ?)", projectEntry.getId(),
+        jdbcTemplate.update("INSERT INTO project_folder(project_id, description) VALUES(?, ?)", projectEntry.getId(),
                 projectEntry.getDescription());
     }
 }

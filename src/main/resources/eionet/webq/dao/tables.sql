@@ -10,7 +10,8 @@ updated datetime default current_timestamp,
 primary key (id));
 
 CREATE TABLE IF NOT EXISTS PROJECT_FOLDER(
-  id varchar(255) CHARACTER SET utf8,
+  id int AUTO_INCREMENT,
+  project_id varchar(255) CHARACTER SET utf8 unique,
   description varchar(2000) CHARACTER SET utf8,
   created datetime default current_timestamp,
   primary key (id));

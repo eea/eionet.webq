@@ -30,10 +30,15 @@ import java.util.Date;
  */
 public class ProjectEntry {
     /**
+     * project id in storage.
+     */
+    private int id;
+    /**
      * project entry id.
+     * must be unique.
      */
     @Length(min = 1, max = 255)
-    private String id;
+    private String projectId;
     /**
      * project entry description.
      */
@@ -45,11 +50,11 @@ public class ProjectEntry {
     private Date created;
 
     public String getId() {
-        return id;
+        return projectId;
     }
 
-    public void setId(String id) {
-        this.id = id;
+    public void setId(String projectId) {
+        this.projectId = projectId;
     }
 
     public String getDescription() {
