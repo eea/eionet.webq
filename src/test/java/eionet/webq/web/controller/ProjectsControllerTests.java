@@ -67,7 +67,7 @@ public class ProjectsControllerTests extends AbstractProjectsControllerTests {
 
     private ProjectEntry projectEntryWith(String id) {
         ProjectEntry projectEntry = new ProjectEntry();
-        projectEntry.setId(id);
+        projectEntry.setProjectId(id);
         return projectEntry;
     }
 

@@ -47,7 +47,7 @@ public class ProjectFoldersImpl implements ProjectFolders {
 
     @Override
     public void save(ProjectEntry projectEntry) {
-        jdbcTemplate.update("INSERT INTO project_folder(project_id, description) VALUES(?, ?)", projectEntry.getId(),
+        jdbcTemplate.update("INSERT INTO project_folder(project_id, description) VALUES(?, ?)", projectEntry.getProjectId(),
                 projectEntry.getDescription());
     }
 }

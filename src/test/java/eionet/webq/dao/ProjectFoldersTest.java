@@ -84,7 +84,7 @@ public class ProjectFoldersTest {
 
     private ProjectEntry projectEntry(String id, String description) {
         ProjectEntry projectEntry = new ProjectEntry();
-        projectEntry.setId(id);
+        projectEntry.setProjectId(id);
         projectEntry.setDescription(description);
         return projectEntry;
     }
