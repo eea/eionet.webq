@@ -46,7 +46,7 @@ public class ProjectValidationTests extends AbstractProjectsControllerTests {
         MvcResult mvcResult = addNewProjectWithId(EMPTY);
         List<FieldError> errorList = getFieldErrorsFromMvcResultAndAssertThatFieldErrorCountIs(mvcResult, 1);
 
-        assertFieldError(errorList.get(0), "id");
+        assertFieldError(errorList.get(0), "projectId");
     }
 
     @Test
@@ -64,7 +64,7 @@ public class ProjectValidationTests extends AbstractProjectsControllerTests {
         MvcResult mvcResult = addNewProjectWithId(stringOfLength(256));
         List<FieldError> fieldErrors = getFieldErrorsFromMvcResultAndAssertThatFieldErrorCountIs(mvcResult, 1);
 
-        assertFieldError(fieldErrors.get(0), "id");
+        assertFieldError(fieldErrors.get(0), "projectId");
     }
 
     @Test
@@ -80,13 +80,28 @@ public class ProjectValidationTests extends AbstractProjectsControllerTests {
         assertFieldError(fieldErrors.get(0), "description");
     }
 
+    @Test
+    public void projectIdMustBeUnique() throws Exception {
+        String duplicateId = "1";
+        assertNoFieldErrors(addNewProjectWithId(duplicateId));
+
+        MvcResult mvcResult = addNewProjectWithId(duplicateId);
+        List<FieldError> fieldErrors = getFieldErrorsFromMvcResultAndAssertThatFieldErrorCountIs(mvcResult, 1);
+
+        assertFieldError(fieldErrors.get(0), "projectId", "duplicate.project.id");
+    }
+
     private String stringOfLength(int length) {
         return StringUtils.repeat("1", length);
     }
 
     private void assertFieldError(FieldError fieldError, String field) {
+        assertFieldError(fieldError, field, VALIDATION_CODE_PREFIX + field);
+    }
+
+    private void assertFieldError(FieldError fieldError, String field, String code) {
         assertThat(fieldError.getField(), equalTo(field));
-        assertTrue(Arrays.asList(fieldError.getCodes()).contains(VALIDATION_CODE_PREFIX + field));
+        assertTrue(Arrays.asList(fieldError.getCodes()).contains(code));
     }
 
     private void assertNoFieldErrors(MvcResult result) {
@@ -104,7 +119,9 @@ public class ProjectValidationTests extends AbstractProjectsControllerTests {
     }
 
     private List<FieldError> getFieldErrorsFromMvcResultAndAssertThatFieldErrorCountIs(MvcResult result, int size) {
-        BeanPropertyBindingResult bindingResult = (BeanPropertyBindingResult) result.getModelAndView().getModelMap().get("org.springframework.validation.BindingResult.projectEntry");
+        BeanPropertyBindingResult bindingResult =
+                (BeanPropertyBindingResult) result.getModelAndView().getModelMap()
+                        .get("org.springframework.validation.BindingResult.projectEntry");
 
         assertThat(bindingResult.getFieldErrorCount(), equalTo(size));
         return bindingResult.getFieldErrors();

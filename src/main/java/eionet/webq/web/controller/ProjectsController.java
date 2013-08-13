@@ -24,6 +24,7 @@ package eionet.webq.web.controller;
 import eionet.webq.dao.ProjectFolders;
 import eionet.webq.dto.ProjectEntry;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -75,7 +76,11 @@ public class ProjectsController {
     @RequestMapping(value = "/add", method = RequestMethod.POST)
     public String addProject(@Valid @ModelAttribute ProjectEntry project, BindingResult bindingResult, Model model) {
         if (!bindingResult.hasErrors()) {
-            projectFolders.save(project);
+            try {
+                projectFolders.save(project);
+            } catch (DuplicateKeyException e) {
+                bindingResult.rejectValue("projectId", "duplicate.project.id");
+            }
         }
         return allProjects(model);
     }
