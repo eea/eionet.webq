@@ -43,4 +43,11 @@ public interface ProjectFolders {
      * @return collection of project entries.
      */
     Collection<ProjectEntry> getAllFolders();
+
+    /**
+     * Removes project folder by project id.
+     *
+     * @param projectId project id
+     */
+    void remove(String projectId);
 }

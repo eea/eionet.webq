@@ -30,6 +30,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.validation.Valid;
 
@@ -76,6 +77,19 @@ public class ProjectsController {
         if (!bindingResult.hasErrors()) {
             projectFolders.save(project);
         }
+        return allProjects(model);
+    }
+
+    /**
+     * Removes project by project id.
+     *
+     * @param projectId project id for project to be removed
+     * @param model model attributes holder
+     * @return view name
+     */
+    @RequestMapping(value = "/remove")
+    public String removeProject(@RequestParam String projectId, Model model) {
+        projectFolders.remove(projectId);
         return allProjects(model);
     }
 }

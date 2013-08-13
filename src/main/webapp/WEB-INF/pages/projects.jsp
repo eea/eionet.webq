@@ -8,7 +8,7 @@
         <tr>
             <td>
                 <label for="projectId">Project id</label>
-                <f:input id="projectId" path="id" type="text"/>
+                <f:input id="projectId" path="projectId" type="text"/>
             </td>
         </tr>
         <tr>
@@ -34,9 +34,10 @@
         <tbody>
             <c:forEach items="${allProjects}" var="project">
                 <tr>
-                    <td>${project.id}</td>
+                    <td>${project.projectId}</td>
                     <td>${project.description}</td>
                     <td>${project.created}</td>
+                    <td><a href="<c:url value="/projects/remove?projectId=${project.projectId}"/>">Remove</a></td>
                 </tr>
             </c:forEach>
         </tbody>

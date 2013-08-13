@@ -65,6 +65,16 @@ public class ProjectsControllerTests extends AbstractProjectsControllerTests {
         assertThat(getAllProjectEntries().size(), equalTo(1));
     }
 
+    @Test
+    public void allowToRemoveProject() throws Exception {
+        String projectId = "projectToRemove";
+        addNewProject(projectId, "project");
+        assertThat(getAllProjectEntries().size(), equalTo(1));
+
+        mvc().perform(get("/projects/remove?projectId=" + projectId));
+        assertThat(getAllProjectEntries().size(), equalTo(0));
+    }
+
     private ProjectEntry projectEntryWith(String id) {
         ProjectEntry projectEntry = new ProjectEntry();
         projectEntry.setProjectId(id);

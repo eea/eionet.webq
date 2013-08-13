@@ -11,8 +11,6 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import util.ProjectFoldersCleaner;
 
-import java.util.Collection;
-
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertThat;
 
@@ -51,41 +49,54 @@ public class ProjectFoldersTest {
 
     @Test
     public void allowToSaveProjectDataWithoutException() throws Exception {
-        folders.save(projectEntry("id", "label"));
+        folders.save(projectEntry("id"));
     }
 
     @Test
     public void returnsEmptyCollectionIfNoFoldersInStorage() throws Exception {
-        Collection<ProjectEntry> entries = folders.getAllFolders();
-        assertThat(entries.size(), equalTo(0));
+        assertThatAllFoldersSizeIs(0);
     }
 
     @Test
     public void allowToRetrieveSavedProjectDataFromStorage() throws Exception {
-        folders.save(projectEntry("myId", "description"));
+        folders.save(projectEntry("myId"));
 
-        assertThat(folders.getAllFolders().size(), equalTo(1));
+        assertThatAllFoldersSizeIs(1);
     }
 
     @Test(expected = DuplicateKeyException.class)
     public void saveWithSameIdCausesException() throws Exception {
-        folders.save(projectEntry("myId", "description"));
-        folders.save(projectEntry("myId", "description2"));
+        folders.save(projectEntry("myId"));
+        folders.save(projectEntry("myId"));
     }
 
     @Test
     public void multipleProjectEntriesCanBeSavedToDb() throws Exception {
-        folders.save(projectEntry("1", "description"));
-        folders.save(projectEntry("2", "description"));
-        folders.save(projectEntry("3", "description"));
+        folders.save(projectEntry("1"));
+        folders.save(projectEntry("2"));
+        folders.save(projectEntry("3"));
 
-        assertThat(folders.getAllFolders().size(), equalTo(3));
+        assertThatAllFoldersSizeIs(3);
     }
 
-    private ProjectEntry projectEntry(String id, String description) {
+    @Test
+    public void allowsToRemoveProjectEntryByProjectId() throws Exception {
+        String projectId = "projectToRemove";
+        folders.save(projectEntry(projectId));
+        assertThatAllFoldersSizeIs(1);
+
+        folders.remove(projectId);
+        assertThatAllFoldersSizeIs(0);
+    }
+
+    private void assertThatAllFoldersSizeIs(int count) {
+        assertThat(folders.getAllFolders().size(), equalTo(count));
+    }
+
+    private ProjectEntry projectEntry(String id) {
         ProjectEntry projectEntry = new ProjectEntry();
         projectEntry.setProjectId(id);
-        projectEntry.setDescription(description);
+        projectEntry.setDescription("description");
         return projectEntry;
     }
 }
