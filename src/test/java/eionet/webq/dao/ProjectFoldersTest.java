@@ -7,9 +7,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import util.ProjectFoldersCleaner;
 
 import java.util.Collection;
 
@@ -42,11 +42,11 @@ public class ProjectFoldersTest {
     @Autowired
     private ProjectFolders folders;
     @Autowired
-    private JdbcTemplate template;
+    private ProjectFoldersCleaner cleaner;
 
     @After
     public void removeAllProjectEntries() {
-        template.execute("DELETE FROM project_folder");
+        cleaner.removeAllProjects();
     }
 
     @Test

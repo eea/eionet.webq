@@ -8,6 +8,7 @@ import org.springframework.context.annotation.ImportResource;
 import org.springframework.web.client.RestOperations;
 import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 import util.CacheCleaner;
+import util.ProjectFoldersCleaner;
 
 /*
  * The contents of this file are subject to the Mozilla Public
@@ -53,5 +54,10 @@ public class ApplicationTestContext {
     @Bean
     public CacheCleaner cacheCleaner() {
         return new CacheCleaner();
+    }
+
+    @Bean
+    public ProjectFoldersCleaner projectsCleaner() {
+        return new ProjectFoldersCleaner();
     }
 }

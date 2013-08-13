@@ -21,11 +21,12 @@ package eionet.webq.web.controller;
  *        Anton Dmitrijev
  */
 
+import eionet.webq.dao.ProjectFolders;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import java.util.Collections;
 
 /**
  * Spring controller to manage projects.
@@ -36,6 +37,12 @@ import java.util.Collections;
 @RequestMapping("projects")
 public class ProjectsController {
     /**
+     * Access to project folders.
+     */
+    @Autowired
+    private ProjectFolders projectFolders;
+
+    /**
      * All projects handler.
      *
      * @param model model attributes holder
@@ -43,7 +50,7 @@ public class ProjectsController {
      */
     @RequestMapping("/")
     public String allProjects(Model model) {
-        model.addAttribute("allProjects", Collections.emptyList());
+        model.addAttribute("allProjects", projectFolders.getAllFolders());
         return "projects";
     }
 }
