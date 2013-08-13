@@ -30,12 +30,12 @@ public class ProjectEntry {
     /**
      * project entry id.
      */
-    @Length(min = 1, max = 255, message = "project.id.length")
+    @Length(min = 1, max = 255)
     private String id;
     /**
      * project entry description.
      */
-    @Length(max = 2000, message = "project.description.length")
+    @Length(max = 2000)
     private String description;
 
     public String getId() {

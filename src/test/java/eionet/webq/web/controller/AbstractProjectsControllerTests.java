@@ -28,7 +28,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
  * Contributor(s):
  *        Anton Dmitrijev
  */
-public class AbstractProjectsControllerTest extends AbstractContextControllerTests {
+public class AbstractProjectsControllerTests extends AbstractContextControllerTests {
     @Autowired
     private ProjectFoldersCleaner cleaner;
 

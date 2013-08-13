@@ -26,6 +26,7 @@ import eionet.webq.dto.ProjectEntry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -56,19 +57,25 @@ public class ProjectsController {
     @RequestMapping("/")
     public String allProjects(Model model) {
         model.addAttribute("allProjects", projectFolders.getAllFolders());
+        if (!model.containsAttribute("projectEntry")) {
+            model.addAttribute("projectEntry", new ProjectEntry());
+        }
         return "projects";
     }
 
     /**
      * Adds new project.
      *
-     * @param entry new project
+     * @param project new project
+     * @param bindingResult request binding to {@link ProjectEntry} result
      * @param model model attribute holder
      * @return view name
      */
     @RequestMapping(value = "/add", method = RequestMethod.POST)
-    public String addProject(@Valid @ModelAttribute ProjectEntry entry, Model model) {
-        projectFolders.save(entry);
+    public String addProject(@Valid @ModelAttribute ProjectEntry project, BindingResult bindingResult, Model model) {
+        if (!bindingResult.hasErrors()) {
+            projectFolders.save(project);
+        }
         return allProjects(model);
     }
 }

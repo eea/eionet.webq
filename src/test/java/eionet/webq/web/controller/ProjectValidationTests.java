@@ -5,17 +5,16 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.validation.BindException;
+import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.FieldError;
 
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /*
  * The contents of this file are subject to the Mozilla Public
@@ -38,13 +37,16 @@ import static org.junit.Assert.fail;
  *        Anton Dmitrijev
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-public class ProjectValidationTest extends AbstractProjectsControllerTest {
+public class ProjectValidationTests extends AbstractProjectsControllerTests {
+
+    public static final String VALIDATION_CODE_PREFIX = "Length.projectEntry.";
+
     @Test
     public void projectIdIsEmpty() throws Exception {
         MvcResult mvcResult = addNewProjectWithId(EMPTY);
         List<FieldError> errorList = getFieldErrorsFromMvcResultAndAssertThatFieldErrorCountIs(mvcResult, 1);
 
-        assertFieldError(errorList.get(0), "id", "project.id.length");
+        assertFieldError(errorList.get(0), "id");
     }
 
     @Test
@@ -62,7 +64,7 @@ public class ProjectValidationTest extends AbstractProjectsControllerTest {
         MvcResult mvcResult = addNewProjectWithId(stringOfLength(256));
         List<FieldError> fieldErrors = getFieldErrorsFromMvcResultAndAssertThatFieldErrorCountIs(mvcResult, 1);
 
-        assertFieldError(fieldErrors.get(0), "id", "project.id.length");
+        assertFieldError(fieldErrors.get(0), "id");
     }
 
     @Test
@@ -75,16 +77,16 @@ public class ProjectValidationTest extends AbstractProjectsControllerTest {
         MvcResult mvcResult = addNewProjectWithDescription(stringOfLength(2001));
         List<FieldError> fieldErrors = getFieldErrorsFromMvcResultAndAssertThatFieldErrorCountIs(mvcResult, 1);
 
-        assertFieldError(fieldErrors.get(0), "description", "project.description.length");
+        assertFieldError(fieldErrors.get(0), "description");
     }
 
     private String stringOfLength(int length) {
         return StringUtils.repeat("1", length);
     }
 
-    private void assertFieldError(FieldError fieldError, String field, String defaultMessage) {
+    private void assertFieldError(FieldError fieldError, String field) {
         assertThat(fieldError.getField(), equalTo(field));
-        assertThat(fieldError.getDefaultMessage(), equalTo(defaultMessage));
+        assertTrue(Arrays.asList(fieldError.getCodes()).contains(VALIDATION_CODE_PREFIX + field));
     }
 
     private void assertNoFieldErrors(MvcResult result) {
@@ -102,16 +104,9 @@ public class ProjectValidationTest extends AbstractProjectsControllerTest {
     }
 
     private List<FieldError> getFieldErrorsFromMvcResultAndAssertThatFieldErrorCountIs(MvcResult result, int size) {
-        @SuppressWarnings("ThrowableResultOfMethodCallIgnored")
-        BindException bindException = (BindException) result.getResolvedException();
-        if (bindException == null) {
-            if (size == 0) {
-                return Collections.emptyList();
-            }
-            fail("expected bind exception");
-        }
+        BeanPropertyBindingResult bindingResult = (BeanPropertyBindingResult) result.getModelAndView().getModelMap().get("org.springframework.validation.BindingResult.projectEntry");
 
-        assertThat(bindException.getFieldErrorCount(), equalTo(1));
-        return bindException.getFieldErrors();
+        assertThat(bindingResult.getFieldErrorCount(), equalTo(size));
+        return bindingResult.getFieldErrors();
     }
 }

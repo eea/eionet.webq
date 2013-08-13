@@ -36,7 +36,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  *        Anton Dmitrijev
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-public class ProjectsControllerTest extends AbstractProjectsControllerTest {
+public class ProjectsControllerTests extends AbstractProjectsControllerTests {
     @Autowired
     private ProjectFolders projectFolders;
 
