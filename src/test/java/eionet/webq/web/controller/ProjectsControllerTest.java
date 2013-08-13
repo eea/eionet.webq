@@ -2,14 +2,11 @@ package eionet.webq.web.controller;
 
 import eionet.webq.dao.ProjectFolders;
 import eionet.webq.dto.ProjectEntry;
-import eionet.webq.web.AbstractContextControllerTests;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.web.servlet.MvcResult;
-import util.ProjectFoldersCleaner;
 
 import java.util.Collection;
 
@@ -39,16 +36,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  *        Anton Dmitrijev
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-public class ProjectsControllerTest extends AbstractContextControllerTests {
+public class ProjectsControllerTest extends AbstractProjectsControllerTest {
     @Autowired
     private ProjectFolders projectFolders;
-    @Autowired
-    private ProjectFoldersCleaner cleaner;
-
-    @Before
-    public void removeAllProjectFolders() {
-        cleaner.removeAllProjects();
-    }
 
     @Test
     public void returnsAllProjectsViewName() throws Exception {
@@ -57,7 +47,7 @@ public class ProjectsControllerTest extends AbstractContextControllerTests {
 
     @Test
     public void modelCollectionIsEmptyIfNoProjects() throws Exception {
-        Collection<ProjectEntry> allProjects = getProjectEntries();
+        Collection<ProjectEntry> allProjects = getAllProjectEntries();
         assertThat(allProjects.size(), equalTo(0));
     }
 
@@ -66,7 +56,13 @@ public class ProjectsControllerTest extends AbstractContextControllerTests {
         projectFolders.save(projectEntryWith("1"));
         projectFolders.save(projectEntryWith("2"));
 
-        assertThat(getProjectEntries().size(), equalTo(2));
+        assertThat(getAllProjectEntries().size(), equalTo(2));
+    }
+
+    @Test
+    public void allowToAddNewProject() throws Exception {
+        addNewProject("1", "short description");
+        assertThat(getAllProjectEntries().size(), equalTo(1));
     }
 
     private ProjectEntry projectEntryWith(String id) {
@@ -76,7 +72,7 @@ public class ProjectsControllerTest extends AbstractContextControllerTests {
     }
 
     @SuppressWarnings("unchecked")
-    private Collection<ProjectEntry> getProjectEntries() throws Exception {
+    private Collection<ProjectEntry> getAllProjectEntries() throws Exception {
         MvcResult mvcResult = mvc().perform(get("/projects/")).andReturn();
         return (Collection<ProjectEntry>) mvcResult.getModelAndView().getModelMap().get("allProjects");
     }

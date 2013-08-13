@@ -21,6 +21,8 @@ package eionet.webq.dto;
  *        Anton Dmitrijev
  */
 
+import org.hibernate.validator.constraints.Length;
+
 /**
  * Data transfer object, represents project entry.
  */
@@ -28,10 +30,12 @@ public class ProjectEntry {
     /**
      * project entry id.
      */
+    @Length(min = 1, max = 255, message = "project.id.length")
     private String id;
     /**
      * project entry description.
      */
+    @Length(max = 2000, message = "project.description.length")
     private String description;
 
     public String getId() {

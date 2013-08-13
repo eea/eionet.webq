@@ -22,10 +22,15 @@ package eionet.webq.web.controller;
  */
 
 import eionet.webq.dao.ProjectFolders;
+import eionet.webq.dto.ProjectEntry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+
+import javax.validation.Valid;
 
 
 /**
@@ -52,5 +57,18 @@ public class ProjectsController {
     public String allProjects(Model model) {
         model.addAttribute("allProjects", projectFolders.getAllFolders());
         return "projects";
+    }
+
+    /**
+     * Adds new project.
+     *
+     * @param entry new project
+     * @param model model attribute holder
+     * @return view name
+     */
+    @RequestMapping(value = "/add", method = RequestMethod.POST)
+    public String addProject(@Valid @ModelAttribute ProjectEntry entry, Model model) {
+        projectFolders.save(entry);
+        return allProjects(model);
     }
 }
