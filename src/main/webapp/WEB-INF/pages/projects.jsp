@@ -1,28 +1,24 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="f" uri="http://www.springframework.org/tags/form" %>
 
-<div class="container">
+<h2>Upload project</h2>
 <f:form modelAttribute="projectEntry" action="add" method="post">
     <f:errors path="*" element="div" cssClass="error-msg"/>
-    <fieldset>
-        <legend>Upload project</legend>
-
-        <p>
-            <f:errors path="id" element="div"/>
-            <label for="projectId">Project id</label>
-            <f:input id="projectId" path="id" type="text"/>
-        </p>
-
-        <p>
-            <label for="label">Project label</label>
-            <f:textarea id="label" path="description" type="text"/>
-        </p>
-
-        <p>
-            <input type="submit" value="Add project"/>
-        </p>
-
-    </fieldset>
+    <table>
+        <tr>
+            <td>
+                <label for="projectId">Project id</label>
+                <f:input id="projectId" path="id" type="text"/>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <label for="label">Project label</label>
+                <f:textarea id="label" path="description"/>
+            </td>
+        </tr>
+    </table>
+    <input type="submit" value="Add project"/>
 </f:form>
 
 <h2>All projects</h2>
@@ -40,11 +36,9 @@
                 <tr>
                     <td>${project.id}</td>
                     <td>${project.description}</td>
-                    <%--TODO created for project--%>
-                    <%--<td>${project.created}</td>--%>
+                    <td>${project.created}</td>
                 </tr>
             </c:forEach>
         </tbody>
     </table>
 </c:if>
-</div>

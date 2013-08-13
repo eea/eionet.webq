@@ -35,14 +35,15 @@ import java.util.Collection;
 @Repository
 public class ProjectFoldersImpl implements ProjectFolders {
     /**
-     * Jdbc template for accessing data storage
+     * Jdbc template for accessing data storage.
      */
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
     @Override
     public Collection<ProjectEntry> getAllFolders() {
-        return jdbcTemplate.query("SELECT * FROM project_folder", new BeanPropertyRowMapper<ProjectEntry>(ProjectEntry.class, true));
+        return jdbcTemplate.query("SELECT * FROM project_folder",
+                new BeanPropertyRowMapper<ProjectEntry>(ProjectEntry.class));
     }
 
     @Override

@@ -23,6 +23,8 @@ package eionet.webq.dto;
 
 import org.hibernate.validator.constraints.Length;
 
+import java.util.Date;
+
 /**
  * Data transfer object, represents project entry.
  */
@@ -37,6 +39,10 @@ public class ProjectEntry {
      */
     @Length(max = 2000)
     private String description;
+    /**
+     * project entry creation date.
+     */
+    private Date created;
 
     public String getId() {
         return id;
@@ -52,5 +58,13 @@ public class ProjectEntry {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public Date getCreated() {
+        return created;
+    }
+
+    public void setCreated(Date created) {
+        this.created = created;
     }
 }

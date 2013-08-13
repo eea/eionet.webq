@@ -10,5 +10,5 @@ updated datetime default current_timestamp);
 
 CREATE TABLE IF NOT EXISTS PROJECT_FOLDER(
   id varchar2(255) primary key,
-  description varchar2(2000)
-)
+  description varchar2(2000),
+  created datetime default current_timestamp);
