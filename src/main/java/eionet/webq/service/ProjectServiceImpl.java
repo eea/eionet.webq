@@ -23,6 +23,7 @@ package eionet.webq.service;
 
 import eionet.webq.dao.ProjectFolders;
 import eionet.webq.dto.ProjectEntry;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -34,6 +35,10 @@ import java.util.Collection;
 @Service
 public class ProjectServiceImpl implements ProjectService {
     /**
+     * Logger for this class.
+     */
+    private static final Logger LOGGER = Logger.getLogger(ProjectServiceImpl.class);
+    /**
      * Project folders access in storage.
      */
     @Autowired
@@ -41,24 +46,31 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public Collection<ProjectEntry> getAllFolders() {
-        return folders.getAllFolders();
+        Collection<ProjectEntry> allFolders = folders.getAllFolders();
+        LOGGER.info("Loaded " + allFolders.size() + " projects.");
+        return allFolders;
     }
 
     @Override
     public void remove(String projectId) {
+        LOGGER.info("Removing project with projectId=" + projectId);
         folders.remove(projectId);
     }
 
     @Override
     public ProjectEntry getByProjectId(String projectId) {
-        return folders.getByProjectId(projectId);
+        ProjectEntry byProjectId = folders.getByProjectId(projectId);
+        LOGGER.info("Loaded project=" + byProjectId);
+        return byProjectId;
     }
 
     @Override
     public void saveOrUpdate(ProjectEntry projectEntry) {
         if (projectEntry.getId() > 0) {
+            LOGGER.info("Updating project=" + projectEntry);
             folders.update(projectEntry);
         } else {
+            LOGGER.info("Saving new project=" + projectEntry);
             folders.save(projectEntry);
         }
     }

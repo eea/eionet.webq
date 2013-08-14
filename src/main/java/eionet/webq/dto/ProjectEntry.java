@@ -82,4 +82,15 @@ public class ProjectEntry {
     public void setCreated(Date created) {
         this.created = created;
     }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("ProjectEntry{");
+        sb.append("id=").append(id);
+        sb.append(", projectId='").append(projectId).append('\'');
+        sb.append(", description='").append(description).append('\'');
+        sb.append(", created=").append(created);
+        sb.append('}');
+        return sb.toString();
+    }
 }
