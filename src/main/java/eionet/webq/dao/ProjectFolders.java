@@ -57,4 +57,12 @@ public interface ProjectFolders {
      * @param project project with storage id set and new data
      */
     void update(ProjectEntry project);
+
+    /**
+     * Returns project stored with specified project id.
+     *
+     * @param projectId project id
+     * @return project from storage
+     */
+    ProjectEntry getByProjectId(String projectId);
 }

@@ -42,7 +42,7 @@ public class ProjectFoldersImpl implements ProjectFolders {
 
     @Override
     public Collection<ProjectEntry> getAllFolders() {
-        return jdbcTemplate.query("SELECT * FROM project_folder", BeanPropertyRowMapper.newInstance(ProjectEntry.class));
+        return jdbcTemplate.query("SELECT * FROM project_folder", projectEntryMapper());
     }
 
     @Override
@@ -63,5 +63,20 @@ public class ProjectFoldersImpl implements ProjectFolders {
     public void save(ProjectEntry projectEntry) {
         jdbcTemplate.update("INSERT INTO project_folder(project_id, description) VALUES(?, ?)", projectEntry.getProjectId(),
                 projectEntry.getDescription());
+    }
+
+    @Override
+    public ProjectEntry getByProjectId(String projectId) {
+        return jdbcTemplate.queryForObject("SELECT * FROM project_folder WHERE project_id=?", projectEntryMapper(), projectId);
+    }
+
+    /**
+     * Returns row mapper for project.
+     *
+     * @return row mapper
+     * @see org.springframework.jdbc.core.RowMapper
+     */
+    private BeanPropertyRowMapper<ProjectEntry> projectEntryMapper() {
+        return BeanPropertyRowMapper.newInstance(ProjectEntry.class);
     }
 }
