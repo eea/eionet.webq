@@ -23,6 +23,7 @@ package eionet.webq.dto;
 
 import org.hibernate.validator.constraints.Length;
 
+import javax.validation.constraints.Pattern;
 import java.util.Date;
 
 /**
@@ -38,6 +39,7 @@ public class ProjectEntry {
      * must be unique.
      */
     @Length(min = 1, max = 255)
+    @Pattern(regexp = "[A-Za-z0-9-\\._~]*")
     private String projectId;
     /**
      * project entry description.

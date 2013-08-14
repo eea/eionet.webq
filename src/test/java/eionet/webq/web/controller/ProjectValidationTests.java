@@ -1,6 +1,5 @@
 package eionet.webq.web.controller;
 
-import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -12,6 +11,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.EMPTY;
+import static org.apache.commons.lang3.StringUtils.repeat;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
@@ -39,14 +39,13 @@ import static org.junit.Assert.assertTrue;
 @RunWith(SpringJUnit4ClassRunner.class)
 public class ProjectValidationTests extends AbstractProjectsControllerTests {
 
-    public static final String VALIDATION_CODE_PREFIX = "Length.projectEntry.";
+    public static final String VALIDATION_CODE_BODY = ".projectEntry.";
+    public static final String LENGTH_VALIDATION_CODE_PREFIX = "Length" + VALIDATION_CODE_BODY;
+    public static final String PATTERN_VALIDATION_CODE_PREFIX = "Pattern" + VALIDATION_CODE_BODY;
 
     @Test
     public void projectIdIsEmpty() throws Exception {
-        MvcResult mvcResult = addNewProjectWithId(EMPTY);
-        List<FieldError> errorList = getFieldErrorsFromMvcResultAndAssertThatFieldErrorCountIs(mvcResult, 1);
-
-        assertFieldError(errorList.get(0), "projectId");
+        assertLengthFieldError(getFirstAndOnlyFieldError(addNewProjectWithId(EMPTY)), "projectId");
     }
 
     @Test
@@ -61,10 +60,7 @@ public class ProjectValidationTests extends AbstractProjectsControllerTests {
 
     @Test
     public void projectIdLengthIsExceeded() throws Exception {
-        MvcResult mvcResult = addNewProjectWithId(stringOfLength(256));
-        List<FieldError> fieldErrors = getFieldErrorsFromMvcResultAndAssertThatFieldErrorCountIs(mvcResult, 1);
-
-        assertFieldError(fieldErrors.get(0), "projectId");
+        assertLengthFieldError(getFirstAndOnlyFieldError(addNewProjectWithId(stringOfLength(256))), "projectId");
     }
 
     @Test
@@ -74,10 +70,7 @@ public class ProjectValidationTests extends AbstractProjectsControllerTests {
 
     @Test
     public void projectDescriptionLengthIsExceeded() throws Exception {
-        MvcResult mvcResult = addNewProjectWithDescription(stringOfLength(2001));
-        List<FieldError> fieldErrors = getFieldErrorsFromMvcResultAndAssertThatFieldErrorCountIs(mvcResult, 1);
-
-        assertFieldError(fieldErrors.get(0), "description");
+        assertLengthFieldError(getFirstAndOnlyFieldError(addNewProjectWithDescription(stringOfLength(2001))), "description");
     }
 
     @Test
@@ -85,18 +78,35 @@ public class ProjectValidationTests extends AbstractProjectsControllerTests {
         String duplicateId = "1";
         assertNoFieldErrors(addNewProjectWithId(duplicateId));
 
-        MvcResult mvcResult = addNewProjectWithId(duplicateId);
-        List<FieldError> fieldErrors = getFieldErrorsFromMvcResultAndAssertThatFieldErrorCountIs(mvcResult, 1);
+        assertFieldError(getFirstAndOnlyFieldError(addNewProjectWithId(duplicateId)), "projectId", "duplicate.project.id");
+    }
 
-        assertFieldError(fieldErrors.get(0), "projectId", "duplicate.project.id");
+    @Test
+    public void allowedCharactersInProjectId() throws Exception {
+        String allowed = "abcdefghiklmnopqrstvxyz";
+        allowed += allowed.toUpperCase();
+        allowed += "0123456789-._~";
+        for (char allowedSymbol : allowed.toCharArray()) {
+            assertNoFieldErrors(addNewProjectWithId(repeat(allowedSymbol, 3)));
+        }
+    }
+
+    @Test
+    public void notAllowedCharactersInProjectId() throws Exception {
+        String notAllowed = "öäüõœ∑´®†¥¨ˆøπ“‘åß∂ƒ©˙∆˚¬…æ«Ω≈ç√∫˜µªº=`\"\\/";
+        notAllowed += " ";
+        for (char c : notAllowed.toCharArray()) {
+            assertFieldError(getFirstAndOnlyFieldError(addNewProjectWithId(repeat(c, 3))), "projectId",
+                    PATTERN_VALIDATION_CODE_PREFIX + "projectId");
+        }
     }
 
     private String stringOfLength(int length) {
-        return StringUtils.repeat("1", length);
+        return repeat("1", length);
     }
 
-    private void assertFieldError(FieldError fieldError, String field) {
-        assertFieldError(fieldError, field, VALIDATION_CODE_PREFIX + field);
+    private void assertLengthFieldError(FieldError fieldError, String field) {
+        assertFieldError(fieldError, field, LENGTH_VALIDATION_CODE_PREFIX + field);
     }
 
     private void assertFieldError(FieldError fieldError, String field, String code) {
@@ -116,6 +126,11 @@ public class ProjectValidationTests extends AbstractProjectsControllerTests {
 
     private MvcResult addNewProjectWithDescription(String description) throws Exception {
         return addNewProject("1", description);
+    }
+
+    private FieldError getFirstAndOnlyFieldError(MvcResult mvcResult) {
+        List<FieldError> fieldErrors = getFieldErrorsFromMvcResultAndAssertThatFieldErrorCountIs(mvcResult, 1);
+        return fieldErrors.get(0);
     }
 
     private List<FieldError> getFieldErrorsFromMvcResultAndAssertThatFieldErrorCountIs(MvcResult result, int size) {
