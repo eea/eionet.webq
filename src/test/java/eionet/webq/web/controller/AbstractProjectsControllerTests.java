@@ -38,6 +38,6 @@ public class AbstractProjectsControllerTests extends AbstractContextControllerTe
     }
 
     MvcResult addNewProject(String id, String description) throws Exception {
-        return mvc().perform(post("/projects/add").param("projectId", id).param("description", description)).andReturn();
+        return request(post("/projects/save").param("projectId", id).param("description", description)).andReturn();
     }
 }

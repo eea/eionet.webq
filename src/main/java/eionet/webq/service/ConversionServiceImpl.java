@@ -3,9 +3,6 @@ package eionet.webq.service;
 import eionet.webq.dto.Conversion;
 import eionet.webq.dto.ListConversionResponse;
 import eionet.webq.dto.UploadedXmlFile;
-
-import java.nio.charset.Charset;
-import java.util.List;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -13,10 +10,13 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestOperations;
+
+import java.nio.charset.Charset;
+import java.util.List;
 
 /*
  * The contents of this file are subject to the Mozilla Public
@@ -42,7 +42,7 @@ import org.springframework.web.client.RestOperations;
 /**
  * Conversion service implementation.
  */
-@Component
+@Service
 public class ConversionServiceImpl implements ConversionService {
     /**
      * Static logger for this class.

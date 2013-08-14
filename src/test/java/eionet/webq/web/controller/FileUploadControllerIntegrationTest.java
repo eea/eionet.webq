@@ -39,7 +39,9 @@ import java.util.List;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.*;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
@@ -97,7 +99,7 @@ public class FileUploadControllerIntegrationTest extends AbstractContextControll
     public void allowFileContentUpdateInStorage() throws Exception {
         UploadedXmlFile uploadedXmlFile = uploadFileAndTakeFirstUploadedFile();
         String newContent = FILE_CONTENT_STRING.replace("/>", "><foobar></foobar></bar>");
-        mvc().perform(
+        request(
                 postWithMockSession("/saveXml").param("fileId", Integer.toString(uploadedXmlFile.getId()))
                         .content(newContent.getBytes()));
 
@@ -113,6 +115,6 @@ public class FileUploadControllerIntegrationTest extends AbstractContextControll
     }
 
     private ResultActions downloadFile(int fileId) throws Exception {
-        return mvc().perform(postWithMockSession("/download").param("fileId", Integer.toString(fileId)));
+        return request(postWithMockSession("/download").param("fileId", Integer.toString(fileId)));
     }
 }

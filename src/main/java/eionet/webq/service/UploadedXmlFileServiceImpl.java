@@ -23,16 +23,17 @@ package eionet.webq.service;
 
 import eionet.webq.dao.FileStorage;
 import eionet.webq.dto.UploadedXmlFile;
-import java.util.Collection;
-import javax.servlet.http.HttpSession;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
+
+import javax.servlet.http.HttpSession;
+import java.util.Collection;
 
 /**
  * {@link UploadedXmlFileService} implementation.
  */
-@Component
+@Service
 public class UploadedXmlFileServiceImpl implements UploadedXmlFileService {
     /**
      * Uploaded files storage.

@@ -21,8 +21,8 @@ package eionet.webq.web.controller;
  *        Anton Dmitrijev
  */
 
-import eionet.webq.dao.ProjectFolders;
 import eionet.webq.dto.ProjectEntry;
+import eionet.webq.service.ProjectService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Controller;
@@ -48,7 +48,7 @@ public class ProjectsController {
      * Access to project folders.
      */
     @Autowired
-    private ProjectFolders projectFolders;
+    private ProjectService projectService;
 
     /**
      * All projects handler.
@@ -56,13 +56,34 @@ public class ProjectsController {
      * @param model model attributes holder
      * @return view name
      */
-    @RequestMapping("/")
+    @RequestMapping({ "/", "*" })
     public String allProjects(Model model) {
-        model.addAttribute("allProjects", projectFolders.getAllFolders());
-        if (!model.containsAttribute("projectEntry")) {
-            model.addAttribute("projectEntry", new ProjectEntry());
-        }
+        model.addAttribute("allProjects", projectService.getAllFolders());
         return "projects";
+    }
+
+    /**
+     * Add or edit project.
+     *
+     * @param model model attributes holder
+     * @return view name
+     */
+    @RequestMapping("/add")
+    public String addProject(Model model) {
+        return editForm(model, new ProjectEntry());
+    }
+
+
+    /**
+     * Add or edit project.
+     *
+     * @param projectId projectId to be edited
+     * @param model model attributes holder
+     * @return view name
+     */
+    @RequestMapping("/edit")
+    public String editProject(@RequestParam String projectId, Model model) {
+        return editForm(model, projectService.getByProjectId(projectId));
     }
 
     /**
@@ -73,16 +94,17 @@ public class ProjectsController {
      * @param model model attribute holder
      * @return view name
      */
-    @RequestMapping(value = "/add", method = RequestMethod.POST)
-    public String addProject(@Valid @ModelAttribute ProjectEntry project, BindingResult bindingResult, Model model) {
+    @RequestMapping(value = "/save", method = RequestMethod.POST)
+    public String saveProject(@Valid @ModelAttribute ProjectEntry project, BindingResult bindingResult, Model model) {
         if (!bindingResult.hasErrors()) {
             try {
-                projectFolders.save(project);
+                projectService.saveOrUpdate(project);
+                return allProjects(model);
             } catch (DuplicateKeyException e) {
                 bindingResult.rejectValue("projectId", "duplicate.project.id");
             }
         }
-        return allProjects(model);
+        return editForm(model, project);
     }
 
     /**
@@ -94,7 +116,21 @@ public class ProjectsController {
      */
     @RequestMapping(value = "/remove")
     public String removeProject(@RequestParam String projectId, Model model) {
-        projectFolders.remove(projectId);
+        projectService.remove(projectId);
         return allProjects(model);
+    }
+
+    /**
+     * Sets model object and returns add/edit view.
+     *
+     * @param model model attribute holder
+     * @param entry project
+     * @return view name
+     */
+    private String editForm(Model model, ProjectEntry entry) {
+        if (!model.containsAttribute("projectEntry")) {
+            model.addAttribute("projectEntry", entry);
+        }
+        return "add_edit_project";
     }
 }

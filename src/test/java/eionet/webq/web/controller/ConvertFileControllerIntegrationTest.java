@@ -41,7 +41,9 @@ import java.util.List;
 
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.*;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
@@ -70,7 +72,7 @@ public class ConvertFileControllerIntegrationTest extends AbstractContextControl
         UploadedXmlFile uploadedXmlFile =
                 uploadFileAndTakeFirstUploadedFile(createMockMultipartFile("test-file.xml", FILE_CONTENT));
 
-        mvc().perform(get("/convert?fileId={fileId}&conversionId={convId}", uploadedXmlFile.getId(), 1).session(mockHttpSession))
+        request(get("/convert?fileId={fileId}&conversionId={convId}", uploadedXmlFile.getId(), 1).session(mockHttpSession))
                 .andExpect(MockMvcResultMatchers.content().bytes(conversionResponse.getBytes()));
     }
 
@@ -82,7 +84,7 @@ public class ConvertFileControllerIntegrationTest extends AbstractContextControl
         
         uploadFile(createMockMultipartFile("file.xml", FILE_CONTENT));
 
-        MvcResult mvcResult = mvc().perform(get("/").session(mockHttpSession)).andReturn();
+        MvcResult mvcResult = request(get("/").session(mockHttpSession)).andReturn();
 
         @SuppressWarnings("unchecked")
         List<UploadedXmlFile> uploadedFiles = (List<UploadedXmlFile>) mvcResult.getModelAndView().getModel().get("uploadedFiles");

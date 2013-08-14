@@ -37,7 +37,7 @@ import static org.junit.Assert.assertTrue;
  *        Anton Dmitrijev
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-public class ProjectValidationTests extends AbstractProjectsControllerTests {
+public class ProjectValidationTest extends AbstractProjectsControllerTests {
 
     public static final String VALIDATION_CODE_BODY = ".projectEntry.";
     public static final String LENGTH_VALIDATION_CODE_PREFIX = "Length" + VALIDATION_CODE_BODY;

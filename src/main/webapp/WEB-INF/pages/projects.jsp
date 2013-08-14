@@ -1,25 +1,7 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="f" uri="http://www.springframework.org/tags/form" %>
 
-<h2>Upload project</h2>
-<f:form modelAttribute="projectEntry" action="add" method="post">
-    <f:errors path="*" element="div" cssClass="error-msg"/>
-    <table>
-        <tr>
-            <td>
-                <label for="projectId">Project id</label>
-                <f:input id="projectId" path="projectId" type="text"/>
-            </td>
-        </tr>
-        <tr>
-            <td>
-                <label for="label">Project label</label>
-                <f:textarea id="label" path="description"/>
-            </td>
-        </tr>
-    </table>
-    <input type="submit" value="Add project"/>
-</f:form>
+<a href="<c:url value="/projects/add"/>">Add project</a>
 
 <h2>All projects</h2>
 <c:if test="${not empty allProjects}">
@@ -29,6 +11,7 @@
             <th>Id</th>
             <th>Description</th>
             <th>Created</th>
+            <th colspan="2">Actions</th>
         </tr>
         </thead>
         <tbody>
@@ -37,6 +20,7 @@
                     <td>${project.projectId}</td>
                     <td>${project.description}</td>
                     <td>${project.created}</td>
+                    <td><a href="<c:url value="/projects/edit?projectId=${project.projectId}"/>">Edit</a></td>
                     <td><a href="<c:url value="/projects/remove?projectId=${project.projectId}"/>">Remove</a></td>
                 </tr>
             </c:forEach>

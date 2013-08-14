@@ -9,8 +9,10 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.RequestBuilder;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.web.context.WebApplicationContext;
 
 import java.util.List;
@@ -30,12 +32,16 @@ public class AbstractContextControllerTests {
         return webAppContextSetup(this.wac).build();
     }
 
+    protected ResultActions request(RequestBuilder requestBuilder) throws Exception {
+        return mvc().perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isOk());
+    }
+
     protected MockMultipartFile createMockMultipartFile(String fileName, byte[] content) {
         return new MockMultipartFile("uploadedXmlFile", fileName, MediaType.APPLICATION_XML_VALUE, content);
     }
 
     protected ResultActions uploadFile(MockMultipartFile file) throws Exception {
-        return mvc().perform(fileUpload("/uploadXml").file(file).session(mockHttpSession));
+        return request(fileUpload("/uploadXml").file(file).session(mockHttpSession));
     }
 
     protected MockHttpServletRequestBuilder postWithMockSession(String path) {
