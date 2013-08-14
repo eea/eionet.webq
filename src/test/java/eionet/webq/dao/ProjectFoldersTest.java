@@ -11,6 +11,8 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import util.ProjectFoldersCleaner;
 
+import java.util.Collection;
+
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertThat;
 
@@ -89,13 +91,35 @@ public class ProjectFoldersTest {
         assertThatAllFoldersSizeIs(0);
     }
 
+    @Test
+    public void allowsToEditProject() throws Exception {
+        folders.save(projectEntry("project"));
+        ProjectEntry savedProject = getOnlyAvailableProjectEntry();
+        String newProjectId = "updated project";
+        savedProject.setProjectId(newProjectId);
+        folders.update(savedProject);
+
+        assertThat(getOnlyAvailableProjectEntry().getProjectId(), equalTo(newProjectId));
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void forbidUpdateIfStorageIdIsNotSet() throws Exception {
+        folders.update(projectEntry("projectId"));
+    }
+
+    private ProjectEntry getOnlyAvailableProjectEntry() {
+        Collection<ProjectEntry> allFolders = folders.getAllFolders();
+        assertThat(allFolders.size(), equalTo(1));
+        return allFolders.iterator().next();
+    }
+
     private void assertThatAllFoldersSizeIs(int count) {
         assertThat(folders.getAllFolders().size(), equalTo(count));
     }
 
-    private ProjectEntry projectEntry(String id) {
+    private ProjectEntry projectEntry(String projectId) {
         ProjectEntry projectEntry = new ProjectEntry();
-        projectEntry.setProjectId(id);
+        projectEntry.setProjectId(projectId);
         projectEntry.setDescription("description");
         return projectEntry;
     }

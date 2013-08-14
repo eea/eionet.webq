@@ -51,6 +51,15 @@ public class ProjectFoldersImpl implements ProjectFolders {
     }
 
     @Override
+    public void update(ProjectEntry project) {
+        if (project.getId() < 1) {
+            throw new RuntimeException("Unable to update project, since it is not present in database.");
+        }
+        jdbcTemplate.update("UPDATE project_folder SET project_id=?, description=? WHERE id=?", project.getProjectId(),
+                project.getDescription(), project.getId());
+    }
+
+    @Override
     public void save(ProjectEntry projectEntry) {
         jdbcTemplate.update("INSERT INTO project_folder(project_id, description) VALUES(?, ?)", projectEntry.getProjectId(),
                 projectEntry.getDescription());

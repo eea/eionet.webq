@@ -50,4 +50,11 @@ public interface ProjectFolders {
      * @param projectId project id
      */
     void remove(String projectId);
+
+    /**
+     * Updates project folder.
+     *
+     * @param project project with storage id set and new data
+     */
+    void update(ProjectEntry project);
 }
