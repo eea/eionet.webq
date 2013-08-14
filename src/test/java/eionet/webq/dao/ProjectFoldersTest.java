@@ -1,8 +1,14 @@
 package eionet.webq.dao;
 
+import static org.hamcrest.core.IsEqual.equalTo;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
+
 import configuration.ApplicationTestContextWithMockSession;
 import eionet.webq.dto.ProjectEntry;
-import org.junit.After;
+import java.util.Collection;
+import java.util.Iterator;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,10 +16,6 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import util.ProjectFoldersCleaner;
-
-import static org.hamcrest.core.IsEqual.equalTo;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
 
 /*
  * The contents of this file are subject to the Mozilla Public
@@ -43,7 +45,7 @@ public class ProjectFoldersTest {
     @Autowired
     private ProjectFoldersCleaner cleaner;
 
-    @After
+    @Before
     public void removeAllProjectEntries() {
         cleaner.removeAllProjects();
     }
@@ -63,6 +65,24 @@ public class ProjectFoldersTest {
         folders.save(projectEntry("myId"));
 
         assertThatAllFoldersSizeIs(1);
+    }
+
+    @Test
+    public void filesAreSortedByProjectIdAscending() throws Exception {
+        String firstProjectName = "1";
+        String secondProjectName = "A";
+        String lastFileName = "z";
+        folders.save(projectEntry(lastFileName));
+        folders.save(projectEntry(firstProjectName));
+        folders.save(projectEntry(secondProjectName));
+
+        assertThatAllFoldersSizeIs(3);
+        Collection<ProjectEntry> allFolders = folders.getAllFolders();
+
+        Iterator<ProjectEntry> iterator = allFolders.iterator();
+        assertThat(iterator.next().getProjectId(), equalTo(firstProjectName));
+        assertThat(iterator.next().getProjectId(), equalTo(secondProjectName));
+        assertThat(iterator.next().getProjectId(), equalTo(lastFileName));
     }
 
     @Test(expected = DuplicateKeyException.class)

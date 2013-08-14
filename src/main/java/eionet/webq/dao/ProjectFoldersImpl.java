@@ -42,7 +42,7 @@ public class ProjectFoldersImpl implements ProjectFolders {
 
     @Override
     public Collection<ProjectEntry> getAllFolders() {
-        return jdbcTemplate.query("SELECT * FROM project_folder", projectEntryMapper());
+        return jdbcTemplate.query("SELECT * FROM project_folder ORDER BY project_id", projectEntryMapper());
     }
 
     @Override
