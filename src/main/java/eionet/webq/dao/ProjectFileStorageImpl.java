@@ -20,10 +20,8 @@
  */
 package eionet.webq.dao;
 
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.util.Collection;
-
+import eionet.webq.dto.ProjectEntry;
+import eionet.webq.dto.WebFormUpload;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -32,8 +30,9 @@ import org.springframework.jdbc.support.lob.LobCreator;
 import org.springframework.jdbc.support.lob.LobHandler;
 import org.springframework.stereotype.Repository;
 
-import eionet.webq.dto.ProjectEntry;
-import eionet.webq.dto.WebFormUpload;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.Collection;
 
 /**
  * ProjectFileStorage implementation.
@@ -77,7 +76,7 @@ public class ProjectFileStorageImpl implements ProjectFileStorage {
 
     @Override
     public void remove(int fileId) {
-
+        template.update("DELETE FROM project_file WHERE id=?", fileId);
     }
 
     @Override

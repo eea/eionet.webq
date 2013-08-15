@@ -20,11 +20,9 @@
  */
 package eionet.webq.dao;
 
-import static org.hamcrest.core.IsEqual.equalTo;
-import static org.junit.Assert.assertThat;
-
-import java.util.Collection;
-
+import configuration.ApplicationTestContextWithMockSession;
+import eionet.webq.dto.ProjectEntry;
+import eionet.webq.dto.WebFormUpload;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -33,9 +31,10 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import configuration.ApplicationTestContextWithMockSession;
-import eionet.webq.dto.ProjectEntry;
-import eionet.webq.dto.WebFormUpload;
+import java.util.Collection;
+
+import static org.hamcrest.core.IsEqual.equalTo;
+import static org.junit.Assert.assertThat;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {ApplicationTestContextWithMockSession.class})
@@ -45,6 +44,9 @@ public class ProjectFileStorageTest {
     ProjectFileStorage projectFileStorage;
     @Autowired
     JdbcTemplate template;
+
+    private ProjectEntry projectEntry = testProjectEntry();
+    private WebFormUpload testFileForUpload = testWebForm();
 
     @Before
     public void removeAllProjectFiles() {
@@ -65,14 +67,10 @@ public class ProjectFileStorageTest {
 
     @Test
     public void saveWebformAndRetrieveItBackWithSameData() throws Exception {
-        ProjectEntry projectEntry = testProjectEntry();
-        WebFormUpload testFileForUpload = testWebForm();
+        addOneFile();
 
-        projectFileStorage.save(projectEntry, testFileForUpload);
-        Collection<WebFormUpload> webFormUploads = projectFileStorage.allFilesFor(projectEntry);
-        assertThat(webFormUploads.size(), equalTo(1));
+        WebFormUpload uploadedFile = getUploadedFileAndAssertThatItIsTheOnlyOne();
 
-        WebFormUpload uploadedFile = webFormUploads.iterator().next();
         assertThat(uploadedFile.getFile(), equalTo(testFileForUpload.getFile()));
         assertThat(uploadedFile.getProjectId(), equalTo(projectEntry.getId()));
         assertThat(uploadedFile.getTitle(), equalTo(testFileForUpload.getTitle()));
@@ -81,6 +79,28 @@ public class ProjectFileStorageTest {
         assertThat(uploadedFile.getXmlSchema(), equalTo(testFileForUpload.getXmlSchema()));
         assertThat(uploadedFile.isActive(), equalTo(testFileForUpload.isActive()));
         assertThat(uploadedFile.isMainForm(), equalTo(testFileForUpload.isMainForm()));
+    }
+
+    private WebFormUpload getUploadedFileAndAssertThatItIsTheOnlyOne() {
+        Collection<WebFormUpload> webFormUploads = projectFileStorage.allFilesFor(projectEntry);
+        assertThat(webFormUploads.size(), equalTo(1));
+
+        return webFormUploads.iterator().next();
+    }
+
+    @Test
+    public void allowToRemoveFilesByFileId() throws Exception {
+        addOneFile();
+
+        WebFormUpload uploadedFile = getUploadedFileAndAssertThatItIsTheOnlyOne();
+
+        projectFileStorage.remove(uploadedFile.getId());
+
+        assertThat(projectFileStorage.allFilesFor(projectEntry).size(), equalTo(0));
+    }
+
+    private void addOneFile() {
+        projectFileStorage.save(projectEntry, testFileForUpload);
     }
 
     private ProjectEntry testProjectEntry() {
