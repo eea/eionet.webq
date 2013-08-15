@@ -22,6 +22,7 @@ package eionet.webq.web.controller;
  */
 
 import eionet.webq.dto.ProjectEntry;
+import eionet.webq.dto.WebFormUpload;
 import eionet.webq.service.ProjectService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
@@ -49,6 +50,10 @@ public class ProjectsController {
      * Attribute name for storing project entry in model.
      */
     static final String PROJECT_ENTRY_MODEL_ATTRIBUTE = "projectEntry";
+    /**
+     * Attribute name for storing project entry in model.
+     */
+    static final String WEB_FORM_UPLOAD_ATTRIBUTE = "webformUpload";
     /**
      * Access to project folders.
      */
@@ -134,8 +139,23 @@ public class ProjectsController {
      */
     @RequestMapping(value = "/{projectId}/view")
     public String viewProject(@PathVariable String projectId, Model model) {
-        addProjectToModel(model, projectService.getByProjectId(projectId));
-        return "view_project";
+        return viewProject(projectService.getByProjectId(projectId), new WebFormUpload(), model);
+    }
+
+    /**
+     * Allow to add new webform under project folder.
+     *
+     * @param projectId project id for webform
+     * @param model model attribute holder
+     * @param webFormUpload web form upload related object
+     * @param bindingResult request binding to {@link WebFormUpload} result
+     * @return view name
+     */
+    @RequestMapping(value = "/{projectId}/webform/new")
+    public String newWebForm(@PathVariable String projectId, @Valid @ModelAttribute WebFormUpload webFormUpload,
+            BindingResult bindingResult, Model model) {
+        ProjectEntry byProjectId = projectService.getByProjectId(projectId);
+        return viewProject(byProjectId, webFormUpload, model);
     }
 
     /**
@@ -151,13 +171,49 @@ public class ProjectsController {
     }
 
     /**
+     * Sets model objects and returns project view.
+     *
+     * @param entry project to be displayed
+     * @param webFormUpload webform upload data
+     * @param model model attribute holder
+     * @return view name
+     */
+    private String viewProject(ProjectEntry entry, WebFormUpload webFormUpload, Model model) {
+        addProjectToModel(model, entry);
+        addWebFormToModel(model, webFormUpload);
+        return "view_project";    
+    }
+
+    /**
      * Adds project entry to model.
+     *
      * @param model model attribute holder
      * @param entry project
      */
     private void addProjectToModel(Model model, ProjectEntry entry) {
-        if (!model.containsAttribute(PROJECT_ENTRY_MODEL_ATTRIBUTE)) {
-            model.addAttribute(PROJECT_ENTRY_MODEL_ATTRIBUTE, entry);
+        addAttributeToModelIfNotAdded(model, PROJECT_ENTRY_MODEL_ATTRIBUTE, entry);
+    }
+
+    /**
+     * Adds webform upload to model.
+     *
+     * @param model model attribute holder
+     * @param webFormUpload web form upload
+     */
+    private void addWebFormToModel(Model model, WebFormUpload webFormUpload) {
+        addAttributeToModelIfNotAdded(model, WEB_FORM_UPLOAD_ATTRIBUTE, webFormUpload);
+    }
+
+    /**
+     * Adds attribute to model if model does not contain it.
+     *
+     * @param model model attribute holder
+     * @param attributeName name of attribute to be added
+     * @param attribute attribute to be added
+     */
+    private void addAttributeToModelIfNotAdded(Model model, String attributeName, Object attribute) {
+        if (!model.containsAttribute(attributeName)) {
+            model.addAttribute(attributeName, attribute);
         }
     }
 }

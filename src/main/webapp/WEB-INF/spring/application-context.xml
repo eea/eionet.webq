@@ -33,6 +33,7 @@
         <property name="converters">
             <set>
                 <bean class="eionet.webq.converter.MultipartFileConverter"/>
+                <bean class="eionet.webq.converter.MultipartToByteArray"/>
             </set>
         </property>
     </bean>

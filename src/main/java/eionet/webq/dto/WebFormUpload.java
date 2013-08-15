@@ -21,6 +21,7 @@ package eionet.webq.dto;
  *        Anton Dmitrijev
  */
 
+import javax.validation.constraints.Size;
 import java.util.Date;
 
 /**
@@ -38,6 +39,7 @@ public class WebFormUpload extends UploadForm {
     /**
      * Form content.
      */
+    @Size(min = 1)
     private byte[] file;
     /**
      * details about the webform

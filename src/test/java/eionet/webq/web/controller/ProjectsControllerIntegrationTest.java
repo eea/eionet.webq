@@ -2,6 +2,7 @@ package eionet.webq.web.controller;
 
 import eionet.webq.dao.ProjectFolders;
 import eionet.webq.dto.ProjectEntry;
+import eionet.webq.dto.WebFormUpload;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,10 +14,12 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import java.util.Collection;
 
 import static eionet.webq.web.controller.ProjectsController.PROJECT_ENTRY_MODEL_ATTRIBUTE;
+import static eionet.webq.web.controller.ProjectsController.WEB_FORM_UPLOAD_ATTRIBUTE;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.fileUpload;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
@@ -43,7 +46,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 public class ProjectsControllerIntegrationTest extends AbstractProjectsControllerTests {
-    public static final String ADD_EDIT_PROJECT_VIEW = "add_edit_project";
+    private static final String ADD_EDIT_PROJECT_VIEW = "add_edit_project";
+    private static final String DEFAULT_PROJECTID = "DEFAULT_PROJECTID";
+    public static final String PROJECT_ID_PARAM = "projectId";
     @Autowired
     private ProjectFolders projectFolders;
 
@@ -60,8 +65,8 @@ public class ProjectsControllerIntegrationTest extends AbstractProjectsControlle
 
     @Test
     public void allProjectsStoredInDataStorageArePresentInModel() throws Exception {
-        projectFolders.save(projectEntryWith("1"));
-        projectFolders.save(projectEntryWith("2"));
+        saveProjectWithId("1");
+        saveProjectWithId("2");
 
         assertThat(getAllProjectEntries().size(), equalTo(2));
     }
@@ -96,8 +101,8 @@ public class ProjectsControllerIntegrationTest extends AbstractProjectsControlle
     @Test
     public void loadsRequiredProjectForEdit() throws Exception {
         String projectToEdit = "projectToEdit";
-        projectFolders.save(projectEntryWith(projectToEdit));
-        ResultActions actions = request(get("/projects/edit").param("projectId", projectToEdit));
+        saveProjectWithId(projectToEdit);
+        ResultActions actions = request(get("/projects/edit").param(PROJECT_ID_PARAM, projectToEdit));
 
         ProjectEntry projectEntry = assertViewNameAndReturnProjectEntryFromModel(actions, ADD_EDIT_PROJECT_VIEW);
 
@@ -109,13 +114,13 @@ public class ProjectsControllerIntegrationTest extends AbstractProjectsControlle
     @Test
     public void allowToEditProject() throws Exception {
         String projectId = "projectToEdit";
-        projectFolders.save(projectEntryWith(projectId));
+        saveProjectWithId(projectId);
         ProjectEntry byProjectId = projectFolders.getByProjectId(projectId);
 
         String projectIdUpdated = "projectIdUpdated";
         String newDescription = "newDescription";
         MockHttpServletRequestBuilder post =
-                post("/projects/save").param("id", Integer.toString(byProjectId.getId())).param("projectId", projectIdUpdated)
+                post("/projects/save").param("id", Integer.toString(byProjectId.getId())).param(PROJECT_ID_PARAM, projectIdUpdated)
                         .param("description", newDescription);
         request(post);
 
@@ -128,12 +133,29 @@ public class ProjectsControllerIntegrationTest extends AbstractProjectsControlle
 
     @Test
     public void allowToViewProjectFolderContent() throws Exception {
-        String projectId = "projectId";
-        projectFolders.save(projectEntryWith(projectId));
-        ResultActions request = request(get("/projects/" + projectId + "/view"));
+        saveProjectWithId(DEFAULT_PROJECTID);
+        ResultActions request = request(get("/projects/" + DEFAULT_PROJECTID + "/view"));
         ProjectEntry project = assertViewNameAndReturnProjectEntryFromModel(request, "view_project");
 
-        assertThat(project.getProjectId(), equalTo(projectId));
+        assertThat(project.getProjectId(), equalTo(DEFAULT_PROJECTID));
+    }
+
+    @Test
+    public void allowToUploadAWebFormForAProject() throws Exception {
+        saveProjectWithId(DEFAULT_PROJECTID);
+        String title = "test webform";
+        byte[] content = "my-webform".getBytes();
+        ResultActions request = request(fileUpload("/projects/" + DEFAULT_PROJECTID + "/webform/new").file("file", content)
+                .param("title", title).param("status", "true"));
+
+        WebFormUpload webformUpload = (WebFormUpload) request.andReturn().getModelAndView().getModel().get(WEB_FORM_UPLOAD_ATTRIBUTE);
+
+        assertThat(webformUpload.getTitle(), equalTo(title));
+        assertThat(webformUpload.getFile(), equalTo(content));
+    }
+
+    private void saveProjectWithId(String projectId) {
+        projectFolders.save(projectEntryWith(projectId));
     }
 
     private ProjectEntry assertViewNameAndReturnProjectEntryFromModel(ResultActions actions, String viewName) throws Exception {
