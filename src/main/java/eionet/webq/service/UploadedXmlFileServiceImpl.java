@@ -21,7 +21,7 @@ package eionet.webq.service;
  *        Anton Dmitrijev
  */
 
-import eionet.webq.dao.FileStorage;
+import eionet.webq.dao.UserFileStorage;
 import eionet.webq.dto.UploadedXmlFile;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,7 +39,7 @@ public class UploadedXmlFileServiceImpl implements UploadedXmlFileService {
      * Uploaded files storage.
      */
     @Autowired
-    FileStorage storage;
+    UserFileStorage storage;
     /**
      * Current http session.
      */

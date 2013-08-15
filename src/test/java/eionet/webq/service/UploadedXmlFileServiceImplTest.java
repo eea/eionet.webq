@@ -1,6 +1,6 @@
 package eionet.webq.service;
 
-import eionet.webq.dao.FileStorage;
+import eionet.webq.dao.UserFileStorage;
 import eionet.webq.dto.UploadedXmlFile;
 import org.junit.After;
 import org.junit.Before;
@@ -37,14 +37,14 @@ import static org.mockito.Mockito.*;
  */
 public class UploadedXmlFileServiceImplTest {
     private UploadedXmlFileServiceImpl service;
-    private FileStorage storage;
+    private UserFileStorage storage;
     HttpSession mockSession;
     private final String userId = "userId";
 
     @Before
     public void prepare() {
         service = new UploadedXmlFileServiceImpl();
-        storage = Mockito.mock(FileStorage.class);
+        storage = Mockito.mock(UserFileStorage.class);
         mockSession = Mockito.mock(HttpSession.class);
         Mockito.when(mockSession.getId()).thenReturn(userId);
         service.storage = storage;

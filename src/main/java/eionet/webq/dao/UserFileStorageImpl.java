@@ -36,10 +36,10 @@ import java.sql.Timestamp;
 import java.util.Collection;
 
 /**
- * {@link FileStorage} implementation.
+ * {@link UserFileStorage} implementation.
  */
 @Repository
-public class FileStorageImpl implements FileStorage {
+public class UserFileStorageImpl implements UserFileStorage {
     /**
      * {@link JdbcTemplate} to perform data access operations.
      */

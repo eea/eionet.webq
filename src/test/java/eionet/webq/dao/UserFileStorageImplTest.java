@@ -37,9 +37,9 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {ApplicationTestContextWithMockSession.class})
-public class FileStorageImplTest {
+public class UserFileStorageImplTest {
     @Autowired
-    private FileStorage storage;
+    private UserFileStorage storage;
     private String userId = userId();
     private String otherUserId = "other" + userId;
 

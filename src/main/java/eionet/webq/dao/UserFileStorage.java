@@ -30,7 +30,7 @@ import eionet.webq.dto.UploadedXmlFile;
  *
  * @see UploadedXmlFile
  */
-public interface FileStorage {
+public interface UserFileStorage {
     /**
      * Save data from uploaded file to storage.
      *
@@ -54,7 +54,7 @@ public interface FileStorage {
     /**
      * All uploaded files by current session user.
      * {@link UploadedXmlFile#content} is not included into resulting collection.
-     * Use {@link FileStorage#fileContentById(int, String)} for fetching specific file content.
+     * Use {@link UserFileStorage#fileContentById(int, String)} for fetching specific file content.
      *
      * @param userId current user id
      * @return  All uploaded files by current session user.
