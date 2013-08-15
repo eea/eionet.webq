@@ -21,17 +21,22 @@ package eionet.webq.dto;
  *        Anton Dmitrijev
  */
 
-import javax.validation.constraints.Size;
 import java.util.Date;
+
+import javax.validation.constraints.Size;
 
 /**
  * DTO for web form upload.
  */
-public class WebFormUpload extends UploadForm {
+public class WebFormUpload {
     /**
      * Auto generated id.
      */
     private int id;
+    /**
+     * Id of a project connected with this file.
+     */
+    private int projectId;
     /**
      * Form title.
      */
@@ -45,6 +50,10 @@ public class WebFormUpload extends UploadForm {
      * details about the webform
      */
     private String description;
+    /**
+     * xml schema connected with this file
+     */
+    private String xmlSchema;
     /**
      * form status.
      */
@@ -72,6 +81,14 @@ public class WebFormUpload extends UploadForm {
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    public int getProjectId() {
+        return projectId;
+    }
+
+    public void setProjectId(int projectId) {
+        this.projectId = projectId;
     }
 
     public String getTitle() {
@@ -136,5 +153,13 @@ public class WebFormUpload extends UploadForm {
 
     public void setUpdated(Date updated) {
         this.updated = updated;
+    }
+
+    public String getXmlSchema() {
+        return xmlSchema;
+    }
+
+    public void setXmlSchema(String xmlSchema) {
+        this.xmlSchema = xmlSchema;
     }
 }

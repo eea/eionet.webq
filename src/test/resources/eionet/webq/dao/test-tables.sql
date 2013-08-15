@@ -16,12 +16,13 @@ CREATE TABLE IF NOT EXISTS PROJECT_FOLDER(
 
 CREATE TABLE IF NOT EXISTS PROJECT_FILE(
   id identity primary key,
+  project_id bigint,
   title varchar2(255),
   file blob,
   xml_schema varchar2(2000),
   description varchar2(2000),
   user_name varchar2(2000),
-  status boolean,
-  main_webform boolean,
+  active boolean,
+  main_form boolean,
   created datetime default current_timestamp,
   updated datetime default current_timestamp);

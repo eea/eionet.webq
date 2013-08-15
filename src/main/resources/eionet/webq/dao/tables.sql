@@ -18,13 +18,14 @@ CREATE TABLE IF NOT EXISTS PROJECT_FOLDER(
 
 CREATE TABLE IF NOT EXISTS PROJECT_FILE(
   id int AUTO_INCREMENT,
+  project_id int,
   title varchar(255) CHARACTER SET utf8,
   file blob,
   xml_schema varchar(2000) CHARACTER SET utf8,
   description varchar(2000) CHARACTER SET utf8,
   user_name varchar(2000) CHARACTER SET utf8,
-  status boolean,
-  main_webform boolean,
+  active boolean,
+  main_form boolean,
   created datetime default current_timestamp,
   updated datetime default current_timestamp,
   primary key (id));
