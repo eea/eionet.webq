@@ -32,6 +32,12 @@ public class AbstractContextControllerTests {
         return webAppContextSetup(this.wac).build();
     }
 
+    /**
+     * Expects returning 200(OK) as a http status.
+     * @param requestBuilder request builder
+     * @return result actions
+     * @throws Exception
+     */
     protected ResultActions request(RequestBuilder requestBuilder) throws Exception {
         return mvc().perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isOk());
     }

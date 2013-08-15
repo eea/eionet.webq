@@ -32,6 +32,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import javax.validation.Valid;
 
@@ -44,6 +45,10 @@ import javax.validation.Valid;
 @Controller
 @RequestMapping("projects")
 public class ProjectsController {
+    /**
+     * Attribute name for storing project entry in model.
+     */
+    static final String PROJECT_ENTRY_MODEL_ATTRIBUTE = "projectEntry";
     /**
      * Access to project folders.
      */
@@ -121,6 +126,19 @@ public class ProjectsController {
     }
 
     /**
+     * View project folder content by project id.
+     *
+     * @param projectId project id for project to be viewed
+     * @param model model attributes holder
+     * @return view name
+     */
+    @RequestMapping(value = "/{projectId}/view")
+    public String viewProject(@PathVariable String projectId, Model model) {
+        addProjectToModel(model, projectService.getByProjectId(projectId));
+        return "view_project";
+    }
+
+    /**
      * Sets model object and returns add/edit view.
      *
      * @param model model attribute holder
@@ -128,9 +146,18 @@ public class ProjectsController {
      * @return view name
      */
     private String editForm(Model model, ProjectEntry entry) {
-        if (!model.containsAttribute("projectEntry")) {
-            model.addAttribute("projectEntry", entry);
-        }
+        addProjectToModel(model, entry);
         return "add_edit_project";
+    }
+
+    /**
+     * Adds project entry to model.
+     * @param model model attribute holder
+     * @param entry project
+     */
+    private void addProjectToModel(Model model, ProjectEntry entry) {
+        if (!model.containsAttribute(PROJECT_ENTRY_MODEL_ATTRIBUTE)) {
+            model.addAttribute(PROJECT_ENTRY_MODEL_ATTRIBUTE, entry);
+        }
     }
 }

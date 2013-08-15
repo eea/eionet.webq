@@ -12,6 +12,7 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 
 import java.util.Collection;
 
+import static eionet.webq.web.controller.ProjectsController.PROJECT_ENTRY_MODEL_ATTRIBUTE;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -42,6 +43,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 public class ProjectsControllerIntegrationTest extends AbstractProjectsControllerTests {
+    public static final String ADD_EDIT_PROJECT_VIEW = "add_edit_project";
     @Autowired
     private ProjectFolders projectFolders;
 
@@ -83,7 +85,7 @@ public class ProjectsControllerIntegrationTest extends AbstractProjectsControlle
     @Test
     public void emptyObjectIsLoadedToModelWhenCreatingNewProject() throws Exception {
         ResultActions actions = request(get("/projects/add"));
-        ProjectEntry projectEntry = assertViewNameAndReturnProjectEntryFromModelForAddOrEdit(actions);
+        ProjectEntry projectEntry = assertViewNameAndReturnProjectEntryFromModel(actions, ADD_EDIT_PROJECT_VIEW);
 
         assertThat(projectEntry.getId(), equalTo(0));
         assertNull(projectEntry.getProjectId());
@@ -97,7 +99,7 @@ public class ProjectsControllerIntegrationTest extends AbstractProjectsControlle
         projectFolders.save(projectEntryWith(projectToEdit));
         ResultActions actions = request(get("/projects/edit").param("projectId", projectToEdit));
 
-        ProjectEntry projectEntry = assertViewNameAndReturnProjectEntryFromModelForAddOrEdit(actions);
+        ProjectEntry projectEntry = assertViewNameAndReturnProjectEntryFromModel(actions, ADD_EDIT_PROJECT_VIEW);
 
         assertThat(projectEntry.getProjectId(), equalTo(projectToEdit));
         assertNotNull(projectEntry.getId());
@@ -124,9 +126,19 @@ public class ProjectsControllerIntegrationTest extends AbstractProjectsControlle
         assertThat(updatedProject.getDescription(), equalTo(newDescription));
     }
 
-    private ProjectEntry assertViewNameAndReturnProjectEntryFromModelForAddOrEdit(ResultActions actions) throws Exception {
-        MvcResult mvcResult = actions.andExpect(view().name("add_edit_project")).andReturn();
-        return (ProjectEntry) mvcResult.getModelAndView().getModel().get("projectEntry");
+    @Test
+    public void allowToViewProjectFolderContent() throws Exception {
+        String projectId = "projectId";
+        projectFolders.save(projectEntryWith(projectId));
+        ResultActions request = request(get("/projects/" + projectId + "/view"));
+        ProjectEntry project = assertViewNameAndReturnProjectEntryFromModel(request, "view_project");
+
+        assertThat(project.getProjectId(), equalTo(projectId));
+    }
+
+    private ProjectEntry assertViewNameAndReturnProjectEntryFromModel(ResultActions actions, String viewName) throws Exception {
+        MvcResult mvcResult = actions.andExpect(view().name(viewName)).andReturn();
+        return (ProjectEntry) mvcResult.getModelAndView().getModel().get(PROJECT_ENTRY_MODEL_ATTRIBUTE);
     }
 
     private ProjectEntry projectEntryWith(String id) {

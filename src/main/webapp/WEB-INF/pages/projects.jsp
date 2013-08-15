@@ -20,6 +20,7 @@
                     <td>${project.projectId}</td>
                     <td>${project.description}</td>
                     <td>${project.created}</td>
+                    <td><a href="<c:url value="/projects/${project.projectId}/view"/>">View</a></td>
                     <td><a href="<c:url value="/projects/edit?projectId=${project.projectId}"/>">Edit</a></td>
                     <td><a href="<c:url value="/projects/remove?projectId=${project.projectId}"/>">Remove</a></td>
                 </tr>
