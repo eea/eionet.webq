@@ -1,3 +1,5 @@
+<%@ taglib prefix="f" uri="http://www.springframework.org/tags/form" %>
+
 <fieldset>
     <legend>Project data</legend>
     <p>
@@ -16,7 +18,7 @@
 
 <fieldset>
     <legend>New webform</legend>
-    <p>
-
-    </p>
+    <%--<f:form commandName="newWebform" action="webform/add" method="post">--%>
+        <%----%>
+    <%--</f:form>--%>
 </fieldset>
