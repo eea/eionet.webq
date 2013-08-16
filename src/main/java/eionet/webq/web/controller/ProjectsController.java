@@ -164,10 +164,11 @@ public class ProjectsController {
     @RequestMapping(value = "/{projectFolderId}/webform/new")
     public String newWebForm(@PathVariable String projectFolderId, @Valid @ModelAttribute WebFormUpload webFormUpload,
             BindingResult bindingResult, Model model) {
+        ProjectEntry currentProject = projectService.getByProjectId(projectFolderId);
         if (!bindingResult.hasErrors()) {
-            projectFileStorage.save(projectService.getByProjectId(projectFolderId), webFormUpload);
+            projectFileStorage.save(currentProject, webFormUpload);
         }
-        return viewProject(null, webFormUpload, model);
+        return viewProject(currentProject, webFormUpload, model);
     }
 
     /**
@@ -192,7 +193,7 @@ public class ProjectsController {
      */
     private String viewProject(ProjectEntry entry, WebFormUpload webFormUpload, Model model) {
         addProjectToModel(model, entry);
-
+        model.addAttribute(ALL_PROJECT_FILES_ATTRIBUTE, projectFileStorage.allFilesFor(entry));
         addWebFormToModel(model, webFormUpload);
         return "view_project";
     }

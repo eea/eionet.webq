@@ -13,6 +13,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 import java.util.Collection;
+import java.util.List;
 
 import static eionet.webq.web.controller.ProjectsController.PROJECT_ENTRY_MODEL_ATTRIBUTE;
 import static eionet.webq.web.controller.ProjectsController.WEB_FORM_UPLOAD_ATTRIBUTE;
@@ -137,7 +138,7 @@ public class ProjectsControllerIntegrationTest extends AbstractProjectsControlle
     @Test
     public void allowToViewProjectFolderContent() throws Exception {
         saveProjectWithId(DEFAULT_PROJECT_ID);
-        ResultActions request = request(get("/projects/" + DEFAULT_PROJECT_ID + "/view"));
+        ResultActions request = getProjectViewResult();
         ProjectEntry project = assertViewNameAndReturnProjectEntryFromModel(request, "view_project");
 
         assertThat(project.getProjectId(), equalTo(DEFAULT_PROJECT_ID));
@@ -148,8 +149,7 @@ public class ProjectsControllerIntegrationTest extends AbstractProjectsControlle
         saveProjectWithId(DEFAULT_PROJECT_ID);
         WebFormUpload webFormUpload = testWebFormUpload();
         ResultActions request = uploadWebFormForDefaultProject(webFormUpload);
-        WebFormUpload uploaded =
-                (WebFormUpload) request.andReturn().getModelAndView().getModel().get(WEB_FORM_UPLOAD_ATTRIBUTE);
+        WebFormUpload uploaded = (WebFormUpload) request.andReturn().getModelAndView().getModel().get(WEB_FORM_UPLOAD_ATTRIBUTE);
 
         assertThat(uploaded.getTitle(), equalTo(webFormUpload.getTitle()));
         assertThat(uploaded.getFile(), equalTo(webFormUpload.getFile()));
@@ -159,9 +159,7 @@ public class ProjectsControllerIntegrationTest extends AbstractProjectsControlle
 
     @Test
     public void savesUploadedWebFormToStorage() throws Exception {
-        saveProjectWithId(DEFAULT_PROJECT_ID);
-        WebFormUpload webFormUpload = testWebFormUpload();
-        uploadWebFormForDefaultProject(webFormUpload);
+        uploadFilesForDefaultProject(1);
         ProjectEntry defaultProject = projectFolders.getByProjectId(DEFAULT_PROJECT_ID);
 
         Collection<WebFormUpload> uploadedFilesForProject = projectFileStorage.allFilesFor(defaultProject);
@@ -171,7 +169,27 @@ public class ProjectsControllerIntegrationTest extends AbstractProjectsControlle
 
     @Test
     public void loadsAllProjectFilesToModel() throws Exception {
+        uploadFilesForDefaultProject(2);
+        ResultActions projectViewResult = getProjectViewResult();
+        @SuppressWarnings("unchecked")
+        List<WebFormUpload> allProjectFiles =
+                (List<WebFormUpload>) projectViewResult.andReturn().getModelAndView().getModel()
+                        .get(ProjectsController.ALL_PROJECT_FILES_ATTRIBUTE);
 
+        assertThat(allProjectFiles.size(), equalTo(2));
+    }
+
+    private ResultActions getProjectViewResult() throws Exception {
+        return request(get("/projects/" + DEFAULT_PROJECT_ID + "/view"));
+    }
+
+    private WebFormUpload uploadFilesForDefaultProject(int amount) throws Exception {
+        saveProjectWithId(DEFAULT_PROJECT_ID);
+        WebFormUpload webFormUpload = testWebFormUpload();
+        for (int i = 0; i < amount; i++) {
+            uploadWebFormForDefaultProject(webFormUpload);
+        }
+        return webFormUpload;
     }
 
     private WebFormUpload testWebFormUpload() {

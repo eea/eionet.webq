@@ -79,6 +79,7 @@ public class ProjectFileStorageImpl implements ProjectFileStorage {
         template.update("DELETE FROM project_file WHERE id=?", fileId);
     }
 
+    //TODO file content not needed
     @Override
     public Collection<WebFormUpload> allFilesFor(ProjectEntry project) {
         return template.query("SELECT * FROM project_file WHERE project_id=?",
