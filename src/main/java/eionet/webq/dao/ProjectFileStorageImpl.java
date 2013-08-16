@@ -70,8 +70,21 @@ public class ProjectFileStorageImpl implements ProjectFileStorage {
     }
 
     @Override
-    public void update(WebFormUpload webFormUpload) {
-
+    public void update(final WebFormUpload webFormUpload) {
+        template.execute("UPDATE project_file SET title=?, file=?, xml_schema=?, description=?, user_name=?, active=?, main_form=?" +
+                " WHERE id=?", new AbstractLobCreatingPreparedStatementCallback(lobHandler) {
+            @Override
+            protected void setValues(PreparedStatement ps, LobCreator lobCreator) throws SQLException {
+                ps.setString(1, webFormUpload.getTitle());
+                lobCreator.setBlobAsBytes(ps, 2, webFormUpload.getFile());
+                ps.setString(3, webFormUpload.getXmlSchema());
+                ps.setString(4, webFormUpload.getDescription());
+                ps.setString(5, webFormUpload.getUserName());
+                ps.setBoolean(6, webFormUpload.isActive());
+                ps.setBoolean(7, webFormUpload.isMainForm());
+                ps.setInt(8, webFormUpload.getId());
+            }
+        });
     }
 
     @Override
@@ -79,7 +92,7 @@ public class ProjectFileStorageImpl implements ProjectFileStorage {
         template.update("DELETE FROM project_file WHERE id=?", fileId);
     }
 
-    //TODO file content not needed
+    // TODO file content not needed
     @Override
     public Collection<WebFormUpload> allFilesFor(ProjectEntry project) {
         return template.query("SELECT * FROM project_file WHERE project_id=?",

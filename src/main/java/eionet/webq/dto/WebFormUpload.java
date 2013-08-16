@@ -21,9 +21,8 @@ package eionet.webq.dto;
  *        Anton Dmitrijev
  */
 
-import java.util.Date;
-
 import javax.validation.constraints.Size;
+import java.util.Date;
 
 /**
  * DTO for web form upload.
@@ -34,7 +33,7 @@ public class WebFormUpload {
      */
     private int id;
     /**
-     * Id of a project connected with this file.
+     * {@link eionet.webq.dto.ProjectEntry#id} connected with this file.
      */
     private int projectId;
     /**

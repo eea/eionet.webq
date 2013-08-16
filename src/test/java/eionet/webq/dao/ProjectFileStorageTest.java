@@ -35,6 +35,7 @@ import java.util.Collection;
 
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {ApplicationTestContextWithMockSession.class})
@@ -97,6 +98,41 @@ public class ProjectFileStorageTest {
         projectFileStorage.remove(uploadedFile.getId());
 
         assertThat(projectFileStorage.allFilesFor(projectEntry).size(), equalTo(0));
+    }
+
+    @Test
+    public void allowToEditProjectFile() throws Exception {
+        addOneFile();
+        WebFormUpload beforeUpdate = getUploadedFileAndAssertThatItIsTheOnlyOne();
+        beforeUpdate.setTitle("brand new title");
+        beforeUpdate.setXmlSchema("brand new schema");
+        beforeUpdate.setFile("brand new content".getBytes());
+        beforeUpdate.setDescription("brand new description");
+        beforeUpdate.setActive(true);
+        beforeUpdate.setMainForm(true);
+
+        projectFileStorage.update(beforeUpdate);
+
+        WebFormUpload updatedFile = getUploadedFileAndAssertThatItIsTheOnlyOne();
+        assertThat(updatedFile.getTitle(), equalTo(beforeUpdate.getTitle()));
+        assertThat(updatedFile.getXmlSchema(), equalTo(beforeUpdate.getXmlSchema()));
+        assertThat(updatedFile.getFile(), equalTo(beforeUpdate.getFile()));
+        assertThat(updatedFile.getDescription(), equalTo(beforeUpdate.getDescription()));
+        assertThat(updatedFile.isActive(), equalTo(beforeUpdate.isActive()));
+        assertThat(updatedFile.isMainForm(), equalTo(beforeUpdate.isMainForm()));
+    }
+
+    @Test
+    public void updateWillNotChangeProjectId() throws Exception {
+        addOneFile();
+        WebFormUpload beforeUpdate = getUploadedFileAndAssertThatItIsTheOnlyOne();
+        beforeUpdate.setProjectId(10000);
+
+        projectFileStorage.update(beforeUpdate);
+
+        WebFormUpload updatedFile = getUploadedFileAndAssertThatItIsTheOnlyOne();
+
+        assertTrue(updatedFile.getProjectId() != beforeUpdate.getProjectId());
     }
 
     private void addOneFile() {
