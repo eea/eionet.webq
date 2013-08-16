@@ -41,7 +41,7 @@ import java.util.Collection;
  */
 @Repository
 @Qualifier("user-files")
-public class UserFileStorageImpl implements FileStorage<String, UploadedXmlFile> {
+public class UserFileStorageImpl extends AbstractDao implements FileStorage<String, UploadedXmlFile> {
     /**
      * {@link JdbcTemplate} to perform data access operations.
      */
@@ -55,7 +55,7 @@ public class UserFileStorageImpl implements FileStorage<String, UploadedXmlFile>
 
     @Override
     public void save(final UploadedXmlFile file, final String userId) {
-        jdbcTemplate.execute("INSERT INTO user_xml(user_id, file_name, xml_schema, xml, file_size_in_bytes) VALUES(?, ?, ?, ?, ?)",
+        jdbcTemplate.execute(sqlProperties.getProperty("insert.user.file"),
                 new AbstractLobCreatingPreparedStatementCallback(lobHandler) {
                     @Override
                     protected void setValues(PreparedStatement ps, LobCreator lobCreator) throws SQLException {
@@ -71,7 +71,7 @@ public class UserFileStorageImpl implements FileStorage<String, UploadedXmlFile>
     @Override
     public UploadedXmlFile fileContentBy(int id, String userId) {
         Object[] params = {id, userId};
-        return jdbcTemplate.queryForObject("SELECT file_name, xml FROM user_xml WHERE id = ? AND user_id = ?", params,
+        return jdbcTemplate.queryForObject(sqlProperties.getProperty("select.user.file.content"), params,
                 new RowMapper<UploadedXmlFile>() {
                     @Override
                     public UploadedXmlFile mapRow(ResultSet rs, int rowNum) throws SQLException {
@@ -82,7 +82,7 @@ public class UserFileStorageImpl implements FileStorage<String, UploadedXmlFile>
 
     @Override
     public void update(final UploadedXmlFile file, final String userId) {
-        jdbcTemplate.execute("UPDATE user_xml SET xml = ?, file_size_in_bytes = ?, updated = ? WHERE id = ? and user_id= ?",
+        jdbcTemplate.execute(sqlProperties.getProperty("update.user.file"),
                 new AbstractLobCreatingPreparedStatementCallback(lobHandler) {
                     @Override
                     protected void setValues(PreparedStatement ps, LobCreator lobCreator) throws SQLException {
@@ -97,15 +97,14 @@ public class UserFileStorageImpl implements FileStorage<String, UploadedXmlFile>
 
     @Override
     public Collection<UploadedXmlFile> allFilesFor(String userId) {
-        return jdbcTemplate.query(
-                "SELECT id, file_name, xml_schema, file_size_in_bytes, created, updated FROM user_xml WHERE user_id = ? "
-                        + "ORDER BY updated DESC", new Object[] {userId}, new RowMapper<UploadedXmlFile>() {
-            @Override
-            public UploadedXmlFile mapRow(ResultSet rs, int rowNum) throws SQLException {
-                return new UploadedXmlFile().setId(rs.getInt(1)).setName(rs.getString(2)).setXmlSchema(rs.getString(3))
-                        .setSizeInBytes(rs.getLong(4)).setCreated(rs.getTimestamp(5)).setUpdated(rs.getTimestamp(6));
-            }
-        });
+        return jdbcTemplate.query(sqlProperties.getProperty("select.all.file.for.user"), new Object[] {userId},
+                new RowMapper<UploadedXmlFile>() {
+                    @Override
+                    public UploadedXmlFile mapRow(ResultSet rs, int rowNum) throws SQLException {
+                        return new UploadedXmlFile().setId(rs.getInt(1)).setName(rs.getString(2)).setXmlSchema(rs.getString(3))
+                                .setSizeInBytes(rs.getLong(4)).setCreated(rs.getTimestamp(5)).setUpdated(rs.getTimestamp(6));
+                    }
+                });
     }
 
     @Override

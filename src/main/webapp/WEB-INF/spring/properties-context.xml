@@ -5,4 +5,5 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
        http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.2.xsd">
     <util:properties id="application_properties" location="classpath:application.properties"/>
+    <util:properties id="sql_statements" location="classpath:eionet/webq/dao/sql_statements.properties"/>
 </beans>

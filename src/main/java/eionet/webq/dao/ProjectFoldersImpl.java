@@ -33,7 +33,7 @@ import java.util.Collection;
  * Project folders interface implementation.
  */
 @Repository
-public class ProjectFoldersImpl implements ProjectFolders {
+public class ProjectFoldersImpl extends AbstractDao implements ProjectFolders {
     /**
      * Jdbc template for accessing data storage.
      */
@@ -42,12 +42,12 @@ public class ProjectFoldersImpl implements ProjectFolders {
 
     @Override
     public Collection<ProjectEntry> getAllFolders() {
-        return jdbcTemplate.query("SELECT * FROM project_folder ORDER BY project_id", projectEntryMapper());
+        return jdbcTemplate.query(sqlProperties.getProperty("select.all.projects"), projectEntryMapper());
     }
 
     @Override
     public void remove(String projectId) {
-        jdbcTemplate.update("DELETE FROM project_folder WHERE project_id=?", projectId);
+        jdbcTemplate.update(sqlProperties.getProperty("delete.project.by.project.id"), projectId);
     }
 
     @Override
@@ -55,21 +55,22 @@ public class ProjectFoldersImpl implements ProjectFolders {
         if (project.getId() < 1) {
             throw new RuntimeException("Unable to update project, since it is not present in database.");
         }
-        jdbcTemplate.update("UPDATE project_folder SET project_id=?, description=? WHERE id=?", project.getProjectId(),
+        jdbcTemplate.update(sqlProperties.getProperty("update.project"), project.getProjectId(),
                 project.getDescription(), project.getId());
     }
 
     @Override
     public void save(ProjectEntry projectEntry) {
-        jdbcTemplate.update("INSERT INTO project_folder(project_id, description) VALUES(?, ?)", projectEntry.getProjectId(),
+        jdbcTemplate.update(sqlProperties.getProperty("insert.project"), projectEntry.getProjectId(),
                 projectEntry.getDescription());
     }
 
     @Override
     public ProjectEntry getByProjectId(String projectId) {
-        return jdbcTemplate.queryForObject("SELECT * FROM project_folder WHERE project_id=?", projectEntryMapper(), projectId);
+        return jdbcTemplate.queryForObject(sqlProperties.getProperty("select.project.by.project.id"), projectEntryMapper(), projectId);
     }
 
+    //TODO row mapper to abstract dao.
     /**
      * Returns row mapper for project.
      *

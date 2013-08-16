@@ -41,7 +41,7 @@ import java.util.Collection;
  */
 @Repository
 @Qualifier("project-files")
-public class ProjectFileStorageImpl implements FileStorage<ProjectEntry, WebFormUpload> {
+public class ProjectFileStorageImpl extends AbstractDao implements FileStorage<ProjectEntry, WebFormUpload> {
     /**
      * Jdbc template for accessing data storage.
      */
@@ -53,11 +53,11 @@ public class ProjectFileStorageImpl implements FileStorage<ProjectEntry, WebForm
     @Autowired
     private LobHandler lobHandler;
 
+
     @Override
     public void save(final WebFormUpload webFormUpload, final ProjectEntry project) {
-        template.execute(
-                "INSERT INTO project_file(project_id, title, file, xml_schema, description, user_name, active, main_form)"
-                        + "VALUES(?, ?, ?, ?, ?, ?, ?, ?)", new AbstractLobCreatingPreparedStatementCallback(lobHandler) {
+        template.execute(sqlProperties.getProperty("insert.project.file"), new AbstractLobCreatingPreparedStatementCallback(
+                lobHandler) {
             @Override
             protected void setValues(PreparedStatement ps, LobCreator lobCreator) throws SQLException {
                 ps.setInt(1, project.getId());
@@ -74,15 +74,14 @@ public class ProjectFileStorageImpl implements FileStorage<ProjectEntry, WebForm
 
     @Override
     public WebFormUpload fileById(int id) {
-        return template.queryForObject("SELECT * FROM project_file WHERE id=?", rowMapper(), id);
+        return template.queryForObject(sqlProperties.getProperty("select.file.by.id"), rowMapper(), id);
     }
 
     @Override
     public void update(final WebFormUpload webFormUpload, ProjectEntry projectEntry) {
         //TODO do not save empty file
-        template.execute(
-                "UPDATE project_file SET title=?, file=?, xml_schema=?, description=?, user_name=?, active=?, main_form=?"
-                        + " WHERE id=?", new AbstractLobCreatingPreparedStatementCallback(lobHandler) {
+        template.execute(sqlProperties.getProperty("update.project.file"), new AbstractLobCreatingPreparedStatementCallback(
+                lobHandler) {
             @Override
             protected void setValues(PreparedStatement ps, LobCreator lobCreator) throws SQLException {
                 ps.setString(1, webFormUpload.getTitle());
@@ -100,13 +99,12 @@ public class ProjectFileStorageImpl implements FileStorage<ProjectEntry, WebForm
     // TODO file content not needed
     @Override
     public Collection<WebFormUpload> allFilesFor(ProjectEntry project) {
-        return template.query("SELECT * FROM project_file WHERE project_id=?",
-                rowMapper(), project.getId());
+        return template.query(sqlProperties.getProperty("select.all.project.files"), rowMapper(), project.getId());
     }
 
     @Override
     public void remove(int fileId, ProjectEntry projectEntry) {
-        template.update("DELETE FROM project_file WHERE id=? AND project_id=?", fileId, projectEntry.getId());
+        template.update(sqlProperties.getProperty("delete.project.file"), fileId, projectEntry.getId());
     }
 
     @Override
