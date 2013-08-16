@@ -41,7 +41,7 @@ import java.util.Collection;
  */
 @Repository
 @Qualifier("user-files")
-public class UserFileStorageImpl extends AbstractDao implements FileStorage<String, UploadedXmlFile> {
+public class UserFileStorageImpl extends AbstractDao<UploadedXmlFile> implements FileStorage<String, UploadedXmlFile> {
     /**
      * {@link JdbcTemplate} to perform data access operations.
      */
@@ -97,14 +97,7 @@ public class UserFileStorageImpl extends AbstractDao implements FileStorage<Stri
 
     @Override
     public Collection<UploadedXmlFile> allFilesFor(String userId) {
-        return jdbcTemplate.query(sqlProperties.getProperty("select.all.file.for.user"), new Object[] {userId},
-                new RowMapper<UploadedXmlFile>() {
-                    @Override
-                    public UploadedXmlFile mapRow(ResultSet rs, int rowNum) throws SQLException {
-                        return new UploadedXmlFile().setId(rs.getInt(1)).setName(rs.getString(2)).setXmlSchema(rs.getString(3))
-                                .setSizeInBytes(rs.getLong(4)).setCreated(rs.getTimestamp(5)).setUpdated(rs.getTimestamp(6));
-                    }
-                });
+        return jdbcTemplate.query(sqlProperties.getProperty("select.all.file.for.user"), new Object[] {userId}, rowMapper());
     }
 
     @Override
@@ -115,5 +108,10 @@ public class UserFileStorageImpl extends AbstractDao implements FileStorage<Stri
     @Override
     public UploadedXmlFile fileById(int id) {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    Class<UploadedXmlFile> getDtoClass() {
+        return UploadedXmlFile.class;
     }
 }

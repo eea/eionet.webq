@@ -24,7 +24,6 @@ import eionet.webq.dto.ProjectEntry;
 import eionet.webq.dto.WebFormUpload;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.support.AbstractLobCreatingPreparedStatementCallback;
 import org.springframework.jdbc.support.lob.LobCreator;
@@ -41,7 +40,7 @@ import java.util.Collection;
  */
 @Repository
 @Qualifier("project-files")
-public class ProjectFileStorageImpl extends AbstractDao implements FileStorage<ProjectEntry, WebFormUpload> {
+public class ProjectFileStorageImpl extends AbstractDao<WebFormUpload> implements FileStorage<ProjectEntry, WebFormUpload> {
     /**
      * Jdbc template for accessing data storage.
      */
@@ -112,12 +111,8 @@ public class ProjectFileStorageImpl extends AbstractDao implements FileStorage<P
         throw new UnsupportedOperationException();
     }
 
-    /**
-     * Row mapper for web form upload.
-     *
-     * @return {@link BeanPropertyRowMapper} for {@link BeanPropertyRowMapper}
-     */
-    private BeanPropertyRowMapper<WebFormUpload> rowMapper() {
-        return BeanPropertyRowMapper.newInstance(WebFormUpload.class);
+    @Override
+    Class<WebFormUpload> getDtoClass() {
+        return WebFormUpload.class;
     }
 }

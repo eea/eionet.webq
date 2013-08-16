@@ -2,7 +2,6 @@ package eionet.webq.dao;
 
 import eionet.webq.dto.ProjectEntry;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -33,7 +32,7 @@ import java.util.Collection;
  * Project folders interface implementation.
  */
 @Repository
-public class ProjectFoldersImpl extends AbstractDao implements ProjectFolders {
+public class ProjectFoldersImpl extends AbstractDao<ProjectEntry> implements ProjectFolders {
     /**
      * Jdbc template for accessing data storage.
      */
@@ -42,7 +41,7 @@ public class ProjectFoldersImpl extends AbstractDao implements ProjectFolders {
 
     @Override
     public Collection<ProjectEntry> getAllFolders() {
-        return jdbcTemplate.query(sqlProperties.getProperty("select.all.projects"), projectEntryMapper());
+        return jdbcTemplate.query(sqlProperties.getProperty("select.all.projects"), rowMapper());
     }
 
     @Override
@@ -67,17 +66,11 @@ public class ProjectFoldersImpl extends AbstractDao implements ProjectFolders {
 
     @Override
     public ProjectEntry getByProjectId(String projectId) {
-        return jdbcTemplate.queryForObject(sqlProperties.getProperty("select.project.by.project.id"), projectEntryMapper(), projectId);
+        return jdbcTemplate.queryForObject(sqlProperties.getProperty("select.project.by.project.id"), rowMapper(), projectId);
     }
 
-    //TODO row mapper to abstract dao.
-    /**
-     * Returns row mapper for project.
-     *
-     * @return row mapper
-     * @see org.springframework.jdbc.core.RowMapper
-     */
-    private BeanPropertyRowMapper<ProjectEntry> projectEntryMapper() {
-        return BeanPropertyRowMapper.newInstance(ProjectEntry.class);
+    @Override
+    Class<ProjectEntry> getDtoClass() {
+        return ProjectEntry.class;
     }
 }
