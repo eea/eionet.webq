@@ -23,6 +23,7 @@ package eionet.webq.dao;
 import eionet.webq.dto.ProjectEntry;
 import eionet.webq.dto.WebFormUpload;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.support.AbstractLobCreatingPreparedStatementCallback;
@@ -36,9 +37,11 @@ import java.util.Collection;
 
 /**
  * ProjectFileStorage implementation.
+ * Key id is {@link eionet.webq.dto.ProjectEntry#getId()}
  */
 @Repository
-public class ProjectFileStorageImpl implements ProjectFileStorage {
+@Qualifier("project-files")
+public class ProjectFileStorageImpl implements FileStorage<ProjectEntry, WebFormUpload> {
     /**
      * Jdbc template for accessing data storage.
      */
@@ -51,34 +54,35 @@ public class ProjectFileStorageImpl implements ProjectFileStorage {
     private LobHandler lobHandler;
 
     @Override
-    public WebFormUpload byId(int id) {
+    public void save(final WebFormUpload webFormUpload, final ProjectEntry project) {
+        template.execute(
+                "INSERT INTO project_file(project_id, title, file, xml_schema, description, user_name, active, main_form)"
+                        + "VALUES(?, ?, ?, ?, ?, ?, ?, ?)", new AbstractLobCreatingPreparedStatementCallback(lobHandler) {
+            @Override
+            protected void setValues(PreparedStatement ps, LobCreator lobCreator) throws SQLException {
+                ps.setInt(1, project.getId());
+                ps.setString(2, webFormUpload.getTitle());
+                lobCreator.setBlobAsBytes(ps, 3, webFormUpload.getFile());
+                ps.setString(4, webFormUpload.getXmlSchema());
+                ps.setString(5, webFormUpload.getDescription());
+                ps.setString(6, webFormUpload.getUserName());
+                ps.setBoolean(7, webFormUpload.isActive());
+                ps.setBoolean(8, webFormUpload.isMainForm());
+            }
+        });
+    }
+
+    @Override
+    public WebFormUpload fileById(int id) {
         return template.queryForObject("SELECT * FROM project_file WHERE id=?", rowMapper(), id);
     }
 
     @Override
-    public void save(final ProjectEntry project, final WebFormUpload webFormUpload) {
-        template.execute(
-                "INSERT INTO project_file(project_id, title, file, xml_schema, description, user_name, active, main_form)"
-                        + "VALUES(?, ?, ?, ?, ?, ?, ?, ?)", new AbstractLobCreatingPreparedStatementCallback(lobHandler) {
-                    @Override
-                    protected void setValues(PreparedStatement ps, LobCreator lobCreator) throws SQLException {
-                        ps.setInt(1, project.getId());
-                        ps.setString(2, webFormUpload.getTitle());
-                        lobCreator.setBlobAsBytes(ps, 3, webFormUpload.getFile());
-                        ps.setString(4, webFormUpload.getXmlSchema());
-                        ps.setString(5, webFormUpload.getDescription());
-                        ps.setString(6, webFormUpload.getUserName());
-                        ps.setBoolean(7, webFormUpload.isActive());
-                        ps.setBoolean(8, webFormUpload.isMainForm());
-                    }
-                });
-    }
-
-    @Override
-    public void update(final WebFormUpload webFormUpload) {
+    public void update(final WebFormUpload webFormUpload, ProjectEntry projectEntry) {
         //TODO do not save empty file
-        template.execute("UPDATE project_file SET title=?, file=?, xml_schema=?, description=?, user_name=?, active=?, main_form=?" +
-                " WHERE id=?", new AbstractLobCreatingPreparedStatementCallback(lobHandler) {
+        template.execute(
+                "UPDATE project_file SET title=?, file=?, xml_schema=?, description=?, user_name=?, active=?, main_form=?"
+                        + " WHERE id=?", new AbstractLobCreatingPreparedStatementCallback(lobHandler) {
             @Override
             protected void setValues(PreparedStatement ps, LobCreator lobCreator) throws SQLException {
                 ps.setString(1, webFormUpload.getTitle());
@@ -93,11 +97,6 @@ public class ProjectFileStorageImpl implements ProjectFileStorage {
         });
     }
 
-    @Override
-    public void remove(int fileId) {
-        template.update("DELETE FROM project_file WHERE id=?", fileId);
-    }
-
     // TODO file content not needed
     @Override
     public Collection<WebFormUpload> allFilesFor(ProjectEntry project) {
@@ -105,6 +104,21 @@ public class ProjectFileStorageImpl implements ProjectFileStorage {
                 rowMapper(), project.getId());
     }
 
+    @Override
+    public void remove(int fileId, ProjectEntry projectEntry) {
+        template.update("DELETE FROM project_file WHERE id=? AND project_id=?", fileId, projectEntry.getId());
+    }
+
+    @Override
+    public WebFormUpload fileContentBy(int id, ProjectEntry projectEntry) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * Row mapper for web form upload.
+     *
+     * @return {@link BeanPropertyRowMapper} for {@link BeanPropertyRowMapper}
+     */
     private BeanPropertyRowMapper<WebFormUpload> rowMapper() {
         return BeanPropertyRowMapper.newInstance(WebFormUpload.class);
     }

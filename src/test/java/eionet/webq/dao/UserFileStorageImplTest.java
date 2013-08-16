@@ -1,19 +1,21 @@
 package eionet.webq.dao;
 
+import configuration.ApplicationTestContextWithMockSession;
+import eionet.webq.dto.UploadedXmlFile;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.dao.DataAccessException;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+
+import java.util.Collection;
+
 import static junit.framework.TestCase.assertNotNull;
 import static junit.framework.TestCase.assertNull;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertThat;
-
-import configuration.ApplicationTestContextWithMockSession;
-import eionet.webq.dto.UploadedXmlFile;
-import java.util.Collection;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataAccessException;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 /*
  * The contents of this file are subject to the Mozilla Public
@@ -39,7 +41,8 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 @ContextConfiguration(classes = {ApplicationTestContextWithMockSession.class})
 public class UserFileStorageImplTest {
     @Autowired
-    private UserFileStorage storage;
+    @Qualifier("user-files")
+    private FileStorage<String, UploadedXmlFile> storage;
     private String userId = userId();
     private String otherUserId = "other" + userId;
 
@@ -57,7 +60,7 @@ public class UserFileStorageImplTest {
         storage.save(uploadedXmlFile, userId);
 
         UploadedXmlFile fileFromDb = getFirstUploadedFileAndAssertThatItIsTheOnlyOneAvailableFor(userId);
-        UploadedXmlFile fileContentFromDb = storage.fileContentById(fileFromDb.getId(), userId);
+        UploadedXmlFile fileContentFromDb = storage.fileContentBy(fileFromDb.getId(), userId);
 
         assertThat(fileFromDb.getName(), equalTo(uploadedXmlFile.getName()));
         assertThat(fileContentFromDb.getContent(), equalTo(uploadedXmlFile.getContent()));
@@ -73,7 +76,7 @@ public class UserFileStorageImplTest {
 
         uploadFileForUser(userId, uploadedXmlFile);
 
-        storage.fileContentById(15, userId);
+        storage.fileContentBy(15, userId);
     }
 
     @Test(expected = DataAccessException.class)
@@ -83,7 +86,7 @@ public class UserFileStorageImplTest {
 
         UploadedXmlFile fileUploadedByAnotherUser = getFirstUploadedFileAndAssertThatItIsTheOnlyOneAvailableFor(otherUserId);
 
-        storage.fileContentById(fileUploadedByAnotherUser.getId(), userId);
+        storage.fileContentBy(fileUploadedByAnotherUser.getId(), userId);
     }
 
     @Test
@@ -100,7 +103,7 @@ public class UserFileStorageImplTest {
     public void allFilesSavedForOneUserCanBeRetrieved() throws Exception {
         uploadFilesFor(userId, 3);
 
-        assertThat(storage.allUploadedFiles(userId).size(), equalTo(3));
+        assertThat(storage.allFilesFor(userId).size(), equalTo(3));
     }
 
     @Test
@@ -108,7 +111,7 @@ public class UserFileStorageImplTest {
         uploadFilesFor(userId, 3);
         uploadFilesFor(otherUserId, 2);
 
-        assertThat(storage.allUploadedFiles(userId).size(), equalTo(3));
+        assertThat(storage.allFilesFor(userId).size(), equalTo(3));
     }
 
     @Test
@@ -131,7 +134,7 @@ public class UserFileStorageImplTest {
         storage.save(fileToUpload, userId);
 
         UploadedXmlFile uploadedFile = getFirstUploadedFileAndAssertThatItIsTheOnlyOneAvailableFor(userId);
-        UploadedXmlFile fileContent = storage.fileContentById(uploadedFile.getId(), userId);
+        UploadedXmlFile fileContent = storage.fileContentBy(uploadedFile.getId(), userId);
 
         assertThat(fileContent.getContent(), equalTo(contentBytes));
     }
@@ -142,9 +145,9 @@ public class UserFileStorageImplTest {
         byte[] newContentBytes = "new content".getBytes();
         UploadedXmlFile uploadedFile = getFirstUploadedFileAndAssertThatItIsTheOnlyOneAvailableFor(userId);
 
-        storage.updateContent(new UploadedXmlFile().setId(uploadedFile.getId()).setContent(newContentBytes), userId);
+        storage.update(new UploadedXmlFile().setId(uploadedFile.getId()).setContent(newContentBytes), userId);
 
-        assertThat(storage.fileContentById(uploadedFile.getId(), userId).getContent(), equalTo(newContentBytes));
+        assertThat(storage.fileContentBy(uploadedFile.getId(), userId).getContent(), equalTo(newContentBytes));
     }
 
     @Test
@@ -156,9 +159,9 @@ public class UserFileStorageImplTest {
         UploadedXmlFile contentChangeRequestFile =
                 new UploadedXmlFile().setContent((otherUserId + " content").getBytes()).setId(uploadedFileByOtherUser.getId());
 
-        storage.updateContent(contentChangeRequestFile, otherUserId);
+        storage.update(contentChangeRequestFile, otherUserId);
 
-        assertThat(storage.fileContentById(uploadedFileByOtherUser.getId(), userId).getContent(), equalTo(originalContent));
+        assertThat(storage.fileContentBy(uploadedFileByOtherUser.getId(), userId).getContent(), equalTo(originalContent));
     }
 
     private void uploadSingleFileFor(String userId) {
@@ -184,7 +187,7 @@ public class UserFileStorageImplTest {
     }
 
     private Collection<UploadedXmlFile> getAllFilesForUserAndAssertThatResultSetSizeIsAsExpected(String userId, int resultSetSize) {
-        Collection<UploadedXmlFile> uploadedXmlFiles = storage.allUploadedFiles(userId);
+        Collection<UploadedXmlFile> uploadedXmlFiles = storage.allFilesFor(userId);
         assertThat(uploadedXmlFiles.size(), equalTo(resultSetSize));
         return uploadedXmlFiles;
     }

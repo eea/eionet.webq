@@ -1,6 +1,6 @@
 package eionet.webq.web.controller;
 
-import eionet.webq.dao.ProjectFileStorage;
+import eionet.webq.dao.FileStorage;
 import eionet.webq.dao.ProjectFolders;
 import eionet.webq.dto.ProjectEntry;
 import eionet.webq.dto.WebFormUpload;
@@ -9,6 +9,7 @@ import org.hamcrest.Description;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
@@ -57,7 +58,8 @@ public class ProjectsControllerIntegrationTest extends AbstractProjectsControlle
     @Autowired
     private ProjectFolders projectFolders;
     @Autowired
-    private ProjectFileStorage projectFileStorage;
+    @Qualifier("project-files")
+    private FileStorage<ProjectEntry, WebFormUpload> projectFileStorage;
 
     @Test
     public void returnsAllProjectsViewName() throws Exception {

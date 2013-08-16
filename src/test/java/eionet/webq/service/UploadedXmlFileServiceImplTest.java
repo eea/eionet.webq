@@ -1,6 +1,7 @@
 package eionet.webq.service;
 
-import eionet.webq.dao.UserFileStorage;
+import eionet.webq.dao.FileStorage;
+import eionet.webq.dao.UserFileStorageImpl;
 import eionet.webq.dto.UploadedXmlFile;
 import org.junit.After;
 import org.junit.Before;
@@ -13,7 +14,11 @@ import java.util.Collection;
 
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.only;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 
 /*
  * The contents of this file are subject to the Mozilla Public
@@ -37,14 +42,14 @@ import static org.mockito.Mockito.*;
  */
 public class UploadedXmlFileServiceImplTest {
     private UploadedXmlFileServiceImpl service;
-    private UserFileStorage storage;
+    private FileStorage<String, UploadedXmlFile> storage;
     HttpSession mockSession;
     private final String userId = "userId";
 
     @Before
     public void prepare() {
         service = new UploadedXmlFileServiceImpl();
-        storage = Mockito.mock(UserFileStorage.class);
+        storage = Mockito.mock(UserFileStorageImpl.class);
         mockSession = Mockito.mock(HttpSession.class);
         Mockito.when(mockSession.getId()).thenReturn(userId);
         service.storage = storage;
@@ -71,30 +76,30 @@ public class UploadedXmlFileServiceImplTest {
     public void testGetById() throws Exception {
         int fileId = 1;
         UploadedXmlFile fileInStorage = new UploadedXmlFile().setName("file.name");
-        when(storage.fileContentById(fileId, userId)).thenReturn(fileInStorage);
+        when(storage.fileContentBy(fileId, userId)).thenReturn(fileInStorage);
 
         assertThat(service.getById(fileId), equalTo(fileInStorage));
-        verify(storage, only()).fileContentById(fileId, userId);
+        verify(storage, only()).fileContentBy(fileId, userId);
     }
 
     @Test
     public void testAllUploadedFiles() throws Exception {
         Collection<UploadedXmlFile> filesInStorage = Arrays.asList(new UploadedXmlFile());
-        when(storage.allUploadedFiles(userId)).thenReturn(filesInStorage);
+        when(storage.allFilesFor(userId)).thenReturn(filesInStorage);
 
         Collection<UploadedXmlFile> uploadedFiles = service.allUploadedFiles();
 
         assertThat(uploadedFiles, equalTo(filesInStorage));
-        verify(storage, only()).allUploadedFiles(userId);
+        verify(storage, only()).allFilesFor(userId);
     }
 
     @Test
     public void testUpdateContent() throws Exception {
         UploadedXmlFile fileToUpdate = new UploadedXmlFile();
-        doNothing().when(storage).updateContent(fileToUpdate, userId);
+        doNothing().when(storage).update(fileToUpdate, userId);
 
         service.updateContent(fileToUpdate);
 
-        verify(storage, only()).updateContent(fileToUpdate, userId);
+        verify(storage, only()).update(fileToUpdate, userId);
     }
 }

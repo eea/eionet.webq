@@ -21,10 +21,11 @@ package eionet.webq.service;
  *        Anton Dmitrijev
  */
 
-import eionet.webq.dao.UserFileStorage;
+import eionet.webq.dao.FileStorage;
 import eionet.webq.dto.UploadedXmlFile;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpSession;
@@ -39,7 +40,8 @@ public class UploadedXmlFileServiceImpl implements UploadedXmlFileService {
      * Uploaded files storage.
      */
     @Autowired
-    UserFileStorage storage;
+    @Qualifier("user-files")
+    FileStorage<String, UploadedXmlFile> storage;
     /**
      * Current http session.
      */
@@ -63,7 +65,7 @@ public class UploadedXmlFileServiceImpl implements UploadedXmlFileService {
 
     @Override
     public UploadedXmlFile getById(int id) {
-        UploadedXmlFile uploadedXmlFile = storage.fileContentById(id, userId());
+        UploadedXmlFile uploadedXmlFile = storage.fileContentBy(id, userId());
         byte[] content = uploadedXmlFile.getContent();
         LOGGER.info("File loaded. Name=" + uploadedXmlFile.getName() + ", content size=" + (content != null ? content.length : 0));
         return uploadedXmlFile;
@@ -72,7 +74,7 @@ public class UploadedXmlFileServiceImpl implements UploadedXmlFileService {
     @Override
     public Collection<UploadedXmlFile> allUploadedFiles() {
         String userId = userId();
-        Collection<UploadedXmlFile> uploadedXmlFiles = storage.allUploadedFiles(userId);
+        Collection<UploadedXmlFile> uploadedXmlFiles = storage.allFilesFor(userId);
         LOGGER.info("Loaded " + uploadedXmlFiles.size() + " files for user=" + userId);
         return uploadedXmlFiles;
     }
@@ -81,7 +83,7 @@ public class UploadedXmlFileServiceImpl implements UploadedXmlFileService {
     public void updateContent(UploadedXmlFile file) {
         String userId = userId();
         LOGGER.info("Updating file id=" + file.getId() + " for user=" + userId);
-        storage.updateContent(file, userId);
+        storage.update(file, userId);
     }
 
     /**

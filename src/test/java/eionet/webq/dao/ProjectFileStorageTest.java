@@ -27,6 +27,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -42,7 +43,8 @@ import static org.junit.Assert.assertTrue;
 public class ProjectFileStorageTest {
 
     @Autowired
-    ProjectFileStorage projectFileStorage;
+    @Qualifier("project-files")
+    FileStorage<ProjectEntry, WebFormUpload> projectFileStorage;
     @Autowired
     JdbcTemplate template;
 
@@ -58,7 +60,7 @@ public class ProjectFileStorageTest {
     public void saveWebformWithoutException() throws Exception {
         ProjectEntry projectEntry = testProjectEntry();
         WebFormUpload webFormUpload = testWebForm();
-        projectFileStorage.save(projectEntry, webFormUpload);
+        projectFileStorage.save(webFormUpload, projectEntry);
     }
 
     @Test
@@ -95,7 +97,7 @@ public class ProjectFileStorageTest {
 
         WebFormUpload uploadedFile = getUploadedFileAndAssertThatItIsTheOnlyOne();
 
-        projectFileStorage.remove(uploadedFile.getId());
+        projectFileStorage.remove(uploadedFile.getId(), projectEntry);
 
         assertThat(projectFileStorage.allFilesFor(projectEntry).size(), equalTo(0));
     }
@@ -111,7 +113,7 @@ public class ProjectFileStorageTest {
         beforeUpdate.setActive(true);
         beforeUpdate.setMainForm(true);
 
-        projectFileStorage.update(beforeUpdate);
+        projectFileStorage.update(beforeUpdate, projectEntry);
 
         WebFormUpload updatedFile = getUploadedFileAndAssertThatItIsTheOnlyOne();
         assertFieldsEquals(beforeUpdate, updatedFile);
@@ -123,7 +125,7 @@ public class ProjectFileStorageTest {
         WebFormUpload beforeUpdate = getUploadedFileAndAssertThatItIsTheOnlyOne();
         beforeUpdate.setProjectId(10000);
 
-        projectFileStorage.update(beforeUpdate);
+        projectFileStorage.update(beforeUpdate, projectEntry);
 
         WebFormUpload updatedFile = getUploadedFileAndAssertThatItIsTheOnlyOne();
 
@@ -135,7 +137,7 @@ public class ProjectFileStorageTest {
         addOneFile();
         WebFormUpload uploadedFile = getUploadedFileAndAssertThatItIsTheOnlyOne();
 
-        WebFormUpload byId = projectFileStorage.byId(uploadedFile.getId());
+        WebFormUpload byId = projectFileStorage.fileById(uploadedFile.getId());
 
         assertFieldsEquals(uploadedFile, byId);
     }
@@ -150,7 +152,7 @@ public class ProjectFileStorageTest {
     }
 
     private void addOneFile() {
-        projectFileStorage.save(projectEntry, testFileForUpload);
+        projectFileStorage.save(testFileForUpload, projectEntry);
     }
 
     private ProjectEntry testProjectEntry() {

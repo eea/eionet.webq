@@ -21,11 +21,12 @@ package eionet.webq.web.controller;
  *        Anton Dmitrijev
  */
 
-import eionet.webq.dao.ProjectFileStorage;
+import eionet.webq.dao.FileStorage;
 import eionet.webq.dto.ProjectEntry;
 import eionet.webq.dto.WebFormUpload;
 import eionet.webq.service.ProjectService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -37,7 +38,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.validation.Valid;
-
 
 /**
  * Spring controller to manage projects.
@@ -68,7 +68,8 @@ public class ProjectsController {
      * Access to project files.
      */
     @Autowired
-    private ProjectFileStorage projectFileStorage;
+    @Qualifier("project-files")
+    private FileStorage<ProjectEntry, WebFormUpload> projectFileStorage;
 
     /**
      * All projects handler.
@@ -92,7 +93,6 @@ public class ProjectsController {
     public String addProject(Model model) {
         return editForm(model, new ProjectEntry());
     }
-
 
     /**
      * Add or edit project.
@@ -164,13 +164,13 @@ public class ProjectsController {
     @RequestMapping(value = "/{projectFolderId}/webform/save")
     public String newWebForm(@PathVariable String projectFolderId, @Valid @ModelAttribute WebFormUpload webFormUpload,
             BindingResult bindingResult, Model model) {
-        //TODO clear object on success
+        // TODO clear object on success
         ProjectEntry currentProject = projectService.getByProjectId(projectFolderId);
         if (!bindingResult.hasErrors()) {
             if (webFormUpload.getId() > 0) {
-                projectFileStorage.update(webFormUpload);
+                projectFileStorage.update(webFormUpload, currentProject);
             } else {
-                projectFileStorage.save(currentProject, webFormUpload);
+                projectFileStorage.save(webFormUpload, currentProject);
             }
         }
         return viewProject(currentProject, webFormUpload, model);
@@ -186,7 +186,7 @@ public class ProjectsController {
      */
     @RequestMapping(value = "/{projectFolderId}/webform/edit")
     public String editWebForm(@PathVariable String projectFolderId, @RequestParam int fileId, Model model) {
-        return viewProject(projectService.getByProjectId(projectFolderId), projectFileStorage.byId(fileId), model);
+        return viewProject(projectService.getByProjectId(projectFolderId), projectFileStorage.fileById(fileId), model);
     }
 
     /**
@@ -199,9 +199,9 @@ public class ProjectsController {
      */
     @RequestMapping(value = "/{projectFolderId}/webform/remove")
     public String removeWebForm(@PathVariable String projectFolderId, @RequestParam int fileId, Model model) {
-        //TODO project id in remove
-        projectFileStorage.remove(fileId);
-        return viewProject(projectFolderId, model);
+        ProjectEntry byProjectId = projectService.getByProjectId(projectFolderId);
+        projectFileStorage.remove(fileId, byProjectId);
+        return viewProject(byProjectId, model);
     }
 
     /**
@@ -229,6 +229,18 @@ public class ProjectsController {
         model.addAttribute(ALL_PROJECT_FILES_ATTRIBUTE, projectFileStorage.allFilesFor(entry));
         addWebFormToModel(model, webFormUpload);
         return "view_project";
+    }
+
+    /**
+     * {@link ProjectsController#viewProject(ProjectEntry, WebFormUpload, Model)}
+     * with new {@link WebFormUpload} added to model.
+     *
+     * @param project project in view
+     * @param model model attribute holder
+     * @return view name
+     */
+    private String viewProject(ProjectEntry project, Model model) {
+        return viewProject(project, new WebFormUpload(), model);
     }
 
     /**

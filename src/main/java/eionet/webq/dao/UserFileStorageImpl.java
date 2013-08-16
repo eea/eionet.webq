@@ -22,6 +22,7 @@ package eionet.webq.dao;
 
 import eionet.webq.dto.UploadedXmlFile;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.support.AbstractLobCreatingPreparedStatementCallback;
@@ -36,10 +37,11 @@ import java.sql.Timestamp;
 import java.util.Collection;
 
 /**
- * {@link UserFileStorage} implementation.
+ * {@link FileStorage} implementation for user files.
  */
 @Repository
-public class UserFileStorageImpl implements UserFileStorage {
+@Qualifier("user-files")
+public class UserFileStorageImpl implements FileStorage<String, UploadedXmlFile> {
     /**
      * {@link JdbcTemplate} to perform data access operations.
      */
@@ -67,7 +69,7 @@ public class UserFileStorageImpl implements UserFileStorage {
     }
 
     @Override
-    public UploadedXmlFile fileContentById(int id, String userId) {
+    public UploadedXmlFile fileContentBy(int id, String userId) {
         Object[] params = {id, userId};
         return jdbcTemplate.queryForObject("SELECT file_name, xml FROM user_xml WHERE id = ? AND user_id = ?", params,
                 new RowMapper<UploadedXmlFile>() {
@@ -79,20 +81,7 @@ public class UserFileStorageImpl implements UserFileStorage {
     }
 
     @Override
-    public Collection<UploadedXmlFile> allUploadedFiles(String userId) {
-        return jdbcTemplate.query(
-                "SELECT id, file_name, xml_schema, file_size_in_bytes, created, updated FROM user_xml WHERE user_id = ? "
-                        + "ORDER BY updated DESC", new Object[] {userId}, new RowMapper<UploadedXmlFile>() {
-                    @Override
-                    public UploadedXmlFile mapRow(ResultSet rs, int rowNum) throws SQLException {
-                        return new UploadedXmlFile().setId(rs.getInt(1)).setName(rs.getString(2)).setXmlSchema(rs.getString(3))
-                                .setSizeInBytes(rs.getLong(4)).setCreated(rs.getTimestamp(5)).setUpdated(rs.getTimestamp(6));
-                    }
-                });
-    }
-
-    @Override
-    public void updateContent(final UploadedXmlFile file, final String userId) {
+    public void update(final UploadedXmlFile file, final String userId) {
         jdbcTemplate.execute("UPDATE user_xml SET xml = ?, file_size_in_bytes = ?, updated = ? WHERE id = ? and user_id= ?",
                 new AbstractLobCreatingPreparedStatementCallback(lobHandler) {
                     @Override
@@ -104,5 +93,28 @@ public class UserFileStorageImpl implements UserFileStorage {
                         ps.setString(5, userId);
                     }
                 });
+    }
+
+    @Override
+    public Collection<UploadedXmlFile> allFilesFor(String userId) {
+        return jdbcTemplate.query(
+                "SELECT id, file_name, xml_schema, file_size_in_bytes, created, updated FROM user_xml WHERE user_id = ? "
+                        + "ORDER BY updated DESC", new Object[] {userId}, new RowMapper<UploadedXmlFile>() {
+            @Override
+            public UploadedXmlFile mapRow(ResultSet rs, int rowNum) throws SQLException {
+                return new UploadedXmlFile().setId(rs.getInt(1)).setName(rs.getString(2)).setXmlSchema(rs.getString(3))
+                        .setSizeInBytes(rs.getLong(4)).setCreated(rs.getTimestamp(5)).setUpdated(rs.getTimestamp(6));
+            }
+        });
+    }
+
+    @Override
+    public void remove(int id, String s) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public UploadedXmlFile fileById(int id) {
+        throw new UnsupportedOperationException();
     }
 }
