@@ -54,7 +54,7 @@ public class ProjectsController {
     /**
      * Attribute name for storing project entry in model.
      */
-    static final String WEB_FORM_UPLOAD_ATTRIBUTE = "webformUpload";
+    static final String WEB_FORM_UPLOAD_ATTRIBUTE = "webFormUpload";
     /**
      * Attribute name for storing project entry in model.
      */
