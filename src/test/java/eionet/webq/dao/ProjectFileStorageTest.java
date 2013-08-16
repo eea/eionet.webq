@@ -35,6 +35,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import java.util.Collection;
 
 import static org.hamcrest.core.IsEqual.equalTo;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
@@ -69,6 +70,19 @@ public class ProjectFileStorageTest {
     }
 
     @Test
+    public void allFilesQueryDoesNotReturnFileContent() throws Exception {
+        addOneFile();
+        addOneFile();
+
+        Collection<WebFormUpload> webFormUploads = projectFileStorage.allFilesFor(testProjectEntry());
+        assertThat(webFormUploads.size(), equalTo(2));
+
+        for (WebFormUpload webFormUpload : webFormUploads) {
+            assertNull(webFormUpload.getFile());
+        }
+    }
+
+    @Test
     public void saveWebformAndRetrieveItBackWithSameData() throws Exception {
         addOneFile();
 
@@ -82,13 +96,6 @@ public class ProjectFileStorageTest {
         assertThat(uploadedFile.getXmlSchema(), equalTo(testFileForUpload.getXmlSchema()));
         assertThat(uploadedFile.isActive(), equalTo(testFileForUpload.isActive()));
         assertThat(uploadedFile.isMainForm(), equalTo(testFileForUpload.isMainForm()));
-    }
-
-    private WebFormUpload getUploadedFileAndAssertThatItIsTheOnlyOne() {
-        Collection<WebFormUpload> webFormUploads = projectFileStorage.allFilesFor(projectEntry);
-        assertThat(webFormUploads.size(), equalTo(1));
-
-        return webFormUploads.iterator().next();
     }
 
     @Test
@@ -115,7 +122,7 @@ public class ProjectFileStorageTest {
 
         projectFileStorage.update(beforeUpdate, projectEntry);
 
-        WebFormUpload updatedFile = getUploadedFileAndAssertThatItIsTheOnlyOne();
+        WebFormUpload updatedFile = projectFileStorage.fileById(beforeUpdate.getId());
         assertFieldsEquals(beforeUpdate, updatedFile);
     }
 
@@ -140,6 +147,13 @@ public class ProjectFileStorageTest {
         WebFormUpload byId = projectFileStorage.fileById(uploadedFile.getId());
 
         assertFieldsEquals(uploadedFile, byId);
+    }
+
+    private WebFormUpload getUploadedFileAndAssertThatItIsTheOnlyOne() {
+        Collection<WebFormUpload> webFormUploads = projectFileStorage.allFilesFor(projectEntry);
+        assertThat(webFormUploads.size(), equalTo(1));
+
+        return projectFileStorage.fileById(webFormUploads.iterator().next().getId());
     }
 
     private void assertFieldsEquals(WebFormUpload before, WebFormUpload after) {

@@ -95,7 +95,6 @@ public class ProjectFileStorageImpl extends AbstractDao<WebFormUpload> implement
         });
     }
 
-    // TODO file content not needed
     @Override
     public Collection<WebFormUpload> allFilesFor(ProjectEntry project) {
         return template.query(sqlProperties.getProperty("select.all.project.files"), rowMapper(), project.getId());
