@@ -21,6 +21,7 @@
     <legend>Project files</legend>
     <c:if test="${not empty allProjectFiles}">
         <table>
+            <%--TODO errors--%>
             <thead>
                 <tr>
                     <td>Title</td>
@@ -29,6 +30,7 @@
                     <td>Active?</td>
                     <td>Main form?</td>
                     <td>Username</td>
+                    <td>Actions</td>
                 </tr>
             </thead>
             <c:forEach items="${allProjectFiles}" var="projectFile">
@@ -39,6 +41,7 @@
                     <td>${projectFile.active}</td>
                     <td>${projectFile.mainForm}</td>
                     <td>${projectFile.userName}</td>
+                    <td><a href="<c:url value="/projects/${projectEntry.projectId}/webform/remove/?fileId=${projectFile.id}"/>">Remove</a></td>
                 </tr>
             </c:forEach>
         </table>

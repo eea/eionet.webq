@@ -164,11 +164,27 @@ public class ProjectsController {
     @RequestMapping(value = "/{projectFolderId}/webform/new")
     public String newWebForm(@PathVariable String projectFolderId, @Valid @ModelAttribute WebFormUpload webFormUpload,
             BindingResult bindingResult, Model model) {
+        //TODO clear object on success
         ProjectEntry currentProject = projectService.getByProjectId(projectFolderId);
         if (!bindingResult.hasErrors()) {
             projectFileStorage.save(currentProject, webFormUpload);
         }
         return viewProject(currentProject, webFormUpload, model);
+    }
+
+    /**
+     * Removes webform from project.
+     *
+     * @param projectFolderId project folder id associated with file to remove
+     * @param fileId file to be removed
+     * @param model model attribute holder
+     * @return view name
+     */
+    @RequestMapping(value = "/{projectFolderId}/webform/remove")
+    public String removeWebForm(@PathVariable String projectFolderId, @RequestParam int fileId, Model model) {
+        //TODO project id in remove
+        projectFileStorage.remove(fileId);
+        return viewProject(projectFolderId, model);
     }
 
     /**

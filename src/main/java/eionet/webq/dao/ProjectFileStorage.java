@@ -30,6 +30,7 @@ import java.util.Collection;
  *
  * @see eionet.webq.dto.WebFormUpload
  */
+//TODO common interface with UserFileStorage
 public interface ProjectFileStorage {
     /**
      * Save uploaded file to storage.

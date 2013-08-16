@@ -171,12 +171,30 @@ public class ProjectsControllerIntegrationTest extends AbstractProjectsControlle
     public void loadsAllProjectFilesToModel() throws Exception {
         uploadFilesForDefaultProject(2);
         ResultActions projectViewResult = getProjectViewResult();
-        @SuppressWarnings("unchecked")
-        List<WebFormUpload> allProjectFiles =
-                (List<WebFormUpload>) projectViewResult.andReturn().getModelAndView().getModel()
-                        .get(ProjectsController.ALL_PROJECT_FILES_ATTRIBUTE);
+        List<WebFormUpload> allProjectFiles = allWebFormUploads(projectViewResult);
 
         assertThat(allProjectFiles.size(), equalTo(2));
+    }
+
+    @Test
+    public void allowToRemoveProjectFile() throws Exception {
+        uploadFilesForDefaultProject(1);
+        ProjectEntry defaultProject = projectFolders.getByProjectId(DEFAULT_PROJECT_ID);
+
+        Collection<WebFormUpload> webFormUploads = projectFileStorage.allFilesFor(defaultProject);
+        assertThat(webFormUploads.size(), equalTo(1));
+
+        WebFormUpload webFormUpload = webFormUploads.iterator().next();
+
+        request(get("/projects/" + DEFAULT_PROJECT_ID + "/webform/remove").param("fileId", String.valueOf(webFormUpload.getId())));
+
+        assertThat(projectFileStorage.allFilesFor(defaultProject).size(), equalTo(0));
+    }
+
+    @SuppressWarnings("unchecked")
+    private List<WebFormUpload> allWebFormUploads(ResultActions projectViewResult) {
+        return (List<WebFormUpload>) projectViewResult.andReturn().getModelAndView().getModel()
+                .get(ProjectsController.ALL_PROJECT_FILES_ATTRIBUTE);
     }
 
     private ResultActions getProjectViewResult() throws Exception {
