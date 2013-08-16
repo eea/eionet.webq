@@ -32,6 +32,15 @@ import java.util.Collection;
  */
 //TODO common interface with UserFileStorage
 public interface ProjectFileStorage {
+
+    /**
+     * Retrieves file by id.
+     *
+     * @param id file id
+     * @return uploaded file
+     */
+    WebFormUpload byId(int id);
+
     /**
      * Save uploaded file to storage.
      *

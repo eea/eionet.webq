@@ -114,12 +114,7 @@ public class ProjectFileStorageTest {
         projectFileStorage.update(beforeUpdate);
 
         WebFormUpload updatedFile = getUploadedFileAndAssertThatItIsTheOnlyOne();
-        assertThat(updatedFile.getTitle(), equalTo(beforeUpdate.getTitle()));
-        assertThat(updatedFile.getXmlSchema(), equalTo(beforeUpdate.getXmlSchema()));
-        assertThat(updatedFile.getFile(), equalTo(beforeUpdate.getFile()));
-        assertThat(updatedFile.getDescription(), equalTo(beforeUpdate.getDescription()));
-        assertThat(updatedFile.isActive(), equalTo(beforeUpdate.isActive()));
-        assertThat(updatedFile.isMainForm(), equalTo(beforeUpdate.isMainForm()));
+        assertFieldsEquals(beforeUpdate, updatedFile);
     }
 
     @Test
@@ -133,6 +128,25 @@ public class ProjectFileStorageTest {
         WebFormUpload updatedFile = getUploadedFileAndAssertThatItIsTheOnlyOne();
 
         assertTrue(updatedFile.getProjectId() != beforeUpdate.getProjectId());
+    }
+
+    @Test
+    public void allowToGetFileById() throws Exception {
+        addOneFile();
+        WebFormUpload uploadedFile = getUploadedFileAndAssertThatItIsTheOnlyOne();
+
+        WebFormUpload byId = projectFileStorage.byId(uploadedFile.getId());
+
+        assertFieldsEquals(uploadedFile, byId);
+    }
+
+    private void assertFieldsEquals(WebFormUpload before, WebFormUpload after) {
+        assertThat(after.getTitle(), equalTo(before.getTitle()));
+        assertThat(after.getXmlSchema(), equalTo(before.getXmlSchema()));
+        assertThat(after.getFile(), equalTo(before.getFile()));
+        assertThat(after.getDescription(), equalTo(before.getDescription()));
+        assertThat(after.isActive(), equalTo(before.isActive()));
+        assertThat(after.isMainForm(), equalTo(before.isMainForm()));
     }
 
     private void addOneFile() {

@@ -36,12 +36,16 @@
             <c:forEach items="${allProjectFiles}" var="projectFile">
                 <tr>
                     <td>${projectFile.title}</td>
+                    <%--TODO allow file download--%>
                     <td>${projectFile.description}</td>
                     <td>${projectFile.xmlSchema}</td>
                     <td>${projectFile.active}</td>
                     <td>${projectFile.mainForm}</td>
                     <td>${projectFile.userName}</td>
-                    <td><a href="<c:url value="/projects/${projectEntry.projectId}/webform/remove/?fileId=${projectFile.id}"/>">Remove</a></td>
+                    <td>
+                        <a href="<c:url value="/projects/${projectEntry.projectId}/webform/edit/?fileId=${projectFile.id}"/>">Edit</a>
+                        <a href="<c:url value="/projects/${projectEntry.projectId}/webform/remove/?fileId=${projectFile.id}"/>">Remove</a>
+                    </td>
                 </tr>
             </c:forEach>
         </table>
@@ -49,8 +53,9 @@
 </fieldset>
 
 <fieldset>
-    <legend>New webform</legend>
-    <f:form commandName="webFormUpload" action="webform/new" method="post" enctype="multipart/form-data">
+    <legend>Save webform</legend>
+    <c:url var="saveUrl" value="/projects/${projectEntry.projectId}/webform/save"/>
+    <f:form commandName="webFormUpload" action="${saveUrl}" method="post" enctype="multipart/form-data">
         <p>
             <label for="title">Title</label>
             <f:input path="title"/>
@@ -79,6 +84,7 @@
             <label for="userName">Username</label>
             <f:input path="userName"/>
         </p>
-        <input type="submit" value="Add new form"/>
+        <f:hidden path="id"/>
+        <input type="submit" value="Save form"/>
     </f:form>
 </fieldset>

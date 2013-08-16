@@ -161,15 +161,32 @@ public class ProjectsController {
      * @param bindingResult request binding to {@link WebFormUpload} result
      * @return view name
      */
-    @RequestMapping(value = "/{projectFolderId}/webform/new")
+    @RequestMapping(value = "/{projectFolderId}/webform/save")
     public String newWebForm(@PathVariable String projectFolderId, @Valid @ModelAttribute WebFormUpload webFormUpload,
             BindingResult bindingResult, Model model) {
         //TODO clear object on success
         ProjectEntry currentProject = projectService.getByProjectId(projectFolderId);
         if (!bindingResult.hasErrors()) {
-            projectFileStorage.save(currentProject, webFormUpload);
+            if (webFormUpload.getId() > 0) {
+                projectFileStorage.update(webFormUpload);
+            } else {
+                projectFileStorage.save(currentProject, webFormUpload);
+            }
         }
         return viewProject(currentProject, webFormUpload, model);
+    }
+
+    /**
+     * Allows to edit file.
+     *
+     * @param projectFolderId project id for webform
+     * @param fileId file id to be edited
+     * @param model model attribute holder
+     * @return view name
+     */
+    @RequestMapping(value = "/{projectFolderId}/webform/edit")
+    public String editWebForm(@PathVariable String projectFolderId, @RequestParam int fileId, Model model) {
+        return viewProject(projectService.getByProjectId(projectFolderId), projectFileStorage.byId(fileId), model);
     }
 
     /**

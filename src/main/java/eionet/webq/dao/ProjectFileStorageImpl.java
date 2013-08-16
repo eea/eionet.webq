@@ -51,6 +51,11 @@ public class ProjectFileStorageImpl implements ProjectFileStorage {
     private LobHandler lobHandler;
 
     @Override
+    public WebFormUpload byId(int id) {
+        return template.queryForObject("SELECT * FROM project_file WHERE id=?", rowMapper(), id);
+    }
+
+    @Override
     public void save(final ProjectEntry project, final WebFormUpload webFormUpload) {
         template.execute(
                 "INSERT INTO project_file(project_id, title, file, xml_schema, description, user_name, active, main_form)"
@@ -71,6 +76,7 @@ public class ProjectFileStorageImpl implements ProjectFileStorage {
 
     @Override
     public void update(final WebFormUpload webFormUpload) {
+        //TODO do not save empty file
         template.execute("UPDATE project_file SET title=?, file=?, xml_schema=?, description=?, user_name=?, active=?, main_form=?" +
                 " WHERE id=?", new AbstractLobCreatingPreparedStatementCallback(lobHandler) {
             @Override
@@ -96,6 +102,10 @@ public class ProjectFileStorageImpl implements ProjectFileStorage {
     @Override
     public Collection<WebFormUpload> allFilesFor(ProjectEntry project) {
         return template.query("SELECT * FROM project_file WHERE project_id=?",
-                BeanPropertyRowMapper.newInstance(WebFormUpload.class), project.getId());
+                rowMapper(), project.getId());
+    }
+
+    private BeanPropertyRowMapper<WebFormUpload> rowMapper() {
+        return BeanPropertyRowMapper.newInstance(WebFormUpload.class);
     }
 }
