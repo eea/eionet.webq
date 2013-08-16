@@ -21,6 +21,7 @@ package eionet.webq.web.controller;
  *        Anton Dmitrijev
  */
 
+import eionet.webq.dao.ProjectFileStorage;
 import eionet.webq.dto.ProjectEntry;
 import eionet.webq.dto.WebFormUpload;
 import eionet.webq.service.ProjectService;
@@ -30,10 +31,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.PathVariable;
 
 import javax.validation.Valid;
 
@@ -55,10 +56,19 @@ public class ProjectsController {
      */
     static final String WEB_FORM_UPLOAD_ATTRIBUTE = "webformUpload";
     /**
+     * Attribute name for storing project entry in model.
+     */
+    static final String ALL_PROJECT_FILES_ATTRIBUTE = "allProjectFiles";
+    /**
      * Access to project folders.
      */
     @Autowired
     private ProjectService projectService;
+    /**
+     * Access to project files.
+     */
+    @Autowired
+    private ProjectFileStorage projectFileStorage;
 
     /**
      * All projects handler.
@@ -145,17 +155,19 @@ public class ProjectsController {
     /**
      * Allow to add new webform under project folder.
      *
-     * @param projectId project id for webform
+     * @param projectFolderId project id for webform
      * @param model model attribute holder
      * @param webFormUpload web form upload related object
      * @param bindingResult request binding to {@link WebFormUpload} result
      * @return view name
      */
-    @RequestMapping(value = "/{projectId}/webform/new")
-    public String newWebForm(@PathVariable String projectId, @Valid @ModelAttribute WebFormUpload webFormUpload,
+    @RequestMapping(value = "/{projectFolderId}/webform/new")
+    public String newWebForm(@PathVariable String projectFolderId, @Valid @ModelAttribute WebFormUpload webFormUpload,
             BindingResult bindingResult, Model model) {
-        ProjectEntry byProjectId = projectService.getByProjectId(projectId);
-        return viewProject(byProjectId, webFormUpload, model);
+        if (!bindingResult.hasErrors()) {
+            projectFileStorage.save(projectService.getByProjectId(projectFolderId), webFormUpload);
+        }
+        return viewProject(null, webFormUpload, model);
     }
 
     /**
@@ -180,8 +192,9 @@ public class ProjectsController {
      */
     private String viewProject(ProjectEntry entry, WebFormUpload webFormUpload, Model model) {
         addProjectToModel(model, entry);
+
         addWebFormToModel(model, webFormUpload);
-        return "view_project";    
+        return "view_project";
     }
 
     /**

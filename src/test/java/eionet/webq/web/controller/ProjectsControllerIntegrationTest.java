@@ -1,5 +1,6 @@
 package eionet.webq.web.controller;
 
+import eionet.webq.dao.ProjectFileStorage;
 import eionet.webq.dao.ProjectFolders;
 import eionet.webq.dto.ProjectEntry;
 import eionet.webq.dto.WebFormUpload;
@@ -47,10 +48,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @RunWith(SpringJUnit4ClassRunner.class)
 public class ProjectsControllerIntegrationTest extends AbstractProjectsControllerTests {
     private static final String ADD_EDIT_PROJECT_VIEW = "add_edit_project";
-    private static final String DEFAULT_PROJECTID = "DEFAULT_PROJECTID";
+    private static final String DEFAULT_PROJECT_ID = "DEFAULT_PROJECT_ID";
     public static final String PROJECT_ID_PARAM = "projectId";
     @Autowired
     private ProjectFolders projectFolders;
+    @Autowired
+    private ProjectFileStorage projectFileStorage;
 
     @Test
     public void returnsAllProjectsViewName() throws Exception {
@@ -120,8 +123,8 @@ public class ProjectsControllerIntegrationTest extends AbstractProjectsControlle
         String projectIdUpdated = "projectIdUpdated";
         String newDescription = "newDescription";
         MockHttpServletRequestBuilder post =
-                post("/projects/save").param("id", Integer.toString(byProjectId.getId())).param(PROJECT_ID_PARAM, projectIdUpdated)
-                        .param("description", newDescription);
+                post("/projects/save").param("id", Integer.toString(byProjectId.getId()))
+                        .param(PROJECT_ID_PARAM, projectIdUpdated).param("description", newDescription);
         request(post);
 
         ProjectEntry updatedProject = projectFolders.getByProjectId(projectIdUpdated);
@@ -133,25 +136,56 @@ public class ProjectsControllerIntegrationTest extends AbstractProjectsControlle
 
     @Test
     public void allowToViewProjectFolderContent() throws Exception {
-        saveProjectWithId(DEFAULT_PROJECTID);
-        ResultActions request = request(get("/projects/" + DEFAULT_PROJECTID + "/view"));
+        saveProjectWithId(DEFAULT_PROJECT_ID);
+        ResultActions request = request(get("/projects/" + DEFAULT_PROJECT_ID + "/view"));
         ProjectEntry project = assertViewNameAndReturnProjectEntryFromModel(request, "view_project");
 
-        assertThat(project.getProjectId(), equalTo(DEFAULT_PROJECTID));
+        assertThat(project.getProjectId(), equalTo(DEFAULT_PROJECT_ID));
     }
 
     @Test
     public void allowToUploadAWebFormForAProject() throws Exception {
-        saveProjectWithId(DEFAULT_PROJECTID);
-        String title = "test webform";
-        byte[] content = "my-webform".getBytes();
-        ResultActions request = request(fileUpload("/projects/" + DEFAULT_PROJECTID + "/webform/new").file("file", content)
-                .param("title", title).param("status", "true"));
+        saveProjectWithId(DEFAULT_PROJECT_ID);
+        WebFormUpload webFormUpload = testWebFormUpload();
+        ResultActions request = uploadWebFormForDefaultProject(webFormUpload);
+        WebFormUpload uploaded =
+                (WebFormUpload) request.andReturn().getModelAndView().getModel().get(WEB_FORM_UPLOAD_ATTRIBUTE);
 
-        WebFormUpload webformUpload = (WebFormUpload) request.andReturn().getModelAndView().getModel().get(WEB_FORM_UPLOAD_ATTRIBUTE);
+        assertThat(uploaded.getTitle(), equalTo(webFormUpload.getTitle()));
+        assertThat(uploaded.getFile(), equalTo(webFormUpload.getFile()));
+        assertThat(uploaded.isActive(), equalTo(webFormUpload.isActive()));
+        assertThat(uploaded.getDescription(), equalTo(webFormUpload.getDescription()));
+    }
 
-        assertThat(webformUpload.getTitle(), equalTo(title));
-        assertThat(webformUpload.getFile(), equalTo(content));
+    @Test
+    public void savesUploadedWebFormToStorage() throws Exception {
+        saveProjectWithId(DEFAULT_PROJECT_ID);
+        WebFormUpload webFormUpload = testWebFormUpload();
+        uploadWebFormForDefaultProject(webFormUpload);
+        ProjectEntry defaultProject = projectFolders.getByProjectId(DEFAULT_PROJECT_ID);
+
+        Collection<WebFormUpload> uploadedFilesForProject = projectFileStorage.allFilesFor(defaultProject);
+
+        assertThat(uploadedFilesForProject.size(), equalTo(1));
+    }
+
+    @Test
+    public void loadsAllProjectFilesToModel() throws Exception {
+
+    }
+
+    private WebFormUpload testWebFormUpload() {
+        WebFormUpload webFormUpload = new WebFormUpload();
+        webFormUpload.setDescription("test description");
+        webFormUpload.setTitle("title");
+        webFormUpload.setFile("test-content".getBytes());
+        return webFormUpload;
+    }
+
+    private ResultActions uploadWebFormForDefaultProject(WebFormUpload webFormUpload) throws Exception {
+        return request(fileUpload("/projects/" + DEFAULT_PROJECT_ID + "/webform/new").file("file", webFormUpload.getFile())
+                .param("title", webFormUpload.getTitle()).param("active", Boolean.toString(webFormUpload.isActive()))
+                .param("description", webFormUpload.getDescription()));
     }
 
     private void saveProjectWithId(String projectId) {
