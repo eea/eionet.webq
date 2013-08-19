@@ -25,16 +25,8 @@ import eionet.webq.dto.UploadedXmlFile;
 import eionet.webq.dto.XmlSaveResult;
 import eionet.webq.service.ConversionService;
 import eionet.webq.service.UploadedXmlFileService;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Collection;
-import javax.servlet.ServletOutputStream;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.validation.Valid;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -43,6 +35,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
+import java.io.InputStream;
+import java.util.Collection;
 
 /**
  * Base controller for front page actions.
@@ -98,20 +95,6 @@ public class BaseController {
     }
 
     /**
-     * Download uploaded file action.
-     *
-     * @param fileId requested file id
-     * @param response http response to write file
-     */
-    @RequestMapping(value = "/download")
-    public void downloadFile(@RequestParam int fileId, HttpServletResponse response) {
-        UploadedXmlFile file = uploadedXmlFileService.getById(fileId);
-        response.setContentType(MediaType.APPLICATION_XML_VALUE);
-        response.addHeader("Content-Disposition", "attachment;filename=" + file.getName());
-        writeToResponse(response, file.getContent());
-    }
-
-    /**
      * Update file content action. The action is called from XForms and it returns XML formatted result.
      *
      * @param fileId file id to update
@@ -141,19 +124,6 @@ public class BaseController {
     }
 
     /**
-     * Performs conversion of specified {@link UploadedXmlFile} to specific format.
-     * Format is defined by conversionId.
-     * @param fileId file id, which will be loaded and converted
-     * @param conversionId id of conversion to be used
-     * @param response object where conversion result will be written
-     */
-    @RequestMapping("convert")
-    public void convertXmlFile(@RequestParam int fileId, @RequestParam int conversionId, HttpServletResponse response) {
-        UploadedXmlFile fileContent = uploadedXmlFileService.getById(fileId);
-        writeToResponse(response, conversionService.convert(fileContent, conversionId));
-    }
-
-    /**
      * Loads and sets conversions for files uploaded by user.
      *
      * @return all uploaded files with available conversions set.
@@ -164,25 +134,5 @@ public class BaseController {
             uploadedXmlFile.setAvailableConversions(conversionService.conversionsFor(uploadedXmlFile.getXmlSchema()));
         }
         return uploadedXmlFiles;
-    }
-
-    /**
-     * Writes specified content to http response.
-     * @param response http response
-     * @param data content to be written to response
-     */
-    private void writeToResponse(HttpServletResponse response, byte[] data) {
-        ServletOutputStream output = null;
-        try {
-            response.setContentLength(data.length);
-
-            output = response.getOutputStream();
-            IOUtils.write(data, output);
-            output.flush();
-        } catch (IOException e) {
-            throw new RuntimeException("Unable to write response", e);
-        } finally {
-            IOUtils.closeQuietly(output);
-        }
     }
 }

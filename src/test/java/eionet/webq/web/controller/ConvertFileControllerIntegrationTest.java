@@ -72,7 +72,7 @@ public class ConvertFileControllerIntegrationTest extends AbstractContextControl
         UploadedXmlFile uploadedXmlFile =
                 uploadFileAndTakeFirstUploadedFile(createMockMultipartFile("test-file.xml", FILE_CONTENT));
 
-        request(get("/convert?fileId={fileId}&conversionId={convId}", uploadedXmlFile.getId(), 1).session(mockHttpSession))
+        request(get("/download/convert?fileId={fileId}&conversionId={convId}", uploadedXmlFile.getId(), 1).session(mockHttpSession))
                 .andExpect(MockMvcResultMatchers.content().bytes(conversionResponse.getBytes()));
     }
 

@@ -115,6 +115,6 @@ public class FileUploadControllerIntegrationTest extends AbstractContextControll
     }
 
     private ResultActions downloadFile(int fileId) throws Exception {
-        return request(postWithMockSession("/download").param("fileId", Integer.toString(fileId)));
+        return request(postWithMockSession("/download/user_file").param("fileId", Integer.toString(fileId)));
     }
 }
