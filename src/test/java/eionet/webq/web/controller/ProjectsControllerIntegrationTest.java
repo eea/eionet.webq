@@ -150,6 +150,12 @@ public class ProjectsControllerIntegrationTest extends AbstractProjectsControlle
     }
 
     @Test
+    public void allowToAddNewProjectFile() throws Exception {
+        saveProjectWithId(DEFAULT_PROJECT_ID);
+        request(get("/projects/" + DEFAULT_PROJECT_ID + "/webform/add")).andExpect(view().name("add_edit_project_file"));
+    }
+
+    @Test
     public void allowToUploadAWebFormForAProject() throws Exception {
         saveProjectWithId(DEFAULT_PROJECT_ID);
         WebFormUpload webFormUpload = testWebFormUpload();
@@ -196,6 +202,7 @@ public class ProjectsControllerIntegrationTest extends AbstractProjectsControlle
         uploadFilesForDefaultProject(1);
         final WebFormUpload webFormUpload = theOnlyOneUploadedFile();
         request(post("/projects/" + DEFAULT_PROJECT_ID + "/webform/edit").param("fileId", String.valueOf(webFormUpload.getId())))
+                .andExpect(view().name("add_edit_project_file"))
                 .andExpect(model().attribute(WEB_FORM_UPLOAD_ATTRIBUTE, new BaseMatcher<WebFormUpload>() {
                     @Override
                     public boolean matches(Object o) {

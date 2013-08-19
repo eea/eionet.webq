@@ -149,7 +149,7 @@ public class ProjectsController {
      */
     @RequestMapping(value = "/{projectId}/view")
     public String viewProject(@PathVariable String projectId, Model model) {
-        return viewProject(projectService.getByProjectId(projectId), new WebFormUpload(), model);
+        return viewProject(projectService.getByProjectId(projectId), model);
     }
 
     /**
@@ -165,15 +165,29 @@ public class ProjectsController {
     public String newWebForm(@PathVariable String projectFolderId, @Valid @ModelAttribute WebFormUpload webFormUpload,
             BindingResult bindingResult, Model model) {
         // TODO clear object on success
+        // TODO empty file on update
         ProjectEntry currentProject = projectService.getByProjectId(projectFolderId);
-        if (!bindingResult.hasErrors()) {
-            if (webFormUpload.getId() > 0) {
-                projectFileStorage.update(webFormUpload, currentProject);
-            } else {
-                projectFileStorage.save(webFormUpload, currentProject);
-            }
+        if (bindingResult.hasErrors()) {
+            return addOrEditProjectFile(currentProject, webFormUpload, model);
         }
-        return viewProject(currentProject, webFormUpload, model);
+        if (webFormUpload.getId() > 0) {
+            projectFileStorage.update(webFormUpload, currentProject);
+        } else {
+            projectFileStorage.save(webFormUpload, currentProject);
+        }
+        return viewProject(currentProject, model);
+    }
+
+    /**
+     * Allows to add file.
+     *
+     * @param projectFolderId project id for webform
+     * @param model model attribute holder
+     * @return view name
+     */
+    @RequestMapping(value = "/{projectFolderId}/webform/add")
+    public String addWebForm(@PathVariable String projectFolderId, Model model) {
+        return addOrEditProjectFile(projectService.getByProjectId(projectFolderId), new WebFormUpload(), model);
     }
 
     /**
@@ -186,7 +200,7 @@ public class ProjectsController {
      */
     @RequestMapping(value = "/{projectFolderId}/webform/edit")
     public String editWebForm(@PathVariable String projectFolderId, @RequestParam int fileId, Model model) {
-        return viewProject(projectService.getByProjectId(projectFolderId), projectFileStorage.fileById(fileId), model);
+        return addOrEditProjectFile(projectService.getByProjectId(projectFolderId), projectFileStorage.fileById(fileId), model);
     }
 
     /**
@@ -217,30 +231,30 @@ public class ProjectsController {
     }
 
     /**
-     * Sets model objects and returns project view.
+     * Sets model objects and returns view name.
      *
-     * @param entry project to be displayed
-     * @param webFormUpload webform upload data
+     * @param entry project in view
      * @param model model attribute holder
      * @return view name
      */
-    private String viewProject(ProjectEntry entry, WebFormUpload webFormUpload, Model model) {
+    private String viewProject(ProjectEntry entry, Model model) {
         addProjectToModel(model, entry);
         model.addAttribute(ALL_PROJECT_FILES_ATTRIBUTE, projectFileStorage.allFilesFor(entry));
-        addWebFormToModel(model, webFormUpload);
         return "view_project";
     }
 
     /**
-     * {@link ProjectsController#viewProject(ProjectEntry, WebFormUpload, Model)}
-     * with new {@link WebFormUpload} added to model.
+     * Sets model objects and returns view name.
      *
      * @param project project in view
+     * @param webFormUpload web form upload
      * @param model model attribute holder
      * @return view name
      */
-    private String viewProject(ProjectEntry project, Model model) {
-        return viewProject(project, new WebFormUpload(), model);
+    private String addOrEditProjectFile(ProjectEntry project, WebFormUpload webFormUpload, Model model) {
+        addProjectToModel(model, project);
+        addWebFormToModel(model, webFormUpload);
+        return "add_edit_project_file";
     }
 
     /**
