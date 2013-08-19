@@ -42,7 +42,7 @@ import static org.junit.Assert.assertTrue;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {ApplicationTestContextWithMockSession.class})
-public class ProjectFileStorageTest {
+public class ProjectFileStorageImplTest {
 
     @Autowired
     @Qualifier("project-files")
@@ -160,6 +160,11 @@ public class ProjectFileStorageTest {
         WebFormUpload byId = projectFileStorage.fileById(uploadedFile.getId());
 
         assertFieldsEquals(uploadedFile, byId);
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void contentByIdNotImplemented() throws Exception {
+        projectFileStorage.fileContentBy(1, projectEntry);
     }
 
     private WebFormUpload getUploadedFileAndAssertThatItIsTheOnlyOne() {

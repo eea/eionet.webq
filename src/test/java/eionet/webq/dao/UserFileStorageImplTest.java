@@ -164,6 +164,16 @@ public class UserFileStorageImplTest {
         assertThat(storage.fileContentBy(uploadedFileByOtherUser.getId(), userId).getContent(), equalTo(originalContent));
     }
 
+    @Test(expected = UnsupportedOperationException.class)
+    public void getByIdNotImplemented() throws Exception {
+        storage.fileById(1);
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void removeNotImplemented() throws Exception {
+        storage.remove(1, "test");
+    }
+
     private void uploadSingleFileFor(String userId) {
         uploadFilesFor(userId, 1);
     }
