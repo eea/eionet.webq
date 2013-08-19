@@ -35,6 +35,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import java.util.Collection;
 
 import static org.hamcrest.core.IsEqual.equalTo;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
@@ -124,6 +125,18 @@ public class ProjectFileStorageTest {
 
         WebFormUpload updatedFile = projectFileStorage.fileById(beforeUpdate.getId());
         assertFieldsEquals(beforeUpdate, updatedFile);
+    }
+
+    @Test
+    public void doNotAllowToOverwriteFileWithNull() throws Exception {
+        addOneFile();
+        WebFormUpload beforeUpdate = getUploadedFileAndAssertThatItIsTheOnlyOne();
+
+        beforeUpdate.setFile(null);
+        projectFileStorage.update(beforeUpdate, projectEntry);
+
+        WebFormUpload webFormUpload = projectFileStorage.fileById(beforeUpdate.getId());
+        assertNotNull(webFormUpload.getFile());
     }
 
     @Test

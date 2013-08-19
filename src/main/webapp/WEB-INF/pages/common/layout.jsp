@@ -29,6 +29,9 @@
         </ul>
     </div>
     <div id="workarea" class="documentContent">
+        <c:if test="${not empty message}">
+            <div id="message" class="system-msg">${message}</div>
+        </c:if>
         <tiles:insertAttribute name="content" />
     </div>
     <tiles:insertAttribute name="footer" />

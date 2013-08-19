@@ -164,17 +164,20 @@ public class ProjectsController {
     @RequestMapping(value = "/{projectFolderId}/webform/save")
     public String newWebForm(@PathVariable String projectFolderId, @Valid @ModelAttribute WebFormUpload webFormUpload,
             BindingResult bindingResult, Model model) {
-        // TODO clear object on success
-        // TODO empty file on update
         ProjectEntry currentProject = projectService.getByProjectId(projectFolderId);
+        boolean update = webFormUpload.getId() > 0;
+        if (!update && webFormUpload.getFile() == null) {
+            bindingResult.rejectValue("file", "webform.file.null");
+        }
         if (bindingResult.hasErrors()) {
             return addOrEditProjectFile(currentProject, webFormUpload, model);
         }
-        if (webFormUpload.getId() > 0) {
+        if (update) {
             projectFileStorage.update(webFormUpload, currentProject);
         } else {
             projectFileStorage.save(webFormUpload, currentProject);
         }
+        model.addAttribute("message", "Webform added/updated.");
         return viewProject(currentProject, model);
     }
 

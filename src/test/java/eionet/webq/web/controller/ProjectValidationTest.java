@@ -4,17 +4,10 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.FieldError;
-
-import java.util.Arrays;
-import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.apache.commons.lang3.StringUtils.repeat;
-import static org.hamcrest.core.IsEqual.equalTo;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
 
 /*
  * The contents of this file are subject to the Mozilla Public
@@ -109,17 +102,6 @@ public class ProjectValidationTest extends AbstractProjectsControllerTests {
         assertFieldError(fieldError, field, LENGTH_VALIDATION_CODE_PREFIX + field);
     }
 
-    private void assertFieldError(FieldError fieldError, String field, String code) {
-        assertThat(fieldError.getField(), equalTo(field));
-        assertTrue(Arrays.asList(fieldError.getCodes()).contains(code));
-    }
-
-    private void assertNoFieldErrors(MvcResult result) {
-        List<FieldError> errorList = getFieldErrorsFromMvcResultAndAssertThatFieldErrorCountIs(result, 0);
-
-        assertTrue(errorList.isEmpty());
-    }
-
     private MvcResult addNewProjectWithId(String id) throws Exception {
         return addNewProject(id, "description");
     }
@@ -128,17 +110,8 @@ public class ProjectValidationTest extends AbstractProjectsControllerTests {
         return addNewProject("1", description);
     }
 
-    private FieldError getFirstAndOnlyFieldError(MvcResult mvcResult) {
-        List<FieldError> fieldErrors = getFieldErrorsFromMvcResultAndAssertThatFieldErrorCountIs(mvcResult, 1);
-        return fieldErrors.get(0);
-    }
-
-    private List<FieldError> getFieldErrorsFromMvcResultAndAssertThatFieldErrorCountIs(MvcResult result, int size) {
-        BeanPropertyBindingResult bindingResult =
-                (BeanPropertyBindingResult) result.getModelAndView().getModelMap()
-                        .get("org.springframework.validation.BindingResult.projectEntry");
-
-        assertThat(bindingResult.getFieldErrorCount(), equalTo(size));
-        return bindingResult.getFieldErrors();
+    @Override
+    protected String bindingResultPropertyNameInModel() {
+        return "org.springframework.validation.BindingResult.projectEntry";
     }
 }

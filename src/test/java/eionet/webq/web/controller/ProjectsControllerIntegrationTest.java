@@ -20,6 +20,7 @@ import java.util.List;
 
 import static eionet.webq.web.controller.ProjectsController.PROJECT_ENTRY_MODEL_ATTRIBUTE;
 import static eionet.webq.web.controller.ProjectsController.WEB_FORM_UPLOAD_ATTRIBUTE;
+import static java.lang.String.valueOf;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -192,7 +193,7 @@ public class ProjectsControllerIntegrationTest extends AbstractProjectsControlle
         uploadFilesForDefaultProject(1);
         WebFormUpload webFormUpload = theOnlyOneUploadedFile();
 
-        request(get("/projects/" + DEFAULT_PROJECT_ID + "/webform/remove").param("fileId", String.valueOf(webFormUpload.getId())));
+        request(get("/projects/" + DEFAULT_PROJECT_ID + "/webform/remove").param("fileId", valueOf(webFormUpload.getId())));
 
         assertThat(allFilesForDefaultProject().size(), equalTo(0));
     }
@@ -201,7 +202,7 @@ public class ProjectsControllerIntegrationTest extends AbstractProjectsControlle
     public void projectFileIsAddedToModelForEdit() throws Exception {
         uploadFilesForDefaultProject(1);
         final WebFormUpload webFormUpload = theOnlyOneUploadedFile();
-        request(post("/projects/" + DEFAULT_PROJECT_ID + "/webform/edit").param("fileId", String.valueOf(webFormUpload.getId())))
+        request(post("/projects/" + DEFAULT_PROJECT_ID + "/webform/edit").param("fileId", valueOf(webFormUpload.getId())))
                 .andExpect(view().name("add_edit_project_file"))
                 .andExpect(model().attribute(WEB_FORM_UPLOAD_ATTRIBUTE, new BaseMatcher<WebFormUpload>() {
                     @Override
@@ -221,8 +222,8 @@ public class ProjectsControllerIntegrationTest extends AbstractProjectsControlle
         uploadFilesForDefaultProject(1);
         WebFormUpload webFormUpload = theOnlyOneUploadedFile();
         String newTitle = "new title";
-        request(post("/projects/" + DEFAULT_PROJECT_ID + "/webform/save").param("title", newTitle).param("id",
-                String.valueOf(webFormUpload.getId())));
+        request(post("/projects/" + DEFAULT_PROJECT_ID + "/webform/save").param("title", newTitle)
+                .param("userName", webFormUpload.getUserName()).param("id", valueOf(webFormUpload.getId())));
 
         WebFormUpload updated = theOnlyOneUploadedFile();
         assertThat(updated.getTitle(), equalTo(newTitle));
@@ -263,13 +264,14 @@ public class ProjectsControllerIntegrationTest extends AbstractProjectsControlle
         webFormUpload.setDescription("test description");
         webFormUpload.setTitle("title");
         webFormUpload.setFile("test-content".getBytes());
+        webFormUpload.setUserName("test-user");
         return webFormUpload;
     }
 
     private ResultActions uploadWebFormForDefaultProject(WebFormUpload webFormUpload) throws Exception {
         return request(fileUpload("/projects/" + DEFAULT_PROJECT_ID + "/webform/save").file("file", webFormUpload.getFile())
                 .param("title", webFormUpload.getTitle()).param("active", Boolean.toString(webFormUpload.isActive()))
-                .param("description", webFormUpload.getDescription()));
+                .param("description", webFormUpload.getDescription()).param("userName", webFormUpload.getUserName()));
     }
 
     private void saveProjectWithId(String projectId) {

@@ -21,7 +21,8 @@ package eionet.webq.dto;
  *        Anton Dmitrijev
  */
 
-import javax.validation.constraints.Size;
+import org.hibernate.validator.constraints.NotEmpty;
+
 import java.util.Date;
 
 /**
@@ -39,18 +40,18 @@ public class WebFormUpload {
     /**
      * Form title.
      */
+    @NotEmpty
     private String title;
     /**
      * Form content.
      */
-    @Size(min = 1)
     private byte[] file;
     /**
-     * details about the webform
+     * details about the webform.
      */
     private String description;
     /**
-     * xml schema connected with this file
+     * xml schema connected with this file.
      */
     private String xmlSchema;
     /**
@@ -64,13 +65,14 @@ public class WebFormUpload {
     /**
      * User name of user who uploaded web form.
      */
+    @NotEmpty
     private String userName;
     /**
-     * timestamp of first upload of the file
+     * timestamp of first upload of the file.
      */
     private Date created;
     /**
-     * timestamp of last update of the file
+     * timestamp of last update of the file.
      */
     private Date updated;
 

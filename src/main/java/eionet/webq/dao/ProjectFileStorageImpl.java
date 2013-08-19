@@ -78,19 +78,26 @@ public class ProjectFileStorageImpl extends AbstractDao<WebFormUpload> implement
 
     @Override
     public void update(final WebFormUpload webFormUpload, ProjectEntry projectEntry) {
-        //TODO do not save empty file
-        template.execute(sqlProperties.getProperty("update.project.file"), new AbstractLobCreatingPreparedStatementCallback(
+        final boolean updateFile = webFormUpload.getFile() != null;
+        String updateStatement =
+                updateFile ? sqlProperties.getProperty("update.project.file") : sqlProperties
+                        .getProperty("update.project.file.without.file");
+        template.execute(updateStatement, new AbstractLobCreatingPreparedStatementCallback(
                 lobHandler) {
             @Override
             protected void setValues(PreparedStatement ps, LobCreator lobCreator) throws SQLException {
-                ps.setString(1, webFormUpload.getTitle());
-                lobCreator.setBlobAsBytes(ps, 2, webFormUpload.getFile());
-                ps.setString(3, webFormUpload.getXmlSchema());
-                ps.setString(4, webFormUpload.getDescription());
-                ps.setString(5, webFormUpload.getUserName());
-                ps.setBoolean(6, webFormUpload.isActive());
-                ps.setBoolean(7, webFormUpload.isMainForm());
-                ps.setInt(8, webFormUpload.getId());
+                //TODO same pattern to all AbstractLobCreatingPreparedStatementCallback
+                int index = 1;
+                ps.setString(index++, webFormUpload.getTitle());
+                ps.setString(index++, webFormUpload.getXmlSchema());
+                ps.setString(index++, webFormUpload.getDescription());
+                ps.setString(index++, webFormUpload.getUserName());
+                ps.setBoolean(index++, webFormUpload.isActive());
+                ps.setBoolean(index++, webFormUpload.isMainForm());
+                if (updateFile) {
+                    lobCreator.setBlobAsBytes(ps, index++, webFormUpload.getFile());
+                }
+                ps.setInt(index, webFormUpload.getId());
             }
         });
     }

@@ -30,9 +30,6 @@
 </style>
 
 <h1>Web Questionnaires</h1>
-<c:if test="${not empty message}">
-    <div id="message" class="system-msg">${message}</div>
-</c:if>
 <div class="container">
     <f:form modelAttribute="uploadForm" action="uploadXml" method="POST" enctype="multipart/form-data">
         <f:errors path="*" element="div" cssClass="error-msg"/>
