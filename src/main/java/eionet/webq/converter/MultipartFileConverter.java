@@ -31,7 +31,6 @@ import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 
 import static javax.xml.stream.XMLStreamConstants.START_ELEMENT;
 
@@ -52,7 +51,7 @@ public class MultipartFileConverter implements Converter<MultipartFile, Uploaded
 
     @Override
     public UploadedXmlFile convert(MultipartFile multipartFile) {
-        byte[] bytes = toByteArray(multipartFile);
+        byte[] bytes = new MultipartToByteArray().convert(multipartFile);
         return new UploadedXmlFile().setContent(bytes).setName(multipartFile.getOriginalFilename())
                 .setSizeInBytes(multipartFile.getSize()).setXmlSchema(extractXmlSchema(bytes));
     }
@@ -89,20 +88,5 @@ public class MultipartFileConverter implements Converter<MultipartFile, Uploaded
             }
         }
         return null;
-    }
-
-    /**
-     * Calls {@link org.springframework.web.multipart.MultipartFile#getBytes()} wrapping {@link IOException}.
-     *
-     * @param multipartFile uploaded file to be converted
-     * @return uploaded file bytes.
-     */
-    private byte[] toByteArray(MultipartFile multipartFile) {
-        try {
-            return multipartFile.getBytes();
-        } catch (IOException e) {
-            LOGGER.warn("unable to transform uploaded file to bytes", e);
-            return new byte[0];
-        }
     }
 }
