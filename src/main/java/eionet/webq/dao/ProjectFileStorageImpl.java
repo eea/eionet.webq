@@ -114,7 +114,8 @@ public class ProjectFileStorageImpl extends AbstractDao<WebFormUpload> implement
 
     @Override
     public WebFormUpload fileContentBy(int id, ProjectEntry projectEntry) {
-        throw new UnsupportedOperationException();
+        return template.queryForObject(sqlProperties.getProperty("select.project.file.content"), rowMapper(), id,
+                projectEntry.getId());
     }
 
     @Override

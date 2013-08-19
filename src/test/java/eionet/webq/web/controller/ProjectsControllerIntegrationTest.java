@@ -28,6 +28,7 @@ import static org.junit.Assert.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.fileUpload;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
@@ -227,6 +228,15 @@ public class ProjectsControllerIntegrationTest extends AbstractProjectsControlle
 
         WebFormUpload updated = theOnlyOneUploadedFile();
         assertThat(updated.getTitle(), equalTo(newTitle));
+    }
+
+    @Test
+    public void allowToDownloadWebFormContent() throws Exception {
+        uploadFilesForDefaultProject(1);
+        WebFormUpload webFormUpload = theOnlyOneUploadedFile();
+
+        request(get("/download/project/" + DEFAULT_PROJECT_ID + "/file/" + webFormUpload.getId())).andExpect(
+                content().bytes(testWebFormUpload().getFile()));
     }
 
     private WebFormUpload theOnlyOneUploadedFile() {

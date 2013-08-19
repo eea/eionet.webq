@@ -20,19 +20,27 @@
  */
 package eionet.webq.web.controller;
 
+import eionet.webq.dao.FileStorage;
+import eionet.webq.dto.ProjectEntry;
 import eionet.webq.dto.UploadedXmlFile;
+import eionet.webq.dto.WebFormUpload;
 import eionet.webq.service.ConversionService;
+import eionet.webq.service.ProjectService;
 import eionet.webq.service.UploadedXmlFileService;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 
 /**
  * Spring controller for WebQ file download.
@@ -41,10 +49,21 @@ import java.io.IOException;
 @RequestMapping("download")
 public class FileDownloadController {
     /**
-     * Service for getting file content from storage.
+     * Service for getting user file content from storage.
      */
     @Autowired
     private UploadedXmlFileService uploadedXmlFileService;
+    /**
+     * Service for getting user file content from storage.
+     */
+    @Autowired
+    private ProjectService projectService;
+    /**
+     * Service for getting project file content from storage.
+     */
+    @Autowired
+    @Qualifier("project-files")
+    private FileStorage<ProjectEntry, WebFormUpload> projectFiles;
     /**
      * File conversion service.
      */
@@ -64,6 +83,21 @@ public class FileDownloadController {
         response.addHeader("Content-Disposition", "attachment;filename=" + file.getName());
         writeToResponse(response, file.getContent());
     }
+    
+    /**
+     * Download uploaded file action.
+     *
+     * @param projectId project id for file download
+     * @param fileId requested file id
+     * @param response http response to write file
+     */
+    @RequestMapping(value = "/project/{projectId}/file/{fileId}")
+    public void downloadProjectFile(@PathVariable String projectId, @PathVariable int fileId, HttpServletResponse response) {
+        WebFormUpload webFormUpload = projectFiles.fileContentBy(fileId, projectService.getByProjectId(projectId));
+        response.setContentType(MediaType.APPLICATION_XML_VALUE);
+        response.addHeader("Content-Disposition", "attachment;filename=" + encodeAsUrl(webFormUpload.getTitle()));
+        writeToResponse(response, webFormUpload.getFile());
+    }
 
     /**
      * Performs conversion of specified {@link UploadedXmlFile} to specific format.
@@ -76,6 +110,20 @@ public class FileDownloadController {
     public void convertXmlFile(@RequestParam int fileId, @RequestParam int conversionId, HttpServletResponse response) {
         UploadedXmlFile fileContent = uploadedXmlFileService.getById(fileId);
         writeToResponse(response, conversionService.convert(fileContent, conversionId));
+    }
+
+    /**
+     * {@link URLEncoder#encode(String, String)} with default value.
+     *
+     * @param path string to encode, also default value
+     * @return encoded string or default value.
+     */
+    private String encodeAsUrl(String path) {
+        try {
+            return URLEncoder.encode(path, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            return path;
+        }
     }
 
     /**

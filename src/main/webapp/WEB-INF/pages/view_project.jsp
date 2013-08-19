@@ -35,8 +35,7 @@
             </thead>
             <c:forEach items="${allProjectFiles}" var="projectFile">
                 <tr>
-                    <td>${projectFile.title}</td>
-                    <%--TODO allow file download--%>
+                    <td><a href="<c:url value="/download/project/${projectEntry.projectId}/file/${projectFile.id}"/>">${projectFile.title}</a></td>
                     <td>${projectFile.description}</td>
                     <td>${projectFile.xmlSchema}</td>
                     <td>${projectFile.active}</td>

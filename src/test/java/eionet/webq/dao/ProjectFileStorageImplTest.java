@@ -162,9 +162,14 @@ public class ProjectFileStorageImplTest {
         assertFieldsEquals(uploadedFile, byId);
     }
 
-    @Test(expected = UnsupportedOperationException.class)
-    public void contentByIdNotImplemented() throws Exception {
-        projectFileStorage.fileContentBy(1, projectEntry);
+    @Test
+    public void getContentByFileId() throws Exception {
+        addOneFile();
+        WebFormUpload uploadedFile = getUploadedFileAndAssertThatItIsTheOnlyOne();
+
+        WebFormUpload webFormUpload = projectFileStorage.fileContentBy(uploadedFile.getId(), projectEntry);
+        assertThat(webFormUpload.getFile(), equalTo(testFileForUpload.getFile()));
+        assertThat(webFormUpload.getTitle(), equalTo(testFileForUpload.getTitle()));
     }
 
     private WebFormUpload getUploadedFileAndAssertThatItIsTheOnlyOne() {
