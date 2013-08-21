@@ -1,8 +1,8 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="f" uri="http://www.springframework.org/tags/form" %>
 
+<h1>Save webform</h1>
 <fieldset>
-    <legend>Save webform</legend>
     <c:url var="saveUrl" value="/projects/${projectEntry.projectId}/webform/save"/>
     <f:form modelAttribute="webFormUpload" action="${saveUrl}" method="post" enctype="multipart/form-data">
         <f:errors path="*" element="div" cssClass="error-msg"/>

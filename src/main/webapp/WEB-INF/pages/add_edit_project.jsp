@@ -1,7 +1,7 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="f" uri="http://www.springframework.org/tags/form" %>
 
-<h2>Save project</h2>
+<h1>Save project</h1>
 <f:form modelAttribute="projectEntry" action="save" method="post">
     <f:errors path="*" element="div" cssClass="error-msg"/>
     <table>
@@ -14,7 +14,7 @@
         <tr>
             <td>
                 <label for="label">Project label</label>
-                <f:textarea id="label" path="description"/>
+                <f:input id="label" path="description" size="35"/>
             </td>
         </tr>
     </table>

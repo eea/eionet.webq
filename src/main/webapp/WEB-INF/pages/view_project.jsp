@@ -5,18 +5,17 @@
         font-weight: bold;
     }
 </style>
-<fieldset>
-    <legend>Project data</legend>
-    <p>
-        Project id: ${projectEntry.projectId}
-    </p>
-    <p>
-        Project label: ${projectEntry.description}
-    </p>
-    <p>
-        Project created: ${projectEntry.created}
-    </p>
-</fieldset>
+<div id="drop-operations">
+    <h2>Operations</h2>
+    <ul>
+        <li><span><a title="Edit project" href="<c:url value="/projects/edit?projectId=${projectEntry.projectId}"/>">Edit project</a></span></li>
+        <li><span><a href="<c:url value="/projects/remove?projectId=${projectEntry.projectId}"/>">Remove project</a></span></li>
+        <li><span><a title="Add webform" href="<c:url value="/projects/${projectEntry.projectId}/webform/add"/>">Add webform</a></span></li>
+    </ul>
+</div>
+<h1>Project: ${projectEntry.projectId}</h1>
+<h4>${projectEntry.description} Created: ${projectEntry.created}</h4>
+
 <fieldset>
     <legend>Project files</legend>
     <c:if test="${not empty allProjectFiles}">
@@ -25,6 +24,7 @@
             <thead>
                 <tr>
                     <td>Title</td>
+                    <td>File</td>
                     <td>Description</td>
                     <td>Xml schema</td>
                     <td>Active?</td>
@@ -35,7 +35,8 @@
             </thead>
             <c:forEach items="${allProjectFiles}" var="projectFile">
                 <tr>
-                    <td><a href="<c:url value="/download/project/${projectEntry.projectId}/file/${projectFile.id}"/>">${projectFile.title}</a></td>
+                    <td>${projectFile.title}</td>
+                    <td><a href="<c:url value="/download/project/${projectEntry.projectId}/file/${projectFile.id}"/>">Download</a></td>
                     <td>${projectFile.description}</td>
                     <td>${projectFile.xmlSchema}</td>
                     <td>${projectFile.active}</td>
@@ -49,5 +50,4 @@
             </c:forEach>
         </table>
     </c:if>
-    <a href="<c:url value="/projects/${projectEntry.projectId}/webform/add"/>">Add webform</a>
 </fieldset>
