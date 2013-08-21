@@ -32,6 +32,7 @@ import org.springframework.stereotype.Repository;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.Collection;
 
 /**
@@ -86,7 +87,6 @@ public class ProjectFileStorageImpl extends AbstractDao<WebFormUpload> implement
                 lobHandler) {
             @Override
             protected void setValues(PreparedStatement ps, LobCreator lobCreator) throws SQLException {
-                //TODO same pattern to all AbstractLobCreatingPreparedStatementCallback
                 int index = 1;
                 ps.setString(index++, webFormUpload.getTitle());
                 ps.setString(index++, webFormUpload.getXmlSchema());
@@ -97,6 +97,7 @@ public class ProjectFileStorageImpl extends AbstractDao<WebFormUpload> implement
                 if (updateFile) {
                     lobCreator.setBlobAsBytes(ps, index++, webFormUpload.getFile());
                 }
+                ps.setTimestamp(index++, new Timestamp(System.currentTimeMillis()));
                 ps.setInt(index, webFormUpload.getId());
             }
         });

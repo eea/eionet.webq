@@ -33,6 +33,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.util.Collection;
+import java.util.Date;
 
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertNotNull;
@@ -153,6 +154,23 @@ public class ProjectFileStorageImplTest {
     }
 
     @Test
+    public void updateChangesUpdatedField() throws Exception {
+        addOneFile();
+        clearUpdatedColumnForAllFiles();
+
+        WebFormUpload beforeUpdate = getUploadedFileAndAssertThatItIsTheOnlyOne();
+        Date updatedTime = beforeUpdate.getUpdated();
+        assertNull(updatedTime);
+
+        projectFileStorage.update(beforeUpdate, projectEntry);
+
+        WebFormUpload updatedFile = getUploadedFileAndAssertThatItIsTheOnlyOne();
+        Date updatedAfterFileUpdate = updatedFile.getUpdated();
+
+        assertNotNull(updatedAfterFileUpdate);
+    }
+
+    @Test
     public void allowToGetFileById() throws Exception {
         addOneFile();
         WebFormUpload uploadedFile = getUploadedFileAndAssertThatItIsTheOnlyOne();
@@ -170,6 +188,10 @@ public class ProjectFileStorageImplTest {
         WebFormUpload webFormUpload = projectFileStorage.fileContentBy(uploadedFile.getId(), projectEntry);
         assertThat(webFormUpload.getFile(), equalTo(testFileForUpload.getFile()));
         assertThat(webFormUpload.getTitle(), equalTo(testFileForUpload.getTitle()));
+    }
+
+    private void clearUpdatedColumnForAllFiles() {
+        template.update("UPDATE project_file SET updated = NULL");
     }
 
     private WebFormUpload getUploadedFileAndAssertThatItIsTheOnlyOne() {
