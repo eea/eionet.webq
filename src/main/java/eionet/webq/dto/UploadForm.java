@@ -1,7 +1,3 @@
-package eionet.webq.dto;
-
-import javax.validation.Valid;
-
 /*
  * The contents of this file are subject to the Mozilla Public
  * License Version 1.1 (the "License"); you may not use this file
@@ -22,6 +18,9 @@ import javax.validation.Valid;
  * Contributor(s):
  *        Anton Dmitrijev
  */
+package eionet.webq.dto;
+
+import javax.validation.Valid;
 
 /**
  * Class represent xml file upload form.
@@ -31,13 +30,13 @@ public class UploadForm {
      * Uploaded file.
      */
     @Valid
-    private UploadedXmlFile uploadedXmlFile;
+    private UserFile userFile;
 
-    public UploadedXmlFile getUploadedXmlFile() {
-        return uploadedXmlFile;
+    public UserFile getUserFile() {
+        return userFile;
     }
 
-    public void setUploadedXmlFile(UploadedXmlFile file) {
-        this.uploadedXmlFile = file;
+    public void setUserFile(UserFile file) {
+        this.userFile = file;
     }
 }

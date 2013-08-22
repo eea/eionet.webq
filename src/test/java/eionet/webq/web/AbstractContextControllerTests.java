@@ -1,7 +1,7 @@
 package eionet.webq.web;
 
 import configuration.ApplicationTestContext;
-import eionet.webq.dto.UploadedXmlFile;
+import eionet.webq.dto.UserFile;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpSession;
@@ -50,7 +50,7 @@ public abstract class AbstractContextControllerTests {
     }
 
     protected MockMultipartFile createMockMultipartFile(String fileName, byte[] content) {
-        return new MockMultipartFile("uploadedXmlFile", fileName, MediaType.APPLICATION_XML_VALUE, content);
+        return new MockMultipartFile("userFile", fileName, MediaType.APPLICATION_XML_VALUE, content);
     }
 
     protected ResultActions uploadFile(MockMultipartFile file) throws Exception {
@@ -62,13 +62,13 @@ public abstract class AbstractContextControllerTests {
     }
 
     @SuppressWarnings("unchecked")
-    protected List<UploadedXmlFile> uploadFileAndExtractUploadedFiles(MockMultipartFile file) throws Exception {
-        return (List<UploadedXmlFile>) uploadFile(file).andReturn().getModelAndView().getModelMap().get("uploadedFiles");
+    protected List<UserFile> uploadFileAndExtractUploadedFiles(MockMultipartFile file) throws Exception {
+        return (List<UserFile>) uploadFile(file).andReturn().getModelAndView().getModelMap().get("uploadedFiles");
     }
 
-    protected UploadedXmlFile uploadFileAndTakeFirstUploadedFile(MockMultipartFile mockMultipartFile) throws Exception {
-        List<UploadedXmlFile> uploadedXmlFiles = uploadFileAndExtractUploadedFiles(mockMultipartFile);
-        return uploadedXmlFiles.iterator().next();
+    protected UserFile uploadFileAndTakeFirstUploadedFile(MockMultipartFile mockMultipartFile) throws Exception {
+        List<UserFile> userFiles = uploadFileAndExtractUploadedFiles(mockMultipartFile);
+        return userFiles.iterator().next();
     }
 
     protected void assertFieldError(FieldError fieldError, String field, String code) {

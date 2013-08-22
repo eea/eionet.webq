@@ -28,7 +28,7 @@ import java.util.Date;
 /**
  * Data transfer object to pass uploaded file data across application.
  */
-public class UploadedXmlFile {
+public class UserFile {
     /**
      * File id in data storage.
      */
@@ -57,12 +57,12 @@ public class UploadedXmlFile {
      */
     private Collection<Conversion> availableConversions;
 
-    public UploadedXmlFile(UploadedFile file, String xmlSchema) {
+    public UserFile(UploadedFile file, String xmlSchema) {
         this.file = file;
         this.xmlSchema = xmlSchema;
     }
 
-    public UploadedXmlFile() {
+    public UserFile() {
     }
 
     public int getId() {
@@ -131,7 +131,7 @@ public class UploadedXmlFile {
 
     @Override
     public String toString() {
-        return "UploadedXmlFile{" + "id=" + id + ", file=" + file + ", xmlSchema='" + xmlSchema + '\''
+        return "UserFile{" + "id=" + id + ", file=" + file + ", xmlSchema='" + xmlSchema + '\''
                 + ", created=" + created + ", updated=" + updated + '}';
     }
 }

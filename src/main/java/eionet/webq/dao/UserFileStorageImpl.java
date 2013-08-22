@@ -21,7 +21,7 @@
 package eionet.webq.dao;
 
 import eionet.webq.dto.UploadedFile;
-import eionet.webq.dto.UploadedXmlFile;
+import eionet.webq.dto.UserFile;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -42,7 +42,7 @@ import java.util.Collection;
  */
 @Repository
 @Qualifier("user-files")
-public class UserFileStorageImpl extends AbstractDao<UploadedXmlFile> implements FileStorage<String, UploadedXmlFile> {
+public class UserFileStorageImpl extends AbstractDao<UserFile> implements FileStorage<String, UserFile> {
     /**
      * {@link JdbcTemplate} to perform data access operations.
      */
@@ -55,7 +55,7 @@ public class UserFileStorageImpl extends AbstractDao<UploadedXmlFile> implements
     private LobHandler lobHandler;
 
     @Override
-    public void save(final UploadedXmlFile file, final String userId) {
+    public void save(final UserFile file, final String userId) {
         jdbcTemplate.execute(sqlProperties.getProperty("insert.user.file"),
                 new AbstractLobCreatingPreparedStatementCallback(lobHandler) {
                     @Override
@@ -70,19 +70,19 @@ public class UserFileStorageImpl extends AbstractDao<UploadedXmlFile> implements
     }
 
     @Override
-    public UploadedXmlFile fileContentBy(int id, String userId) {
+    public UserFile fileContentBy(int id, String userId) {
         Object[] params = {id, userId};
         return jdbcTemplate.queryForObject(sqlProperties.getProperty("select.user.file.content"), params,
-                new RowMapper<UploadedXmlFile>() {
+                new RowMapper<UserFile>() {
                     @Override
-                    public UploadedXmlFile mapRow(ResultSet rs, int rowNum) throws SQLException {
-                        return new UploadedXmlFile(new UploadedFile(rs.getString(1), lobHandler.getBlobAsBytes(rs, 2)), null);
+                    public UserFile mapRow(ResultSet rs, int rowNum) throws SQLException {
+                        return new UserFile(new UploadedFile(rs.getString(1), lobHandler.getBlobAsBytes(rs, 2)), null);
                     }
                 });
     }
 
     @Override
-    public void update(final UploadedXmlFile file, final String userId) {
+    public void update(final UserFile file, final String userId) {
         jdbcTemplate.execute(sqlProperties.getProperty("update.user.file"),
                 new AbstractLobCreatingPreparedStatementCallback(lobHandler) {
                     @Override
@@ -97,7 +97,7 @@ public class UserFileStorageImpl extends AbstractDao<UploadedXmlFile> implements
     }
 
     @Override
-    public Collection<UploadedXmlFile> allFilesFor(String userId) {
+    public Collection<UserFile> allFilesFor(String userId) {
         return jdbcTemplate.query(sqlProperties.getProperty("select.all.file.for.user"), new Object[] {userId}, rowMapper());
     }
 
@@ -107,12 +107,12 @@ public class UserFileStorageImpl extends AbstractDao<UploadedXmlFile> implements
     }
 
     @Override
-    public UploadedXmlFile fileById(int id) {
+    public UserFile fileById(int id) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    Class<UploadedXmlFile> getDtoClass() {
-        return UploadedXmlFile.class;
+    Class<UserFile> getDtoClass() {
+        return UserFile.class;
     }
 }

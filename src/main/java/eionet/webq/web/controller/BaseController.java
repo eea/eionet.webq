@@ -21,7 +21,7 @@
 package eionet.webq.web.controller;
 
 import eionet.webq.dto.UploadForm;
-import eionet.webq.dto.UploadedXmlFile;
+import eionet.webq.dto.UserFile;
 import eionet.webq.dto.XmlSaveResult;
 import eionet.webq.service.ConversionService;
 import eionet.webq.service.UploadedXmlFileService;
@@ -78,7 +78,7 @@ public class BaseController {
 
     /**
      * Upload action.
-     * @param uploadForm represents form used in UI, {@link UploadForm#uploadedXmlFile} will be converted from
+     * @param uploadForm represents form used in UI, {@link UploadForm#userFile} will be converted from
      *            {@link org.springframework.web.multipart.MultipartFile}
      * @param result binding result, contains validation errors
      * @param model holder for model attributes
@@ -87,7 +87,7 @@ public class BaseController {
     @RequestMapping(value = "/uploadXml", method = RequestMethod.POST)
     public String upload(@Valid @ModelAttribute UploadForm uploadForm, BindingResult result, Model model) {
         if (!result.hasErrors()) {
-            UploadedXmlFile file = uploadForm.getUploadedXmlFile();
+            UserFile file = uploadForm.getUserFile();
             uploadedXmlFileService.save(file);
             model.addAttribute("message", "File '" + file.getName() + "' uploaded successfully");
         }
@@ -104,7 +104,7 @@ public class BaseController {
     @RequestMapping(value = "/saveXml", method = RequestMethod.POST)
     @ResponseBody
     public XmlSaveResult saveXml(@RequestParam int fileId, HttpServletRequest request) {
-        UploadedXmlFile file = new UploadedXmlFile();
+        UserFile file = new UserFile();
         XmlSaveResult saveResult = null;
         InputStream input = null;
         try {
@@ -128,11 +128,11 @@ public class BaseController {
      *
      * @return all uploaded files with available conversions set.
      */
-    private Collection<UploadedXmlFile> allFilesWithConversions() {
-        Collection<UploadedXmlFile> uploadedXmlFiles = uploadedXmlFileService.allUploadedFiles();
-        for (UploadedXmlFile uploadedXmlFile : uploadedXmlFiles) {
-            uploadedXmlFile.setAvailableConversions(conversionService.conversionsFor(uploadedXmlFile.getXmlSchema()));
+    private Collection<UserFile> allFilesWithConversions() {
+        Collection<UserFile> userFiles = uploadedXmlFileService.allUploadedFiles();
+        for (UserFile userFile : userFiles) {
+            userFile.setAvailableConversions(conversionService.conversionsFor(userFile.getXmlSchema()));
         }
-        return uploadedXmlFiles;
+        return userFiles;
     }
 }

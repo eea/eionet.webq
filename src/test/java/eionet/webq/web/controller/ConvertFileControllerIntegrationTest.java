@@ -1,5 +1,3 @@
-package eionet.webq.web.controller;
-
 /*
  * The contents of this file are subject to the Mozilla Public
  * License Version 1.1 (the "License"); you may not use this file
@@ -20,10 +18,11 @@ package eionet.webq.web.controller;
  * Contributor(s):
  *        Anton Dmitrijev
  */
+package eionet.webq.web.controller;
 
 import eionet.webq.dto.Conversion;
 import eionet.webq.dto.ListConversionResponse;
-import eionet.webq.dto.UploadedXmlFile;
+import eionet.webq.dto.UserFile;
 import eionet.webq.web.AbstractContextControllerTests;
 import org.junit.Before;
 import org.junit.Test;
@@ -69,10 +68,10 @@ public class ConvertFileControllerIntegrationTest extends AbstractContextControl
         String conversionResponse = "conversionSuccess";
         returnListOfConversionsFromRestApi(new ListConversionResponse());
         when(restOperations.postForObject(Mockito.anyString(), any(), eq(String.class))).thenReturn(conversionResponse);
-        UploadedXmlFile uploadedXmlFile =
+        UserFile userFile =
                 uploadFileAndTakeFirstUploadedFile(createMockMultipartFile("test-file.xml", FILE_CONTENT));
 
-        request(get("/download/convert?fileId={fileId}&conversionId={convId}", uploadedXmlFile.getId(), 1).session(mockHttpSession))
+        request(get("/download/convert?fileId={fileId}&conversionId={convId}", userFile.getId(), 1).session(mockHttpSession))
                 .andExpect(MockMvcResultMatchers.content().bytes(conversionResponse.getBytes()));
     }
 
@@ -87,7 +86,7 @@ public class ConvertFileControllerIntegrationTest extends AbstractContextControl
         MvcResult mvcResult = request(get("/").session(mockHttpSession)).andReturn();
 
         @SuppressWarnings("unchecked")
-        List<UploadedXmlFile> uploadedFiles = (List<UploadedXmlFile>) mvcResult.getModelAndView().getModel().get("uploadedFiles");
+        List<UserFile> uploadedFiles = (List<UserFile>) mvcResult.getModelAndView().getModel().get("uploadedFiles");
         assertThat(uploadedFiles.size(), equalTo(1));
         assertThat(uploadedFiles.iterator().next().getAvailableConversions().size(), equalTo(1));
     }

@@ -1,5 +1,3 @@
-package eionet.webq.service;
-
 /*
  * The contents of this file are subject to the Mozilla Public
  * License Version 1.1 (the "License"); you may not use this file
@@ -20,9 +18,10 @@ package eionet.webq.service;
  * Contributor(s):
  *        Anton Dmitrijev
  */
+package eionet.webq.service;
 
 import eionet.webq.dao.FileStorage;
-import eionet.webq.dto.UploadedXmlFile;
+import eionet.webq.dto.UserFile;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -41,7 +40,7 @@ public class UploadedXmlFileServiceImpl implements UploadedXmlFileService {
      */
     @Autowired
     @Qualifier("user-files")
-    FileStorage<String, UploadedXmlFile> storage;
+    FileStorage<String, UserFile> storage;
     /**
      * Current http session.
      */
@@ -58,29 +57,29 @@ public class UploadedXmlFileServiceImpl implements UploadedXmlFileService {
     private static final Logger LOGGER = Logger.getLogger(UploadedXmlFileServiceImpl.class);
 
     @Override
-    public void save(UploadedXmlFile file) {
+    public void save(UserFile file) {
         LOGGER.info("Saving uploaded file=" + file);
         storage.save(file, userId());
     }
 
     @Override
-    public UploadedXmlFile getById(int id) {
-        UploadedXmlFile uploadedXmlFile = storage.fileContentBy(id, userId());
-        byte[] content = uploadedXmlFile.getContent();
-        LOGGER.info("File loaded. Name=" + uploadedXmlFile.getName() + ", content size=" + (content != null ? content.length : 0));
-        return uploadedXmlFile;
+    public UserFile getById(int id) {
+        UserFile userFile = storage.fileContentBy(id, userId());
+        byte[] content = userFile.getContent();
+        LOGGER.info("File loaded. Name=" + userFile.getName() + ", content size=" + (content != null ? content.length : 0));
+        return userFile;
     }
 
     @Override
-    public Collection<UploadedXmlFile> allUploadedFiles() {
+    public Collection<UserFile> allUploadedFiles() {
         String userId = userId();
-        Collection<UploadedXmlFile> uploadedXmlFiles = storage.allFilesFor(userId);
-        LOGGER.info("Loaded " + uploadedXmlFiles.size() + " files for user=" + userId);
-        return uploadedXmlFiles;
+        Collection<UserFile> userFiles = storage.allFilesFor(userId);
+        LOGGER.info("Loaded " + userFiles.size() + " files for user=" + userId);
+        return userFiles;
     }
 
     @Override
-    public void updateContent(UploadedXmlFile file) {
+    public void updateContent(UserFile file) {
         String userId = userId();
         LOGGER.info("Updating file id=" + file.getId() + " for user=" + userId);
         storage.update(file, userId);

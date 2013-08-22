@@ -39,8 +39,8 @@
             <legend>Upload XML file</legend>
 
             <p>
-                <label for="uploadedXmlFile">Select the file from My Computer</label>
-                <f:input id="uploadedXmlFile" type="file" path="uploadedXmlFile"/>
+                <label for="userFile">Select the file from My Computer</label>
+                <f:input id="userFile" type="file" path="userFile"/>
             </p>
 
             <p>

@@ -1,10 +1,3 @@
-package eionet.webq.service;
-
-import eionet.webq.dto.Conversion;
-import eionet.webq.dto.UploadedXmlFile;
-
-import java.util.List;
-
 /*
  * The contents of this file are subject to the Mozilla Public
  * License Version 1.1 (the "License"); you may not use this file
@@ -25,6 +18,12 @@ import java.util.List;
  * Contributor(s):
  *        Anton Dmitrijev
  */
+package eionet.webq.service;
+
+import eionet.webq.dto.Conversion;
+import eionet.webq.dto.UserFile;
+
+import java.util.List;
 
 /**
  * Service provides conversion information for xml schemas.
@@ -37,7 +36,7 @@ public interface ConversionService {
      * @param conversionId conversion id for this file
      * @return conversion result as string
      */
-    byte[] convert(UploadedXmlFile fileContent, int conversionId);
+    byte[] convert(UserFile fileContent, int conversionId);
 
     /**
      * List all available conversions.

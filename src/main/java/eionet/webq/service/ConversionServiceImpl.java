@@ -1,23 +1,3 @@
-package eionet.webq.service;
-
-import eionet.webq.dto.Conversion;
-import eionet.webq.dto.ListConversionResponse;
-import eionet.webq.dto.UploadedXmlFile;
-import org.apache.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.stereotype.Service;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
-import org.springframework.web.client.RestOperations;
-
-import java.nio.charset.Charset;
-import java.util.List;
-
 /*
  * The contents of this file are subject to the Mozilla Public
  * License Version 1.1 (the "License"); you may not use this file
@@ -38,6 +18,25 @@ import java.util.List;
  * Contributor(s):
  *        Anton Dmitrijev
  */
+package eionet.webq.service;
+
+import eionet.webq.dto.Conversion;
+import eionet.webq.dto.ListConversionResponse;
+import eionet.webq.dto.UserFile;
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestOperations;
+
+import java.nio.charset.Charset;
+import java.util.List;
 
 /**
  * Conversion service implementation.
@@ -80,7 +79,7 @@ public class ConversionServiceImpl implements ConversionService {
     private String convertPushIdParameter;
 
     @Override
-    public byte[] convert(UploadedXmlFile fileContent, int conversionId) {
+    public byte[] convert(UserFile fileContent, int conversionId) {
         MultiValueMap<String, Object> request = new LinkedMultiValueMap<String, Object>();
         request.add(convertPushFileParameter, createFileHttpEntity(fileContent));
         request.add(convertPushIdParameter, new HttpEntity<String>(Integer.toString(conversionId)));
@@ -104,7 +103,7 @@ public class ConversionServiceImpl implements ConversionService {
      *            file content and name
      * @return new {@link HttpEntity} with required headers and body set
      */
-    private HttpEntity<byte[]> createFileHttpEntity(UploadedXmlFile fileContent) {
+    private HttpEntity<byte[]> createFileHttpEntity(UserFile fileContent) {
         HttpHeaders fileHttpHeaders = new HttpHeaders();
         fileHttpHeaders.setContentType(MediaType.MULTIPART_FORM_DATA);
         fileHttpHeaders.setContentDispositionFormData(convertPushFileParameter, fileContent.getName());

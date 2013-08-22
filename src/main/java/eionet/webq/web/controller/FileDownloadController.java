@@ -23,7 +23,7 @@ package eionet.webq.web.controller;
 import eionet.webq.dao.FileStorage;
 import eionet.webq.dto.ProjectEntry;
 import eionet.webq.dto.ProjectFile;
-import eionet.webq.dto.UploadedXmlFile;
+import eionet.webq.dto.UserFile;
 import eionet.webq.service.ConversionService;
 import eionet.webq.service.ProjectService;
 import eionet.webq.service.UploadedXmlFileService;
@@ -78,7 +78,7 @@ public class FileDownloadController {
      */
     @RequestMapping(value = "/user_file")
     public void downloadUserFile(@RequestParam int fileId, HttpServletResponse response) {
-        UploadedXmlFile file = uploadedXmlFileService.getById(fileId);
+        UserFile file = uploadedXmlFileService.getById(fileId);
         addXmlFileHeaders(response, file.getName());
         writeToResponse(response, file.getContent());
     }
@@ -98,7 +98,7 @@ public class FileDownloadController {
     }
 
     /**
-     * Performs conversion of specified {@link UploadedXmlFile} to specific format.
+     * Performs conversion of specified {@link eionet.webq.dto.UserFile} to specific format.
      * Format is defined by conversionId.
      * @param fileId file id, which will be loaded and converted
      * @param conversionId id of conversion to be used
@@ -106,7 +106,7 @@ public class FileDownloadController {
      */
     @RequestMapping("/convert")
     public void convertXmlFile(@RequestParam int fileId, @RequestParam int conversionId, HttpServletResponse response) {
-        UploadedXmlFile fileContent = uploadedXmlFileService.getById(fileId);
+        UserFile fileContent = uploadedXmlFileService.getById(fileId);
         writeToResponse(response, conversionService.convert(fileContent, conversionId));
     }
 

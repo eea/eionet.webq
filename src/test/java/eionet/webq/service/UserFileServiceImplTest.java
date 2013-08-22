@@ -1,25 +1,3 @@
-package eionet.webq.service;
-
-import eionet.webq.dao.FileStorage;
-import eionet.webq.dao.UserFileStorageImpl;
-import eionet.webq.dto.UploadedXmlFile;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.Mockito;
-
-import javax.servlet.http.HttpSession;
-import java.util.Arrays;
-import java.util.Collection;
-
-import static org.hamcrest.core.IsEqual.equalTo;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.only;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
-
 /*
  * The contents of this file are subject to the Mozilla Public
  * License Version 1.1 (the "License"); you may not use this file
@@ -40,9 +18,32 @@ import static org.mockito.Mockito.when;
  * Contributor(s):
  *        Anton Dmitrijev
  */
-public class UploadedXmlFileServiceImplTest {
+
+package eionet.webq.service;
+
+import eionet.webq.dao.FileStorage;
+import eionet.webq.dao.UserFileStorageImpl;
+import eionet.webq.dto.UserFile;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.Mockito;
+
+import javax.servlet.http.HttpSession;
+import java.util.Arrays;
+import java.util.Collection;
+
+import static org.hamcrest.core.IsEqual.equalTo;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.only;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
+
+public class UserFileServiceImplTest {
     private UploadedXmlFileServiceImpl service;
-    private FileStorage<String, UploadedXmlFile> storage;
+    private FileStorage<String, UserFile> storage;
     HttpSession mockSession;
     private final String userId = "userId";
 
@@ -64,7 +65,7 @@ public class UploadedXmlFileServiceImplTest {
 
     @Test
     public void testSave() throws Exception {
-        UploadedXmlFile fileToSave = new UploadedXmlFile();
+        UserFile fileToSave = new UserFile();
         doNothing().when(storage).save(fileToSave, userId);
 
         service.save(fileToSave);
@@ -75,7 +76,7 @@ public class UploadedXmlFileServiceImplTest {
     @Test
     public void testGetById() throws Exception {
         int fileId = 1;
-        UploadedXmlFile fileInStorage = new UploadedXmlFile();
+        UserFile fileInStorage = new UserFile();
         fileInStorage.setName("file.name");
         when(storage.fileContentBy(fileId, userId)).thenReturn(fileInStorage);
 
@@ -85,10 +86,10 @@ public class UploadedXmlFileServiceImplTest {
 
     @Test
     public void testAllUploadedFiles() throws Exception {
-        Collection<UploadedXmlFile> filesInStorage = Arrays.asList(new UploadedXmlFile());
+        Collection<UserFile> filesInStorage = Arrays.asList(new UserFile());
         when(storage.allFilesFor(userId)).thenReturn(filesInStorage);
 
-        Collection<UploadedXmlFile> uploadedFiles = service.allUploadedFiles();
+        Collection<UserFile> uploadedFiles = service.allUploadedFiles();
 
         assertThat(uploadedFiles, equalTo(filesInStorage));
         verify(storage, only()).allFilesFor(userId);
@@ -96,7 +97,7 @@ public class UploadedXmlFileServiceImplTest {
 
     @Test
     public void testUpdateContent() throws Exception {
-        UploadedXmlFile fileToUpdate = new UploadedXmlFile();
+        UserFile fileToUpdate = new UserFile();
         doNothing().when(storage).update(fileToUpdate, userId);
 
         service.updateContent(fileToUpdate);

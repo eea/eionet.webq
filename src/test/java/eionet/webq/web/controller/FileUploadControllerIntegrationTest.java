@@ -22,7 +22,7 @@ package eionet.webq.web.controller;
 
 import eionet.webq.dto.Conversion;
 import eionet.webq.dto.ListConversionResponse;
-import eionet.webq.dto.UploadedXmlFile;
+import eionet.webq.dto.UserFile;
 import eionet.webq.web.AbstractContextControllerTests;
 import org.junit.Before;
 import org.junit.Test;
@@ -71,9 +71,9 @@ public class FileUploadControllerIntegrationTest extends AbstractContextControll
     @Test
     public void downloadReturnsUploadedXmlFile() throws Exception {
 
-        UploadedXmlFile uploadedXmlFile = uploadFileAndTakeFirstUploadedFile();
+        UserFile userFile = uploadFileAndTakeFirstUploadedFile();
 
-        downloadFile(uploadedXmlFile.getId()).andExpect(content().contentType(MediaType.APPLICATION_XML))
+        downloadFile(userFile.getId()).andExpect(content().contentType(MediaType.APPLICATION_XML))
                 .andExpect(content().bytes(FILE_CONTENT)).andReturn();
     }
 
@@ -81,7 +81,7 @@ public class FileUploadControllerIntegrationTest extends AbstractContextControll
     public void after3FilesUploadModelContainsSameAmountOfFiles() throws Exception {
         uploadFile(createMockMultipartFile("file"));
         uploadFile(createMockMultipartFile("file1"));
-        List<UploadedXmlFile> uploadedFiles = uploadFileAndExtractUploadedFiles(createMockMultipartFile("file2"));
+        List<UserFile> uploadedFiles = uploadFileAndExtractUploadedFiles(createMockMultipartFile("file2"));
 
         assertThat(uploadedFiles.size(), is(3));
     }
@@ -90,23 +90,23 @@ public class FileUploadControllerIntegrationTest extends AbstractContextControll
     public void allowToStoreFilesWithSameName() throws Exception {
         String file = "file.xml";
         uploadFile(createMockMultipartFile(file));
-        List<UploadedXmlFile> uploadedXmlFiles = uploadFileAndExtractUploadedFiles(createMockMultipartFile(file));
+        List<UserFile> userFiles = uploadFileAndExtractUploadedFiles(createMockMultipartFile(file));
 
-        assertThat(uploadedXmlFiles.size(), is(2));
+        assertThat(userFiles.size(), is(2));
     }
 
     @Test
     public void allowFileContentUpdateInStorage() throws Exception {
-        UploadedXmlFile uploadedXmlFile = uploadFileAndTakeFirstUploadedFile();
+        UserFile userFile = uploadFileAndTakeFirstUploadedFile();
         String newContent = FILE_CONTENT_STRING.replace("/>", "><foobar></foobar></bar>");
         request(
-                postWithMockSession("/saveXml").param("fileId", Integer.toString(uploadedXmlFile.getId()))
+                postWithMockSession("/saveXml").param("fileId", Integer.toString(userFile.getId()))
                         .content(newContent.getBytes()));
 
-        downloadFile(uploadedXmlFile.getId()).andExpect(content().string(newContent));
+        downloadFile(userFile.getId()).andExpect(content().string(newContent));
     }
 
-    private UploadedXmlFile uploadFileAndTakeFirstUploadedFile() throws Exception {
+    private UserFile uploadFileAndTakeFirstUploadedFile() throws Exception {
         return uploadFileAndTakeFirstUploadedFile(createMockMultipartFile("file.xml"));
     }
 

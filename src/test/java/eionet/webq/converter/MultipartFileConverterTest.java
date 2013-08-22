@@ -20,11 +20,8 @@
  */
 package eionet.webq.converter;
 
-import static org.hamcrest.core.IsEqual.equalTo;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-
 import configuration.ApplicationTestContextWithMockSession;
+import eionet.webq.dto.UserFile;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +31,9 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.web.multipart.MultipartFile;
 
-import eionet.webq.dto.UploadedXmlFile;
+import static org.hamcrest.core.IsEqual.equalTo;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {ApplicationTestContextWithMockSession.class})
@@ -50,7 +49,7 @@ public class MultipartFileConverterTest {
         byte[] fileContent = xmlWithRootElementAttributes(rootAttributesDeclaration);
         MultipartFile xmlFileUpload = createMultipartFile(fileContent);
 
-        UploadedXmlFile xmlFile = fileConverter.convert(xmlFileUpload);
+        UserFile xmlFile = fileConverter.convert(xmlFileUpload);
 
         assertThat(xmlFile.getName(), equalTo(originalFilename));
         assertThat(xmlFile.getContent(), equalTo(fileContent));
@@ -60,7 +59,7 @@ public class MultipartFileConverterTest {
 
     @Test
     public void setXmlSchemaToNullIfUnableToRead() {
-        UploadedXmlFile result =
+        UserFile result =
                 fileConverter.convert(createMultipartFile(xmlWithRootElementAttributes(noNamespaceSchemaAttribute("foo"))));
         assertNull(result.getXmlSchema());
     }
@@ -69,7 +68,7 @@ public class MultipartFileConverterTest {
     public void setXmlSchemaWithNamespace() throws Exception {
         String namespace = "namespace";
         String schemaLocation = "testSchema";
-        UploadedXmlFile result =
+        UserFile result =
                 fileConverter.convert(createMultipartFile(xmlWithRootElementAttributes(rootAttributesDeclaration(schemaAttribute(
                         namespace, schemaLocation)))));
 

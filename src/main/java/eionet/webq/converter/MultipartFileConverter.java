@@ -21,7 +21,7 @@
 package eionet.webq.converter;
 
 import eionet.webq.dto.UploadedFile;
-import eionet.webq.dto.UploadedXmlFile;
+import eionet.webq.dto.UserFile;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
@@ -37,11 +37,11 @@ import java.io.ByteArrayInputStream;
 import static javax.xml.stream.XMLStreamConstants.START_ELEMENT;
 
 /**
- * Performs converting from {@link MultipartFile} to {@link UploadedXmlFile}.
+ * Performs converting from {@link MultipartFile} to {@link eionet.webq.dto.UserFile}.
  *
  * @see Converter
  */
-public class MultipartFileConverter implements Converter<MultipartFile, UploadedXmlFile> {
+public class MultipartFileConverter implements Converter<MultipartFile, UserFile> {
     /**
      * Logger for this class.
      */
@@ -54,9 +54,9 @@ public class MultipartFileConverter implements Converter<MultipartFile, Uploaded
     private MultipartFileToUploadedFile toUploadedFileConverter;
 
     @Override
-    public UploadedXmlFile convert(MultipartFile multipartFile) {
+    public UserFile convert(MultipartFile multipartFile) {
         UploadedFile uploadedFile = toUploadedFileConverter.convert(multipartFile);
-        return new UploadedXmlFile(uploadedFile, extractXmlSchema(uploadedFile.getContent()));
+        return new UserFile(uploadedFile, extractXmlSchema(uploadedFile.getContent()));
     }
 
     /**
