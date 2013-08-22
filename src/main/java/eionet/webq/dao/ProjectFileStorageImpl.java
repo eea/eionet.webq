@@ -63,12 +63,15 @@ public class ProjectFileStorageImpl extends AbstractDao<ProjectFile> implements 
                 ps.setInt(1, project.getId());
                 ps.setString(2, projectFile.getTitle());
                 lobCreator.setBlobAsBytes(ps, 3, projectFile.getFileContent());
-                ps.setLong(4, projectFile.getFileSizeInBytes());
-                ps.setString(5, projectFile.getXmlSchema());
-                ps.setString(6, projectFile.getDescription());
-                ps.setString(7, projectFile.getUserName());
-                ps.setBoolean(8, projectFile.isActive());
-                ps.setBoolean(9, projectFile.isMainForm());
+                ps.setString(4, projectFile.getFileName());
+                ps.setLong(5, projectFile.getFileSizeInBytes());
+                ps.setString(6, projectFile.getNewXmlFileName());
+                ps.setString(7, projectFile.getEmptyInstanceUrl());
+                ps.setString(8, projectFile.getXmlSchema());
+                ps.setString(9, projectFile.getDescription());
+                ps.setString(10, projectFile.getUserName());
+                ps.setBoolean(11, projectFile.isActive());
+                ps.setBoolean(12, projectFile.isMainForm());
             }
         });
     }
@@ -97,7 +100,11 @@ public class ProjectFileStorageImpl extends AbstractDao<ProjectFile> implements 
                 ps.setBoolean(index++, projectFile.isMainForm());
                 if (updateFile) {
                     lobCreator.setBlobAsBytes(ps, index++, projectFile.getFileContent());
+                    ps.setString(index++, projectFile.getFileName());
+                    ps.setLong(index++, projectFile.getFileSizeInBytes());
                 }
+                ps.setString(index++, projectFile.getNewXmlFileName());
+                ps.setString(index++, projectFile.getEmptyInstanceUrl());
                 ps.setTimestamp(index++, new Timestamp(System.currentTimeMillis()));
                 ps.setInt(index, projectFile.getId());
             }

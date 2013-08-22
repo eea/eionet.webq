@@ -23,6 +23,14 @@
             <f:input path="xmlSchema"/>
         </p>
         <p>
+            <label for="newXmlFileName">New xml file name(optional)</label>
+            <f:input path="newXmlFileName"/>
+        </p>
+        <p>
+            <label for="emptyInstanceUrl">The location of empty instance XML file(optional)</label>
+            <f:input path="emptyInstanceUrl"/>
+        </p>
+        <p>
             <label for="active">Active?</label>
             <f:checkbox path="active"/>
         </p>

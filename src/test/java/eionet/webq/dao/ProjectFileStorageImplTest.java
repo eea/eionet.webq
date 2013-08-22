@@ -23,6 +23,7 @@ package eionet.webq.dao;
 import configuration.ApplicationTestContextWithMockSession;
 import eionet.webq.dto.ProjectEntry;
 import eionet.webq.dto.ProjectFile;
+import eionet.webq.dto.UploadedFile;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -117,8 +118,10 @@ public class ProjectFileStorageImplTest {
         ProjectFile beforeUpdate = getUploadedFileAndAssertThatItIsTheOnlyOne();
         beforeUpdate.setTitle("brand new title");
         beforeUpdate.setXmlSchema("brand new schema");
-        beforeUpdate.setFileContent("brand new content".getBytes());
+        beforeUpdate.setFile(new UploadedFile("new file name", "brand new content".getBytes()));
         beforeUpdate.setDescription("brand new description");
+        beforeUpdate.setEmptyInstanceUrl("brand new instance url");
+        beforeUpdate.setNewXmlFileName("brand new xml file name");
         beforeUpdate.setActive(true);
         beforeUpdate.setMainForm(true);
 
@@ -177,7 +180,7 @@ public class ProjectFileStorageImplTest {
 
         ProjectFile byId = projectFileStorage.fileById(uploadedFile.getId());
 
-        assertFieldsEquals(uploadedFile, byId);
+        assertFieldsEquals(testFileForUpload, byId);
     }
 
     @Test
@@ -205,6 +208,10 @@ public class ProjectFileStorageImplTest {
         assertThat(after.getTitle(), equalTo(before.getTitle()));
         assertThat(after.getXmlSchema(), equalTo(before.getXmlSchema()));
         assertThat(after.getFileContent(), equalTo(before.getFileContent()));
+        assertThat(after.getFileName(), equalTo(before.getFileName()));
+        assertThat(after.getFileSizeInBytes(), equalTo(before.getFileSizeInBytes()));
+        assertThat(after.getEmptyInstanceUrl(), equalTo(before.getEmptyInstanceUrl()));
+        assertThat(after.getNewXmlFileName(), equalTo(before.getNewXmlFileName()));
         assertThat(after.getDescription(), equalTo(before.getDescription()));
         assertThat(after.isActive(), equalTo(before.isActive()));
         assertThat(after.isMainForm(), equalTo(before.isMainForm()));
@@ -227,9 +234,9 @@ public class ProjectFileStorageImplTest {
         projectFile.setTitle("Main form");
         projectFile.setDescription("Main web form for questionnaire");
         projectFile.setUserName("User Name");
-        byte[] bytes = "Web-form content".getBytes();
-        projectFile.setFileContent(bytes);
-        projectFile.setFileSizeInBytes(bytes.length);
+        projectFile.setFile(new UploadedFile("test-filename", "Web-form content".getBytes()));
+        projectFile.setEmptyInstanceUrl("empty-instance-url");
+        projectFile.setNewXmlFileName("new-xml-file-name");
         projectFile.setXmlSchema("test-xml-schema");
         return projectFile;
     }
