@@ -165,7 +165,7 @@ public class ProjectsControllerIntegrationTest extends AbstractProjectsControlle
         WebFormUpload uploaded = (WebFormUpload) request.andReturn().getModelAndView().getModel().get(WEB_FORM_UPLOAD_ATTRIBUTE);
 
         assertThat(uploaded.getTitle(), equalTo(webFormUpload.getTitle()));
-        assertThat(uploaded.getFile(), equalTo(webFormUpload.getFile()));
+        assertThat(uploaded.getFileContent(), equalTo(webFormUpload.getFileContent()));
         assertThat(uploaded.isActive(), equalTo(webFormUpload.isActive()));
         assertThat(uploaded.getDescription(), equalTo(webFormUpload.getDescription()));
     }
@@ -236,7 +236,7 @@ public class ProjectsControllerIntegrationTest extends AbstractProjectsControlle
         WebFormUpload webFormUpload = theOnlyOneUploadedFile();
 
         request(get("/download/project/" + DEFAULT_PROJECT_ID + "/file/" + webFormUpload.getId())).andExpect(
-                content().bytes(testWebFormUpload().getFile()));
+                content().bytes(testWebFormUpload().getFileContent()));
     }
 
     private WebFormUpload theOnlyOneUploadedFile() {
@@ -273,13 +273,13 @@ public class ProjectsControllerIntegrationTest extends AbstractProjectsControlle
         WebFormUpload webFormUpload = new WebFormUpload();
         webFormUpload.setDescription("test description");
         webFormUpload.setTitle("title");
-        webFormUpload.setFile("test-content".getBytes());
+        webFormUpload.setFileContent("test-content".getBytes());
         webFormUpload.setUserName("test-user");
         return webFormUpload;
     }
 
     private ResultActions uploadWebFormForDefaultProject(WebFormUpload webFormUpload) throws Exception {
-        return request(fileUpload("/projects/" + DEFAULT_PROJECT_ID + "/webform/save").file("file", webFormUpload.getFile())
+        return request(fileUpload("/projects/" + DEFAULT_PROJECT_ID + "/webform/save").file("file", webFormUpload.getFileContent())
                 .param("title", webFormUpload.getTitle()).param("active", Boolean.toString(webFormUpload.isActive()))
                 .param("description", webFormUpload.getDescription()).param("userName", webFormUpload.getUserName()));
     }

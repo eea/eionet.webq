@@ -43,9 +43,17 @@ public class WebFormUpload {
     @NotEmpty
     private String title;
     /**
-     * Form content.
+     * Uploaded file.
      */
-    private byte[] file;
+    private UploadedFile file = new UploadedFile();
+    /**
+     * New xml file name for web form.
+     */
+    private String newXmlFileName;
+    /**
+     * The location of empty instance XML file.
+     */
+    private String emptyInstanceUrl;
     /**
      * details about the webform.
      */
@@ -100,11 +108,51 @@ public class WebFormUpload {
         this.title = title;
     }
 
-    public byte[] getFile() {
+    public String getFileName() {
+        return file.getName();
+    }
+
+    public void setFileName(String fileName) {
+        file.setName(fileName);
+    }
+
+    public long getFileSizeInBytes() {
+        return file.getSizeInBytes();
+    }
+
+    public void setFileSizeInBytes(long fileSizeInBytes) {
+        file.setSizeInBytes(fileSizeInBytes);
+    }
+
+    public String getNewXmlFileName() {
+        return newXmlFileName;
+    }
+
+    public void setNewXmlFileName(String newXmlFileName) {
+        this.newXmlFileName = newXmlFileName;
+    }
+
+    public String getEmptyInstanceUrl() {
+        return emptyInstanceUrl;
+    }
+
+    public void setEmptyInstanceUrl(String emptyInstanceUrl) {
+        this.emptyInstanceUrl = emptyInstanceUrl;
+    }
+
+    public byte[] getFileContent() {
+        return file.getContent();
+    }
+
+    public void setFileContent(byte[] fileContent) {
+        file.setContent(fileContent);
+    }
+
+    public UploadedFile getFile() {
         return file;
     }
 
-    public void setFile(byte[] file) {
+    public void setFile(UploadedFile file) {
         this.file = file;
     }
 

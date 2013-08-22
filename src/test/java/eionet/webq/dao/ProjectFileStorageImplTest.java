@@ -80,7 +80,7 @@ public class ProjectFileStorageImplTest {
         assertThat(webFormUploads.size(), equalTo(2));
 
         for (WebFormUpload webFormUpload : webFormUploads) {
-            assertNull(webFormUpload.getFile());
+            assertNull(webFormUpload.getFileContent());
         }
     }
 
@@ -90,7 +90,7 @@ public class ProjectFileStorageImplTest {
 
         WebFormUpload uploadedFile = getUploadedFileAndAssertThatItIsTheOnlyOne();
 
-        assertThat(uploadedFile.getFile(), equalTo(testFileForUpload.getFile()));
+        assertThat(uploadedFile.getFileContent(), equalTo(testFileForUpload.getFileContent()));
         assertThat(uploadedFile.getProjectId(), equalTo(projectEntry.getId()));
         assertThat(uploadedFile.getTitle(), equalTo(testFileForUpload.getTitle()));
         assertThat(uploadedFile.getDescription(), equalTo(testFileForUpload.getDescription()));
@@ -117,7 +117,7 @@ public class ProjectFileStorageImplTest {
         WebFormUpload beforeUpdate = getUploadedFileAndAssertThatItIsTheOnlyOne();
         beforeUpdate.setTitle("brand new title");
         beforeUpdate.setXmlSchema("brand new schema");
-        beforeUpdate.setFile("brand new content".getBytes());
+        beforeUpdate.setFileContent("brand new content".getBytes());
         beforeUpdate.setDescription("brand new description");
         beforeUpdate.setActive(true);
         beforeUpdate.setMainForm(true);
@@ -133,11 +133,11 @@ public class ProjectFileStorageImplTest {
         addOneFile();
         WebFormUpload beforeUpdate = getUploadedFileAndAssertThatItIsTheOnlyOne();
 
-        beforeUpdate.setFile(null);
+        beforeUpdate.setFileContent(null);
         projectFileStorage.update(beforeUpdate, projectEntry);
 
         WebFormUpload webFormUpload = projectFileStorage.fileById(beforeUpdate.getId());
-        assertNotNull(webFormUpload.getFile());
+        assertNotNull(webFormUpload.getFileContent());
     }
 
     @Test
@@ -186,7 +186,7 @@ public class ProjectFileStorageImplTest {
         WebFormUpload uploadedFile = getUploadedFileAndAssertThatItIsTheOnlyOne();
 
         WebFormUpload webFormUpload = projectFileStorage.fileContentBy(uploadedFile.getId(), projectEntry);
-        assertThat(webFormUpload.getFile(), equalTo(testFileForUpload.getFile()));
+        assertThat(webFormUpload.getFileContent(), equalTo(testFileForUpload.getFileContent()));
         assertThat(webFormUpload.getTitle(), equalTo(testFileForUpload.getTitle()));
     }
 
@@ -204,7 +204,7 @@ public class ProjectFileStorageImplTest {
     private void assertFieldsEquals(WebFormUpload before, WebFormUpload after) {
         assertThat(after.getTitle(), equalTo(before.getTitle()));
         assertThat(after.getXmlSchema(), equalTo(before.getXmlSchema()));
-        assertThat(after.getFile(), equalTo(before.getFile()));
+        assertThat(after.getFileContent(), equalTo(before.getFileContent()));
         assertThat(after.getDescription(), equalTo(before.getDescription()));
         assertThat(after.isActive(), equalTo(before.isActive()));
         assertThat(after.isMainForm(), equalTo(before.isMainForm()));
@@ -227,7 +227,9 @@ public class ProjectFileStorageImplTest {
         webFormUpload.setTitle("Main form");
         webFormUpload.setDescription("Main web form for questionnaire");
         webFormUpload.setUserName("User Name");
-        webFormUpload.setFile("Web-form content".getBytes());
+        byte[] bytes = "Web-form content".getBytes();
+        webFormUpload.setFileContent(bytes);
+        webFormUpload.setFileSizeInBytes(bytes.length);
         webFormUpload.setXmlSchema("test-xml-schema");
         return webFormUpload;
     }

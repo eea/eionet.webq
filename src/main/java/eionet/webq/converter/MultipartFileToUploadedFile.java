@@ -20,38 +20,20 @@
  */
 package eionet.webq.converter;
 
-import org.apache.log4j.Logger;
+import eionet.webq.dto.UploadedFile;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.converter.Converter;
-import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-
 /**
- * Performs converting from {@link MultipartFile} to byte array.
- *
- * @see Converter
+ * Convert {@link MultipartFile} to {@link UploadedFile}.
  */
-@Component
-public class MultipartToByteArray implements Converter<MultipartFile, byte[]> {
-    /**
-     * Logger for this class.
-     */
-    private static final Logger LOGGER = Logger.getLogger(MultipartToByteArray.class);
+public class MultipartFileToUploadedFile implements Converter<MultipartFile, UploadedFile> {
+    @Autowired
+    private MultipartToByteArray toByteArrayConverter;
 
-    /**
-     * Calls {@link org.springframework.web.multipart.MultipartFile#getBytes()} wrapping {@link IOException}.
-     *
-     * @param multipartFile uploaded file to be converted
-     * @return uploaded file bytes.
-     */
     @Override
-    public byte[] convert(MultipartFile multipartFile) {
-        try {
-            return multipartFile.getBytes();
-        } catch (IOException e) {
-            LOGGER.warn("unable to transform uploaded file to bytes", e);
-            return new byte[0];
-        }
+    public UploadedFile convert(MultipartFile source) {
+        return new UploadedFile(source.getOriginalFilename(), toByteArrayConverter.convert(source));
     }
 }

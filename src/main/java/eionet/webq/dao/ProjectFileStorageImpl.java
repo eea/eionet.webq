@@ -62,12 +62,13 @@ public class ProjectFileStorageImpl extends AbstractDao<WebFormUpload> implement
             protected void setValues(PreparedStatement ps, LobCreator lobCreator) throws SQLException {
                 ps.setInt(1, project.getId());
                 ps.setString(2, webFormUpload.getTitle());
-                lobCreator.setBlobAsBytes(ps, 3, webFormUpload.getFile());
-                ps.setString(4, webFormUpload.getXmlSchema());
-                ps.setString(5, webFormUpload.getDescription());
-                ps.setString(6, webFormUpload.getUserName());
-                ps.setBoolean(7, webFormUpload.isActive());
-                ps.setBoolean(8, webFormUpload.isMainForm());
+                lobCreator.setBlobAsBytes(ps, 3, webFormUpload.getFileContent());
+                ps.setLong(4, webFormUpload.getFileSizeInBytes());
+                ps.setString(5, webFormUpload.getXmlSchema());
+                ps.setString(6, webFormUpload.getDescription());
+                ps.setString(7, webFormUpload.getUserName());
+                ps.setBoolean(8, webFormUpload.isActive());
+                ps.setBoolean(9, webFormUpload.isMainForm());
             }
         });
     }
@@ -79,7 +80,7 @@ public class ProjectFileStorageImpl extends AbstractDao<WebFormUpload> implement
 
     @Override
     public void update(final WebFormUpload webFormUpload, ProjectEntry projectEntry) {
-        final boolean updateFile = webFormUpload.getFile() != null;
+        final boolean updateFile = webFormUpload.getFileContent() != null;
         String updateStatement =
                 updateFile ? sqlProperties.getProperty("update.project.file") : sqlProperties
                         .getProperty("update.project.file.without.file");
@@ -95,7 +96,7 @@ public class ProjectFileStorageImpl extends AbstractDao<WebFormUpload> implement
                 ps.setBoolean(index++, webFormUpload.isActive());
                 ps.setBoolean(index++, webFormUpload.isMainForm());
                 if (updateFile) {
-                    lobCreator.setBlobAsBytes(ps, index++, webFormUpload.getFile());
+                    lobCreator.setBlobAsBytes(ps, index++, webFormUpload.getFileContent());
                 }
                 ps.setTimestamp(index++, new Timestamp(System.currentTimeMillis()));
                 ps.setInt(index, webFormUpload.getId());

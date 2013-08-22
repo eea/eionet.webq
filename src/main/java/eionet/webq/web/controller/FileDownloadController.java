@@ -96,7 +96,7 @@ public class FileDownloadController {
         WebFormUpload webFormUpload = projectFiles.fileContentBy(fileId, projectService.getByProjectId(projectId));
         response.setContentType(MediaType.APPLICATION_XML_VALUE);
         response.addHeader("Content-Disposition", "attachment;filename=" + encodeAsUrl(webFormUpload.getTitle()));
-        writeToResponse(response, webFormUpload.getFile());
+        writeToResponse(response, webFormUpload.getFileContent());
     }
 
     /**

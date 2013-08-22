@@ -166,7 +166,7 @@ public class ProjectsController {
             BindingResult bindingResult, Model model) {
         ProjectEntry currentProject = projectService.getByProjectId(projectFolderId);
         boolean update = webFormUpload.getId() > 0;
-        if (!update && webFormUpload.getFile() == null) {
+        if (!update && webFormUpload.getFileContent() == null) {
             bindingResult.rejectValue("file", "webform.file.null");
         }
         if (bindingResult.hasErrors()) {
