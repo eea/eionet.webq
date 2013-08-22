@@ -26,6 +26,14 @@
         });
     }
 
+    function view_file(popupElement) {
+        popupElement.dialog({
+            height: 450,
+            width: 500,
+            modal: true
+        });
+    }
+
     function removeFile(id) {
         removeDialog($("#remove-file"), "<c:url value="/projects/${projectEntry.projectId}/webform/remove/?fileId="/>" + id);
     }
@@ -45,38 +53,62 @@
 <h1>Project: ${projectEntry.projectId}</h1>
 <p><strong>${projectEntry.description}</strong> (created <fmt:formatDate pattern="dd MMM yyyy" value="${projectEntry.created}" />)</p>
 
-    <h2>Webforms</h2>
-    <c:if test="${not empty allProjectFiles}">
+<h2>Project files</h2>
+<c:if test="${empty allProjectFiles}">
+    <div>No project files yet.</div>
+</c:if>
+
+<c:forEach items="${allProjectFiles}" var="projectFile">
+    <c:set value="view-file-${projectFile.id}" var="popup_id"/>
+    <a href="#" onclick="view_file($('#${popup_id}'))">${projectFile.fileName}</a>
+    <div title="File for project '${projectEntry.projectId}'" id="view-file-${projectFile.id}" style="display: none;">
         <table class="datatable">
-            <thead>
             <tr>
                 <td>Title</td>
-                <td>File</td>
-                <td>Description</td>
-                <td>Xml schema</td>
-                <td>Active?</td>
-                <td>Main form?</td>
-                <td>Username</td>
-                <td>Actions</td>
+                <td>${projectFile.title}</td>
             </tr>
-            </thead>
-            <c:forEach items="${allProjectFiles}" var="projectFile">
-                <tr>
-                    <td>${projectFile.title}</td>
-                    <td><a href="<c:url value="/download/project/${projectEntry.projectId}/file/${projectFile.id}"/>">${projectFile.fileName}</a></td>
-                    <td>${projectFile.description}</td>
-                    <td>${projectFile.xmlSchema}</td>
-                    <td>${projectFile.active}</td>
-                    <td>${projectFile.mainForm}</td>
-                    <td>${projectFile.userName}</td>
-                    <td>
-                        <a href="<c:url value="/projects/${projectEntry.projectId}/webform/edit/?fileId=${projectFile.id}"/>">Edit</a>
-                        <a href="#" onclick="removeFile(${projectFile.id});">Remove</a>
-                    </td>
-                </tr>
-            </c:forEach>
+            <tr>
+                <td>File</td>
+                <td><a href="<c:url value="/download/project/${projectEntry.projectId}/file/${projectFile.id}"/>">${projectFile.fileName}</a></td>
+            </tr>
+            <tr>
+                <td>Description</td>
+                <td>${projectFile.description}</td>
+            </tr>
+            <tr>
+                <td>Xml schema</td>
+                <td>${projectFile.xmlSchema}</td>
+            </tr>
+            <tr>
+                <td>Empty instance URL</td>
+                <td>${projectFile.emptyInstanceUrl}</td>
+            </tr>
+            <tr>
+                <td>New xml file name</td>
+                <td>${projectFile.newXmlFileName}</td>
+            </tr>
+            <tr>
+                <td>Active?</td>
+                <td>${projectFile.active}</td>
+            </tr>
+            <tr>
+                <td>Main form?</td>
+                <td>${projectFile.mainForm}</td>
+            </tr>
+            <tr>
+                <td>Username</td>
+                <td>${projectFile.userName}</td>
+            </tr>
+            <tr>
+                <td>Actions</td>
+                <td>
+                    <a href="<c:url value="/projects/${projectEntry.projectId}/webform/edit/?fileId=${projectFile.id}"/>">Edit</a>
+                    <a href="#" onclick="removeFile('${projectFile.id}');">Remove</a>
+                </td>
+            </tr>
         </table>
-    </c:if>
+    </div>
+</c:forEach>
 
 <div id="remove-file" title="Remove project file?" style="display: none;">
     <p>This file will be removed. Are you sure?</p>
