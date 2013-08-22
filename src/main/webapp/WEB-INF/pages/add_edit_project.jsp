@@ -20,4 +20,14 @@
     </table>
     <f:hidden path="id"/>
     <input type="submit" value="Save project"/>
+    <c:choose>
+        <c:when test="${not empty projectEntry.projectId}">
+            <c:set var="cancelLink" value="/projects/${projectEntry.projectId}/view"/>
+        </c:when>
+        <c:otherwise>
+            <c:set var="cancelLink" value="/projects/"/>
+        </c:otherwise>
+    </c:choose>
+
+    <input type="button" onclick="window.location = '<c:url value="${cancelLink}"/>'" value="Cancel"/>
 </f:form>
