@@ -44,5 +44,6 @@
         </p>
         <f:hidden path="id"/>
         <input type="submit" value="Save form"/>
+        <input type="button" onclick="window.location = '<c:url value="/projects/${projectEntry.projectId}/view"/>'" value="Cancel"/>
     </f:form>
 </fieldset>

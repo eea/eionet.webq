@@ -63,7 +63,7 @@
             <c:forEach items="${allProjectFiles}" var="projectFile">
                 <tr>
                     <td>${projectFile.title}</td>
-                    <td><a href="<c:url value="/download/project/${projectEntry.projectId}/file/${projectFile.id}"/>">Download</a></td>
+                    <td><a href="<c:url value="/download/project/${projectEntry.projectId}/file/${projectFile.id}"/>">${projectFile.fileName}</a></td>
                     <td>${projectFile.description}</td>
                     <td>${projectFile.xmlSchema}</td>
                     <td>${projectFile.active}</td>
@@ -76,7 +76,6 @@
                 </tr>
             </c:forEach>
         </table>
-        <input type="button" value="Remove selected" onclick="">
     </c:if>
 
 <div id="remove-file" title="Remove project file?" style="display: none;">
