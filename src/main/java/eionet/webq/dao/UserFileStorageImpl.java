@@ -20,6 +20,7 @@
  */
 package eionet.webq.dao;
 
+import eionet.webq.dto.UploadedFile;
 import eionet.webq.dto.UploadedXmlFile;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -75,7 +76,7 @@ public class UserFileStorageImpl extends AbstractDao<UploadedXmlFile> implements
                 new RowMapper<UploadedXmlFile>() {
                     @Override
                     public UploadedXmlFile mapRow(ResultSet rs, int rowNum) throws SQLException {
-                        return new UploadedXmlFile().setName(rs.getString(1)).setContent(lobHandler.getBlobAsBytes(rs, 2));
+                        return new UploadedXmlFile(new UploadedFile(rs.getString(1), lobHandler.getBlobAsBytes(rs, 2)), null);
                     }
                 });
     }

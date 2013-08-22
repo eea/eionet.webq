@@ -1,5 +1,3 @@
-package eionet.webq.dto;
-
 /*
  * The contents of this file are subject to the Mozilla Public
  * License Version 1.1 (the "License"); you may not use this file
@@ -20,6 +18,8 @@ package eionet.webq.dto;
  * Contributor(s):
  *        Anton Dmitrijev
  */
+package eionet.webq.dto;
+
 public class UploadedFile {
     /**
      * File name.
@@ -65,5 +65,11 @@ public class UploadedFile {
 
     public void setSizeInBytes(long sizeInBytes) {
         this.sizeInBytes = sizeInBytes;
+    }
+
+    @Override
+    public String toString() {
+        return "UploadedFile{" + "name='" + name + '\'' + ", content="
+                + (content != null ? content.length : null) + ", sizeInBytes=" + sizeInBytes + '}';
     }
 }

@@ -20,10 +20,12 @@
  */
 package eionet.webq.converter;
 
+import eionet.webq.dto.UploadedFile;
 import eionet.webq.dto.UploadedXmlFile;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -48,12 +50,13 @@ public class MultipartFileConverter implements Converter<MultipartFile, Uploaded
      * Xsi namespace URI.
      */
     private static final String XSI_NAMESPACE_URI = "http://www.w3.org/2001/XMLSchema-instance";
+    @Autowired
+    private MultipartFileToUploadedFile toUploadedFileConverter;
 
     @Override
     public UploadedXmlFile convert(MultipartFile multipartFile) {
-        byte[] bytes = new MultipartToByteArray().convert(multipartFile);
-        return new UploadedXmlFile().setContent(bytes).setName(multipartFile.getOriginalFilename())
-                .setSizeInBytes(multipartFile.getSize()).setXmlSchema(extractXmlSchema(bytes));
+        UploadedFile uploadedFile = toUploadedFileConverter.convert(multipartFile);
+        return new UploadedXmlFile(uploadedFile, extractXmlSchema(uploadedFile.getContent()));
     }
 
     /**

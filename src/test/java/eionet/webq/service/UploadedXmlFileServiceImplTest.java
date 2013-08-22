@@ -75,7 +75,8 @@ public class UploadedXmlFileServiceImplTest {
     @Test
     public void testGetById() throws Exception {
         int fileId = 1;
-        UploadedXmlFile fileInStorage = new UploadedXmlFile().setName("file.name");
+        UploadedXmlFile fileInStorage = new UploadedXmlFile();
+        fileInStorage.setName("file.name");
         when(storage.fileContentBy(fileId, userId)).thenReturn(fileInStorage);
 
         assertThat(service.getById(fileId), equalTo(fileInStorage));

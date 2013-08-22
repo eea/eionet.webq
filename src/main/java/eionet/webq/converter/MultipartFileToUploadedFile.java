@@ -23,11 +23,13 @@ package eionet.webq.converter;
 import eionet.webq.dto.UploadedFile;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.converter.Converter;
+import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
  * Convert {@link MultipartFile} to {@link UploadedFile}.
  */
+@Component
 public class MultipartFileToUploadedFile implements Converter<MultipartFile, UploadedFile> {
     @Autowired
     private MultipartToByteArray toByteArrayConverter;

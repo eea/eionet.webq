@@ -1,6 +1,7 @@
 package eionet.webq.dao;
 
 import configuration.ApplicationTestContextWithMockSession;
+import eionet.webq.dto.UploadedFile;
 import eionet.webq.dto.UploadedXmlFile;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -54,8 +55,7 @@ public class UserFileStorageImplTest {
     @Test
     public void savesRequiredFields() throws Exception {
         UploadedXmlFile uploadedXmlFile =
-                new UploadedXmlFile().setName("name").setXmlSchema("xmlSchema").setSizeInBytes(1000)
-                        .setContent("test_content".getBytes());
+                new UploadedXmlFile(new UploadedFile("name", "test_content".getBytes()), "xmlSchema");
 
         storage.save(uploadedXmlFile, userId);
 
@@ -72,7 +72,8 @@ public class UserFileStorageImplTest {
 
     @Test(expected = DataAccessException.class)
     public void saveIgnoresId() throws Exception {
-        UploadedXmlFile uploadedXmlFile = new UploadedXmlFile().setId(15);
+        UploadedXmlFile uploadedXmlFile = new UploadedXmlFile();
+        uploadedXmlFile.setId(15);
 
         uploadFileForUser(userId, uploadedXmlFile);
 
@@ -92,7 +93,8 @@ public class UserFileStorageImplTest {
     @Test
     public void savedFileCanBeRetrieved() throws Exception {
         String savedFileName = "file_to_retrieve.xml";
-        UploadedXmlFile fileToUpload = new UploadedXmlFile().setName(savedFileName);
+        UploadedXmlFile fileToUpload = new UploadedXmlFile();
+        fileToUpload.setName(savedFileName);
         storage.save(fileToUpload, userId);
 
         UploadedXmlFile uploadedXmlFile = getFirstUploadedFileAndAssertThatItIsTheOnlyOneAvailableFor(userId);
@@ -116,7 +118,8 @@ public class UserFileStorageImplTest {
 
     @Test
     public void allFilesWillNotFetchFilesContent() throws Exception {
-        UploadedXmlFile fileWithContent = new UploadedXmlFile().setContent("File content".getBytes());
+        UploadedXmlFile fileWithContent = fileWithContent("File content".getBytes());
+
         uploadFilesFor(userId, 10, fileWithContent);
         Collection<UploadedXmlFile> uploadedFiles = getAllFilesForUserAndAssertThatResultSetSizeIsAsExpected(userId, 10);
         for (UploadedXmlFile file : uploadedFiles) {
@@ -128,8 +131,7 @@ public class UserFileStorageImplTest {
     public void saveFilesContentCouldBeRetrievedByFileId() throws Exception {
         byte[] contentBytes = "Hello world!".getBytes();
         UploadedXmlFile fileToUpload =
-                new UploadedXmlFile().setName("my_file.xml").setContent(contentBytes).setXmlSchema("my_schema.xsd")
-                        .setSizeInBytes(contentBytes.length);
+                new UploadedXmlFile(new UploadedFile("my_file.xml", contentBytes), "my_schema.xsd");
 
         storage.save(fileToUpload, userId);
 
@@ -141,11 +143,11 @@ public class UserFileStorageImplTest {
 
     @Test
     public void fileContentCouldBeChanged() {
-        uploadFileForUser(userId, new UploadedXmlFile().setContent("initial content".getBytes()));
+        uploadFileForUser(userId, fileWithContent("initial content".getBytes()));
         byte[] newContentBytes = "new content".getBytes();
         UploadedXmlFile uploadedFile = getFirstUploadedFileAndAssertThatItIsTheOnlyOneAvailableFor(userId);
 
-        storage.update(new UploadedXmlFile().setId(uploadedFile.getId()).setContent(newContentBytes), userId);
+        storage.update(fileWithContentAndId(newContentBytes, uploadedFile.getId()), userId);
 
         assertThat(storage.fileContentBy(uploadedFile.getId(), userId).getContent(), equalTo(newContentBytes));
     }
@@ -153,11 +155,11 @@ public class UserFileStorageImplTest {
     @Test
     public void userCannotChangeOtherUserContent() throws Exception {
         byte[] originalContent = (userId + " content").getBytes();
-        uploadFileForUser(userId, new UploadedXmlFile().setContent(originalContent));
+        uploadFileForUser(userId, fileWithContent(originalContent));
         UploadedXmlFile uploadedFileByOtherUser = getFirstUploadedFileAndAssertThatItIsTheOnlyOneAvailableFor(userId);
 
         UploadedXmlFile contentChangeRequestFile =
-                new UploadedXmlFile().setContent((otherUserId + " content").getBytes()).setId(uploadedFileByOtherUser.getId());
+                fileWithContentAndId((otherUserId + " content").getBytes(), uploadedFileByOtherUser.getId());
 
         storage.update(contentChangeRequestFile, otherUserId);
 
@@ -176,6 +178,18 @@ public class UserFileStorageImplTest {
 
     private void uploadSingleFileFor(String userId) {
         uploadFilesFor(userId, 1);
+    }
+
+    private UploadedXmlFile fileWithContent(byte[] content) {
+        UploadedXmlFile uploadedXmlFile = new UploadedXmlFile();
+        uploadedXmlFile.setContent(content);
+        return uploadedXmlFile;
+    }
+
+    private UploadedXmlFile fileWithContentAndId(byte[] content, int id) {
+        UploadedXmlFile uploadedXmlFile = fileWithContent(content);
+        uploadedXmlFile.setId(id);
+        return uploadedXmlFile;
     }
 
     private void uploadFilesFor(String userId, int count) {

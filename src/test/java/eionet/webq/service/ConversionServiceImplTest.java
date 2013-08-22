@@ -31,7 +31,10 @@ import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /*
  * The contents of this file are subject to the Mozilla Public
@@ -111,7 +114,9 @@ public class ConversionServiceImplTest {
         };
         when(restOperations.postForObject(anyString(), any(), eq(String.class))).thenAnswer(checkPostParameters);
 
-        conversionService.convert(new UploadedXmlFile().setContent(testContent), 1);
+        UploadedXmlFile uploadedXmlFile = new UploadedXmlFile();
+        uploadedXmlFile.setContent(testContent);
+        conversionService.convert(uploadedXmlFile, 1);
 
         verify(restOperations, times(1)).postForObject(anyString(), any(), eq(String.class));
     }
