@@ -36,7 +36,6 @@ public class UserFile {
     /**
      * Uploaded file.
      */
-    //todo file content @Size(min = 1)
     private UploadedFile file = new UploadedFile();
     /**
      * Xml schema name extracted during conversion.
