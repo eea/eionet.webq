@@ -4,6 +4,7 @@ import eionet.webq.dao.FileStorage;
 import eionet.webq.dao.ProjectFolders;
 import eionet.webq.dto.ProjectEntry;
 import eionet.webq.dto.ProjectFile;
+import eionet.webq.dto.UploadedFile;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.junit.Test;
@@ -273,7 +274,7 @@ public class ProjectsControllerIntegrationTest extends AbstractProjectsControlle
         ProjectFile projectFile = new ProjectFile();
         projectFile.setDescription("test description");
         projectFile.setTitle("title");
-        projectFile.setFileContent("test-content".getBytes());
+        projectFile.setFile(new UploadedFile("file-name", "test-content".getBytes()));
         projectFile.setUserName("test-user");
         return projectFile;
     }

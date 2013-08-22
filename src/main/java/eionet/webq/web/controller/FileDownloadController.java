@@ -79,8 +79,7 @@ public class FileDownloadController {
     @RequestMapping(value = "/user_file")
     public void downloadUserFile(@RequestParam int fileId, HttpServletResponse response) {
         UploadedXmlFile file = uploadedXmlFileService.getById(fileId);
-        response.setContentType(MediaType.APPLICATION_XML_VALUE);
-        response.addHeader("Content-Disposition", "attachment;filename=" + file.getName());
+        addXmlFileHeaders(response, file.getName());
         writeToResponse(response, file.getContent());
     }
     
@@ -94,8 +93,7 @@ public class FileDownloadController {
     @RequestMapping(value = "/project/{projectId}/file/{fileId}")
     public void downloadProjectFile(@PathVariable String projectId, @PathVariable int fileId, HttpServletResponse response) {
         ProjectFile projectFile = projectFiles.fileContentBy(fileId, projectService.getByProjectId(projectId));
-        response.setContentType(MediaType.APPLICATION_XML_VALUE);
-        response.addHeader("Content-Disposition", "attachment;filename=" + encodeAsUrl(projectFile.getTitle()));
+        addXmlFileHeaders(response, encodeAsUrl(projectFile.getFileName()));
         writeToResponse(response, projectFile.getFileContent());
     }
 
@@ -110,6 +108,11 @@ public class FileDownloadController {
     public void convertXmlFile(@RequestParam int fileId, @RequestParam int conversionId, HttpServletResponse response) {
         UploadedXmlFile fileContent = uploadedXmlFileService.getById(fileId);
         writeToResponse(response, conversionService.convert(fileContent, conversionId));
+    }
+
+    private void addXmlFileHeaders(HttpServletResponse response, String fileName) {
+        response.setContentType(MediaType.APPLICATION_XML_VALUE);
+        response.addHeader("Content-Disposition", "attachment;filename=" + fileName);
     }
 
     /**

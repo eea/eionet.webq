@@ -190,7 +190,8 @@ public class ProjectFileStorageImplTest {
 
         ProjectFile projectFile = projectFileStorage.fileContentBy(uploadedFile.getId(), projectEntry);
         assertThat(projectFile.getFileContent(), equalTo(testFileForUpload.getFileContent()));
-        assertThat(projectFile.getTitle(), equalTo(testFileForUpload.getTitle()));
+        assertThat(projectFile.getFileName(), equalTo(testFileForUpload.getFileName()));
+        assertThat(projectFile.getFileSizeInBytes(), equalTo(testFileForUpload.getFileSizeInBytes()));
     }
 
     private void clearUpdatedColumnForAllFiles() {
