@@ -78,7 +78,7 @@
             </thead>
             <tbody>
             <c:forEach items="${uploadedFiles}" var="file">
-                <c:url value="/download?fileId=${file.id}" var="downloadLink"/>
+                <c:url value="/download/user_file?fileId=${file.id}" var="downloadLink"/>
                 <tr>
                     <td>
                         <a href="${downloadLink}" title="Download file">${file.name}</a>
@@ -95,7 +95,7 @@
                                 with web form</a>
                         </c:if>
                         <c:forEach items="${file.availableConversions}" var="conversion">
-                            <a href="<c:url value="/convert?fileId=${file.id}&conversionId=${conversion.id}"/>">${conversion.description}</a>
+                            <a href="<c:url value="/download/convert?fileId=${file.id}&conversionId=${conversion.id}"/>">${conversion.description}</a>
                         </c:forEach>
                     </td>
                 </tr>
