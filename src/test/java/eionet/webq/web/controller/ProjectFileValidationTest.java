@@ -37,7 +37,7 @@ public class ProjectFileValidationTest extends AbstractContextControllerTests {
     public void titleIsEmpty() throws Exception {
         MvcResult result = request(SaveRequestBuilder.fileUploadBuilder().withUserName().build()).andReturn();
 
-        assertFieldError(getFirstAndOnlyFieldError(result), "title", "NotEmpty.webFormUpload.title");
+        assertFieldError(getFirstAndOnlyFieldError(result), "title", "NotEmpty.projectFile.title");
     }
 
     @Test
@@ -49,12 +49,12 @@ public class ProjectFileValidationTest extends AbstractContextControllerTests {
     @Test
     public void noUserName() throws Exception {
         MvcResult mvcResult = request(SaveRequestBuilder.fileUploadBuilder().withTitle().build()).andReturn();
-        assertFieldError(getFirstAndOnlyFieldError(mvcResult), "userName", "NotEmpty.webFormUpload.userName");
+        assertFieldError(getFirstAndOnlyFieldError(mvcResult), "userName", "NotEmpty.projectFile.userName");
     }
 
     @Override
     protected String bindingResultPropertyNameInModel() {
-        return "org.springframework.validation.BindingResult.webFormUpload";
+        return "org.springframework.validation.BindingResult.projectFile";
     }
     
     private static class SaveRequestBuilder {

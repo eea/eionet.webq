@@ -22,8 +22,8 @@ package eionet.webq.web.controller;
 
 import eionet.webq.dao.FileStorage;
 import eionet.webq.dto.ProjectEntry;
+import eionet.webq.dto.ProjectFile;
 import eionet.webq.dto.UploadedXmlFile;
-import eionet.webq.dto.WebFormUpload;
 import eionet.webq.service.ConversionService;
 import eionet.webq.service.ProjectService;
 import eionet.webq.service.UploadedXmlFileService;
@@ -63,7 +63,7 @@ public class FileDownloadController {
      */
     @Autowired
     @Qualifier("project-files")
-    private FileStorage<ProjectEntry, WebFormUpload> projectFiles;
+    private FileStorage<ProjectEntry, ProjectFile> projectFiles;
     /**
      * File conversion service.
      */
@@ -93,10 +93,10 @@ public class FileDownloadController {
      */
     @RequestMapping(value = "/project/{projectId}/file/{fileId}")
     public void downloadProjectFile(@PathVariable String projectId, @PathVariable int fileId, HttpServletResponse response) {
-        WebFormUpload webFormUpload = projectFiles.fileContentBy(fileId, projectService.getByProjectId(projectId));
+        ProjectFile projectFile = projectFiles.fileContentBy(fileId, projectService.getByProjectId(projectId));
         response.setContentType(MediaType.APPLICATION_XML_VALUE);
-        response.addHeader("Content-Disposition", "attachment;filename=" + encodeAsUrl(webFormUpload.getTitle()));
-        writeToResponse(response, webFormUpload.getFileContent());
+        response.addHeader("Content-Disposition", "attachment;filename=" + encodeAsUrl(projectFile.getTitle()));
+        writeToResponse(response, projectFile.getFileContent());
     }
 
     /**

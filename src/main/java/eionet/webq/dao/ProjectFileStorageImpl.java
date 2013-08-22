@@ -21,7 +21,7 @@
 package eionet.webq.dao;
 
 import eionet.webq.dto.ProjectEntry;
-import eionet.webq.dto.WebFormUpload;
+import eionet.webq.dto.ProjectFile;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -41,7 +41,7 @@ import java.util.Collection;
  */
 @Repository
 @Qualifier("project-files")
-public class ProjectFileStorageImpl extends AbstractDao<WebFormUpload> implements FileStorage<ProjectEntry, WebFormUpload> {
+public class ProjectFileStorageImpl extends AbstractDao<ProjectFile> implements FileStorage<ProjectEntry, ProjectFile> {
     /**
      * Jdbc template for accessing data storage.
      */
@@ -55,32 +55,32 @@ public class ProjectFileStorageImpl extends AbstractDao<WebFormUpload> implement
 
 
     @Override
-    public void save(final WebFormUpload webFormUpload, final ProjectEntry project) {
+    public void save(final ProjectFile projectFile, final ProjectEntry project) {
         template.execute(sqlProperties.getProperty("insert.project.file"), new AbstractLobCreatingPreparedStatementCallback(
                 lobHandler) {
             @Override
             protected void setValues(PreparedStatement ps, LobCreator lobCreator) throws SQLException {
                 ps.setInt(1, project.getId());
-                ps.setString(2, webFormUpload.getTitle());
-                lobCreator.setBlobAsBytes(ps, 3, webFormUpload.getFileContent());
-                ps.setLong(4, webFormUpload.getFileSizeInBytes());
-                ps.setString(5, webFormUpload.getXmlSchema());
-                ps.setString(6, webFormUpload.getDescription());
-                ps.setString(7, webFormUpload.getUserName());
-                ps.setBoolean(8, webFormUpload.isActive());
-                ps.setBoolean(9, webFormUpload.isMainForm());
+                ps.setString(2, projectFile.getTitle());
+                lobCreator.setBlobAsBytes(ps, 3, projectFile.getFileContent());
+                ps.setLong(4, projectFile.getFileSizeInBytes());
+                ps.setString(5, projectFile.getXmlSchema());
+                ps.setString(6, projectFile.getDescription());
+                ps.setString(7, projectFile.getUserName());
+                ps.setBoolean(8, projectFile.isActive());
+                ps.setBoolean(9, projectFile.isMainForm());
             }
         });
     }
 
     @Override
-    public WebFormUpload fileById(int id) {
+    public ProjectFile fileById(int id) {
         return template.queryForObject(sqlProperties.getProperty("select.file.by.id"), rowMapper(), id);
     }
 
     @Override
-    public void update(final WebFormUpload webFormUpload, ProjectEntry projectEntry) {
-        final boolean updateFile = webFormUpload.getFileContent() != null;
+    public void update(final ProjectFile projectFile, ProjectEntry projectEntry) {
+        final boolean updateFile = projectFile.getFileContent() != null;
         String updateStatement =
                 updateFile ? sqlProperties.getProperty("update.project.file") : sqlProperties
                         .getProperty("update.project.file.without.file");
@@ -89,23 +89,23 @@ public class ProjectFileStorageImpl extends AbstractDao<WebFormUpload> implement
             @Override
             protected void setValues(PreparedStatement ps, LobCreator lobCreator) throws SQLException {
                 int index = 1;
-                ps.setString(index++, webFormUpload.getTitle());
-                ps.setString(index++, webFormUpload.getXmlSchema());
-                ps.setString(index++, webFormUpload.getDescription());
-                ps.setString(index++, webFormUpload.getUserName());
-                ps.setBoolean(index++, webFormUpload.isActive());
-                ps.setBoolean(index++, webFormUpload.isMainForm());
+                ps.setString(index++, projectFile.getTitle());
+                ps.setString(index++, projectFile.getXmlSchema());
+                ps.setString(index++, projectFile.getDescription());
+                ps.setString(index++, projectFile.getUserName());
+                ps.setBoolean(index++, projectFile.isActive());
+                ps.setBoolean(index++, projectFile.isMainForm());
                 if (updateFile) {
-                    lobCreator.setBlobAsBytes(ps, index++, webFormUpload.getFileContent());
+                    lobCreator.setBlobAsBytes(ps, index++, projectFile.getFileContent());
                 }
                 ps.setTimestamp(index++, new Timestamp(System.currentTimeMillis()));
-                ps.setInt(index, webFormUpload.getId());
+                ps.setInt(index, projectFile.getId());
             }
         });
     }
 
     @Override
-    public Collection<WebFormUpload> allFilesFor(ProjectEntry project) {
+    public Collection<ProjectFile> allFilesFor(ProjectEntry project) {
         return template.query(sqlProperties.getProperty("select.all.project.files"), rowMapper(), project.getId());
     }
 
@@ -115,13 +115,13 @@ public class ProjectFileStorageImpl extends AbstractDao<WebFormUpload> implement
     }
 
     @Override
-    public WebFormUpload fileContentBy(int id, ProjectEntry projectEntry) {
+    public ProjectFile fileContentBy(int id, ProjectEntry projectEntry) {
         return template.queryForObject(sqlProperties.getProperty("select.project.file.content"), rowMapper(), id,
                 projectEntry.getId());
     }
 
     @Override
-    Class<WebFormUpload> getDtoClass() {
-        return WebFormUpload.class;
+    Class<ProjectFile> getDtoClass() {
+        return ProjectFile.class;
     }
 }

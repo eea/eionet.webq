@@ -23,7 +23,7 @@ package eionet.webq.web.controller;
 
 import eionet.webq.dao.FileStorage;
 import eionet.webq.dto.ProjectEntry;
-import eionet.webq.dto.WebFormUpload;
+import eionet.webq.dto.ProjectFile;
 import eionet.webq.service.ProjectService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -54,7 +54,7 @@ public class ProjectsController {
     /**
      * Attribute name for storing project entry in model.
      */
-    static final String WEB_FORM_UPLOAD_ATTRIBUTE = "webFormUpload";
+    static final String WEB_FORM_UPLOAD_ATTRIBUTE = "projectFile";
     /**
      * Attribute name for storing project entry in model.
      */
@@ -69,7 +69,7 @@ public class ProjectsController {
      */
     @Autowired
     @Qualifier("project-files")
-    private FileStorage<ProjectEntry, WebFormUpload> projectFileStorage;
+    private FileStorage<ProjectEntry, ProjectFile> projectFileStorage;
 
     /**
      * All projects handler.
@@ -157,25 +157,25 @@ public class ProjectsController {
      *
      * @param projectFolderId project id for webform
      * @param model model attribute holder
-     * @param webFormUpload web form upload related object
-     * @param bindingResult request binding to {@link WebFormUpload} result
+     * @param projectFile web form upload related object
+     * @param bindingResult request binding to {@link eionet.webq.dto.ProjectFile} result
      * @return view name
      */
     @RequestMapping(value = "/{projectFolderId}/webform/save")
-    public String newWebForm(@PathVariable String projectFolderId, @Valid @ModelAttribute WebFormUpload webFormUpload,
+    public String newWebForm(@PathVariable String projectFolderId, @Valid @ModelAttribute ProjectFile projectFile,
             BindingResult bindingResult, Model model) {
         ProjectEntry currentProject = projectService.getByProjectId(projectFolderId);
-        boolean update = webFormUpload.getId() > 0;
-        if (!update && webFormUpload.getFileContent() == null) {
+        boolean update = projectFile.getId() > 0;
+        if (!update && projectFile.getFileContent() == null) {
             bindingResult.rejectValue("file", "webform.file.null");
         }
         if (bindingResult.hasErrors()) {
-            return addOrEditProjectFile(currentProject, webFormUpload, model);
+            return addOrEditProjectFile(currentProject, projectFile, model);
         }
         if (update) {
-            projectFileStorage.update(webFormUpload, currentProject);
+            projectFileStorage.update(projectFile, currentProject);
         } else {
-            projectFileStorage.save(webFormUpload, currentProject);
+            projectFileStorage.save(projectFile, currentProject);
         }
         model.addAttribute("message", "Webform added/updated.");
         return viewProject(currentProject, model);
@@ -190,7 +190,7 @@ public class ProjectsController {
      */
     @RequestMapping(value = "/{projectFolderId}/webform/add")
     public String addWebForm(@PathVariable String projectFolderId, Model model) {
-        return addOrEditProjectFile(projectService.getByProjectId(projectFolderId), new WebFormUpload(), model);
+        return addOrEditProjectFile(projectService.getByProjectId(projectFolderId), new ProjectFile(), model);
     }
 
     /**
@@ -250,13 +250,13 @@ public class ProjectsController {
      * Sets model objects and returns view name.
      *
      * @param project project in view
-     * @param webFormUpload web form upload
+     * @param projectFile web form upload
      * @param model model attribute holder
      * @return view name
      */
-    private String addOrEditProjectFile(ProjectEntry project, WebFormUpload webFormUpload, Model model) {
+    private String addOrEditProjectFile(ProjectEntry project, ProjectFile projectFile, Model model) {
         addProjectToModel(model, project);
-        addWebFormToModel(model, webFormUpload);
+        addWebFormToModel(model, projectFile);
         return "add_edit_project_file";
     }
 
@@ -274,10 +274,10 @@ public class ProjectsController {
      * Adds webform upload to model.
      *
      * @param model model attribute holder
-     * @param webFormUpload web form upload
+     * @param projectFile web form upload
      */
-    private void addWebFormToModel(Model model, WebFormUpload webFormUpload) {
-        addAttributeToModelIfNotAdded(model, WEB_FORM_UPLOAD_ATTRIBUTE, webFormUpload);
+    private void addWebFormToModel(Model model, ProjectFile projectFile) {
+        addAttributeToModelIfNotAdded(model, WEB_FORM_UPLOAD_ATTRIBUTE, projectFile);
     }
 
     /**

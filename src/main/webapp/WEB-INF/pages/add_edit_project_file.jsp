@@ -4,7 +4,7 @@
 <h1>Save webform</h1>
 <fieldset>
     <c:url var="saveUrl" value="/projects/${projectEntry.projectId}/webform/save"/>
-    <f:form modelAttribute="webFormUpload" action="${saveUrl}" method="post" enctype="multipart/form-data">
+    <f:form modelAttribute="projectFile" action="${saveUrl}" method="post" enctype="multipart/form-data">
         <f:errors path="*" element="div" cssClass="error-msg"/>
         <p>
             <label for="title">Title</label>

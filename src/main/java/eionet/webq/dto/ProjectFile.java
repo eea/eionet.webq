@@ -28,7 +28,7 @@ import java.util.Date;
 /**
  * DTO for web form upload.
  */
-public class WebFormUpload {
+public class ProjectFile {
     /**
      * Auto generated id.
      */
