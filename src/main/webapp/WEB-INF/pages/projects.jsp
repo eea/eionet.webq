@@ -1,4 +1,5 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 
 <div id="drop-operations">
     <h2>Operations</h2>
@@ -6,9 +7,9 @@
         <li><span><a title="Add project" href="<c:url value="/projects/add"/>">Add project</a></span></li>
     </ul>
 </div>
-<h1>All projects</h1>
+<h1>Webform projects</h1>
 <c:if test="${not empty allProjects}">
-    <table>
+    <table class="datatable">
         <thead>
         <tr>
             <th>Id</th>
@@ -21,7 +22,7 @@
                 <tr>
                     <td><a href="<c:url value="/projects/${project.projectId}/view"/>">${project.projectId}</a></td>
                     <td>${project.description}</td>
-                    <td>${project.created}</td>
+                    <td><fmt:formatDate pattern="dd MMM yyyy" value="${project.created}" /></td>
                 </tr>
             </c:forEach>
         </tbody>

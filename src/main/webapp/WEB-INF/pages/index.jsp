@@ -95,7 +95,7 @@
                             <strong><a href="<c:url value="/forms/habides-factsheet-v4.xhtml?instance=${downloadLink}&amp;fileId=${file.id}&amp;base_uri=${pageContext.request.contextPath}"/>">Edit
                                 with web form</a></strong><br/>
                         </c:if>
-                        <c:if test="${not empty uploadedFiles}">
+                        <c:if test="${not empty file.availableConversions}">
                             View file as:
                             <ul>
                             <c:forEach items="${file.availableConversions}" var="conversion">
@@ -110,4 +110,3 @@
         </table>
 </div>
 </c:if>
-<footer></footer>

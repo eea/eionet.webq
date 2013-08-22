@@ -1,5 +1,6 @@
 <%@ taglib prefix="f" uri="http://www.springframework.org/tags/form" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <script type="text/javascript" src="<c:url value="/js/jquery-1.10.2.min.js"/>"></script>
 <script type="text/javascript" src="<c:url value="/js/jquery-ui-1.10.3.custom.min.js"/>"></script>
 <link rel="stylesheet" type="text/css" href="<c:url value="/css/jquery-ui-1.10.3.custom.min.css"/>">
@@ -42,12 +43,11 @@
     </ul>
 </div>
 <h1>Project: ${projectEntry.projectId}</h1>
-<h4>${projectEntry.description} Created: ${projectEntry.created}</h4>
+<p><strong>${projectEntry.description}</strong> (created <fmt:formatDate pattern="dd MMM yyyy" value="${projectEntry.created}" />)</p>
 
-<fieldset>
-    <legend>Project files</legend>
+    <h2>Webforms</h2>
     <c:if test="${not empty allProjectFiles}">
-        <table>
+        <table class="datatable">
             <thead>
             <tr>
                 <td>Title</td>
@@ -78,12 +78,11 @@
         </table>
         <input type="button" value="Remove selected" onclick="">
     </c:if>
-</fieldset>
 
 <div id="remove-file" title="Remove project file?" style="display: none;">
     <p>This file will be removed. Are you sure?</p>
 </div>
 
 <div id="remove-project" title="Remove project?" style="display: none;">
-    <p>This project and all it's files will be removed. Are you sure?</p>
+    <p>This project and all its files will be removed. Are you sure?</p>
 </div>

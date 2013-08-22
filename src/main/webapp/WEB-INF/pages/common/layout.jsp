@@ -25,8 +25,8 @@
     <tiles:insertAttribute name="header" />
     <div id="leftcolumn" class="localnav">
         <ul>
-            <li><a href="<c:url value="/"/>">My xml files & new file upload</a></li>
-            <li><a href="<c:url value="/projects/"/>">Project folders</a></li>
+            <li><a href="<c:url value="/"/>">My xml files</a></li>
+            <li><a href="<c:url value="/projects/"/>">Webform projects</a></li>
         </ul>
     </div>
     <div id="workarea" class="documentContent">
