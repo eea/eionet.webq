@@ -1,5 +1,6 @@
 <%@ taglib prefix="f" uri="http://www.springframework.org/tags/form" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 
 <script type="text/javascript">
     function getSelectedFileValue() {
@@ -85,18 +86,23 @@
                     </td>
                     <td>
                         File size: ${file.sizeInBytes} bytes<br/>
-                        Created: ${file.created}<br/>
-                        Updated: ${file.updated}
+                        Created: <fmt:formatDate pattern="dd MMM yyyy HH:mm:ss" value="${file.created}" /><br/>
+                        Updated:  <fmt:formatDate pattern="dd MMM yyyy HH:mm:ss" value="${file.updated}" />
                     </td>
                     <td>
                         <!-- FIXME - make the XML Schema check dynamic when Webforms repo is implemented -->
                         <c:if test="${file.xmlSchema eq 'http://biodiversity.eionet.europa.eu/schemas/bernconvention/derogations.xsd'}">
-                            <a href="<c:url value="/forms/habides-factsheet-v4.xhtml?instance=${downloadLink}&amp;fileId=${file.id}&amp;base_uri=${pageContext.request.contextPath}"/>">Edit
-                                with web form</a>
+                            <strong><a href="<c:url value="/forms/habides-factsheet-v4.xhtml?instance=${downloadLink}&amp;fileId=${file.id}&amp;base_uri=${pageContext.request.contextPath}"/>">Edit
+                                with web form</a></strong><br/>
                         </c:if>
-                        <c:forEach items="${file.availableConversions}" var="conversion">
-                            <a href="<c:url value="/download/convert?fileId=${file.id}&conversionId=${conversion.id}"/>">${conversion.description}</a>
-                        </c:forEach>
+                        <c:if test="${not empty uploadedFiles}">
+                            View file as:
+                            <ul>
+                            <c:forEach items="${file.availableConversions}" var="conversion">
+                                <li><a href="<c:url value="/download/convert?fileId=${file.id}&conversionId=${conversion.id}"/>">${conversion.description}</a></li>
+                            </c:forEach>
+                            </ul>
+                        </c:if>
                     </td>
                 </tr>
             </c:forEach>
