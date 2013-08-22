@@ -24,7 +24,7 @@ import eionet.webq.dto.UploadForm;
 import eionet.webq.dto.UserFile;
 import eionet.webq.dto.XmlSaveResult;
 import eionet.webq.service.ConversionService;
-import eionet.webq.service.UploadedXmlFileService;
+import eionet.webq.service.UserFileService;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -50,10 +50,10 @@ import java.util.Collection;
 @RequestMapping("/")
 public class BaseController {
     /**
-     * File uploadedXmlFileService for user uploaded files.
+     * Service for user uploaded files.
      */
     @Autowired
-    private UploadedXmlFileService uploadedXmlFileService;
+    private UserFileService userFileService;
     /**
      * File conversion service.
      */
@@ -88,7 +88,7 @@ public class BaseController {
     public String upload(@Valid @ModelAttribute UploadForm uploadForm, BindingResult result, Model model) {
         if (!result.hasErrors()) {
             UserFile file = uploadForm.getUserFile();
-            uploadedXmlFileService.save(file);
+            userFileService.save(file);
             model.addAttribute("message", "File '" + file.getName() + "' uploaded successfully");
         }
         return welcome(model);
@@ -113,7 +113,7 @@ public class BaseController {
             file.setContent(fileContent);
             file.setSizeInBytes(fileContent.length);
             file.setId(fileId);
-            uploadedXmlFileService.updateContent(file);
+            userFileService.updateContent(file);
             saveResult = XmlSaveResult.valueOfSuccess();
         } catch (Exception e) {
             saveResult = XmlSaveResult.valueOfError(e.toString());
@@ -129,7 +129,7 @@ public class BaseController {
      * @return all uploaded files with available conversions set.
      */
     private Collection<UserFile> allFilesWithConversions() {
-        Collection<UserFile> userFiles = uploadedXmlFileService.allUploadedFiles();
+        Collection<UserFile> userFiles = userFileService.allUploadedFiles();
         for (UserFile userFile : userFiles) {
             userFile.setAvailableConversions(conversionService.conversionsFor(userFile.getXmlSchema()));
         }

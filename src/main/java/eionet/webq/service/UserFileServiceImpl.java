@@ -31,10 +31,10 @@ import javax.servlet.http.HttpSession;
 import java.util.Collection;
 
 /**
- * {@link UploadedXmlFileService} implementation.
+ * {@link UserFileService} implementation.
  */
 @Service
-public class UploadedXmlFileServiceImpl implements UploadedXmlFileService {
+public class UserFileServiceImpl implements UserFileService {
     /**
      * Uploaded files storage.
      */
@@ -54,7 +54,7 @@ public class UploadedXmlFileServiceImpl implements UploadedXmlFileService {
     /**
      * Static logger for this class.
      */
-    private static final Logger LOGGER = Logger.getLogger(UploadedXmlFileServiceImpl.class);
+    private static final Logger LOGGER = Logger.getLogger(UserFileServiceImpl.class);
 
     @Override
     public void save(UserFile file) {

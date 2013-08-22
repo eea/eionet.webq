@@ -27,7 +27,7 @@ import java.util.Collection;
 /**
  * Service for storing uploaded files.
  */
-public interface UploadedXmlFileService {
+public interface UserFileService {
     /**
      * Save data from uploaded file to storage.
      *
@@ -48,7 +48,7 @@ public interface UploadedXmlFileService {
     /**
      * All uploaded files by current session user.
      * {@link eionet.webq.dto.UserFile#getContent()} is not included into resulting collection.
-     * Use {@link UploadedXmlFileService#getById(int)} for fetching specific file content.
+     * Use {@link UserFileService#getById(int)} for fetching specific file content.
      *
      * @return  All uploaded files by current session user.
      */

@@ -42,14 +42,14 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 public class UserFileServiceImplTest {
-    private UploadedXmlFileServiceImpl service;
+    private UserFileServiceImpl service;
     private FileStorage<String, UserFile> storage;
     HttpSession mockSession;
     private final String userId = "userId";
 
     @Before
     public void prepare() {
-        service = new UploadedXmlFileServiceImpl();
+        service = new UserFileServiceImpl();
         storage = Mockito.mock(UserFileStorageImpl.class);
         mockSession = Mockito.mock(HttpSession.class);
         Mockito.when(mockSession.getId()).thenReturn(userId);

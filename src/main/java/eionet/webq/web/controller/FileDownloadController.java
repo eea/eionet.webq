@@ -26,7 +26,7 @@ import eionet.webq.dto.ProjectFile;
 import eionet.webq.dto.UserFile;
 import eionet.webq.service.ConversionService;
 import eionet.webq.service.ProjectService;
-import eionet.webq.service.UploadedXmlFileService;
+import eionet.webq.service.UserFileService;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -52,7 +52,7 @@ public class FileDownloadController {
      * Service for getting user file content from storage.
      */
     @Autowired
-    private UploadedXmlFileService uploadedXmlFileService;
+    private UserFileService userFileService;
     /**
      * Service for getting user file content from storage.
      */
@@ -78,7 +78,7 @@ public class FileDownloadController {
      */
     @RequestMapping(value = "/user_file")
     public void downloadUserFile(@RequestParam int fileId, HttpServletResponse response) {
-        UserFile file = uploadedXmlFileService.getById(fileId);
+        UserFile file = userFileService.getById(fileId);
         addXmlFileHeaders(response, file.getName());
         writeToResponse(response, file.getContent());
     }
@@ -106,7 +106,7 @@ public class FileDownloadController {
      */
     @RequestMapping("/convert")
     public void convertXmlFile(@RequestParam int fileId, @RequestParam int conversionId, HttpServletResponse response) {
-        UserFile fileContent = uploadedXmlFileService.getById(fileId);
+        UserFile fileContent = userFileService.getById(fileId);
         writeToResponse(response, conversionService.convert(fileContent, conversionId));
     }
 
