@@ -30,7 +30,9 @@ import eionet.webq.service.UserFileService;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -82,7 +84,7 @@ public class FileDownloadController {
         addXmlFileHeaders(response, file.getName());
         writeToResponse(response, file.getContent());
     }
-    
+
     /**
      * Download uploaded file action.
      *
@@ -107,12 +109,46 @@ public class FileDownloadController {
     @RequestMapping("/convert")
     public void convertXmlFile(@RequestParam int fileId, @RequestParam int conversionId, HttpServletResponse response) {
         UserFile fileContent = userFileService.getById(fileId);
-        writeToResponse(response, conversionService.convert(fileContent, conversionId));
+        ResponseEntity<byte[]> convert = conversionService.convert(fileContent, conversionId);
+        HttpHeaders headers = convert.getHeaders();
+        setContentType(response, headers.getContentType());
+        setContentDisposition(response, headers.getFirst("Content-Disposition"));
+        writeToResponse(response, convert.getBody());
     }
 
+    /**
+     * Sets headers required to xml file download.
+     *
+     * @param response http response
+     * @param fileName file name
+     */
     private void addXmlFileHeaders(HttpServletResponse response, String fileName) {
-        response.setContentType(MediaType.APPLICATION_XML_VALUE);
-        response.addHeader("Content-Disposition", "attachment;filename=" + fileName);
+        setContentType(response, MediaType.APPLICATION_XML);
+        setContentDisposition(response, "attachment;filename=" + fileName);
+    }
+
+    /**
+     * Sets content disposition to response.
+     *
+     * @param response {@link HttpServletResponse}
+     * @param contentDisposition content disposition header value.
+     */
+    private void setContentDisposition(HttpServletResponse response, String contentDisposition) {
+        if (contentDisposition != null) {
+            response.setHeader("Content-Disposition", contentDisposition);
+        }
+    }
+
+    /**
+     * Sets content type header to response.
+     *
+     * @param response http response
+     * @param contentType content type
+     */
+    private void setContentType(HttpServletResponse response, MediaType contentType) {
+        if (contentType != null) {
+            response.setContentType(contentType.toString());
+        }
     }
 
     /**

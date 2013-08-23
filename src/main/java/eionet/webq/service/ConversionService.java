@@ -22,6 +22,7 @@ package eionet.webq.service;
 
 import eionet.webq.dto.Conversion;
 import eionet.webq.dto.UserFile;
+import org.springframework.http.ResponseEntity;
 
 import java.util.List;
 
@@ -36,7 +37,7 @@ public interface ConversionService {
      * @param conversionId conversion id for this file
      * @return conversion result as string
      */
-    byte[] convert(UserFile fileContent, int conversionId);
+    ResponseEntity<byte[]> convert(UserFile fileContent, int conversionId);
 
     /**
      * List all available conversions.

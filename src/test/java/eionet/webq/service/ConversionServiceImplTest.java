@@ -35,7 +35,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.Cache;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.util.MultiValueMap;
@@ -103,22 +105,22 @@ public class ConversionServiceImplTest {
     public void convertRequestShouldContainRequiredAttributes() throws Exception {
         final byte[] testContent = "test content".getBytes();
         final int convertId = 1;
-        Answer<Object> checkPostParameters = new Answer<Object>() {
+        Answer<ResponseEntity<byte[]>> checkPostParameters = new Answer<ResponseEntity<byte[]>>() {
             @Override
-            public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
+            public ResponseEntity<byte[]> answer(InvocationOnMock invocationOnMock) throws Throwable {
                 @SuppressWarnings("unchecked")
                 MultiValueMap<String, Object> postParameters = (MultiValueMap<String, Object>) invocationOnMock.getArguments()[1];
                 assertPostParametersAreCorrect(postParameters, testContent, convertId);
-                return "";
+                return new ResponseEntity<byte[]>("response".getBytes(), HttpStatus.OK);
             }
         };
-        when(restOperations.postForObject(anyString(), any(), eq(String.class))).thenAnswer(checkPostParameters);
+        when(restOperations.postForEntity(anyString(), any(), eq(byte[].class))).thenAnswer(checkPostParameters);
 
         UserFile userFile = new UserFile();
         userFile.setContent(testContent);
         conversionService.convert(userFile, 1);
 
-        verify(restOperations, times(1)).postForObject(anyString(), any(), eq(String.class));
+        verify(restOperations, times(1)).postForEntity(anyString(), any(), eq(byte[].class));
     }
 
     @SuppressWarnings("unchecked")

@@ -29,6 +29,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
@@ -44,6 +47,8 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.when;
+import static org.springframework.http.MediaType.APPLICATION_XML;
+import static org.springframework.http.MediaType.APPLICATION_XML_VALUE;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -64,15 +69,26 @@ public class ConvertFileControllerIntegrationTest extends AbstractContextControl
     }
 
     @Test
-    public void uploadFileAndConvertIt() throws Exception {
-        String conversionResponse = "conversionSuccess";
+    public void uploadFileAndConvertItWithContentTypeAndContentDispositionResponseHeadersSet() throws Exception {
+        byte[] conversionResponse = "conversionSuccess".getBytes();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(APPLICATION_XML);
+        String contentDispositionValue = "content-disposition";
+        String contentDispositionHeaderName = "Content-Disposition";
+        headers.add(contentDispositionHeaderName, contentDispositionValue);
+
+        ResponseEntity<byte[]> responseEntity = new ResponseEntity<byte[]>(conversionResponse, headers, HttpStatus.OK);
         returnListOfConversionsFromRestApi(new ListConversionResponse());
-        when(restOperations.postForObject(Mockito.anyString(), any(), eq(String.class))).thenReturn(conversionResponse);
+        when(restOperations.postForEntity(Mockito.anyString(), any(), eq(byte[].class))).thenReturn(responseEntity);
+
         UserFile userFile =
                 uploadFileAndTakeFirstUploadedFile(createMockMultipartFile("test-file.xml", FILE_CONTENT));
 
         request(get("/download/convert?fileId={fileId}&conversionId={convId}", userFile.getId(), 1).session(mockHttpSession))
-                .andExpect(MockMvcResultMatchers.content().bytes(conversionResponse.getBytes()));
+                .andExpect(MockMvcResultMatchers.content().bytes(conversionResponse))
+                .andExpect(MockMvcResultMatchers.header().string("Content-Type", APPLICATION_XML_VALUE))
+                .andExpect(MockMvcResultMatchers.header().string(contentDispositionHeaderName, contentDispositionValue));
     }
 
     @Test

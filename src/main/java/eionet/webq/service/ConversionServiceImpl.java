@@ -30,12 +30,12 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestOperations;
 
-import java.nio.charset.Charset;
 import java.util.List;
 
 /**
@@ -79,15 +79,15 @@ public class ConversionServiceImpl implements ConversionService {
     private String convertPushIdParameter;
 
     @Override
-    public byte[] convert(UserFile fileContent, int conversionId) {
+    public ResponseEntity<byte[]> convert(UserFile fileContent, int conversionId) {
         MultiValueMap<String, Object> request = new LinkedMultiValueMap<String, Object>();
         request.add(convertPushFileParameter, createFileHttpEntity(fileContent));
         request.add(convertPushIdParameter, new HttpEntity<String>(Integer.toString(conversionId)));
 
-        String conversionResult = restOperations.postForObject(apiCallTo(convertPush), request, String.class);
-        LOGGER.info("Response from conversion service for file=" + fileContent.getName() + ", conversionId=" + conversionId + "\n"
-                + conversionResult);
-        return conversionResult.getBytes(Charset.forName("UTF-8"));
+        ResponseEntity<byte[]> entity = restOperations.postForEntity(apiCallTo(convertPush), request, byte[].class);
+        LOGGER.info("Response from conversion service for file=" + fileContent.getName() + ", conversionId=" + conversionId
+                + "\n Status:" + entity.getStatusCode() + ", response headers=" + entity.getHeaders());
+        return entity;
     }
 
     @Cacheable(value = "conversions")
