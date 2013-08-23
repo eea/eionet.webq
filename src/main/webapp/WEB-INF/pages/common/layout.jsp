@@ -2,6 +2,7 @@
 <%@page pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@ taglib prefix="tiles" uri="http://tiles.apache.org/tags-tiles" %>
+<%@ taglib prefix="title" uri="http://tiles.apache.org/tags-tiles" %>
 
 <!DOCTYPE html>
 <html>
@@ -19,6 +20,7 @@
     <link rel="stylesheet" type="text/css" href="http://www.eionet.europa.eu/styles/eionet2007/screen.css" media="screen" title="Eionet 2007 style" />
     <link rel="stylesheet" type="text/css" href="<c:url value="/css/eionet2007.css"/>" media="screen" title="Eionet 2007 style" />
     <script type="text/javascript" src="<c:url value="/js/pageops.js"/>"></script>
+    <title:insertAttribute name="specific_header" ignore="true"/>
 </head>
 <body>
 <div id="container">
