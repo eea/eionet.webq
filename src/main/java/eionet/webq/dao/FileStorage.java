@@ -35,8 +35,9 @@ public interface FileStorage<KEY, FILE> {
      *
      * @param file file to save
      * @param key key to which this file will belong
+     * @return auto generated id of the new record
      */
-    void save(FILE file, KEY key);
+    int save(FILE file, KEY key);
 
     /**
      * Retrieve file data by id in storage without file content.

@@ -20,23 +20,25 @@
  */
 package eionet.webq.dao;
 
-import configuration.ApplicationTestContextWithMockSession;
-import eionet.webq.dto.UploadedFile;
-import eionet.webq.dto.UserFile;
+import static junit.framework.TestCase.assertNotNull;
+import static junit.framework.TestCase.assertNull;
+import static org.hamcrest.core.IsEqual.equalTo;
+import static org.junit.Assert.assertThat;
+
+import java.util.Collection;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.DataAccessException;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import java.util.Collection;
-
-import static junit.framework.TestCase.assertNotNull;
-import static junit.framework.TestCase.assertNull;
-import static org.hamcrest.core.IsEqual.equalTo;
-import static org.junit.Assert.assertThat;
+import configuration.ApplicationTestContextWithMockSession;
+import eionet.webq.dto.UploadedFile;
+import eionet.webq.dto.UserFile;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {ApplicationTestContextWithMockSession.class})
@@ -46,6 +48,9 @@ public class UserFileStorageImplTest {
     private FileStorage<String, UserFile> storage;
     private String userId = userId();
     private String otherUserId = "other" + userId;
+
+    @Autowired
+    JdbcTemplate template;
 
     @Test
     public void saveUploadedFileToStorageWithoutException() {
@@ -174,6 +179,16 @@ public class UserFileStorageImplTest {
     @Test(expected = UnsupportedOperationException.class)
     public void removeNotImplemented() throws Exception {
         storage.remove(1, "test");
+    }
+
+    @Test
+    public void getIdAfterSave() throws Exception {
+        UserFile userFile =
+                new UserFile(new UploadedFile("name", "test_content".getBytes()), "xmlSchema");
+        int fileId = storage.save(userFile, userId);
+        int maxId = template.queryForInt("SELECT MAX(id) from user_xml");
+
+        assertThat(fileId, equalTo(maxId));
     }
 
     private void uploadSingleFileFor(String userId) {

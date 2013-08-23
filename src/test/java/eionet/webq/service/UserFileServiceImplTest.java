@@ -21,18 +21,6 @@
 
 package eionet.webq.service;
 
-import eionet.webq.dao.FileStorage;
-import eionet.webq.dao.UserFileStorageImpl;
-import eionet.webq.dto.UserFile;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.Mockito;
-
-import javax.servlet.http.HttpSession;
-import java.util.Arrays;
-import java.util.Collection;
-
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.doNothing;
@@ -40,6 +28,20 @@ import static org.mockito.Mockito.only;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
+
+import java.util.Arrays;
+import java.util.Collection;
+
+import javax.servlet.http.HttpSession;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.Mockito;
+
+import eionet.webq.dao.FileStorage;
+import eionet.webq.dao.UserFileStorageImpl;
+import eionet.webq.dto.UserFile;
 
 public class UserFileServiceImplTest {
     private UserFileServiceImpl service;
@@ -65,8 +67,9 @@ public class UserFileServiceImplTest {
 
     @Test
     public void testSave() throws Exception {
+        int fileId = 1;
         UserFile fileToSave = new UserFile();
-        doNothing().when(storage).save(fileToSave, userId);
+        when(storage.save(fileToSave, userId)).thenReturn(fileId);
 
         service.save(fileToSave);
 

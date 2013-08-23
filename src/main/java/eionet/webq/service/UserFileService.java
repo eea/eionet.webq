@@ -20,9 +20,9 @@
  */
 package eionet.webq.service;
 
-import eionet.webq.dto.UserFile;
-
 import java.util.Collection;
+
+import eionet.webq.dto.UserFile;
 
 /**
  * Service for storing uploaded files.
@@ -32,13 +32,13 @@ public interface UserFileService {
      * Save data from uploaded file to storage.
      *
      * @param file uploaded file to be saved to storage
+     * @return auto generated id of inserted record
      */
-    void save(UserFile file);
+    int save(UserFile file);
 
     /**
-     * Fetches uploaded file from storage by specified id.
-     * User access to this file must be checked.
-     * Only {@link eionet.webq.dto.UserFile#getName()} and {@link eionet.webq.dto.UserFile#getContent()} will be set.
+     * Fetches uploaded file from storage by specified id. User access to this file must be checked. Only
+     * {@link eionet.webq.dto.UserFile#getName()} and {@link eionet.webq.dto.UserFile#getContent()} will be set.
      *
      * @param id file id
      * @return uploaded file
@@ -46,17 +46,16 @@ public interface UserFileService {
     UserFile getById(int id);
 
     /**
-     * All uploaded files by current session user.
-     * {@link eionet.webq.dto.UserFile#getContent()} is not included into resulting collection.
-     * Use {@link UserFileService#getById(int)} for fetching specific file content.
+     * All uploaded files by current session user. {@link eionet.webq.dto.UserFile#getContent()} is not included into resulting
+     * collection. Use {@link UserFileService#getById(int)} for fetching specific file content.
      *
-     * @return  All uploaded files by current session user.
+     * @return All uploaded files by current session user.
      */
     Collection<UserFile> allUploadedFiles();
 
     /**
-     * Update file content and updated time in storage.
-     * Only {@link eionet.webq.dto.UserFile#getContent()}, {@link eionet.webq.dto.UserFile#getSizeInBytes()} and {@link eionet.webq.dto.UserFile#updated} will be set.
+     * Update file content and updated time in storage. Only {@link eionet.webq.dto.UserFile#getContent()},
+     * {@link eionet.webq.dto.UserFile#getSizeInBytes()} and {@link eionet.webq.dto.UserFile#updated} will be set.
      *
      * @param file content to be updated in storage
      */

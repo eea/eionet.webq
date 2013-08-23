@@ -20,22 +20,26 @@
  */
 package eionet.webq.dao;
 
-import eionet.webq.dto.UploadedFile;
-import eionet.webq.dto.UserFile;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
-import org.springframework.jdbc.core.support.AbstractLobCreatingPreparedStatementCallback;
-import org.springframework.jdbc.support.lob.LobCreator;
-import org.springframework.jdbc.support.lob.LobHandler;
-import org.springframework.stereotype.Repository;
-
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Collection;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.support.AbstractLobCreatingPreparedStatementCallback;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.jdbc.support.lob.LobCreator;
+import org.springframework.jdbc.support.lob.LobHandler;
+import org.springframework.stereotype.Repository;
+
+import eionet.webq.dao.util.AbstractLobPreparedStatementCreator;
+import eionet.webq.dto.UploadedFile;
+import eionet.webq.dto.UserFile;
 
 /**
  * {@link FileStorage} implementation for user files.
@@ -55,9 +59,11 @@ public class UserFileStorageImpl extends AbstractDao<UserFile> implements FileSt
     private LobHandler lobHandler;
 
     @Override
-    public void save(final UserFile file, final String userId) {
-        jdbcTemplate.execute(sqlProperties.getProperty("insert.user.file"),
-                new AbstractLobCreatingPreparedStatementCallback(lobHandler) {
+    public int save(final UserFile file, final String userId) {
+
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+        jdbcTemplate.update(
+                new AbstractLobPreparedStatementCreator(lobHandler, sqlProperties.getProperty("insert.user.file"), "id") {
                     @Override
                     protected void setValues(PreparedStatement ps, LobCreator lobCreator) throws SQLException {
                         ps.setString(1, userId);
@@ -66,7 +72,9 @@ public class UserFileStorageImpl extends AbstractDao<UserFile> implements FileSt
                         lobCreator.setBlobAsBytes(ps, 4, file.getContent());
                         ps.setLong(5, file.getSizeInBytes());
                     }
-                });
+                }
+                , keyHolder);
+        return keyHolder.getKey().intValue();
     }
 
     @Override

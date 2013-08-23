@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS PROJECT_FILE(
   project_id int,
   title varchar(255) CHARACTER SET utf8,
   file_name varchar(255) CHARACTER SET utf8,
-  file_size_in_bytes varchar(255) CHARACTER SET utf8,
+  file_size_in_bytes bigint,
   new_xml_file_name varchar(255) CHARACTER SET utf8,
   empty_instance_url varchar(255) CHARACTER SET utf8,
   file_content mediumblob,

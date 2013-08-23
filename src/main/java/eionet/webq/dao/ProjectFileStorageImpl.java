@@ -20,24 +20,27 @@
  */
 package eionet.webq.dao;
 
-import eionet.webq.dto.ProjectEntry;
-import eionet.webq.dto.ProjectFile;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.support.AbstractLobCreatingPreparedStatementCallback;
-import org.springframework.jdbc.support.lob.LobCreator;
-import org.springframework.jdbc.support.lob.LobHandler;
-import org.springframework.stereotype.Repository;
-
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Collection;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.support.AbstractLobCreatingPreparedStatementCallback;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.jdbc.support.lob.LobCreator;
+import org.springframework.jdbc.support.lob.LobHandler;
+import org.springframework.stereotype.Repository;
+
+import eionet.webq.dao.util.AbstractLobPreparedStatementCreator;
+import eionet.webq.dto.ProjectEntry;
+import eionet.webq.dto.ProjectFile;
+
 /**
- * ProjectFileStorage implementation.
- * Key id is {@link eionet.webq.dto.ProjectEntry#getId()}
+ * ProjectFileStorage implementation. Key id is {@link eionet.webq.dto.ProjectEntry#getId()}
  */
 @Repository
 @Qualifier("project-files")
@@ -53,27 +56,30 @@ public class ProjectFileStorageImpl extends AbstractDao<ProjectFile> implements 
     @Autowired
     private LobHandler lobHandler;
 
-
     @Override
-    public void save(final ProjectFile projectFile, final ProjectEntry project) {
-        template.execute(sqlProperties.getProperty("insert.project.file"), new AbstractLobCreatingPreparedStatementCallback(
-                lobHandler) {
-            @Override
-            protected void setValues(PreparedStatement ps, LobCreator lobCreator) throws SQLException {
-                ps.setInt(1, project.getId());
-                ps.setString(2, projectFile.getTitle());
-                lobCreator.setBlobAsBytes(ps, 3, projectFile.getFileContent());
-                ps.setString(4, projectFile.getFileName());
-                ps.setLong(5, projectFile.getFileSizeInBytes());
-                ps.setString(6, projectFile.getNewXmlFileName());
-                ps.setString(7, projectFile.getEmptyInstanceUrl());
-                ps.setString(8, projectFile.getXmlSchema());
-                ps.setString(9, projectFile.getDescription());
-                ps.setString(10, projectFile.getUserName());
-                ps.setBoolean(11, projectFile.isActive());
-                ps.setBoolean(12, projectFile.isMainForm());
-            }
-        });
+    public int save(final ProjectFile projectFile, final ProjectEntry project) {
+
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+        template.update(
+                new AbstractLobPreparedStatementCreator(lobHandler, sqlProperties.getProperty("insert.project.file"), "id") {
+                    @Override
+                    protected void setValues(PreparedStatement ps, LobCreator lobCreator) throws SQLException {
+                        ps.setInt(1, project.getId());
+                        ps.setString(2, projectFile.getTitle());
+                        lobCreator.setBlobAsBytes(ps, 3, projectFile.getFileContent());
+                        ps.setString(4, projectFile.getFileName());
+                        ps.setLong(5, projectFile.getFileSizeInBytes());
+                        ps.setString(6, projectFile.getNewXmlFileName());
+                        ps.setString(7, projectFile.getEmptyInstanceUrl());
+                        ps.setString(8, projectFile.getXmlSchema());
+                        ps.setString(9, projectFile.getDescription());
+                        ps.setString(10, projectFile.getUserName());
+                        ps.setBoolean(11, projectFile.isActive());
+                        ps.setBoolean(12, projectFile.isMainForm());
+                    }
+                }
+                , keyHolder);
+        return keyHolder.getKey().intValue();
     }
 
     @Override

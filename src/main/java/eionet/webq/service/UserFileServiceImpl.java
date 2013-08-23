@@ -20,15 +20,17 @@
  */
 package eionet.webq.service;
 
-import eionet.webq.dao.FileStorage;
-import eionet.webq.dto.UserFile;
+import java.util.Collection;
+
+import javax.servlet.http.HttpSession;
+
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
-import javax.servlet.http.HttpSession;
-import java.util.Collection;
+import eionet.webq.dao.FileStorage;
+import eionet.webq.dto.UserFile;
 
 /**
  * {@link UserFileService} implementation.
@@ -57,9 +59,9 @@ public class UserFileServiceImpl implements UserFileService {
     private static final Logger LOGGER = Logger.getLogger(UserFileServiceImpl.class);
 
     @Override
-    public void save(UserFile file) {
+    public int save(UserFile file) {
         LOGGER.info("Saving uploaded file=" + file);
-        storage.save(file, userId());
+        return storage.save(file, userId());
     }
 
     @Override

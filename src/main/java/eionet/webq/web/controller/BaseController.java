@@ -20,11 +20,12 @@
  */
 package eionet.webq.web.controller;
 
-import eionet.webq.dto.UploadForm;
-import eionet.webq.dto.UserFile;
-import eionet.webq.dto.XmlSaveResult;
-import eionet.webq.service.ConversionService;
-import eionet.webq.service.UserFileService;
+import java.io.InputStream;
+import java.util.Collection;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
+
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -36,10 +37,11 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
-import java.io.InputStream;
-import java.util.Collection;
+import eionet.webq.dto.UploadForm;
+import eionet.webq.dto.UserFile;
+import eionet.webq.dto.XmlSaveResult;
+import eionet.webq.service.ConversionService;
+import eionet.webq.service.UserFileService;
 
 /**
  * Base controller for front page actions.
@@ -78,6 +80,7 @@ public class BaseController {
 
     /**
      * Upload action.
+     *
      * @param uploadForm represents form used in UI, {@link UploadForm#userFile} will be converted from
      *            {@link org.springframework.web.multipart.MultipartFile}
      * @param result binding result, contains validation errors
@@ -121,6 +124,26 @@ public class BaseController {
             IOUtils.closeQuietly(input);
         }
         return saveResult;
+    }
+
+    /**
+     * Open selected webform. The action stores an empty XML file in user XML files area.
+     *
+     * @param form webform path to open
+     * @param request current request
+     * @return redirection URL of webform with correct parameters
+     */
+    @RequestMapping(value = "/startWebform")
+    public String saveXml(@RequestParam String form, HttpServletRequest request) {
+        UserFile file = new UserFile();
+        // FIXME read the following properties from project file storage
+        file.setName("new.xml");
+        file.setXmlSchema("http://biodiversity.eionet.europa.eu/schemas/bernconvention/derogations.xsd");
+        // TODO load XML content from the project_file.empty_instance_url field, if exists.
+
+        int fileId = userFileService.save(file);
+
+        return "redirect:" + form + "?fileId=" + fileId + "&base_uri=" + request.getContextPath();
     }
 
     /**

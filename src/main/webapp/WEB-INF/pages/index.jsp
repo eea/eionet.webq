@@ -56,7 +56,7 @@
         <p>
             <label for="selectFile">Select the web form</label><br/>
             <select id="selectFile" name="selectFile" title="Select new webform">
-                <option value="<c:url value="/forms/habides-factsheet-v4.xhtml?base_uri=${pageContext.request.contextPath}"/>">Habides factsheet</option>
+                <option value="<c:url value="/startWebform?form=/forms/habides-factsheet-v4.xhtml"/>">Habides factsheet</option>
             </select>
         </p>
         <p>

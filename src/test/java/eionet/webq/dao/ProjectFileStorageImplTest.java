@@ -20,10 +20,15 @@
  */
 package eionet.webq.dao;
 
-import configuration.ApplicationTestContextWithMockSession;
-import eionet.webq.dto.ProjectEntry;
-import eionet.webq.dto.ProjectFile;
-import eionet.webq.dto.UploadedFile;
+import static org.hamcrest.core.IsEqual.equalTo;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+
+import java.util.Collection;
+import java.util.Date;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -33,14 +38,10 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import java.util.Collection;
-import java.util.Date;
-
-import static org.hamcrest.core.IsEqual.equalTo;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import configuration.ApplicationTestContextWithMockSession;
+import eionet.webq.dto.ProjectEntry;
+import eionet.webq.dto.ProjectFile;
+import eionet.webq.dto.UploadedFile;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {ApplicationTestContextWithMockSession.class})
@@ -192,6 +193,17 @@ public class ProjectFileStorageImplTest {
         assertThat(projectFile.getFileContent(), equalTo(testFileForUpload.getFileContent()));
         assertThat(projectFile.getFileName(), equalTo(testFileForUpload.getFileName()));
         assertThat(projectFile.getFileSizeInBytes(), equalTo(testFileForUpload.getFileSizeInBytes()));
+    }
+
+    @Test
+    public void getIdAfterSave() throws Exception {
+        ProjectEntry projectEntry = testProjectEntry();
+        ProjectFile projectFile = testWebForm();
+
+        int fileId = projectFileStorage.save(projectFile, projectEntry);
+        int maxId = template.queryForInt("SELECT MAX(id) from project_file");
+
+        assertThat(fileId, equalTo(maxId));
     }
 
     private void clearUpdatedColumnForAllFiles() {
