@@ -36,6 +36,20 @@
         <f:errors path="*" element="div" cssClass="error-msg"/>
         <div class="col1">
         <fieldset>
+            <legend>Start a new web form</legend>
+            <p>
+                <label for="selectFile">Select the web form</label><br/>
+                <select id="selectFile" name="selectFile" title="Select new webform">
+                    <option value="<c:url value="/startWebform?form=/forms/habides-factsheet-v4.xhtml"/>">Habides factsheet</option>
+                </select>
+            </p>
+            <p>
+                <input type="button" value="Start" onclick="window.location=getSelectedFileValue()"/>
+            </p>
+        </fieldset>
+        </div>
+    <div class="col2">
+        <fieldset>
             <legend>Upload XML file</legend>
 
             <p>
@@ -48,28 +62,14 @@
             </p>
 
         </fieldset>
-        </div>
+    </div>
     </f:form>
-<div class="col2">
-    <fieldset>
-        <legend>Start a new web form</legend>
-        <p>
-            <label for="selectFile">Select the web form</label><br/>
-            <select id="selectFile" name="selectFile" title="Select new webform">
-                <option value="<c:url value="/startWebform?form=/forms/habides-factsheet-v4.xhtml"/>">Habides factsheet</option>
-            </select>
-        </p>
-        <p>
-            <input type="button" value="Start" onclick="window.location=getSelectedFileValue()"/>
-        </p>
-    </fieldset>
-</div>
 </div>
 <c:if test="${not empty uploadedFiles}">
 <div class="files">
     <h2>My XML files</h2>
 
-        <table class="datatable">
+        <table class="datatable" style="width:100%"">
             <thead>
             <tr>
                 <th scope="col">File</th>

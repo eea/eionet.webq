@@ -27,7 +27,7 @@
 
     function view_file(popupElement) {
         popupElement.dialog({
-            height: 450,
+            height: 500,
             width: 500,
             modal: true
         });
