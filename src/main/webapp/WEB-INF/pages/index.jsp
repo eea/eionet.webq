@@ -38,13 +38,13 @@
         <fieldset>
             <legend>Start a new web form</legend>
             <p>
-                <label for="selectFile">Select the web form</label><br/>
+                <label for="selectFile">1. Select the web form</label><br/>
                 <select id="selectFile" name="selectFile" title="Select new webform">
                     <option value="<c:url value="/startWebform?form=/forms/habides-factsheet-v4.xhtml"/>">Habides factsheet</option>
                 </select>
             </p>
             <p>
-                <input type="button" value="Start" onclick="window.location=getSelectedFileValue()"/>
+                2. <input type="button" value="Start" onclick="window.location=getSelectedFileValue()"/> to open the web form
             </p>
         </fieldset>
         </div>
@@ -53,12 +53,12 @@
             <legend>Upload XML file</legend>
 
             <p>
-                <label for="userFile">Select the file from My Computer</label>
+                <label for="userFile">1. Select the file from My Computer</label>
                 <f:input id="userFile" type="file" path="userFile"/>
             </p>
 
             <p>
-                <input type="submit" value="Upload"/>
+                2. <input type="submit" value="Upload"/> XML file and edit it on web form
             </p>
 
         </fieldset>
