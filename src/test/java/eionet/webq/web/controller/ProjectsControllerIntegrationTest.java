@@ -4,6 +4,7 @@ import eionet.webq.dao.FileStorage;
 import eionet.webq.dao.ProjectFolders;
 import eionet.webq.dto.ProjectEntry;
 import eionet.webq.dto.ProjectFile;
+import eionet.webq.dto.ProjectFileType;
 import eionet.webq.dto.UploadedFile;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
@@ -153,9 +154,13 @@ public class ProjectsControllerIntegrationTest extends AbstractProjectsControlle
     }
 
     @Test
+    public void allowToAddNewWebForm() throws Exception {
+        assertNewProjectFileViewNameAndModelFileType("/webform/add", ProjectFileType.WEBFORM);
+    }
+
+    @Test
     public void allowToAddNewProjectFile() throws Exception {
-        saveProjectWithId(DEFAULT_PROJECT_ID);
-        request(get("/projects/" + DEFAULT_PROJECT_ID + "/webform/add")).andExpect(view().name("add_edit_project_file"));
+        assertNewProjectFileViewNameAndModelFileType("/file/add", ProjectFileType.FILE);
     }
 
     @Test
@@ -274,6 +279,7 @@ public class ProjectsControllerIntegrationTest extends AbstractProjectsControlle
         ProjectFile projectFile = new ProjectFile();
         projectFile.setDescription("test description");
         projectFile.setTitle("title");
+        projectFile.setFileType(ProjectFileType.WEBFORM);
         projectFile.setFile(new UploadedFile("file-name", "test-content".getBytes()));
         projectFile.setUserName("test-user");
         return projectFile;
@@ -282,7 +288,8 @@ public class ProjectsControllerIntegrationTest extends AbstractProjectsControlle
     private ResultActions uploadWebFormForDefaultProject(ProjectFile projectFile) throws Exception {
         return request(fileUpload("/projects/" + DEFAULT_PROJECT_ID + "/webform/save").file("file", projectFile.getFileContent())
                 .param("title", projectFile.getTitle()).param("active", Boolean.toString(projectFile.isActive()))
-                .param("description", projectFile.getDescription()).param("userName", projectFile.getUserName()));
+                .param("description", projectFile.getDescription()).param("userName", projectFile.getUserName())
+                .param("fileType", projectFile.getFileType().name()));
     }
 
     private void saveProjectWithId(String projectId) {
@@ -304,5 +311,30 @@ public class ProjectsControllerIntegrationTest extends AbstractProjectsControlle
     private Collection<ProjectEntry> getAllProjectEntries() throws Exception {
         MvcResult mvcResult = request(get("/projects/")).andReturn();
         return (Collection<ProjectEntry>) mvcResult.getModelAndView().getModelMap().get("allProjects");
+    }
+
+    private void assertNewProjectFileViewNameAndModelFileType(String path, ProjectFileType type) throws Exception {
+        saveProjectWithId(DEFAULT_PROJECT_ID);
+        request(get("/projects/" + DEFAULT_PROJECT_ID + path)).andExpect(view().name("add_edit_project_file"))
+                .andExpect(model().attribute(WEB_FORM_UPLOAD_ATTRIBUTE, new FileTypeMatcher(type)));
+    }
+
+    private static class FileTypeMatcher extends BaseMatcher<ProjectFile> {
+        private final ProjectFileType expectedFileType;
+
+        private FileTypeMatcher(ProjectFileType type) {
+            expectedFileType = type;
+        }
+
+        @Override
+        public boolean matches(Object o) {
+            ProjectFile file = (ProjectFile) o;
+            return file.getFileType() == expectedFileType;
+        }
+
+        @Override
+        public void describeTo(Description description) {
+            description.appendText("File type not matched.").appendValue(expectedFileType);
+        }
     }
 }

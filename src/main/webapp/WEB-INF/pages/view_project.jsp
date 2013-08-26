@@ -7,6 +7,7 @@
         <li><span><a title="Edit project" href="<c:url value="/projects/edit?projectId=${projectEntry.projectId}"/>">Edit project</a></span></li>
         <li><span><a href="#" onclick="removeProject();">Remove project</a></span></li>
         <li><span><a title="Add webform" href="<c:url value="/projects/${projectEntry.projectId}/webform/add"/>">Add webform</a></span></li>
+        <li><span><a title="Add webform" href="<c:url value="/projects/${projectEntry.projectId}/file/add"/>">Add file</a></span></li>
     </ul>
 </div>
 <h1>Project: ${projectEntry.projectId}</h1>

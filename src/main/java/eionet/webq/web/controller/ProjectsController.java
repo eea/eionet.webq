@@ -170,7 +170,6 @@ public class ProjectsController {
         if (bindingResult.hasErrors()) {
             return addOrEditProjectFile(currentProject, projectFile, model);
         }
-        projectFile.setFileType(ProjectFileType.WEBFORM);
         projectFileService.saveOrUpdate(projectFile, currentProject);
         model.addAttribute("message", "Webform added/updated.");
         return viewProject(currentProject, model);
@@ -179,14 +178,15 @@ public class ProjectsController {
     /**
      * Allows to add file.
      *
-     * @param projectFolderId project id for webform
+     * @param projectFolderId project id for file
+     * @param fileType file type
      * @param model model attribute holder
      * @return view name
      */
-    @RequestMapping(value = "/{projectFolderId}/webform/add")
-    public String addWebForm(@PathVariable String projectFolderId, Model model) {
+    @RequestMapping(value = "/{projectFolderId}/{fileType}/add")
+    public String addProjectFile(@PathVariable String projectFolderId, @PathVariable String fileType, Model model) {
         ProjectFile projectFile = new ProjectFile();
-        projectFile.setFileType(ProjectFileType.WEBFORM);
+        projectFile.setFileType(ProjectFileType.valueOf(fileType.toUpperCase()));
         return addOrEditProjectFile(projectService.getByProjectId(projectFolderId), projectFile, model);
     }
 
