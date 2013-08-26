@@ -21,14 +21,13 @@
 
 package eionet.webq.dao.util;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-
-import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.support.lob.LobCreator;
 import org.springframework.jdbc.support.lob.LobHandler;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 
 /**
  * PreparedStatementCreator for inserting blob and returning generated key with Spring JdbcTemplate.
@@ -40,10 +39,29 @@ import org.springframework.jdbc.support.lob.LobHandler;
  */
 public abstract class AbstractLobPreparedStatementCreator implements
                 PreparedStatementCreator {
+    /**
+     * Lob handler.
+     *
+     * @see LobHandler
+     * @see LobCreator
+     */
     private final LobHandler lobHandler;
+    /**
+     * Sql to be executed.
+     */
     private final String sql;
+    /**
+     * Generated id column.
+     */
     private final String keyColumn;
 
+    /**
+     * Constructs AbstractLobPreparedStatementCreator.
+     *
+     * @param lobHandler {@link #lobHandler}
+     * @param sql {@link #sql}
+     * @param keyColumn {@link #keyColumn}
+     */
     public AbstractLobPreparedStatementCreator(LobHandler lobHandler,
                         String sql, String keyColumn) {
         this.lobHandler = lobHandler;
@@ -61,6 +79,13 @@ public abstract class AbstractLobPreparedStatementCreator implements
         return ps;
     }
 
+    /**
+     * Abstract method, which allows to set parameters to prepared statement.
+     *
+     * @param ps prepared statement
+     * @param lobCreator {@link LobCreator}
+     * @throws SQLException could be thrown from this method
+     */
     protected abstract void setValues(PreparedStatement ps,
-                        LobCreator lobCreator) throws SQLException, DataAccessException;
+                        LobCreator lobCreator) throws SQLException;
 }

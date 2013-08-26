@@ -20,11 +20,11 @@ public abstract class AbstractDao<T> {
     @Qualifier("sql_statements")
     Properties sqlProperties;
 
+
     /**
      * Row mapper for web form upload.
      *
-     * @return {@link org.springframework.jdbc.core.BeanPropertyRowMapper} for
-     *         {@link org.springframework.jdbc.core.BeanPropertyRowMapper}
+     * @return {@link org.springframework.jdbc.core.BeanPropertyRowMapper} for {@link #getDtoClass()}
      */
     BeanPropertyRowMapper<T> rowMapper() {
         return BeanPropertyRowMapper.newInstance(getDtoClass());

@@ -50,6 +50,9 @@ public class MultipartFileConverter implements Converter<MultipartFile, UserFile
      * Xsi namespace URI.
      */
     private static final String XSI_NAMESPACE_URI = "http://www.w3.org/2001/XMLSchema-instance";
+    /**
+     * Converter to {@link UploadedFile}.
+     */
     @Autowired
     private MultipartFileToUploadedFile toUploadedFileConverter;
 

@@ -112,6 +112,11 @@ public class ProjectFile {
         return file.getName();
     }
 
+    /**
+     * Set file name for embedded {@link UploadedFile}.
+     *
+     * @param fileName file name
+     */
     public void setFileName(String fileName) {
         file.setName(fileName);
     }
@@ -120,6 +125,11 @@ public class ProjectFile {
         return file.getSizeInBytes();
     }
 
+    /**
+     * Set size in bytes name for embedded {@link UploadedFile}.
+     *
+     * @param fileSizeInBytes size in bytes
+     */
     public void setFileSizeInBytes(long fileSizeInBytes) {
         file.setSizeInBytes(fileSizeInBytes);
     }
@@ -144,6 +154,11 @@ public class ProjectFile {
         return file.getContent();
     }
 
+    /**
+     * Set file content for embedded {@link UploadedFile}.
+     *
+     * @param fileContent file content.
+     */
     public void setFileContent(byte[] fileContent) {
         file.setContent(fileContent);
     }

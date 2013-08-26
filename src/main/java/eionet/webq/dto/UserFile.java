@@ -56,11 +56,20 @@ public class UserFile {
      */
     private Collection<Conversion> availableConversions;
 
+    /**
+     * Shorthand for file uploaded by user creation.
+     *
+     * @param file uploaded file
+     * @param xmlSchema xml schema extracted from file
+     */
     public UserFile(UploadedFile file, String xmlSchema) {
         this.file = file;
         this.xmlSchema = xmlSchema;
     }
 
+    /**
+     * Empty constructor for instantiation by reflexion.
+     */
     public UserFile() {
     }
 
@@ -75,7 +84,11 @@ public class UserFile {
     public String getName() {
         return file.getName();
     }
-
+    /**
+     * Set file name for embedded {@link UploadedFile}.
+     *
+     * @param name file name
+     */
     public void setName(String name) {
         file.setName(name);
     }
@@ -83,7 +96,11 @@ public class UserFile {
     public byte[] getContent() {
         return file.getContent();
     }
-
+    /**
+     * Set file content for embedded {@link UploadedFile}.
+     *
+     * @param content file content.
+     */
     public void setContent(byte[] content) {
         file.setContent(content);
     }
@@ -91,7 +108,11 @@ public class UserFile {
     public long getSizeInBytes() {
         return file.getSizeInBytes();
     }
-
+    /**
+     * Set size in bytes name for embedded {@link UploadedFile}.
+     *
+     * @param sizeInBytes size in bytes
+     */
     public void setSizeInBytes(long sizeInBytes) {
         file.setSizeInBytes(sizeInBytes);
     }

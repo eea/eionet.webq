@@ -20,6 +20,9 @@
  */
 package eionet.webq.dto;
 
+/**
+ * Class represents uploaded file.
+ */
 public class UploadedFile {
     /**
      * File name.
@@ -34,12 +37,22 @@ public class UploadedFile {
      */
     private long sizeInBytes;
 
+    /**
+     * Shorthand for uploaded file creation.
+     * File size in bytes is taken from content length.
+     *
+     * @param name file name
+     * @param content content
+     */
     public UploadedFile(String name, byte[] content) {
         this.name = name;
         this.content = content;
         this.sizeInBytes = content.length;
     }
 
+    /**
+     * Empty constructor for instantiation by reflexion.
+     */
     public UploadedFile() {
     }
 

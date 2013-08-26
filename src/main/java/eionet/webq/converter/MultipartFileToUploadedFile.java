@@ -31,6 +31,9 @@ import org.springframework.web.multipart.MultipartFile;
  */
 @Component
 public class MultipartFileToUploadedFile implements Converter<MultipartFile, UploadedFile> {
+    /**
+     * Converter from {@link MultipartFile} to byte[].
+     */
     @Autowired
     private MultipartToByteArray toByteArrayConverter;
 
