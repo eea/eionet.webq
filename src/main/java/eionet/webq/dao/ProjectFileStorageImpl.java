@@ -20,11 +20,10 @@
  */
 package eionet.webq.dao;
 
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.util.Collection;
-
+import eionet.webq.dao.util.AbstractLobPreparedStatementCreator;
+import eionet.webq.dto.ProjectEntry;
+import eionet.webq.dto.ProjectFile;
+import eionet.webq.dto.ProjectFileType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -35,9 +34,10 @@ import org.springframework.jdbc.support.lob.LobCreator;
 import org.springframework.jdbc.support.lob.LobHandler;
 import org.springframework.stereotype.Repository;
 
-import eionet.webq.dao.util.AbstractLobPreparedStatementCreator;
-import eionet.webq.dto.ProjectEntry;
-import eionet.webq.dto.ProjectFile;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.util.Collection;
 
 /**
  * ProjectFileStorage implementation. Key id is {@link eionet.webq.dto.ProjectEntry#getId()}
@@ -69,13 +69,15 @@ public class ProjectFileStorageImpl extends AbstractDao<ProjectFile> implements 
                         lobCreator.setBlobAsBytes(ps, 3, projectFile.getFileContent());
                         ps.setString(4, projectFile.getFileName());
                         ps.setLong(5, projectFile.getFileSizeInBytes());
-                        ps.setString(6, projectFile.getNewXmlFileName());
-                        ps.setString(7, projectFile.getEmptyInstanceUrl());
-                        ps.setString(8, projectFile.getXmlSchema());
-                        ps.setString(9, projectFile.getDescription());
-                        ps.setString(10, projectFile.getUserName());
-                        ps.setBoolean(11, projectFile.isActive());
-                        ps.setBoolean(12, projectFile.isMainForm());
+                        ProjectFileType fileType = projectFile.getFileType();
+                        ps.setString(6, fileType != null ? fileType.name() : null);
+                        ps.setString(7, projectFile.getNewXmlFileName());
+                        ps.setString(8, projectFile.getEmptyInstanceUrl());
+                        ps.setString(9, projectFile.getXmlSchema());
+                        ps.setString(10, projectFile.getDescription());
+                        ps.setString(11, projectFile.getUserName());
+                        ps.setBoolean(12, projectFile.isActive());
+                        ps.setBoolean(13, projectFile.isMainForm());
                     }
                 }
                 , keyHolder);

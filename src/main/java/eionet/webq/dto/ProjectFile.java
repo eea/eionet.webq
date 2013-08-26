@@ -71,6 +71,10 @@ public class ProjectFile {
      */
     private boolean mainForm;
     /**
+     * Project file type.
+     */
+    private ProjectFileType fileType;
+    /**
      * User name of user who uploaded web form.
      */
     @NotEmpty
@@ -225,5 +229,13 @@ public class ProjectFile {
 
     public void setXmlSchema(String xmlSchema) {
         this.xmlSchema = xmlSchema;
+    }
+
+    public ProjectFileType getFileType() {
+        return fileType;
+    }
+
+    public void setFileType(ProjectFileType fileType) {
+        this.fileType = fileType;
     }
 }

@@ -20,15 +20,11 @@
  */
 package eionet.webq.dao;
 
-import static org.hamcrest.core.IsEqual.equalTo;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-
-import java.util.Collection;
-import java.util.Date;
-
+import configuration.ApplicationTestContextWithMockSession;
+import eionet.webq.dto.ProjectEntry;
+import eionet.webq.dto.ProjectFile;
+import eionet.webq.dto.ProjectFileType;
+import eionet.webq.dto.UploadedFile;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -38,10 +34,17 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import configuration.ApplicationTestContextWithMockSession;
-import eionet.webq.dto.ProjectEntry;
-import eionet.webq.dto.ProjectFile;
-import eionet.webq.dto.UploadedFile;
+import java.util.Collection;
+import java.util.Date;
+import java.util.Iterator;
+
+import static eionet.webq.dto.ProjectFileType.FILE;
+import static eionet.webq.dto.ProjectFileType.WEBFORM;
+import static org.hamcrest.core.IsEqual.equalTo;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {ApplicationTestContextWithMockSession.class})
@@ -206,6 +209,52 @@ public class ProjectFileStorageImplTest {
         assertThat(fileId, equalTo(maxId));
     }
 
+    @Test
+    public void webFormFileTypeCouldBeSavedToDatabase() throws Exception {
+        ProjectFile projectFile = saveAndGetBackProjectFileWithFileType(WEBFORM);
+
+        assertThat(projectFile.getFileType(), equalTo(WEBFORM));
+    }
+
+    @Test
+    public void projectFileTypeCouldBeSavedToDatabase() throws Exception {
+        ProjectFile projectFile = saveAndGetBackProjectFileWithFileType(ProjectFileType.FILE);
+
+        assertThat(projectFile.getFileType(), equalTo(ProjectFileType.FILE));
+    }
+
+    @Test
+    public void fileTypeCouldNotBeUpdated() throws Exception {
+        ProjectFile projectFile = saveAndGetBackProjectFileWithFileType(WEBFORM);
+        projectFile.setFileType(ProjectFileType.FILE);
+
+        projectFileStorage.update(projectFile, projectEntry);
+
+        assertThat(projectFileStorage.fileById(projectFile.getId()).getFileType(), equalTo(WEBFORM));
+    }
+
+    @Test
+    public void whenListingAllFilesFileTypeIsSet() throws Exception {
+        setFileTypeAndSave(FILE);
+        setFileTypeAndSave(WEBFORM);
+
+        Collection<ProjectFile> projectFiles = projectFileStorage.allFilesFor(projectEntry);
+        assertThat(projectFiles.size(), equalTo(2));
+
+        Iterator<ProjectFile> iterator = projectFiles.iterator();
+        assertThat(iterator.next().getFileType(), equalTo(FILE));
+        assertThat(iterator.next().getFileType(), equalTo(WEBFORM));
+    }
+
+    private int setFileTypeAndSave(ProjectFileType fileType) {
+        testFileForUpload.setFileType(fileType);
+        return addOneFile();
+    }
+
+    private ProjectFile saveAndGetBackProjectFileWithFileType(ProjectFileType type) {
+        return projectFileStorage.fileById(setFileTypeAndSave(type));
+    }
+
     private void clearUpdatedColumnForAllFiles() {
         template.update("UPDATE project_file SET updated = NULL");
     }
@@ -230,8 +279,8 @@ public class ProjectFileStorageImplTest {
         assertThat(after.isMainForm(), equalTo(before.isMainForm()));
     }
 
-    private void addOneFile() {
-        projectFileStorage.save(testFileForUpload, projectEntry);
+    private int addOneFile() {
+        return projectFileStorage.save(testFileForUpload, projectEntry);
     }
 
     private ProjectEntry testProjectEntry() {

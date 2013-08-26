@@ -23,6 +23,7 @@ CREATE TABLE IF NOT EXISTS PROJECT_FILE(
   new_xml_file_name varchar2(255),
   empty_instance_url varchar2(255),
   file_content blob,
+  file_type varchar(255),
   xml_schema varchar2(2000),
   description varchar2(2000),
   user_name varchar2(2000),
