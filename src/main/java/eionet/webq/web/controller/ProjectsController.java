@@ -1,5 +1,3 @@
-package eionet.webq.web.controller;
-
 /*
  * The contents of this file are subject to the Mozilla Public
  * License Version 1.1 (the "License"); you may not use this file
@@ -20,13 +18,14 @@ package eionet.webq.web.controller;
  * Contributor(s):
  *        Anton Dmitrijev
  */
+package eionet.webq.web.controller;
 
-import eionet.webq.dao.FileStorage;
 import eionet.webq.dto.ProjectEntry;
 import eionet.webq.dto.ProjectFile;
+import eionet.webq.dto.ProjectFileType;
+import eionet.webq.service.ProjectFileService;
 import eionet.webq.service.ProjectService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -68,8 +67,7 @@ public class ProjectsController {
      * Access to project files.
      */
     @Autowired
-    @Qualifier("project-files")
-    private FileStorage<ProjectEntry, ProjectFile> projectFileStorage;
+    private ProjectFileService projectFileService;
 
     /**
      * All projects handler.
@@ -172,11 +170,8 @@ public class ProjectsController {
         if (bindingResult.hasErrors()) {
             return addOrEditProjectFile(currentProject, projectFile, model);
         }
-        if (update) {
-            projectFileStorage.update(projectFile, currentProject);
-        } else {
-            projectFileStorage.save(projectFile, currentProject);
-        }
+        projectFile.setFileType(ProjectFileType.WEBFORM);
+        projectFileService.saveOrUpdate(projectFile, currentProject);
         model.addAttribute("message", "Webform added/updated.");
         return viewProject(currentProject, model);
     }
@@ -203,7 +198,7 @@ public class ProjectsController {
      */
     @RequestMapping(value = "/{projectFolderId}/webform/edit")
     public String editWebForm(@PathVariable String projectFolderId, @RequestParam int fileId, Model model) {
-        return addOrEditProjectFile(projectService.getByProjectId(projectFolderId), projectFileStorage.fileById(fileId), model);
+        return addOrEditProjectFile(projectService.getByProjectId(projectFolderId), projectFileService.getById(fileId), model);
     }
 
     /**
@@ -217,7 +212,7 @@ public class ProjectsController {
     @RequestMapping(value = "/{projectFolderId}/webform/remove")
     public String removeWebForm(@PathVariable String projectFolderId, @RequestParam int fileId, Model model) {
         ProjectEntry byProjectId = projectService.getByProjectId(projectFolderId);
-        projectFileStorage.remove(fileId, byProjectId);
+        projectFileService.remove(fileId, byProjectId);
         return viewProject(byProjectId, model);
     }
 
@@ -242,7 +237,7 @@ public class ProjectsController {
      */
     private String viewProject(ProjectEntry entry, Model model) {
         addProjectToModel(model, entry);
-        model.addAttribute(ALL_PROJECT_FILES_ATTRIBUTE, projectFileStorage.allFilesFor(entry));
+        model.addAttribute(ALL_PROJECT_FILES_ATTRIBUTE, projectFileService.allFilesFor(entry));
         return "view_project";
     }
 
