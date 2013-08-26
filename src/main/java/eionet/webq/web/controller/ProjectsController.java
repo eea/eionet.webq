@@ -185,7 +185,9 @@ public class ProjectsController {
      */
     @RequestMapping(value = "/{projectFolderId}/webform/add")
     public String addWebForm(@PathVariable String projectFolderId, Model model) {
-        return addOrEditProjectFile(projectService.getByProjectId(projectFolderId), new ProjectFile(), model);
+        ProjectFile projectFile = new ProjectFile();
+        projectFile.setFileType(ProjectFileType.WEBFORM);
+        return addOrEditProjectFile(projectService.getByProjectId(projectFolderId), projectFile, model);
     }
 
     /**
