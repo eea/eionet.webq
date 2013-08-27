@@ -20,13 +20,9 @@
  */
 package eionet.webq.dao;
 
-import static junit.framework.TestCase.assertNotNull;
-import static junit.framework.TestCase.assertNull;
-import static org.hamcrest.core.IsEqual.equalTo;
-import static org.junit.Assert.assertThat;
-
-import java.util.Collection;
-
+import configuration.ApplicationTestContextWithMockSession;
+import eionet.webq.dto.UploadedFile;
+import eionet.webq.dto.UserFile;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,9 +32,13 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import configuration.ApplicationTestContextWithMockSession;
-import eionet.webq.dto.UploadedFile;
-import eionet.webq.dto.UserFile;
+import java.util.Collection;
+import java.util.Iterator;
+
+import static junit.framework.TestCase.assertNotNull;
+import static junit.framework.TestCase.assertNull;
+import static org.hamcrest.core.IsEqual.equalTo;
+import static org.junit.Assert.assertThat;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {ApplicationTestContextWithMockSession.class})
@@ -176,9 +176,24 @@ public class UserFileStorageImplTest {
         storage.fileById(1);
     }
 
-    @Test(expected = UnsupportedOperationException.class)
-    public void removeNotImplemented() throws Exception {
-        storage.remove(1, "test");
+    @Test
+    public void removesUserFileById() throws Exception {
+        uploadSingleFileFor(userId);
+        UserFile file = getFirstUploadedFileAndAssertThatItIsTheOnlyOneAvailableFor(userId);
+
+        storage.remove(userId, file.getId());
+
+        assertThat(storage.allFilesFor(userId).size(), equalTo(0));
+    }
+
+    @Test
+    public void allowsBulkRemoval() throws Exception {
+        uploadFilesFor(userId, 2);
+        Iterator<UserFile> it = storage.allFilesFor(userId).iterator();
+
+        storage.remove(userId, it.next().getId(), it.next().getId());
+
+        assertThat(storage.allFilesFor(userId).size(), equalTo(0));
     }
 
     @Test

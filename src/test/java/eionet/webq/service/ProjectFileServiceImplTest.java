@@ -138,7 +138,7 @@ public class ProjectFileServiceImplTest {
     public void testRemove() throws Exception {
         service.remove(1, testProject);
 
-        verify(projectFileStorage).remove(1, testProject);
+        verify(projectFileStorage).remove(testProject, 1);
     }
 
     private ProjectFile fileWithType(ProjectFileType type) {

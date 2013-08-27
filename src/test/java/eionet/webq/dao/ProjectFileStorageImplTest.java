@@ -111,7 +111,19 @@ public class ProjectFileStorageImplTest {
 
         ProjectFile uploadedFile = getUploadedFileAndAssertThatItIsTheOnlyOne();
 
-        projectFileStorage.remove(uploadedFile.getId(), projectEntry);
+        projectFileStorage.remove(projectEntry, uploadedFile.getId());
+
+        assertThat(projectFileStorage.allFilesFor(projectEntry).size(), equalTo(0));
+    }
+
+    @Test
+    public void allowToBulkRemoveFilesByFileId() throws Exception {
+        addOneFile();
+        addOneFile();
+
+        Iterator<ProjectFile> it = projectFileStorage.allFilesFor(projectEntry).iterator();
+
+        projectFileStorage.remove(projectEntry, it.next().getId(), it.next().getId());
 
         assertThat(projectFileStorage.allFilesFor(projectEntry).size(), equalTo(0));
     }

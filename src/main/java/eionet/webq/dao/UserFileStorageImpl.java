@@ -20,14 +20,12 @@
  */
 package eionet.webq.dao;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.util.Collection;
-
+import eionet.webq.dao.util.AbstractLobPreparedStatementCreator;
+import eionet.webq.dto.UploadedFile;
+import eionet.webq.dto.UserFile;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.support.AbstractLobCreatingPreparedStatementCallback;
@@ -37,9 +35,11 @@ import org.springframework.jdbc.support.lob.LobCreator;
 import org.springframework.jdbc.support.lob.LobHandler;
 import org.springframework.stereotype.Repository;
 
-import eionet.webq.dao.util.AbstractLobPreparedStatementCreator;
-import eionet.webq.dto.UploadedFile;
-import eionet.webq.dto.UserFile;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.util.Collection;
 
 /**
  * {@link FileStorage} implementation for user files.
@@ -110,8 +110,19 @@ public class UserFileStorageImpl extends AbstractDao<UserFile> implements FileSt
     }
 
     @Override
-    public void remove(int id, String s) {
-        throw new UnsupportedOperationException();
+    public void remove(final String userId, final int... id) {
+        jdbcTemplate.batchUpdate(sqlProperties.getProperty("delete.user.file"), new BatchPreparedStatementSetter() {
+            @Override
+            public void setValues(PreparedStatement ps, int i) throws SQLException {
+                ps.setInt(1, id[i]);
+                ps.setString(2, userId);
+            }
+
+            @Override
+            public int getBatchSize() {
+                return id.length;
+            }
+        });
     }
 
     @Override

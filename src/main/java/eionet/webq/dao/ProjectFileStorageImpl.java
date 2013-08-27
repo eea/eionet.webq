@@ -26,6 +26,7 @@ import eionet.webq.dto.ProjectFile;
 import eionet.webq.dto.ProjectFileType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.support.AbstractLobCreatingPreparedStatementCallback;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -125,8 +126,19 @@ public class ProjectFileStorageImpl extends AbstractDao<ProjectFile> implements 
     }
 
     @Override
-    public void remove(int fileId, ProjectEntry projectEntry) {
-        template.update(sqlProperties.getProperty("delete.project.file"), fileId, projectEntry.getId());
+    public void remove(final ProjectEntry projectEntry, final int... fileId) {
+        template.batchUpdate(sqlProperties.getProperty("delete.project.file"), new BatchPreparedStatementSetter() {
+            @Override
+            public void setValues(PreparedStatement ps, int i) throws SQLException {
+                ps.setInt(1, fileId[i]);
+                ps.setInt(2, projectEntry.getId());
+            }
+
+            @Override
+            public int getBatchSize() {
+                return fileId.length;
+            }
+        });
     }
 
     @Override

@@ -76,8 +76,8 @@ public interface FileStorage<KEY, FILE> {
 
     /**
      * Remove file by id and classifier.
-     * @param id file id
      * @param key classifier
+     * @param id file id
      */
-    void remove(int id, KEY key);
+    void remove(KEY key, int... id);
 }
