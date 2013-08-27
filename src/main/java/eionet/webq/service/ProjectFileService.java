@@ -22,8 +22,8 @@ package eionet.webq.service;
 
 import eionet.webq.dto.ProjectEntry;
 import eionet.webq.dto.ProjectFile;
-
-import java.util.Collection;
+import eionet.webq.dto.ProjectFileType;
+import org.springframework.util.MultiValueMap;
 
 /**
  * Project file storage service.
@@ -52,7 +52,7 @@ public interface ProjectFileService {
      * @param project associated project
      * @return collection of files linked to this key
      */
-    Collection<ProjectFile> allFilesFor(ProjectEntry project);
+    MultiValueMap<ProjectFileType, ProjectFile> filesDividedByTypeFor(ProjectEntry project);
 
     /**
      * Retrieve file name and content.

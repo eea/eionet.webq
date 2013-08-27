@@ -30,7 +30,12 @@ import eionet.webq.dto.UploadedFile;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.util.MultiValueMap;
 
+import java.util.Arrays;
+
+import static eionet.webq.dto.ProjectFileType.FILE;
+import static eionet.webq.dto.ProjectFileType.WEBFORM;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
@@ -60,7 +65,7 @@ public class ProjectFileServiceImplTest {
 
     @Test
     public void saveFileIfNoIdSet() throws Exception {
-        testFile.setFileType(ProjectFileType.FILE);
+        testFile.setFileType(FILE);
         service.saveOrUpdate(testFile, testProject);
 
         verify(projectFileStorage).save(testFile, testProject);
@@ -72,7 +77,7 @@ public class ProjectFileServiceImplTest {
         String expectedXmlSchema = "expected-xml-schema";
         when(xmlSchemaExtractor.extractXmlSchema(any(byte[].class))).thenReturn(expectedXmlSchema);
         testFile.setFile(new UploadedFile("test.xml", "dummy-content".getBytes()));
-        testFile.setFileType(ProjectFileType.FILE);
+        testFile.setFileType(FILE);
 
         service.saveOrUpdate(testFile, testProject);
 
@@ -103,8 +108,22 @@ public class ProjectFileServiceImplTest {
 
     @Test
     public void testAllFilesFor() throws Exception {
-        service.allFilesFor(testProject);
+        service.filesDividedByTypeFor(testProject);
 
+        verify(projectFileStorage).allFilesFor(testProject);
+    }
+
+    @Test
+    public void whenFetchingAllFilesTheyAreDividedByType() throws Exception {
+        ProjectFile projectXmlFile = fileWithType(FILE);
+        ProjectFile webform = fileWithType(WEBFORM);
+        when(projectFileStorage.allFilesFor(testProject))
+                .thenReturn(Arrays.asList(projectXmlFile, webform));
+
+        MultiValueMap<ProjectFileType,ProjectFile> filesByType = service.filesDividedByTypeFor(testProject);
+
+        assertThat(filesByType.get(FILE), equalTo(Arrays.asList(projectXmlFile)));
+        assertThat(filesByType.get(WEBFORM), equalTo(Arrays.asList(webform)));
         verify(projectFileStorage).allFilesFor(testProject);
     }
 
@@ -120,5 +139,11 @@ public class ProjectFileServiceImplTest {
         service.remove(1, testProject);
 
         verify(projectFileStorage).remove(1, testProject);
+    }
+
+    private ProjectFile fileWithType(ProjectFileType type) {
+        ProjectFile file = new ProjectFile();
+        file.setFileType(type);
+        return file;
     }
 }

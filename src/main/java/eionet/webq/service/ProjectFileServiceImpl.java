@@ -28,8 +28,8 @@ import eionet.webq.dto.ProjectFileType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-
-import java.util.Collection;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 
 /**
  */
@@ -67,8 +67,12 @@ public class ProjectFileServiceImpl implements ProjectFileService {
     }
 
     @Override
-    public Collection<ProjectFile> allFilesFor(ProjectEntry project) {
-        return projectFileStorage.allFilesFor(project);
+    public MultiValueMap<ProjectFileType, ProjectFile> filesDividedByTypeFor(ProjectEntry project) {
+        MultiValueMap<ProjectFileType, ProjectFile> result = new LinkedMultiValueMap<ProjectFileType, ProjectFile>();
+        for (ProjectFile projectFile : projectFileStorage.allFilesFor(project)) {
+            result.add(projectFile.getFileType(), projectFile);
+        }
+        return result;
     }
 
     @Override

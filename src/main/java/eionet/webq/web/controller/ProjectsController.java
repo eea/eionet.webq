@@ -239,7 +239,7 @@ public class ProjectsController {
      */
     private String viewProject(ProjectEntry entry, Model model) {
         addProjectToModel(model, entry);
-        model.addAttribute(ALL_PROJECT_FILES_ATTRIBUTE, projectFileService.allFilesFor(entry));
+        model.addAttribute(ALL_PROJECT_FILES_ATTRIBUTE, projectFileService.filesDividedByTypeFor(entry));
         return "view_project";
     }
 

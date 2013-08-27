@@ -16,9 +16,9 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.util.MultiValueMap;
 
 import java.util.Collection;
-import java.util.List;
 
 import static eionet.webq.web.controller.ProjectsController.PROJECT_ENTRY_MODEL_ATTRIBUTE;
 import static eionet.webq.web.controller.ProjectsController.WEB_FORM_UPLOAD_ATTRIBUTE;
@@ -190,9 +190,9 @@ public class ProjectsControllerIntegrationTest extends AbstractProjectsControlle
     public void loadsAllProjectFilesToModel() throws Exception {
         uploadFilesForDefaultProject(2);
         ResultActions projectViewResult = getProjectViewResult();
-        List<ProjectFile> allProjectFiles = allWebFormUploads(projectViewResult);
+        MultiValueMap<ProjectFileType, ProjectFile> allProjectFiles = allWebFormUploads(projectViewResult);
 
-        assertThat(allProjectFiles.size(), equalTo(2));
+        assertThat(allProjectFiles.get(testWebFormUpload().getFileType()).size(), equalTo(2));
     }
 
     @Test
@@ -257,8 +257,8 @@ public class ProjectsControllerIntegrationTest extends AbstractProjectsControlle
     }
 
     @SuppressWarnings("unchecked")
-    private List<ProjectFile> allWebFormUploads(ResultActions projectViewResult) {
-        return (List<ProjectFile>) projectViewResult.andReturn().getModelAndView().getModel()
+    private MultiValueMap<ProjectFileType, ProjectFile> allWebFormUploads(ResultActions projectViewResult) {
+        return (MultiValueMap<ProjectFileType, ProjectFile>) projectViewResult.andReturn().getModelAndView().getModel()
                 .get(ProjectsController.ALL_PROJECT_FILES_ATTRIBUTE);
     }
 
