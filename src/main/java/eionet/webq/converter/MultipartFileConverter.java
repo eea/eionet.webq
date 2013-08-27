@@ -22,19 +22,10 @@ package eionet.webq.converter;
 
 import eionet.webq.dto.UploadedFile;
 import eionet.webq.dto.UserFile;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.web.multipart.MultipartFile;
-
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamReader;
-import java.io.ByteArrayInputStream;
-
-import static javax.xml.stream.XMLStreamConstants.START_ELEMENT;
 
 /**
  * Performs converting from {@link MultipartFile} to {@link eionet.webq.dto.UserFile}.
@@ -47,53 +38,20 @@ public class MultipartFileConverter implements Converter<MultipartFile, UserFile
      */
     private static final Logger LOGGER = Logger.getLogger(MultipartFileConverter.class);
     /**
-     * Xsi namespace URI.
-     */
-    private static final String XSI_NAMESPACE_URI = "http://www.w3.org/2001/XMLSchema-instance";
-    /**
      * Converter to {@link UploadedFile}.
      */
     @Autowired
     private MultipartFileToUploadedFile toUploadedFileConverter;
+    /**
+     * Xml schema extractor.
+     */
+    @Autowired
+    private XmlSchemaExtractor xmlSchemaExtractor;
 
     @Override
     public UserFile convert(MultipartFile multipartFile) {
         UploadedFile uploadedFile = toUploadedFileConverter.convert(multipartFile);
         LOGGER.info("Converting " + uploadedFile);
-        return new UserFile(uploadedFile, extractXmlSchema(uploadedFile.getContent()));
-    }
-
-    /**
-     * Extracts {@code @xsi:noNamespaceSchemaLocation} or {@code @xsi:schemaLocation} attribute value from xml root element.
-     *
-     * @param bytes uploaded file bytes
-     * @return {@code @xsi:noNamespaceSchemaLocation} or {@code @xsi:schemaLocation} attribute value
-     */
-    private String extractXmlSchema(byte[] bytes) {
-        XMLInputFactory xmlInputFactory = XMLInputFactory.newInstance();
-        XMLStreamReader xmlStreamReader = null;
-        ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
-        try {
-            xmlStreamReader = xmlInputFactory.createXMLStreamReader(bais);
-            while (xmlStreamReader.hasNext()) {
-                if (xmlStreamReader.next() == START_ELEMENT) {
-                    return StringUtils.defaultString(
-                            xmlStreamReader.getAttributeValue(XSI_NAMESPACE_URI, "noNamespaceSchemaLocation"),
-                            xmlStreamReader.getAttributeValue(XSI_NAMESPACE_URI, "schemaLocation"));
-                }
-            }
-        } catch (Exception e) {
-            LOGGER.warn("exception thrown during extracting xml schema", e);
-        } finally {
-            IOUtils.closeQuietly(bais);
-            if (xmlStreamReader != null) {
-                try {
-                    xmlStreamReader.close();
-                } catch (XMLStreamException e) {
-                    LOGGER.warn("unable to close xml stream", e);
-                }
-            }
-        }
-        return null;
+        return new UserFile(uploadedFile, xmlSchemaExtractor.extractXmlSchema(uploadedFile.getContent()));
     }
 }
