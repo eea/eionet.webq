@@ -65,8 +65,9 @@ public interface ProjectFileService {
 
     /**
      * Remove file by id and classifier.
-     * @param id file id
+     *
      * @param project associated project
+     * @param id file ids
      */
-    void remove(int id, ProjectEntry project);
+    void remove(ProjectEntry project, int... id);
 }

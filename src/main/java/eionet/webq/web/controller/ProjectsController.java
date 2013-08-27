@@ -212,9 +212,9 @@ public class ProjectsController {
      * @return view name
      */
     @RequestMapping(value = "/{projectFolderId}/webform/remove")
-    public String removeWebForm(@PathVariable String projectFolderId, @RequestParam int fileId, Model model) {
+    public String removeWebForm(@PathVariable String projectFolderId, @RequestParam int[] fileId, Model model) {
         ProjectEntry byProjectId = projectService.getByProjectId(projectFolderId);
-        projectFileService.remove(fileId, byProjectId);
+        projectFileService.remove(byProjectId, fileId);
         return viewProject(byProjectId, model);
     }
 

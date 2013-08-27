@@ -21,9 +21,11 @@
 <c:forEach var="projectFilesEntry" items="${allProjectFiles}">
     <c:set var="isWebForm" value="${projectFilesEntry.key == 'WEBFORM'}"/>
     <h2>Project <c:out value="${isWebForm ? 'webforms' : 'files'}"/></h2>
+    <form action="<c:url value="/projects/${projectEntry.projectId}/webform/remove"/>" method="post">
     <table class="datatable">
         <thead>
             <tr>
+                <th/>
                 <th>Title</th>
                 <th>File</th>
                 <th>Last modified</th>
@@ -38,6 +40,7 @@
         <c:forEach var="projectFile" items="${projectFilesEntry.value}">
             <c:set value="view-file-${projectFile.id}" var="popup_id"/>
             <tr>
+                <td><input type="checkbox" name="fileId" value="${projectFile.id}"/></td>
                 <td>${projectFile.title}</td>
                 <td><a href="#" onclick="view_file($('#${popup_id}'), <c:out value="${isWebForm ? 500 : 300}"/>)">${projectFile.fileName}</a></td>
                 <td><fmt:formatDate pattern="dd MMM yyyy HH:mm:ss" value="${projectFile.updated}" /></td>
@@ -107,6 +110,8 @@
         </c:forEach>
         </tbody>
     </table>
+    <input type="submit" value="Remove selected files">
+    </form>
 </c:forEach>
 
 <div id="remove-file" title="Remove project file?" class="dialogTemplate">

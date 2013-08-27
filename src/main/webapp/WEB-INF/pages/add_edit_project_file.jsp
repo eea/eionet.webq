@@ -6,7 +6,7 @@
         <c:set var="isWebform" value="true"/>
     </c:when>
     <c:otherwise>
-        <c:set var="fileTypeLabel" value="project file"/>
+        <c:set var="fileTypeLabel" value="Project file"/>
     </c:otherwise>
 </c:choose>
 

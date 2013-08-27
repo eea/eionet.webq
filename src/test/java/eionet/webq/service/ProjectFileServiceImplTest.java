@@ -136,7 +136,7 @@ public class ProjectFileServiceImplTest {
 
     @Test
     public void testRemove() throws Exception {
-        service.remove(1, testProject);
+        service.remove(testProject, 1);
 
         verify(projectFileStorage).remove(testProject, 1);
     }

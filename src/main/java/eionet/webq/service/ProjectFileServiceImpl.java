@@ -81,7 +81,7 @@ public class ProjectFileServiceImpl implements ProjectFileService {
     }
 
     @Override
-    public void remove(int id, ProjectEntry project) {
+    public void remove(ProjectEntry project, int... id) {
         projectFileStorage.remove(project, id);
     }
 
