@@ -27,11 +27,11 @@
                 <th scope="row"><label for="description">Description</label></th>
                 <td><f:textarea path="description" cols="60"/></td>
             </tr>
-            <tr>
-                <th scope="row"><label for="xmlSchema">Xml Schema</label></th>
-                <td><f:input path="xmlSchema" style="width:500px"/></td>
-            </tr>
             <c:if test="${isWebform}">
+                <tr>
+                    <th scope="row"><label for="xmlSchema">Xml Schema</label></th>
+                    <td><f:input path="xmlSchema" style="width:500px"/></td>
+                </tr>
                 <tr>
                     <th scope="row"><label for="newXmlFileName">New xml file name</label></th>
                     <td><f:input path="newXmlFileName" style="width:500px"/></td>
