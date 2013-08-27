@@ -32,7 +32,8 @@
 
 <h1>Web Questionnaires</h1>
 <div class="container">
-    <f:form modelAttribute="uploadForm" action="uploadXml" method="POST" enctype="multipart/form-data">
+    <c:url var="uploadUrl" value="/uploadXml"/>
+    <f:form modelAttribute="uploadForm" action="${uploadUrl}" method="POST" enctype="multipart/form-data">
         <f:errors path="*" element="div" cssClass="error-msg"/>
         <div class="col1">
         <fieldset>
@@ -68,10 +69,11 @@
 <c:if test="${not empty uploadedFiles}">
 <div class="files">
     <h2>My XML files</h2>
-
-        <table class="datatable" style="width:100%"">
+        <form method="post" action="<c:url value="/remove/files"/>">
+        <table class="datatable" style="width:100%">
             <thead>
             <tr>
+                <th scope="col"></th>
                 <th scope="col">File</th>
                 <th scope="col">File info</th>
                 <th scope="col">Actions</th>
@@ -81,6 +83,9 @@
             <c:forEach items="${uploadedFiles}" var="file">
                 <c:url value="/download/user_file?fileId=${file.id}" var="downloadLink"/>
                 <tr>
+                    <td>
+                        <input type="checkbox" name="selectedUserFile" value="${file.id}">
+                    </td>
                     <td>
                         <a href="${downloadLink}" title="Download file">${file.name}</a>
                     </td>
@@ -108,5 +113,7 @@
             </c:forEach>
             </tbody>
         </table>
+        <input type="submit" value="Remove selected files"/>
+        </form>
 </div>
 </c:if>

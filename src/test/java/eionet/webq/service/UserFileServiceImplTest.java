@@ -21,6 +21,18 @@
 
 package eionet.webq.service;
 
+import eionet.webq.dao.FileStorage;
+import eionet.webq.dao.UserFileStorageImpl;
+import eionet.webq.dto.UserFile;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.Mockito;
+
+import javax.servlet.http.HttpSession;
+import java.util.Arrays;
+import java.util.Collection;
+
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.doNothing;
@@ -28,20 +40,6 @@ import static org.mockito.Mockito.only;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
-
-import java.util.Arrays;
-import java.util.Collection;
-
-import javax.servlet.http.HttpSession;
-
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.Mockito;
-
-import eionet.webq.dao.FileStorage;
-import eionet.webq.dao.UserFileStorageImpl;
-import eionet.webq.dto.UserFile;
 
 public class UserFileServiceImplTest {
     private UserFileServiceImpl service;
@@ -106,5 +104,13 @@ public class UserFileServiceImplTest {
         service.updateContent(fileToUpdate);
 
         verify(storage, only()).update(fileToUpdate, userId);
+    }
+
+    @Test
+    public void removesFiles() throws Exception {
+        int[] fileIds = {1, 2, 3};
+        service.removeFilesById(fileIds);
+
+        verify(storage).remove(userId, fileIds);
     }
 }

@@ -20,12 +20,11 @@
  */
 package eionet.webq.web.controller;
 
-import java.io.InputStream;
-import java.util.Collection;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
-
+import eionet.webq.dto.UploadForm;
+import eionet.webq.dto.UserFile;
+import eionet.webq.dto.XmlSaveResult;
+import eionet.webq.service.ConversionService;
+import eionet.webq.service.UserFileService;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -37,11 +36,10 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import eionet.webq.dto.UploadForm;
-import eionet.webq.dto.UserFile;
-import eionet.webq.dto.XmlSaveResult;
-import eionet.webq.service.ConversionService;
-import eionet.webq.service.UserFileService;
+import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
+import java.io.InputStream;
+import java.util.Collection;
 
 /**
  * Base controller for front page actions.
@@ -87,7 +85,7 @@ public class BaseController {
      * @param model holder for model attributes
      * @return view name
      */
-    @RequestMapping(value = "/uploadXml", method = RequestMethod.POST)
+    @RequestMapping(value = "uploadXml", method = RequestMethod.POST)
     public String upload(@Valid @ModelAttribute UploadForm uploadForm, BindingResult result, Model model) {
         if (!result.hasErrors()) {
             UserFile file = uploadForm.getUserFile();
@@ -96,6 +94,21 @@ public class BaseController {
         }
         return welcome(model);
     }
+
+    /**
+     * Removes selected user files
+     *
+     * @param selectedUserFile ids of files to be removed
+     * @param model holder for model attributes
+     * @return view name
+     */
+    @RequestMapping(value = "/remove/files")
+    public String removeUserFiles(@RequestParam int[] selectedUserFile, Model model) {
+        userFileService.removeFilesById(selectedUserFile);
+        model.addAttribute("message", "Selected files removed successfully");
+        return welcome(model);
+    }
+
 
     /**
      * Update file content action. The action is called from XForms and it returns XML formatted result.

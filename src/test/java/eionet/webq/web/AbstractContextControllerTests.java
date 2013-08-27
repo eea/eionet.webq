@@ -61,9 +61,13 @@ public abstract class AbstractContextControllerTests {
         return post(path).session(mockHttpSession);
     }
 
-    @SuppressWarnings("unchecked")
     protected List<UserFile> uploadFileAndExtractUploadedFiles(MockMultipartFile file) throws Exception {
-        return (List<UserFile>) uploadFile(file).andReturn().getModelAndView().getModelMap().get("uploadedFiles");
+        return extractUserFilesFromMvcResult(uploadFile(file).andReturn());
+    }
+
+    @SuppressWarnings("unchecked")
+    protected List<UserFile> extractUserFilesFromMvcResult(MvcResult result) {
+        return (List<UserFile>) result.getModelAndView().getModelMap().get("uploadedFiles");
     }
 
     protected UserFile uploadFileAndTakeFirstUploadedFile(MockMultipartFile mockMultipartFile) throws Exception {

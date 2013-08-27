@@ -20,17 +20,16 @@
  */
 package eionet.webq.service;
 
-import java.util.Collection;
-
-import javax.servlet.http.HttpSession;
-
+import eionet.webq.dao.FileStorage;
+import eionet.webq.dto.UserFile;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
-import eionet.webq.dao.FileStorage;
-import eionet.webq.dto.UserFile;
+import javax.servlet.http.HttpSession;
+import java.util.Arrays;
+import java.util.Collection;
 
 /**
  * {@link UserFileService} implementation.
@@ -85,6 +84,13 @@ public class UserFileServiceImpl implements UserFileService {
         String userId = userId();
         LOGGER.info("Updating file id=" + file.getId() + " for user=" + userId);
         storage.update(file, userId);
+    }
+
+    @Override
+    public void removeFilesById(int[] fileIds) {
+        String userId = userId();
+        LOGGER.info("Removing files:" + Arrays.toString(fileIds) + " for user=" + userId);
+        storage.remove(userId, fileIds);
     }
 
     /**

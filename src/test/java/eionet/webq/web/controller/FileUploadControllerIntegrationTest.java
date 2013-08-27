@@ -35,14 +35,17 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.web.client.RestOperations;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 
@@ -104,6 +107,18 @@ public class FileUploadControllerIntegrationTest extends AbstractContextControll
                         .content(newContent.getBytes()));
 
         downloadFile(userFile.getId()).andExpect(content().string(newContent));
+    }
+
+    @Test
+    public void allowToRemoveFiles() throws Exception {
+        uploadFile(createMockMultipartFile("file1"));
+        Iterator<UserFile> it = uploadFileAndExtractUploadedFiles(createMockMultipartFile("file2")).iterator();
+
+        String[] fileIds = {String.valueOf(it.next().getId()), String.valueOf(it.next().getId())};
+        request(postWithMockSession("/remove/files").param("selectedUserFile", fileIds));
+
+        List<UserFile> userFiles = extractUserFilesFromMvcResult(request(get("/").session(mockHttpSession)).andReturn());
+        assertThat(userFiles.size(), equalTo(0));
     }
 
     private UserFile uploadFileAndTakeFirstUploadedFile() throws Exception {

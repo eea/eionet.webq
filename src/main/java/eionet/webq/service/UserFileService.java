@@ -20,9 +20,9 @@
  */
 package eionet.webq.service;
 
-import java.util.Collection;
-
 import eionet.webq.dto.UserFile;
+
+import java.util.Collection;
 
 /**
  * Service for storing uploaded files.
@@ -60,4 +60,11 @@ public interface UserFileService {
      * @param file content to be updated in storage
      */
     void updateContent(UserFile file);
+
+    /**
+     * Removes files by id.
+     *
+     * @param fileIds files to be removed.
+     */
+    void removeFilesById(int[] fileIds);
 }
