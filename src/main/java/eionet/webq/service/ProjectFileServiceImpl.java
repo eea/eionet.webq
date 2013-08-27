@@ -20,9 +20,11 @@
  */
 package eionet.webq.service;
 
+import eionet.webq.converter.XmlSchemaExtractor;
 import eionet.webq.dao.FileStorage;
 import eionet.webq.dto.ProjectEntry;
 import eionet.webq.dto.ProjectFile;
+import eionet.webq.dto.ProjectFileType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -39,6 +41,11 @@ public class ProjectFileServiceImpl implements ProjectFileService {
     @Autowired
     @Qualifier("project-files")
     FileStorage<ProjectEntry, ProjectFile> projectFileStorage;
+    /**
+     * Extracts xml schema from project xml files.
+     */
+    @Autowired
+    XmlSchemaExtractor xmlSchemaExtractor;
 
     @Override
     public void saveOrUpdate(ProjectFile file, ProjectEntry project) {
@@ -50,6 +57,7 @@ public class ProjectFileServiceImpl implements ProjectFileService {
         if (file.getFileType() == null) {
             throw new RuntimeException("File type not set. File=" + file);
         }
+        extractAndSetXmlSchemaIfRequired(file);
         projectFileStorage.save(file, project);
     }
 
@@ -71,5 +79,16 @@ public class ProjectFileServiceImpl implements ProjectFileService {
     @Override
     public void remove(int id, ProjectEntry project) {
         projectFileStorage.remove(id, project);
+    }
+
+    /**
+     * Try to extract xml schema from file content if required.
+     *
+     * @param file file.
+     */
+    private void extractAndSetXmlSchemaIfRequired(ProjectFile file) {
+        if (file.getFileType() == ProjectFileType.FILE) {
+            file.setXmlSchema(xmlSchemaExtractor.extractXmlSchema(file.getFileContent()));
+        }
     }
 }

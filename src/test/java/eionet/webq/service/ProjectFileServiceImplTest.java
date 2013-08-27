@@ -20,33 +20,42 @@
  */
 package eionet.webq.service;
 
+import eionet.webq.converter.XmlSchemaExtractor;
 import eionet.webq.dao.FileStorage;
 import eionet.webq.dao.ProjectFileStorageImpl;
 import eionet.webq.dto.ProjectEntry;
 import eionet.webq.dto.ProjectFile;
 import eionet.webq.dto.ProjectFileType;
+import eionet.webq.dto.UploadedFile;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import static org.hamcrest.core.IsEqual.equalTo;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 
 public class ProjectFileServiceImplTest {
     ProjectFileServiceImpl service = new ProjectFileServiceImpl();
     FileStorage<ProjectEntry, ProjectFile> projectFileStorage = mock(ProjectFileStorageImpl.class);
+    XmlSchemaExtractor xmlSchemaExtractor = mock(XmlSchemaExtractor.class);
     ProjectFile testFile = new ProjectFile();
     ProjectEntry testProject = new ProjectEntry();
 
     @Before
     public void setUp() throws Exception {
         service.projectFileStorage = projectFileStorage;
+        service.xmlSchemaExtractor = xmlSchemaExtractor;
     }
 
     @After
     public void tearDown() throws Exception {
         verifyNoMoreInteractions(projectFileStorage);
+        verifyNoMoreInteractions(xmlSchemaExtractor);
     }
 
     @Test
@@ -55,6 +64,21 @@ public class ProjectFileServiceImplTest {
         service.saveOrUpdate(testFile, testProject);
 
         verify(projectFileStorage).save(testFile, testProject);
+        verify(xmlSchemaExtractor).extractXmlSchema(null);
+    }
+
+    @Test
+    public void whenSavingFileXmlSchemaWillBeExtractedAndSet() throws Exception {
+        String expectedXmlSchema = "expected-xml-schema";
+        when(xmlSchemaExtractor.extractXmlSchema(any(byte[].class))).thenReturn(expectedXmlSchema);
+        testFile.setFile(new UploadedFile("test.xml", "dummy-content".getBytes()));
+        testFile.setFileType(ProjectFileType.FILE);
+
+        service.saveOrUpdate(testFile, testProject);
+
+        assertThat(testFile.getXmlSchema(), equalTo(expectedXmlSchema));
+        verify(projectFileStorage).save(testFile, testProject);
+        verify(xmlSchemaExtractor).extractXmlSchema(any(byte[].class));
     }
 
     @Test(expected = RuntimeException.class)
