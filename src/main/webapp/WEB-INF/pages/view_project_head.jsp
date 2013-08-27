@@ -25,10 +25,9 @@
         });
     }
 
-    function view_file(popupElement) {
+    function view_file(popupElement, width) {
         popupElement.dialog({
-            height: 500,
-            width: 500,
+            width: width,
             modal: true
         });
     }

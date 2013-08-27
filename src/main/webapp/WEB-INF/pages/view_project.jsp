@@ -13,92 +13,101 @@
 <h1>Project: ${projectEntry.projectId}</h1>
 <p><strong>${projectEntry.description}</strong> (created <fmt:formatDate pattern="dd MMM yyyy" value="${projectEntry.created}" />)</p>
 
-<h2>Project files</h2>
 <c:if test="${empty allProjectFiles}">
+    <h2>Project files</h2>
     <div>No project files yet.</div>
 </c:if>
 
-
-<table class="datatable">
-    <thead>
-        <tr>
-            <th>Title</th>
-            <th>File</th>
-            <th>Last modified</th>
-            <th>Active</th>
-            <th>Main form</th>
-            <th>Username</th>
-        </tr>
-    </thead>
-    <tbody>
-    <c:forEach items="${allProjectFiles}" var="projectFile">
-        <c:set value="view-file-${projectFile.id}" var="popup_id"/>
-        <tr>
-            <td>${projectFile.title}</td>
-            <td><a href="#" onclick="view_file($('#${popup_id}'))">${projectFile.fileName}</a></td>
-            <td><fmt:formatDate pattern="dd MMM yyyy HH:mm:ss" value="${projectFile.updated}" /></td>
-            <td><input type="checkbox" checked="${projectFile.active}" disabled="disabled"/></td>
-            <td><input type="checkbox" checked="${projectFile.mainForm}" disabled="disabled"/></td>
-            <td>${projectFile.userName}</td>
-        </tr>
-        <tr class="dialogTemplate">
-            <td colspan="5">
-                <div title="File for project '${projectEntry.projectId}'" id="view-file-${projectFile.id}" >
-                    <table class="datatable">
-                        <tr>
-                            <th scope="row">Title</th>
-                            <td>${projectFile.title}</td>
-                        </tr>
-                        <tr>
-                            <th scope="row">File</th>
-                            <td><a href="<c:url value="/download/project/${projectEntry.projectId}/file/${projectFile.id}"/>">${projectFile.fileName}</a></td>
-                        </tr>
-                        <tr>
-                            <th scope="row">Last modified</th>
-                            <td><fmt:formatDate pattern="dd MMM yyyy HH:mm:ss" value="${projectFile.updated}" /></td>
-                        </tr>
-                        <tr>
-                            <th scope="row">Description</th>
-                            <td>${projectFile.description}</td>
-                        </tr>
-                        <tr>
-                            <th scope="row">Xml Schema</th>
-                            <td>${projectFile.xmlSchema}</td>
-                        </tr>
-                        <tr>
-                            <th scope="row">Empty instance URL</th>
-                            <td>${projectFile.emptyInstanceUrl}</td>
-                        </tr>
-                        <tr>
-                            <th scope="row">New xml file name</th>
-                            <td>${projectFile.newXmlFileName}</td>
-                        </tr>
-                        <tr>
-                            <th scope="row">Active</th>
-                            <td>${projectFile.active}</td>
-                        </tr>
-                        <tr>
-                            <th scope="row">Main form</th>
-                            <td>${projectFile.mainForm}</td>
-                        </tr>
-                        <tr>
-                            <th scope="row">Username</th>
-                            <td>${projectFile.userName}</td>
-                        </tr>
-                        <tr>
-                            <th scope="row">Actions</th>
-                            <td>
-                                <a href="<c:url value="/projects/${projectEntry.projectId}/webform/edit/?fileId=${projectFile.id}"/>">Edit</a>
-                                <a href="#" onclick="removeFile('${projectFile.id}');">Remove</a>
-                            </td>
-                        </tr>
-                    </table>
-                </div>
-            </td>
-        </tr>
-    </c:forEach>
-    </tbody>
-</table>
+<c:forEach var="projectFilesEntry" items="${allProjectFiles}">
+    <c:set var="isWebForm" value="${projectFilesEntry.key == 'WEBFORM'}"/>
+    <h2>Project <c:out value="${isWebForm ? 'webforms' : 'files'}"/></h2>
+    <table class="datatable">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>File</th>
+                <th>Last modified</th>
+                <c:if test="${isWebForm}">
+                    <th>Active</th>
+                    <th>Main form</th>
+                </c:if>
+                <th>Username</th>
+            </tr>
+        </thead>
+        <tbody>
+        <c:forEach var="projectFile" items="${projectFilesEntry.value}">
+            <c:set value="view-file-${projectFile.id}" var="popup_id"/>
+            <tr>
+                <td>${projectFile.title}</td>
+                <td><a href="#" onclick="view_file($('#${popup_id}'), <c:out value="${isWebForm ? 500 : 300}"/>)">${projectFile.fileName}</a></td>
+                <td><fmt:formatDate pattern="dd MMM yyyy HH:mm:ss" value="${projectFile.updated}" /></td>
+                <c:if test="${isWebForm}">
+                    <td><input type="checkbox" checked="${projectFile.active}" disabled="disabled"/></td>
+                    <td><input type="checkbox" checked="${projectFile.mainForm}" disabled="disabled"/></td>
+                </c:if>
+                <td>${projectFile.userName}</td>
+            </tr>
+            <tr class="dialogTemplate">
+                <td colspan="5">
+                    <div title="File for project '${projectEntry.projectId}'" id="view-file-${projectFile.id}" >
+                        <table class="datatable">
+                            <tr>
+                                <th scope="row">Title</th>
+                                <td>${projectFile.title}</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">File</th>
+                                <td><a href="<c:url value="/download/project/${projectEntry.projectId}/file/${projectFile.id}"/>">${projectFile.fileName}</a></td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Last modified</th>
+                                <td><fmt:formatDate pattern="dd MMM yyyy HH:mm:ss" value="${projectFile.updated}" /></td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Description</th>
+                                <td>${projectFile.description}</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Xml Schema</th>
+                                <td>${projectFile.xmlSchema}</td>
+                            </tr>
+                            <c:if test="${isWebForm}">
+                                <tr>
+                                    <th scope="row">Empty instance URL</th>
+                                    <td>${projectFile.emptyInstanceUrl}</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">New xml file name</th>
+                                    <td>${projectFile.newXmlFileName}</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">Active</th>
+                                    <td>${projectFile.active}</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">Main form</th>
+                                    <td>${projectFile.mainForm}</td>
+                                </tr>
+                            </c:if>
+                            <tr>
+                                <th scope="row">Username</th>
+                                <td>${projectFile.userName}</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Actions</th>
+                                <td>
+                                    <a href="<c:url value="/projects/${projectEntry.projectId}/webform/edit/?fileId=${projectFile.id}"/>">Edit</a>
+                                    <a href="#" onclick="removeFile('${projectFile.id}');">Remove</a>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </td>
+            </tr>
+        </c:forEach>
+        </tbody>
+    </table>
+</c:forEach>
 
 <div id="remove-file" title="Remove project file?" class="dialogTemplate">
     <p>This file will be removed. Are you sure?</p>
