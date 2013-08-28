@@ -60,7 +60,7 @@ public class PublicPageController {
      * Service for user uploaded files.
      */
     @Autowired
-    private UserFileService userFileService;
+    UserFileService userFileService;
     /**
      * File conversion service.
      */
@@ -76,7 +76,7 @@ public class PublicPageController {
      * WebForms storage.
      */
     @Autowired
-    private ProjectFileService projectFileService;
+    ProjectFileService projectFileService;
 
     /**
      * Action to be performed on http GET method and path '/'.
@@ -168,7 +168,7 @@ public class PublicPageController {
      */
     @RequestMapping(value = "/startWebform")
     public String startWebFormSaveFile(@RequestParam int formId, HttpServletRequest request) {
-        ProjectFile webForm = projectFileService.getById(formId);
+        ProjectFile webForm = projectFileService.getById(formId); //TODO no file content here
         UserFile file = new UserFile();
         file.setName(StringUtils.defaultIfEmpty(webForm.getNewXmlFileName(), "new_form.xml"));
         file.setXmlSchema(webForm.getXmlSchema());
