@@ -113,12 +113,14 @@ public class WebFormStorageTest {
 
     @Test
     public void getAllReturnsRequiredFieldsAndNotUploadedFile() throws Exception {
-        save(webFormWithAllFieldsSet());
+        ProjectFile projectFile = webFormWithAllFieldsSet();
+        save(projectFile);
 
         Collection<ProjectFile> allActiveWebForms = webFormStorage.getAllActiveWebForms();
         ProjectFile foundWebform = allActiveWebForms.iterator().next();
-        assertNotNull(foundWebform.getId());
-        assertNotNull(foundWebform.getTitle());
+        assertTrue(foundWebform.getId() > 0);
+        assertThat(foundWebform.getTitle(), equalTo(projectFile.getTitle()));
+        assertThat(foundWebform.getXmlSchema(), equalTo(projectFile.getXmlSchema()));
 
         assertNull(foundWebform.getFileContent());
     }

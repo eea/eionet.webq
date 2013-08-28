@@ -97,11 +97,12 @@
                         Updated:  <fmt:formatDate pattern="dd MMM yyyy HH:mm:ss" value="${file.updated}" />
                     </td>
                     <td>
-                        <!-- FIXME - make the XML Schema check dynamic when Webforms repo is implemented -->
-                        <c:if test="${file.xmlSchema eq 'http://biodiversity.eionet.europa.eu/schemas/bernconvention/derogations.xsd'}">
-                            <strong><a href="<c:url value="/forms/habides-factsheet-v4.xhtml?instance=${downloadLink}&amp;fileId=${file.id}&amp;base_uri=${pageContext.request.contextPath}"/>">Edit
-                                with web form</a></strong><br/>
-                        </c:if>
+                        <c:forEach var="webForm" items="${allWebForms}">
+                            <c:if test="${file.xmlSchema eq webForm.xmlSchema}">
+                                <strong><a href="<c:url value="/xform/?formId=${webForm.id}&instance=${downloadLink}&amp;fileId=${file.id}&amp;base_uri=${pageContext.request.contextPath}"/>">Edit
+                                    with '${webForm.title}' web form</a></strong><br/>
+                            </c:if>
+                        </c:forEach>
                         <c:if test="${not empty file.availableConversions}">
                             View file as:
                             <ul>
