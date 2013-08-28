@@ -45,7 +45,8 @@ import java.util.Collection;
  */
 @Repository
 @Qualifier("project-files")
-public class ProjectFileStorageImpl extends AbstractDao<ProjectFile> implements FileStorage<ProjectEntry, ProjectFile> {
+public class ProjectFileStorageImpl extends AbstractDao<ProjectFile>
+        implements FileStorage<ProjectEntry, ProjectFile>, WebFormStorage {
     /**
      * Jdbc template for accessing data storage.
      */
@@ -145,6 +146,11 @@ public class ProjectFileStorageImpl extends AbstractDao<ProjectFile> implements 
     public ProjectFile fileContentBy(int id, ProjectEntry projectEntry) {
         return template.queryForObject(sqlProperties.getProperty("select.project.file.content"), rowMapper(), id,
                 projectEntry.getId());
+    }
+
+    @Override
+    public Collection<ProjectFile> getAllActiveWebForms() {
+        return template.query(sqlProperties.getProperty("select.all.active.webforms"), rowMapper());
     }
 
     @Override
