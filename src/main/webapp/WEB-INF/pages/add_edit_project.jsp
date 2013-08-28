@@ -4,16 +4,20 @@
 <h1>Save project</h1>
 <f:form modelAttribute="projectEntry" action="save" method="post">
     <f:errors path="*" element="div" cssClass="error-msg"/>
-    <table>
+    <table class="datatable">
         <tr>
-            <td>
+            <th scope="row">
                 <label for="projectId">Project id</label>
+            </th>
+            <td>
                 <f:input id="projectId" path="projectId" type="text"/>
             </td>
         </tr>
         <tr>
-            <td>
+            <th scope="row">
                 <label for="label">Project label</label>
+            </th>
+            <td>
                 <f:input id="label" path="description" size="35"/>
             </td>
         </tr>

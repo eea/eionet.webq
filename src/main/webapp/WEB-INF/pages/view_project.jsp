@@ -7,7 +7,7 @@
         <li><span><a title="Edit project" href="<c:url value="/projects/edit?projectId=${projectEntry.projectId}"/>">Edit project</a></span></li>
         <li><span><a href="#" onclick="removeProject();">Remove project</a></span></li>
         <li><span><a title="Add webform" href="<c:url value="/projects/${projectEntry.projectId}/webform/add"/>">Add webform</a></span></li>
-        <li><span><a title="Add webform" href="<c:url value="/projects/${projectEntry.projectId}/file/add"/>">Add file</a></span></li>
+        <li><span><a title="Add file" href="<c:url value="/projects/${projectEntry.projectId}/file/add"/>">Add file</a></span></li>
     </ul>
 </div>
 <h1>Project: ${projectEntry.projectId}</h1>
@@ -42,7 +42,7 @@
             <tr>
                 <td><input type="checkbox" name="fileId" value="${projectFile.id}"/></td>
                 <td>${projectFile.title}</td>
-                <td><a href="#" onclick="view_file($('#${popup_id}'), <c:out value="${isWebForm ? 500 : 300}"/>)">${projectFile.fileName}</a></td>
+                <td><a href="#" onclick="view_file($('#${popup_id}'), <c:out value="${isWebForm ? 500 : 400}"/>)">${projectFile.fileName}</a></td>
                 <td><fmt:formatDate pattern="dd MMM yyyy HH:mm:ss" value="${projectFile.updated}" /></td>
                 <c:if test="${isWebForm}">
                     <td><input type="checkbox" checked="${projectFile.active}" disabled="disabled"/></td>
