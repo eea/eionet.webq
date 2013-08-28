@@ -26,8 +26,10 @@ import eionet.webq.dto.UploadForm;
 import eionet.webq.dto.UserFile;
 import eionet.webq.dto.XmlSaveResult;
 import eionet.webq.service.ConversionService;
+import eionet.webq.service.ProjectFileService;
 import eionet.webq.service.UserFileService;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -39,8 +41,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Collection;
 
 /**
@@ -67,6 +72,11 @@ public class PublicPageController {
      */
     @Autowired
     private WebFormStorage webFormStorage;
+    /**
+     * WebForms storage.
+     */
+    @Autowired
+    private ProjectFileService projectFileService;
 
     /**
      * Action to be performed on http GET method and path '/'.
@@ -149,23 +159,43 @@ public class PublicPageController {
     }
 
     /**
-     * Open selected webform. The action stores an empty XML file in user XML files area.
+     * This is STEP 1 in generating new WebForm.
+     * New file with form parameters will be saved to storage.
      *
-     * @param form webform path to open
+     * @param formId webform id
      * @param request current request
      * @return redirection URL of webform with correct parameters
      */
     @RequestMapping(value = "/startWebform")
-    public String saveXml(@RequestParam String form, HttpServletRequest request) {
+    public String startWebFormSaveFile(@RequestParam int formId, HttpServletRequest request) {
+        ProjectFile webForm = projectFileService.getById(formId);
         UserFile file = new UserFile();
-        // FIXME read the following properties from project file storage
-        file.setName("new.xml");
-        file.setXmlSchema("http://biodiversity.eionet.europa.eu/schemas/bernconvention/derogations.xsd");
+        file.setName(StringUtils.defaultIfEmpty(webForm.getNewXmlFileName(), "new_form.xml"));
+        file.setXmlSchema(webForm.getXmlSchema());
         // TODO load XML content from the project_file.empty_instance_url field, if exists.
-
         int fileId = userFileService.save(file);
+        return "redirect:/xform/?formId=" + webForm.getId() + "&fileId=" + fileId + "&base_uri=" + request.getContextPath();
+    }
 
-        return "redirect:" + form + "?fileId=" + fileId + "&base_uri=" + request.getContextPath();
+    /**
+     * This is STEP 2 in generating new WebForm.
+     * Form content will be loaded from storage and written to response.
+     * After that response must be handled by {@link de.betterform.agent.web.filter.XFormsFilter}.
+     * Filter mapping in web.xml should match with mapping of this method.
+     *
+     * @param formId webform id
+     * @param response current response
+     * @throws IOException in case if writing of xForm to response failed
+     */
+    @RequestMapping(value = "/xform")
+    public void startWebFormWriteFormToResponse(@RequestParam int formId, HttpServletResponse response) throws IOException {
+        ProjectFile webForm = projectFileService.getById(formId);
+        byte[] fileContent = webForm.getFileContent();
+        response.setContentLength(fileContent.length);
+        response.setContentType("application/xhtml+html");
+        OutputStream outputStream = response.getOutputStream();
+        IOUtils.write(fileContent, outputStream);
+        outputStream.flush();
     }
 
     /**

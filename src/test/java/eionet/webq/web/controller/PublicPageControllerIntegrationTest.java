@@ -35,6 +35,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.web.servlet.ResultActions;
@@ -66,12 +67,15 @@ public class PublicPageControllerIntegrationTest extends AbstractContextControll
     RestOperations operations;
     @Autowired
     ProjectFileService projectFileService;
+    @Autowired
+    JdbcTemplate jdbcTemplate;
 
     @Before
     public void mockConversionServiceApiCall() {
         ListConversionResponse listConversionResponse = new ListConversionResponse();
         listConversionResponse.setConversions(new ArrayList<Conversion>());
         when(operations.getForObject(anyString(), eq(ListConversionResponse.class), any())).thenReturn(listConversionResponse);
+        jdbcTemplate.execute("DELETE FROM project_file");
     }
 
     @Test

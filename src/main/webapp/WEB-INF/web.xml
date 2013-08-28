@@ -7,7 +7,7 @@
 
     <display-name>WebQ Application</display-name>
 
-    <!--  Spring servlets -->
+    <!--  Spring servlet -->
     <servlet>
         <servlet-name>spring-mvc-dispatcher</servlet-name>
         <servlet-class>
@@ -19,6 +19,7 @@
         </init-param>
         <load-on-startup>1</load-on-startup>
     </servlet>
+
     <servlet-mapping>
         <servlet-name>spring-mvc-dispatcher</servlet-name>
         <url-pattern>/</url-pattern>
@@ -40,6 +41,10 @@
     <filter-mapping>
         <filter-name>XFormsFilter</filter-name>
         <url-pattern>*.xhtml</url-pattern>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>XFormsFilter</filter-name>
+        <url-pattern>/xform/*</url-pattern>
     </filter-mapping>
 <!--
     <filter-mapping>
@@ -185,32 +190,6 @@
         <servlet-name>bfEditor</servlet-name>
         <url-pattern>/bfEditor/*</url-pattern>
     </servlet-mapping>
-    <!--
-    <servlet>
-        <servlet-name>foo</servlet-name>
-        <servlet-class>org.apache.catalina.servlets.DefaultServlet</servlet-class>
-        <init-param>
-            <param-name>debug</param-name>
-            <param-value>0</param-value>
-        </init-param>
-        <init-param>
-            <param-name>listings</param-name>
-            <param-value>false</param-value>
-        </init-param>
-        <init-param>
-            <param-name>readonly</param-name>
-            <param-value>false</param-value>
-        </init-param>
-        <load-on-startup>1</load-on-startup>
-    </servlet>
--->
-
-<!--
-    <servlet-mapping>
-        <servlet-name>foo</servlet-name>
-        <url-pattern>/</url-pattern>
-    </servlet-mapping>
--->
 
 
     <!--
