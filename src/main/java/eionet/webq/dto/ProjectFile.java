@@ -1,5 +1,3 @@
-package eionet.webq.dto;
-
 /*
  * The contents of this file are subject to the Mozilla Public
  * License Version 1.1 (the "License"); you may not use this file
@@ -20,6 +18,7 @@ package eionet.webq.dto;
  * Contributor(s):
  *        Anton Dmitrijev
  */
+package eionet.webq.dto;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
@@ -237,5 +236,26 @@ public class ProjectFile {
 
     public void setFileType(ProjectFileType fileType) {
         this.fileType = fileType;
+    }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("ProjectFile{");
+        sb.append("id=").append(id);
+        sb.append(", projectId=").append(projectId);
+        sb.append(", title='").append(title).append('\'');
+        sb.append(", file=").append(file);
+        sb.append(", newXmlFileName='").append(newXmlFileName).append('\'');
+        sb.append(", emptyInstanceUrl='").append(emptyInstanceUrl).append('\'');
+        sb.append(", description='").append(description).append('\'');
+        sb.append(", xmlSchema='").append(xmlSchema).append('\'');
+        sb.append(", active=").append(active);
+        sb.append(", mainForm=").append(mainForm);
+        sb.append(", fileType=").append(fileType);
+        sb.append(", userName='").append(userName).append('\'');
+        sb.append(", created=").append(created);
+        sb.append(", updated=").append(updated);
+        sb.append('}');
+        return sb.toString();
     }
 }

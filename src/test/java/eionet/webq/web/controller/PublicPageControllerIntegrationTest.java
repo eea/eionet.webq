@@ -22,8 +22,14 @@ package eionet.webq.web.controller;
 
 import eionet.webq.dto.Conversion;
 import eionet.webq.dto.ListConversionResponse;
+import eionet.webq.dto.ProjectEntry;
+import eionet.webq.dto.ProjectFile;
+import eionet.webq.dto.ProjectFileType;
 import eionet.webq.dto.UserFile;
+import eionet.webq.service.ProjectFileService;
 import eionet.webq.web.AbstractContextControllerTests;
+import org.hamcrest.BaseMatcher;
+import org.hamcrest.Description;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -35,6 +41,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.web.client.RestOperations;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
@@ -57,6 +64,8 @@ public class PublicPageControllerIntegrationTest extends AbstractContextControll
 
     @Autowired
     RestOperations operations;
+    @Autowired
+    ProjectFileService projectFileService;
 
     @Before
     public void mockConversionServiceApiCall() {
@@ -117,8 +126,39 @@ public class PublicPageControllerIntegrationTest extends AbstractContextControll
         String[] fileIds = {String.valueOf(it.next().getId()), String.valueOf(it.next().getId())};
         request(postWithMockSession("/remove/files").param("selectedUserFile", fileIds));
 
-        List<UserFile> userFiles = extractUserFilesFromMvcResult(request(get("/").session(mockHttpSession)).andReturn());
+        List<UserFile> userFiles = extractUserFilesFromMvcResult(requestIndexPage().andReturn());
         assertThat(userFiles.size(), equalTo(0));
+    }
+
+    @Test
+    public void activeWebFormsMustBeAccessibleInModel() throws Exception {
+        ProjectEntry project = new ProjectEntry();
+        final ProjectFile testFile = new ProjectFile();
+        testFile.setActive(true);
+        testFile.setMainForm(true);
+        testFile.setXmlSchema("xml-schema");
+        testFile.setTitle("test-title");
+        testFile.setFileType(ProjectFileType.WEBFORM);
+
+        projectFileService.saveOrUpdate(testFile, project);
+
+        requestIndexPage().andExpect(model().attribute("allWebForms", new BaseMatcher<Collection<ProjectFile>>() {
+            @Override
+            public boolean matches(Object o) {
+                @SuppressWarnings("unchecked") Collection<ProjectFile> files = (Collection<ProjectFile>) o;
+                ProjectFile file = files.iterator().next();
+                return files.size() == 1 && file.getId() > 0 && file.getTitle().equals(testFile.getTitle());
+            }
+
+            @Override
+            public void describeTo(Description description) {
+                description.appendText("Expected 1 element with id greater than 0 and title=" + testFile.getTitle());
+            }
+        }));
+    }
+
+    private ResultActions requestIndexPage() throws Exception {
+        return request(get("/").session(mockHttpSession));
     }
 
     private UserFile uploadFileAndTakeFirstUploadedFile() throws Exception {

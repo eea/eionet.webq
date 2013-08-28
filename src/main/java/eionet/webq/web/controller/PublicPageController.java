@@ -20,6 +20,7 @@
  */
 package eionet.webq.web.controller;
 
+import eionet.webq.dao.WebFormStorage;
 import eionet.webq.dto.ProjectFile;
 import eionet.webq.dto.UploadForm;
 import eionet.webq.dto.UserFile;
@@ -40,7 +41,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.io.InputStream;
-import java.util.Arrays;
 import java.util.Collection;
 
 /**
@@ -63,6 +63,12 @@ public class PublicPageController {
     private ConversionService conversionService;
 
     /**
+     * WebForms storage.
+     */
+    @Autowired
+    private WebFormStorage webFormStorage;
+
+    /**
      * Action to be performed on http GET method and path '/'.
      *
      * @param model holder for model attributes
@@ -77,13 +83,6 @@ public class PublicPageController {
             model.addAttribute(uploadForm, new UploadForm());
         }
         return "index";
-    }
-
-    private Collection<ProjectFile> allWebForms() {
-        ProjectFile file = new ProjectFile();
-        file.setId(1);
-        file.setTitle("test");
-        return Arrays.asList(file);
     }
 
     /**
@@ -180,5 +179,14 @@ public class PublicPageController {
             userFile.setAvailableConversions(conversionService.conversionsFor(userFile.getXmlSchema()));
         }
         return userFiles;
+    }
+
+    /**
+     * Loads all active webforms.
+     *
+     * @return collection of active webforms.
+     */
+    private Collection<ProjectFile> allWebForms() {
+        return webFormStorage.getAllActiveWebForms();
     }
 }
