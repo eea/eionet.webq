@@ -28,9 +28,8 @@ import eionet.webq.dto.UserFile;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 import org.springframework.aop.framework.Advised;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.Cache;
@@ -102,26 +101,22 @@ public class ConversionServiceImplTest {
         verify(restOperations, times(1)).getForObject(anyString(), eq(ListConversionResponse.class), eq(xmlSchema));
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     public void convertRequestShouldContainRequiredAttributes() throws Exception {
         final byte[] testContent = "test content".getBytes();
         final int convertId = 1;
-        Answer<ResponseEntity<byte[]>> checkPostParameters = new Answer<ResponseEntity<byte[]>>() {
-            @Override
-            public ResponseEntity<byte[]> answer(InvocationOnMock invocationOnMock) throws Throwable {
-                @SuppressWarnings("unchecked")
-                MultiValueMap<String, Object> postParameters = (MultiValueMap<String, Object>) invocationOnMock.getArguments()[1];
-                assertPostParametersAreCorrect(postParameters, testContent, convertId);
-                return new ResponseEntity<byte[]>("response".getBytes(), HttpStatus.OK);
-            }
-        };
-        when(restOperations.postForEntity(anyString(), any(), eq(byte[].class))).thenAnswer(checkPostParameters);
 
+        when(restOperations.postForEntity(anyString(), any(), eq(byte[].class)))
+                .thenReturn(new ResponseEntity<byte[]>("response".getBytes(), HttpStatus.OK));
         UserFile userFile = new UserFile();
         userFile.setContent(testContent);
         conversionService.convert(userFile, 1);
 
-        verify(restOperations, times(1)).postForEntity(anyString(), any(), eq(byte[].class));
+        ArgumentCaptor<MultiValueMap> postParameters = ArgumentCaptor.forClass(MultiValueMap.class);
+        verify(restOperations).postForEntity(anyString(), postParameters.capture(), eq(byte[].class));
+
+        assertPostParametersAreCorrect(((MultiValueMap<String, Object>)postParameters.getValue()), testContent, convertId);
     }
 
     @Test(expected = RuntimeException.class)
