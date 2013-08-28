@@ -50,7 +50,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-public class FileUploadControllerIntegrationTest extends AbstractContextControllerTests {
+public class PublicPageControllerIntegrationTest extends AbstractContextControllerTests {
     private final String FILE_CONTENT_STRING = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
             + "<foo xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:noNamespaceSchemaLocation=\"bar\" />";
     private final byte[] FILE_CONTENT = FILE_CONTENT_STRING.getBytes();

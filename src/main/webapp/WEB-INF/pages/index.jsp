@@ -41,7 +41,9 @@
             <p>
                 <label for="selectFile">1. Select the web form</label><br/>
                 <select id="selectFile" name="selectFile" title="Select new webform">
-                    <option value="<c:url value="/startWebform?form=/forms/habides-factsheet-v4.xhtml"/>">Habides factsheet</option>
+                    <c:forEach var="form" items="${allWebForms}">
+                        <option value="<c:url value="/startWebform?form=${form.id}"/>">${form.title}</option>
+                    </c:forEach>
                 </select>
             </p>
             <p>
