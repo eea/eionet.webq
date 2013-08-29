@@ -27,7 +27,9 @@ import eionet.webq.service.UserFileService;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Mockito;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 
@@ -41,14 +43,16 @@ import static org.mockito.Mockito.when;
 public class PublicPageControllerTest {
 
     public static final int WEB_FORM_ID = 1;
+    @Mock
+    private ProjectFileService projectFileService;
+    @Mock
+    private UserFileService userFileService;
+    @InjectMocks
     private PublicPageController publicPageController = new PublicPageController();
-    private ProjectFileService projectFileService = Mockito.mock(ProjectFileService.class);
-    private UserFileService userFileService = Mockito.mock(UserFileService.class);
 
     @Before
     public void setUp() throws Exception {
-        publicPageController.projectFileService = projectFileService;
-        publicPageController.userFileService = userFileService;
+        MockitoAnnotations.initMocks(this);
     }
 
     @Test
