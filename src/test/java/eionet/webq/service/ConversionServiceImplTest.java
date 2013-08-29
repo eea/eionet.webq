@@ -25,12 +25,11 @@ import eionet.webq.dto.Conversion;
 import eionet.webq.dto.ListConversionResponse;
 import eionet.webq.dto.UploadedFile;
 import eionet.webq.dto.UserFile;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Mockito;
-import org.springframework.aop.framework.Advised;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.Cache;
 import org.springframework.http.HttpEntity;
@@ -54,7 +53,7 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -65,18 +64,19 @@ public class ConversionServiceImplTest {
     private ConversionService conversionService;
     @Autowired
     private CacheCleaner cacheCleaner;
-
+    @Autowired
     private RestOperations restOperations;
     private Cache conversionsCache;
     private final String xmlSchema = "schema.xsd";
 
     @Before
     public void prepare() throws Exception {
-        restOperations = Mockito.mock(RestOperations.class);
-        ConversionServiceImpl conversionServiceImpl =
-                (ConversionServiceImpl) ((Advised) conversionService).getTargetSource().getTarget();
-        conversionServiceImpl.restOperations = restOperations;
         conversionsCache = cacheCleaner.cleanConversionsCacheAndReturnIt();
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        reset(restOperations);
     }
 
     @Test
@@ -98,7 +98,7 @@ public class ConversionServiceImplTest {
         Collection<Object> entries = (Collection<Object>) conversionsCache.get(xmlSchema).get();
 
         assertThat(entries.size(), equalTo(1));
-        verify(restOperations, times(1)).getForObject(anyString(), eq(ListConversionResponse.class), eq(xmlSchema));
+        verify(restOperations).getForObject(anyString(), eq(ListConversionResponse.class), eq(xmlSchema));
     }
 
     @SuppressWarnings("unchecked")
