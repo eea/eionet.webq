@@ -122,9 +122,11 @@ public class PublicPageController {
      * @return view name
      */
     @RequestMapping(value = "/remove/files")
-    public String removeUserFiles(@RequestParam int[] selectedUserFile, Model model) {
-        userFileService.removeFilesById(selectedUserFile);
-        model.addAttribute("message", "Selected files removed successfully");
+    public String removeUserFiles(@RequestParam(required = false) int[] selectedUserFile, Model model) {
+        if (selectedUserFile != null) {
+            userFileService.removeFilesById(selectedUserFile);
+            model.addAttribute("message", "Selected files removed successfully");
+        }
         return welcome(model);
     }
 

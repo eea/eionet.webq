@@ -135,6 +135,15 @@ public class PublicPageControllerIntegrationTest extends AbstractContextControll
     }
 
     @Test
+    public void ifNoSelectedUserFilesParameterSpecifiedDoNothing() throws Exception {
+        uploadFile(createMockMultipartFile("file"));
+
+        request(postWithMockSession("/remove/files"));
+
+        assertThat(extractUserFilesFromMvcResult(requestIndexPage().andReturn()).size(), equalTo(1));
+    }
+
+    @Test
     public void activeWebFormsMustBeAccessibleInModel() throws Exception {
         ProjectEntry project = new ProjectEntry();
         final ProjectFile testFile = new ProjectFile();
