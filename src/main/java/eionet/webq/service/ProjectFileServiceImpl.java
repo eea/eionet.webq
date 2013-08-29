@@ -25,6 +25,7 @@ import eionet.webq.dao.FileStorage;
 import eionet.webq.dto.ProjectEntry;
 import eionet.webq.dto.ProjectFile;
 import eionet.webq.dto.ProjectFileType;
+import eionet.webq.dto.util.ProjectFileInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -49,8 +50,7 @@ public class ProjectFileServiceImpl implements ProjectFileService {
 
     @Override
     public void saveOrUpdate(ProjectFile file, ProjectEntry project) {
-        boolean update = file.getId() > 0;
-        if (update) {
+        if (!ProjectFileInfo.isNew(file)) {
             projectFileStorage.update(file, project);
             return;
         }

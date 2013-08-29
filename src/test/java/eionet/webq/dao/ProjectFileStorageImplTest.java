@@ -148,11 +148,11 @@ public class ProjectFileStorageImplTest {
     }
 
     @Test
-    public void doNotAllowToOverwriteFileWithNull() throws Exception {
+    public void doNotAllowToOverwriteFileWithEmptyFile() throws Exception {
         addOneFile();
         ProjectFile beforeUpdate = getUploadedFileAndAssertThatItIsTheOnlyOne();
 
-        beforeUpdate.setFileContent(null);
+        beforeUpdate.setFileContent(new byte[0]);
         projectFileStorage.update(beforeUpdate, projectEntry);
 
         ProjectFile projectFile = projectFileStorage.fileById(beforeUpdate.getId());

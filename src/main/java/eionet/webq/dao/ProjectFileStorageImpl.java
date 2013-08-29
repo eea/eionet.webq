@@ -24,6 +24,7 @@ import eionet.webq.dao.util.AbstractLobPreparedStatementCreator;
 import eionet.webq.dto.ProjectEntry;
 import eionet.webq.dto.ProjectFile;
 import eionet.webq.dto.ProjectFileType;
+import eionet.webq.dto.util.ProjectFileInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
@@ -93,9 +94,8 @@ public class ProjectFileStorageImpl extends AbstractDao<ProjectFile>
 
     @Override
     public void update(final ProjectFile projectFile, ProjectEntry projectEntry) {
-        final boolean updateFile = projectFile.getFileContent() != null;
-        String updateStatement =
-                updateFile ? sqlProperties.getProperty("update.project.file") : sqlProperties
+        final boolean updateFile = !ProjectFileInfo.fileIsEmpty(projectFile);
+        String updateStatement = updateFile ? sqlProperties.getProperty("update.project.file") : sqlProperties
                         .getProperty("update.project.file.without.file");
         template.execute(updateStatement, new AbstractLobCreatingPreparedStatementCallback(
                 lobHandler) {

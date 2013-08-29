@@ -23,6 +23,7 @@ package eionet.webq.web.controller;
 import eionet.webq.dto.ProjectEntry;
 import eionet.webq.dto.ProjectFile;
 import eionet.webq.dto.ProjectFileType;
+import eionet.webq.dto.util.ProjectFileInfo;
 import eionet.webq.service.ProjectFileService;
 import eionet.webq.service.ProjectService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -162,11 +163,10 @@ public class ProjectsController {
     @RequestMapping(value = "/{projectFolderId}/webform/save")
     public String newWebForm(@PathVariable String projectFolderId, @Valid @ModelAttribute ProjectFile projectFile,
             BindingResult bindingResult, Model model) {
-        ProjectEntry currentProject = projectService.getByProjectId(projectFolderId);
-        boolean update = projectFile.getId() > 0;
-        if (!update && projectFile.getFileContent() == null) {
+        if (ProjectFileInfo.isNew(projectFile) && ProjectFileInfo.fileIsEmpty(projectFile)) {
             bindingResult.rejectValue("file", "webform.file.null");
         }
+        ProjectEntry currentProject = projectService.getByProjectId(projectFolderId);
         if (bindingResult.hasErrors()) {
             return addOrEditProjectFile(currentProject, projectFile, model);
         }
