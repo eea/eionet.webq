@@ -32,6 +32,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
+import java.util.Collection;
+
 /**
  */
 @Service
@@ -83,6 +85,11 @@ public class ProjectFileServiceImpl implements ProjectFileService {
     @Override
     public void remove(ProjectEntry project, int... id) {
         projectFileStorage.remove(project, id);
+    }
+
+    @Override
+    public Collection<ProjectFile> allFilesFor(ProjectEntry project) {
+        return projectFileStorage.allFilesFor(project);
     }
 
     /**

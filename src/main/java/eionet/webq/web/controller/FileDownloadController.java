@@ -20,16 +20,14 @@
  */
 package eionet.webq.web.controller;
 
-import eionet.webq.dao.FileStorage;
-import eionet.webq.dto.ProjectEntry;
 import eionet.webq.dto.ProjectFile;
 import eionet.webq.dto.UserFile;
 import eionet.webq.service.ConversionService;
+import eionet.webq.service.ProjectFileService;
 import eionet.webq.service.ProjectService;
 import eionet.webq.service.UserFileService;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -64,8 +62,7 @@ public class FileDownloadController {
      * Service for getting project file content from storage.
      */
     @Autowired
-    @Qualifier("project-files")
-    private FileStorage<ProjectEntry, ProjectFile> projectFiles;
+    private ProjectFileService projectFileService;
     /**
      * File conversion service.
      */
@@ -94,7 +91,7 @@ public class FileDownloadController {
      */
     @RequestMapping(value = "/project/{projectId}/file/{fileId}")
     public void downloadProjectFile(@PathVariable String projectId, @PathVariable int fileId, HttpServletResponse response) {
-        ProjectFile projectFile = projectFiles.fileContentBy(fileId, projectService.getByProjectId(projectId));
+        ProjectFile projectFile = projectFileService.fileContentBy(fileId, projectService.getByProjectId(projectId));
         addXmlFileHeaders(response, encodeAsUrl(projectFile.getFileName()));
         writeToResponse(response, projectFile.getFileContent());
     }

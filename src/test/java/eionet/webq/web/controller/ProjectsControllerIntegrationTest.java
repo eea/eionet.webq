@@ -1,17 +1,16 @@
 package eionet.webq.web.controller;
 
-import eionet.webq.dao.FileStorage;
 import eionet.webq.dao.ProjectFolders;
 import eionet.webq.dto.ProjectEntry;
 import eionet.webq.dto.ProjectFile;
 import eionet.webq.dto.ProjectFileType;
 import eionet.webq.dto.UploadedFile;
+import eionet.webq.service.ProjectFileService;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
@@ -62,8 +61,7 @@ public class ProjectsControllerIntegrationTest extends AbstractProjectsControlle
     @Autowired
     private ProjectFolders projectFolders;
     @Autowired
-    @Qualifier("project-files")
-    private FileStorage<ProjectEntry, ProjectFile> projectFileStorage;
+    private ProjectFileService projectFileService;
 
     @Test
     public void returnsAllProjectsViewName() throws Exception {
@@ -181,7 +179,7 @@ public class ProjectsControllerIntegrationTest extends AbstractProjectsControlle
         uploadFilesForDefaultProject(1);
         ProjectEntry defaultProject = projectFolders.getByProjectId(DEFAULT_PROJECT_ID);
 
-        Collection<ProjectFile> uploadedFilesForProject = projectFileStorage.allFilesFor(defaultProject);
+        Collection<ProjectFile> uploadedFilesForProject = projectFileService.allFilesFor(defaultProject);
 
         assertThat(uploadedFilesForProject.size(), equalTo(1));
     }
@@ -253,7 +251,7 @@ public class ProjectsControllerIntegrationTest extends AbstractProjectsControlle
 
     private Collection<ProjectFile> allFilesForDefaultProject() {
         ProjectEntry defaultProject = projectFolders.getByProjectId(DEFAULT_PROJECT_ID);
-        return projectFileStorage.allFilesFor(defaultProject);
+        return projectFileService.allFilesFor(defaultProject);
     }
 
     @SuppressWarnings("unchecked")

@@ -22,7 +22,6 @@ package eionet.webq.service;
 
 import eionet.webq.converter.XmlSchemaExtractor;
 import eionet.webq.dao.FileStorage;
-import eionet.webq.dao.ProjectFileStorageImpl;
 import eionet.webq.dto.ProjectEntry;
 import eionet.webq.dto.ProjectFile;
 import eionet.webq.dto.ProjectFileType;
@@ -30,6 +29,9 @@ import eionet.webq.dto.UploadedFile;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.springframework.util.MultiValueMap;
 
 import java.util.Arrays;
@@ -39,22 +41,23 @@ import static eionet.webq.dto.ProjectFileType.WEBFORM;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 public class ProjectFileServiceImplTest {
+    @Mock
+    FileStorage<ProjectEntry, ProjectFile> projectFileStorage;
+    @Mock
+    XmlSchemaExtractor xmlSchemaExtractor;
+    @InjectMocks
     ProjectFileServiceImpl service = new ProjectFileServiceImpl();
-    FileStorage<ProjectEntry, ProjectFile> projectFileStorage = mock(ProjectFileStorageImpl.class);
-    XmlSchemaExtractor xmlSchemaExtractor = mock(XmlSchemaExtractor.class);
     ProjectFile testFile = new ProjectFile();
     ProjectEntry testProject = new ProjectEntry();
 
     @Before
     public void setUp() throws Exception {
-        service.projectFileStorage = projectFileStorage;
-        service.xmlSchemaExtractor = xmlSchemaExtractor;
+        MockitoAnnotations.initMocks(this);
     }
 
     @After
@@ -139,6 +142,14 @@ public class ProjectFileServiceImplTest {
         service.remove(testProject, 1);
 
         verify(projectFileStorage).remove(testProject, 1);
+    }
+
+    @Test
+    public void callsAllProjectFiles() throws Exception {
+        ProjectEntry project = new ProjectEntry();
+        service.allFilesFor(project);
+
+        verify(projectFileStorage).allFilesFor(project);
     }
 
     private ProjectFile fileWithType(ProjectFileType type) {
