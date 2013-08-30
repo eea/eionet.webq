@@ -110,7 +110,6 @@ public class ProjectFileStorageImpl extends AbstractDao<ProjectFile>
                 ps.setBoolean(index++, projectFile.isMainForm());
                 if (updateFile) {
                     lobCreator.setBlobAsBytes(ps, index++, projectFile.getFileContent());
-                    ps.setString(index++, projectFile.getFileName());
                     ps.setLong(index++, projectFile.getFileSizeInBytes());
                 }
                 ps.setString(index++, projectFile.getNewXmlFileName());

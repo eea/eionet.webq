@@ -148,6 +148,19 @@ public class ProjectFileStorageImplTest {
     }
 
     @Test
+    public void fileNameIsImmutableAfterSave() throws Exception {
+        String immutableName = "ImmutableName";
+        testFileForUpload.setFileName(immutableName);
+        int fileId = projectFileStorage.save(testFileForUpload, projectEntry);
+
+        ProjectFile fileFromStorage = projectFileStorage.fileById(fileId);
+        fileFromStorage.setFileName("ChangeName");
+        projectFileStorage.update(fileFromStorage, projectEntry);
+
+        assertThat(projectFileStorage.fileById(fileId).getFileName(), equalTo(immutableName));
+    }
+
+    @Test
     public void doNotAllowToOverwriteFileWithEmptyFile() throws Exception {
         addOneFile();
         ProjectFile beforeUpdate = getUploadedFileAndAssertThatItIsTheOnlyOne();
@@ -282,7 +295,6 @@ public class ProjectFileStorageImplTest {
         assertThat(after.getTitle(), equalTo(before.getTitle()));
         assertThat(after.getXmlSchema(), equalTo(before.getXmlSchema()));
         assertThat(after.getFileContent(), equalTo(before.getFileContent()));
-        assertThat(after.getFileName(), equalTo(before.getFileName()));
         assertThat(after.getFileSizeInBytes(), equalTo(before.getFileSizeInBytes()));
         assertThat(after.getEmptyInstanceUrl(), equalTo(before.getEmptyInstanceUrl()));
         assertThat(after.getNewXmlFileName(), equalTo(before.getNewXmlFileName()));
