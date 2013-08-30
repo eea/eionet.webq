@@ -78,8 +78,8 @@ public class ProjectFileServiceImpl implements ProjectFileService {
     }
 
     @Override
-    public ProjectFile fileContentBy(int id, ProjectEntry project) {
-        return projectFileStorage.fileContentBy(id, project);
+    public ProjectFile fileContentBy(String name, ProjectEntry project) {
+        return projectFileStorage.fileContentBy(name, project);
     }
 
     @Override

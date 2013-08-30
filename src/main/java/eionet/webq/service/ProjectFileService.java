@@ -41,7 +41,7 @@ public interface ProjectFileService {
 
     /**
      * Retrieve file data by id in storage without file content.
-     * To get content consider usage of {@link ProjectFileService#fileContentBy(int, ProjectEntry)}
+     * To get content consider usage of {@link ProjectFileService#fileContentBy(String, ProjectEntry)}
      *
      * @param id file id in storage
      * @return file data without file content
@@ -60,10 +60,10 @@ public interface ProjectFileService {
      * Retrieve file name and content.
      *
      * @param project associated project
-     * @param id file id
+     * @param name file name
      * @return file
      */
-    ProjectFile fileContentBy(int id, ProjectEntry project);
+    ProjectFile fileContentBy(String name, ProjectEntry project);
 
     /**
      * Remove file by id and classifier.

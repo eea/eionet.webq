@@ -143,8 +143,13 @@ public class ProjectFileStorageImpl extends AbstractDao<ProjectFile>
 
     @Override
     public ProjectFile fileContentBy(int id, ProjectEntry projectEntry) {
-        return template.queryForObject(sqlProperties.getProperty("select.project.file.content"), rowMapper(), id,
-                projectEntry.getId());
+        throw new UnsupportedOperationException("Please use fileContentBy file name");
+    }
+
+    @Override
+    public ProjectFile fileContentBy(String name, ProjectEntry projectEntry) {
+        return template.queryForObject(sqlProperties.getProperty("select.project.file.content.by.name"), rowMapper(),
+                projectEntry.getId(), name);
     }
 
     @Override

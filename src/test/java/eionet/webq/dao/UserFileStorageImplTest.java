@@ -206,6 +206,11 @@ public class UserFileStorageImplTest {
         assertThat(fileId, equalTo(maxId));
     }
 
+    @Test(expected = UnsupportedOperationException.class)
+    public void fileContentByNameNotSupported() throws Exception {
+        storage.fileContentBy("file.xml", userId);
+    }
+
     private void uploadSingleFileFor(String userId) {
         uploadFilesFor(userId, 1);
     }

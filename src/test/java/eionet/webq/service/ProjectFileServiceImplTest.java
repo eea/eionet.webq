@@ -132,9 +132,9 @@ public class ProjectFileServiceImplTest {
 
     @Test
     public void testFileContentBy() throws Exception {
-        service.fileContentBy(1, testProject);
+        service.fileContentBy("name", testProject);
 
-        verify(projectFileStorage).fileContentBy(1, testProject);
+        verify(projectFileStorage).fileContentBy("name", testProject);
     }
 
     @Test

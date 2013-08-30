@@ -75,6 +75,16 @@ public interface FileStorage<KEY, FILE> {
     FILE fileContentBy(int id, KEY key);
 
     /**
+     * Retrieve file content by it's name.
+     * File name and key pair must be unique in storage.
+     *
+     * @param key key to which this file belong
+     * @param name file name.
+     * @return file
+     */
+    FILE fileContentBy(String name, KEY key);
+
+    /**
      * Remove file by id and classifier.
      * @param key classifier
      * @param id file id

@@ -126,6 +126,11 @@ public class UserFileStorageImpl extends AbstractDao<UserFile> implements FileSt
     }
 
     @Override
+    public UserFile fileContentBy(String name, String userId) {
+        throw new UnsupportedOperationException("File name and userId pair is not unique in storage");
+    }
+
+    @Override
     public UserFile fileById(int id) {
         throw new UnsupportedOperationException();
     }

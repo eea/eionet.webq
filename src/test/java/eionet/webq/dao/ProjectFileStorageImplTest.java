@@ -58,7 +58,7 @@ public class ProjectFileStorageImplTest {
     JdbcTemplate template;
 
     private ProjectEntry projectEntry = testProjectEntry();
-    private ProjectFile testFileForUpload = testWebForm();
+    private ProjectFile testFileForUpload = projectFileWithoutTypeSet();
 
     @Before
     public void removeAllProjectFiles() {
@@ -68,7 +68,7 @@ public class ProjectFileStorageImplTest {
     @Test
     public void saveWebformWithoutException() throws Exception {
         ProjectEntry projectEntry = testProjectEntry();
-        ProjectFile projectFile = testWebForm();
+        ProjectFile projectFile = projectFileWithoutTypeSet();
         projectFileStorage.save(projectFile, projectEntry);
     }
 
@@ -213,21 +213,15 @@ public class ProjectFileStorageImplTest {
         assertFieldsEquals(testFileForUpload, byId);
     }
 
-    @Test
+    @Test(expected = UnsupportedOperationException.class)
     public void getContentByFileId() throws Exception {
-        addOneFile();
-        ProjectFile uploadedFile = getUploadedFileAndAssertThatItIsTheOnlyOne();
-
-        ProjectFile projectFile = projectFileStorage.fileContentBy(uploadedFile.getId(), projectEntry);
-        assertThat(projectFile.getFileContent(), equalTo(testFileForUpload.getFileContent()));
-        assertThat(projectFile.getFileName(), equalTo(testFileForUpload.getFileName()));
-        assertThat(projectFile.getFileSizeInBytes(), equalTo(testFileForUpload.getFileSizeInBytes()));
+        projectFileStorage.fileContentBy(1, projectEntry);
     }
 
     @Test
     public void getIdAfterSave() throws Exception {
         ProjectEntry projectEntry = testProjectEntry();
-        ProjectFile projectFile = testWebForm();
+        ProjectFile projectFile = projectFileWithoutTypeSet();
 
         int fileId = projectFileStorage.save(projectFile, projectEntry);
         int maxId = template.queryForInt("SELECT MAX(id) from project_file");
@@ -280,6 +274,15 @@ public class ProjectFileStorageImplTest {
         projectFileStorage.save(file, projectEntry);
     }
 
+    @Test
+    public void fetchFileContentByFileName() throws Exception {
+        projectFileStorage.save(testFileForUpload, projectEntry);
+
+        ProjectFile file = projectFileStorage.fileContentBy(testFileForUpload.getFileName(), projectEntry);
+
+        assertThat(file.getFileContent(), equalTo(testFileForUpload.getFileContent()));
+    }
+
     private int setFileTypeAndSave(ProjectFileType fileType) {
         testFileForUpload.setFileType(fileType);
         return addOneFile();
@@ -323,7 +326,7 @@ public class ProjectFileStorageImplTest {
         return projectEntry;
     }
 
-    private ProjectFile testWebForm() {
+    private ProjectFile projectFileWithoutTypeSet() {
         ProjectFile projectFile = new ProjectFile();
         projectFile.setActive(true);
         projectFile.setMainForm(true);

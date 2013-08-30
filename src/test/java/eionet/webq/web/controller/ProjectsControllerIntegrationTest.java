@@ -241,7 +241,7 @@ public class ProjectsControllerIntegrationTest extends AbstractProjectsControlle
         uploadFilesForDefaultProject(1);
         ProjectFile projectFile = theOnlyOneUploadedFile();
 
-        request(get("/download/project/" + DEFAULT_PROJECT_ID + "/file/" + projectFile.getId())).andExpect(
+        request(get("/download/project/" + DEFAULT_PROJECT_ID + "/file/" + projectFile.getFileName())).andExpect(
                 content().bytes(testWebFormUpload().getFileContent()));
     }
 
