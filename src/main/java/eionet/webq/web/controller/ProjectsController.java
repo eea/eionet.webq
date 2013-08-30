@@ -164,15 +164,20 @@ public class ProjectsController {
     public String newWebForm(@PathVariable String projectFolderId, @Valid @ModelAttribute ProjectFile projectFile,
             BindingResult bindingResult, Model model) {
         if (ProjectFileInfo.isNew(projectFile) && ProjectFileInfo.fileIsEmpty(projectFile)) {
-            bindingResult.rejectValue("file", "webform.file.null");
+            bindingResult.rejectValue("file", "project.file.null");
         }
         ProjectEntry currentProject = projectService.getByProjectId(projectFolderId);
         if (bindingResult.hasErrors()) {
             return addOrEditProjectFile(currentProject, projectFile, model);
         }
-        projectFileService.saveOrUpdate(projectFile, currentProject);
-        model.addAttribute("message", "Webform added/updated.");
-        return viewProject(currentProject, model);
+        try {
+            projectFileService.saveOrUpdate(projectFile, currentProject);
+            model.addAttribute("message", "Webform added/updated.");
+            return viewProject(currentProject, model);
+        } catch (DuplicateKeyException e) {
+            bindingResult.rejectValue("file", "project.file.duplicate.name");
+            return addOrEditProjectFile(currentProject, projectFile, model);
+        }
     }
 
     /**

@@ -1,6 +1,7 @@
 package eionet.webq.web.controller;
 
 import eionet.webq.dto.ProjectEntry;
+import eionet.webq.dto.ProjectFileType;
 import eionet.webq.service.ProjectService;
 import eionet.webq.web.AbstractContextControllerTests;
 import org.junit.Before;
@@ -10,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.fileUpload;
@@ -43,13 +45,24 @@ public class ProjectFileValidationTest extends AbstractContextControllerTests {
     @Test
     public void noFileAttached() throws Exception {
         MvcResult mvcResult = request(SaveRequestBuilder.postBuilder().withUserName().withTitle().build()).andReturn();
-        assertFieldError(getFirstAndOnlyFieldError(mvcResult), "file", "webform.file.null");
+        assertFieldError(getFirstAndOnlyFieldError(mvcResult), "file", "project.file.null");
     }
 
     @Test
     public void noUserName() throws Exception {
         MvcResult mvcResult = request(SaveRequestBuilder.fileUploadBuilder().withTitle().build()).andReturn();
         assertFieldError(getFirstAndOnlyFieldError(mvcResult), "userName", "NotEmpty.projectFile.userName");
+    }
+
+    @Test
+    public void fileNameWithProjectIdMustBeUnique() throws Exception {
+        allRequiredFieldsFilledInWithDefaultValues();
+        MvcResult mvcResult = allRequiredFieldsFilledInWithDefaultValues().andReturn();
+        assertFieldError(getFirstAndOnlyFieldError(mvcResult), "file", "project.file.duplicate.name");
+    }
+
+    private ResultActions allRequiredFieldsFilledInWithDefaultValues() throws Exception {
+        return request(SaveRequestBuilder.fileUploadBuilder().withTitle().withUserName().withFileType().build());
     }
 
     @Override
@@ -67,7 +80,7 @@ public class ProjectFileValidationTest extends AbstractContextControllerTests {
         private static SaveRequestBuilder fileUploadBuilder() {
             return new SaveRequestBuilder(fileUpload(SAVE_PROJECT_FILE_URL).file("file", "test-file".getBytes()));
         }
-        
+
         public static SaveRequestBuilder postBuilder() {
             return new SaveRequestBuilder(post(SAVE_PROJECT_FILE_URL));
         }
@@ -81,7 +94,12 @@ public class ProjectFileValidationTest extends AbstractContextControllerTests {
             request.param("title", "test-title");
             return this;
         }
-        
+
+        public SaveRequestBuilder withFileType() {
+            request.param("fileType", ProjectFileType.WEBFORM.name());
+            return this;
+        }
+
         public MockHttpServletRequestBuilder build() {
             return request;
         }
