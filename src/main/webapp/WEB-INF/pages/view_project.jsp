@@ -1,6 +1,7 @@
 <%@ taglib prefix="f" uri="http://www.springframework.org/tags/form" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ taglib prefix="s" uri="http://www.springframework.org/tags" %>
 <div id="drop-operations">
     <h2>Operations</h2>
     <ul>
@@ -39,10 +40,11 @@
         <tbody>
         <c:forEach var="projectFile" items="${projectFilesEntry.value}">
             <c:set value="view-file-${projectFile.id}" var="popup_id"/>
+            <s:eval expression="T(org.apache.commons.io.FileUtils).byteCountToDisplaySize(projectFile.fileSizeInBytes)" var="humanReadableFileSize"/>
             <tr>
                 <td><input type="checkbox" name="fileId" value="${projectFile.id}"/></td>
                 <td>${projectFile.title}</td>
-                <td><a href="#" onclick="view_file($('#${popup_id}'), <c:out value="${isWebForm ? 500 : 400}"/>)">${projectFile.fileName}</a></td>
+                <td><a href="#" onclick="view_file($('#${popup_id}'), <c:out value="${isWebForm ? 500 : 400}"/>)">${projectFile.fileName}</a> ${humanReadableFileSize}</td>
                 <td><fmt:formatDate pattern="dd MMM yyyy HH:mm:ss" value="${projectFile.updated}" /></td>
                 <c:if test="${isWebForm}">
                     <td><input type="checkbox" checked="${projectFile.active}" disabled="disabled"/></td>
@@ -61,6 +63,10 @@
                             <tr>
                                 <th scope="row">File</th>
                                 <td><a href="<c:url value="/download/project/${projectEntry.projectId}/file/${projectFile.id}"/>">${projectFile.fileName}</a></td>
+                            </tr>
+                            <tr>
+                                <th scope="row">File size</th>
+                                <td>${humanReadableFileSize}(${projectFile.fileSizeInBytes} bytes)</td>
                             </tr>
                             <tr>
                                 <th scope="row">Last modified</th>

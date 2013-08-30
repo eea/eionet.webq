@@ -1,5 +1,7 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="f" uri="http://www.springframework.org/tags/form" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+
 <c:choose>
     <c:when test="${projectFile.fileType == 'WEBFORM'}">
         <c:set var="fileTypeLabel" value="WebForm"/>
@@ -21,7 +23,27 @@
             </tr>
             <tr>
                 <th scope="row"><label for="file">${fileTypeLabel}</label></th>
-                <td><f:input path="file" type="file"/></td>
+                <td>
+                    <f:input path="file" type="file"/>
+                </td>
+            </tr>
+            <tr>
+                <th scope="row">Current file</th>
+                <td>
+                    <a href="<c:url value="/download/project/${projectEntry.projectId}/file/${projectFile.id}"/>">${projectFile.fileName}</a>
+                </td>
+            </tr>
+            <tr>
+                <th scope="row">Modified</th>
+                <td>
+                    <fmt:formatDate pattern="dd MMM yyyy HH:mm:ss" value="${projectFile.updated}"/>
+                </td>
+            </tr>
+            <tr>
+                <th scope="row">Size</th>
+                <td>
+                    ${projectFile.fileSizeInBytes} bytes
+                </td>
             </tr>
             <tr>
                 <th scope="row"><label for="description">Description</label></th>
