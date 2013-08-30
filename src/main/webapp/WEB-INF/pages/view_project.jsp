@@ -47,8 +47,8 @@
                 <td><a href="#" onclick="view_file($('#${popup_id}'), <c:out value="${isWebForm ? 500 : 400}"/>)">${projectFile.fileName}</a> ${humanReadableFileSize}</td>
                 <td><fmt:formatDate pattern="dd MMM yyyy HH:mm:ss" value="${projectFile.updated}" /></td>
                 <c:if test="${isWebForm}">
-                    <td><input type="checkbox" checked="${projectFile.active}" disabled="disabled"/></td>
-                    <td><input type="checkbox" checked="${projectFile.mainForm}" disabled="disabled"/></td>
+                    <td><input type="checkbox" ${projectFile.active ? 'checked="checked"' : ''} disabled="disabled"/></td>
+                    <td><input type="checkbox" ${projectFile.mainForm ? 'checked="checked"' : ''} disabled="disabled"/></td>
                 </c:if>
                 <td>${projectFile.userName}</td>
             </tr>
