@@ -30,6 +30,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -271,6 +272,14 @@ public class ProjectFileStorageImplTest {
         assertThat(iterator.next().getFileType(), equalTo(WEBFORM));
     }
 
+    @Test(expected = DuplicateKeyException.class)
+    public void fileNameMustBeUnique() throws Exception {
+        ProjectFile file = new ProjectFile();
+        file.setFileName("file.xml");
+        projectFileStorage.save(file, projectEntry);
+        projectFileStorage.save(file, projectEntry);
+    }
+
     private int setFileTypeAndSave(ProjectFileType fileType) {
         testFileForUpload.setFileType(fileType);
         return addOneFile();
@@ -304,6 +313,7 @@ public class ProjectFileStorageImplTest {
     }
 
     private int addOneFile() {
+        testFileForUpload.setFileName(testFileForUpload.getFileName() + "+");//unique name
         return projectFileStorage.save(testFileForUpload, projectEntry);
     }
 

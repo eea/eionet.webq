@@ -31,3 +31,5 @@ CREATE TABLE IF NOT EXISTS PROJECT_FILE(
   main_form boolean,
   created datetime default current_timestamp,
   updated datetime default current_timestamp);
+
+CREATE UNIQUE INDEX IF NOT EXISTS unique_project_file_name ON project_file(project_id, file_name);

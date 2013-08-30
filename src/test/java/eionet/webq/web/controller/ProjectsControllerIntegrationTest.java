@@ -11,6 +11,8 @@ import org.hamcrest.Description;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
@@ -268,6 +270,7 @@ public class ProjectsControllerIntegrationTest extends AbstractProjectsControlle
         saveProjectWithId(DEFAULT_PROJECT_ID);
         ProjectFile projectFile = testWebFormUpload();
         for (int i = 0; i < amount; i++) {
+            projectFile.setFileName(projectFile.getFileName() + Integer.toString(i));
             uploadWebFormForDefaultProject(projectFile);
         }
         return projectFile;
@@ -284,7 +287,8 @@ public class ProjectsControllerIntegrationTest extends AbstractProjectsControlle
     }
 
     private ResultActions uploadWebFormForDefaultProject(ProjectFile projectFile) throws Exception {
-        return request(fileUpload("/projects/" + DEFAULT_PROJECT_ID + "/webform/save").file("file", projectFile.getFileContent())
+        return request(fileUpload("/projects/" + DEFAULT_PROJECT_ID + "/webform/save")
+                .file(new MockMultipartFile("file", projectFile.getFileName(), MediaType.APPLICATION_XML_VALUE, projectFile.getFileContent()))
                 .param("title", projectFile.getTitle()).param("active", Boolean.toString(projectFile.isActive()))
                 .param("description", projectFile.getDescription()).param("userName", projectFile.getUserName())
                 .param("fileType", projectFile.getFileType().name()));
