@@ -40,10 +40,6 @@
     -->
     <filter-mapping>
         <filter-name>XFormsFilter</filter-name>
-        <url-pattern>*.xhtml</url-pattern>
-    </filter-mapping>
-    <filter-mapping>
-        <filter-name>XFormsFilter</filter-name>
         <url-pattern>/xform/*</url-pattern>
     </filter-mapping>
 <!--

@@ -27,24 +27,26 @@
                     <f:input path="file" type="file"/>
                 </td>
             </tr>
-            <tr>
-                <th scope="row">Current file</th>
-                <td>
-                    <a href="<c:url value="/download/project/${projectEntry.projectId}/file/${projectFile.id}"/>">${projectFile.fileName}</a>
-                </td>
-            </tr>
-            <tr>
-                <th scope="row">Modified</th>
-                <td>
-                    <fmt:formatDate pattern="dd MMM yyyy HH:mm:ss" value="${projectFile.updated}"/>
-                </td>
-            </tr>
-            <tr>
-                <th scope="row">Size</th>
-                <td>
-                    ${projectFile.fileSizeInBytes} bytes
-                </td>
-            </tr>
+            <c:if test="${not empty projectFile.fileContent}">
+                <tr>
+                    <th scope="row">Current file</th>
+                    <td>
+                        <a href="<c:url value="/download/project/${projectEntry.projectId}/file/${projectFile.fileName}"/>">${projectFile.fileName}</a>
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row">Modified</th>
+                    <td>
+                        <fmt:formatDate pattern="dd MMM yyyy HH:mm:ss" value="${projectFile.updated}"/>
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row">Size</th>
+                    <td>
+                            ${projectFile.fileSizeInBytes} bytes
+                    </td>
+                </tr>
+            </c:if>
             <tr>
                 <th scope="row"><label for="description">Description</label></th>
                 <td><f:textarea path="description" cols="60"/></td>

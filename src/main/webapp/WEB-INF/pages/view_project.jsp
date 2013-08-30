@@ -62,7 +62,7 @@
                             </tr>
                             <tr>
                                 <th scope="row">File</th>
-                                <td><a href="<c:url value="/download/project/${projectEntry.projectId}/file/${projectFile.id}"/>">${projectFile.fileName}</a></td>
+                                <td><a href="<c:url value="/download/project/${projectEntry.projectId}/file/${projectFile.fileName}"/>">${projectFile.fileName}</a></td>
                             </tr>
                             <tr>
                                 <th scope="row">File size</th>

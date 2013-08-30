@@ -41,4 +41,4 @@ CREATE TABLE IF NOT EXISTS PROJECT_FILE(
   created timestamp default current_timestamp,
   updated timestamp,
   primary key (id),
-  unique index 'project_to_file_name' (project_id, file_name)) DEFAULT CHARACTER SET utf8;
+  unique index project_to_file_name (project_id, file_name)) DEFAULT CHARACTER SET utf8;

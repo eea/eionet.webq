@@ -27,7 +27,6 @@
     <mvc:annotation-driven />
     <!-- resources exclusions from servlet mapping -->
     <mvc:resources mapping="/bfResources/**" location="/bfResources/" />
-    <mvc:resources mapping="/*.xhtml" location="/*.xhtml" />
     <mvc:resources mapping="/*.html" location="/*.html" />
     <mvc:resources mapping="/forms/**" location="/forms/" />
     <mvc:resources mapping="/js/**" location="/js/" />

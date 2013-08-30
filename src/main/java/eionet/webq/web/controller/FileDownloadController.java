@@ -89,7 +89,7 @@ public class FileDownloadController {
      * @param fileName requested file name
      * @param response http response to write file
      */
-    @RequestMapping(value = "/project/{projectId}/file/{fileName}")
+    @RequestMapping(value = "/project/{projectId}/file/{fileName:.*}")
     public void downloadProjectFile(@PathVariable String projectId, @PathVariable String fileName, HttpServletResponse response) {
         ProjectFile projectFile = projectFileService.fileContentBy(fileName, projectService.getByProjectId(projectId));
         addXmlFileHeaders(response, encodeAsUrl(fileName));
