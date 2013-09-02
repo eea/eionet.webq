@@ -31,6 +31,8 @@
 </style>
 
 <h1>Web Questionnaires</h1>
+<div class="warning-msg">The files are stored in the system temporarily.</div>
+<div class="tip-msg">Please download your modified files. All files will be deleted if your session expires or if you close your web browser!</div>
 <div class="container">
     <c:url var="uploadUrl" value="/uploadXml"/>
     <f:form modelAttribute="uploadForm" action="${uploadUrl}" method="POST" enctype="multipart/form-data">
