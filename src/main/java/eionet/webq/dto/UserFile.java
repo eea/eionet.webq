@@ -52,6 +52,10 @@ public class UserFile {
      */
     private Date updated;
     /**
+     * Last download date.
+     */
+    private Date downloaded;
+    /**
      * Available conversions for this file.
      */
     private Collection<Conversion> availableConversions;
@@ -139,6 +143,14 @@ public class UserFile {
 
     public void setUpdated(Date updated) {
         this.updated = updated;
+    }
+
+    public Date getDownloaded() {
+        return downloaded;
+    }
+
+    public void setDownloaded(Date downloaded) {
+        this.downloaded = downloaded;
     }
 
     public Collection<Conversion> getAvailableConversions() {

@@ -14,6 +14,7 @@ CREATE TABLE IF NOT EXISTS USER_XML(
   file_size_in_bytes bigint,
   created timestamp default current_timestamp,
   updated timestamp,
+  downloaded timestamp,
   primary key (id)) DEFAULT CHARACTER SET utf8;
 
 CREATE TABLE IF NOT EXISTS PROJECT_FOLDER(

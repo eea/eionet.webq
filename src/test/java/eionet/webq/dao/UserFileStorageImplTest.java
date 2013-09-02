@@ -46,6 +46,8 @@ public class UserFileStorageImplTest {
     @Autowired
     @Qualifier("user-files")
     private FileStorage<String, UserFile> storage;
+    @Autowired
+    private UserFileDownload userFileDownload;
     private String userId = userId();
     private String otherUserId = "other" + userId;
 
@@ -178,8 +180,7 @@ public class UserFileStorageImplTest {
 
     @Test
     public void removesUserFileById() throws Exception {
-        uploadSingleFileFor(userId);
-        UserFile file = getFirstUploadedFileAndAssertThatItIsTheOnlyOneAvailableFor(userId);
+        UserFile file = saveAndGetBackSavedFileForDefaultUser();
 
         storage.remove(userId, file.getId());
 
@@ -209,6 +210,26 @@ public class UserFileStorageImplTest {
     @Test(expected = UnsupportedOperationException.class)
     public void fileContentByNameNotSupported() throws Exception {
         storage.fileContentBy("file.xml", userId);
+    }
+
+    @Test
+    public void lastDownloadTimeForSavedFileIsNull() throws Exception {
+        UserFile file = saveAndGetBackSavedFileForDefaultUser();
+        assertThat(file.getDownloaded(), equalTo(null));
+    }
+
+    @Test
+    public void allowsToUpdateDownloadTime() throws Exception {
+        UserFile userFile = saveAndGetBackSavedFileForDefaultUser();
+        userFileDownload.updateDownloadTime(userFile);
+
+        UserFile updatedFile = getFirstUploadedFileAndAssertThatItIsTheOnlyOneAvailableFor(userId);
+        assertNotNull(updatedFile.getDownloaded());
+    }
+
+    private UserFile saveAndGetBackSavedFileForDefaultUser() {
+        uploadSingleFileFor(userId);
+        return getFirstUploadedFileAndAssertThatItIsTheOnlyOneAvailableFor(userId);
     }
 
     private void uploadSingleFileFor(String userId) {

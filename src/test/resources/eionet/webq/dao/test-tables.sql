@@ -6,7 +6,8 @@ xml_schema varchar2(255),
 xml blob,
 file_size_in_bytes bigint,
 created datetime default current_timestamp,
-updated datetime default current_timestamp);
+updated datetime,
+downloaded datetime);
 
 CREATE TABLE IF NOT EXISTS PROJECT_FOLDER(
   id identity primary key,

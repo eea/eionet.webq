@@ -46,7 +46,7 @@ import java.util.Collection;
  */
 @Repository
 @Qualifier("user-files")
-public class UserFileStorageImpl extends AbstractDao<UserFile> implements FileStorage<String, UserFile> {
+public class UserFileStorageImpl extends AbstractDao<UserFile> implements FileStorage<String, UserFile>, UserFileDownload {
     /**
      * {@link JdbcTemplate} to perform data access operations.
      */
@@ -128,6 +128,11 @@ public class UserFileStorageImpl extends AbstractDao<UserFile> implements FileSt
     @Override
     public UserFile fileContentBy(String name, String userId) {
         throw new UnsupportedOperationException("File name and userId pair is not unique in storage");
+    }
+
+    @Override
+    public void updateDownloadTime(UserFile file) {
+        jdbcTemplate.update(sqlProperties.getProperty("update.user.file.download.time"), file.getId());
     }
 
     @Override

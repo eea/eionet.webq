@@ -96,9 +96,11 @@
                     <td>
                         File size: ${file.sizeInBytes} bytes<br/>
                         Created: <fmt:formatDate pattern="dd MMM yyyy HH:mm:ss" value="${file.created}" /><br/>
-                        Updated:  <fmt:formatDate pattern="dd MMM yyyy HH:mm:ss" value="${file.updated}" />
+                        Updated:  <fmt:formatDate pattern="dd MMM yyyy HH:mm:ss" value="${file.updated}" /><br/>
+                        Downloaded:  <fmt:formatDate pattern="dd MMM yyyy HH:mm:ss" value="${file.downloaded}" />
                     </td>
                     <td>
+                        <p><a href="${downloadLink}" title="Download file">Download</a></p>
                         <c:forEach var="webForm" items="${allWebForms}">
                             <c:if test="${file.xmlSchema eq webForm.xmlSchema}">
                                 <strong><a href="<c:url value="/xform/?formId=${webForm.id}&instance=${downloadLink}&amp;fileId=${file.id}&amp;base_uri=${pageContext.request.contextPath}"/>">Edit
