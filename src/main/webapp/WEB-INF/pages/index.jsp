@@ -1,6 +1,7 @@
 <%@ taglib prefix="f" uri="http://www.springframework.org/tags/form" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ taglib prefix="s" uri="http://www.springframework.org/tags" %>
 
 <script type="text/javascript">
     function getSelectedFileValue() {
@@ -91,16 +92,35 @@
                         <input type="checkbox" name="selectedUserFile" value="${file.id}">
                     </td>
                     <td>
-                        <a href="${downloadLink}" title="Download file">${file.name}</a>
+                        ${file.name}
                     </td>
                     <td>
                         File size: ${file.sizeInBytes} bytes<br/>
                         Created: <fmt:formatDate pattern="dd MMM yyyy HH:mm:ss" value="${file.created}" /><br/>
                         Updated:  <fmt:formatDate pattern="dd MMM yyyy HH:mm:ss" value="${file.updated}" /><br/>
-                        Downloaded:  <fmt:formatDate pattern="dd MMM yyyy HH:mm:ss" value="${file.downloaded}" />
+                        Downloaded:  <c:choose>
+                        <c:when test="${not empty file.downloaded}">
+                            <fmt:formatDate pattern="dd MMM yyyy HH:mm:ss" value="${file.downloaded}" />
+                        </c:when>
+                        <c:otherwise>
+                            never
+                        </c:otherwise>
+                        </c:choose>
                     </td>
                     <td>
-                        <p><a href="${downloadLink}" title="Download file">Download</a></p>
+                        <p>
+                        <s:eval expression="T(eionet.webq.dto.util.UserFileInfo).isNotUpdatedOrDownloadedAfterUpdateUsingForm(file)"
+                                var="downloadedAfterUpdateOrNotChanged"/>
+                            <c:choose>
+                                <c:when test="${not downloadedAfterUpdateOrNotChanged}">
+                                    <c:set var="updateNote" value="(NB! updated through web form)"/>
+                                </c:when>
+                                <c:otherwise>
+                                    <c:set var="updateNote" value=""/>
+                                </c:otherwise>
+                            </c:choose>
+                        <a href="${downloadLink}" onclick="this.text='Download'" title="Download file">Download ${updateNote}</a>
+                        </p>
                         <c:forEach var="webForm" items="${allWebForms}">
                             <c:if test="${file.xmlSchema eq webForm.xmlSchema}">
                                 <strong><a href="<c:url value="/xform/?formId=${webForm.id}&instance=${downloadLink}&amp;fileId=${file.id}&amp;base_uri=${pageContext.request.contextPath}"/>">Edit
