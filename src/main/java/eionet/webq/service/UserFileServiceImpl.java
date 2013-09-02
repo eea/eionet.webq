@@ -21,6 +21,7 @@
 package eionet.webq.service;
 
 import eionet.webq.dao.FileStorage;
+import eionet.webq.dao.UserFileDownload;
 import eionet.webq.dto.UserFile;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,6 +54,11 @@ public class UserFileServiceImpl implements UserFileService {
     @Autowired
     ConversionService conversionService;
     /**
+     * Operation for file download.
+     */
+    @Autowired
+    UserFileDownload userFileDownload;
+    /**
      * Static logger for this class.
      */
     private static final Logger LOGGER = Logger.getLogger(UserFileServiceImpl.class);
@@ -67,6 +73,7 @@ public class UserFileServiceImpl implements UserFileService {
     public UserFile getById(int id) {
         UserFile userFile = storage.fileContentBy(id, userId());
         byte[] content = userFile.getContent();
+        userFileDownload.updateDownloadTime(id);
         LOGGER.info("File loaded. Name=" + userFile.getName() + ", content size=" + (content != null ? content.length : 0));
         return userFile;
     }

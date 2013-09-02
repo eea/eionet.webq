@@ -20,12 +20,14 @@
  */
 package eionet.webq.dao;
 
-import eionet.webq.dto.UserFile;
-
 /**
  * Actions for handling user file download.
  */
 public interface UserFileDownload {
-
-    void updateDownloadTime(UserFile file);
+    /**
+     * Updates {@link eionet.webq.dto.UserFile} downloaded timestamp.
+     *
+     * @param userFileId file to be updated.
+     */
+    void updateDownloadTime(int userFileId);
 }

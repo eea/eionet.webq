@@ -22,12 +22,15 @@
 package eionet.webq.service;
 
 import eionet.webq.dao.FileStorage;
-import eionet.webq.dao.UserFileStorageImpl;
+import eionet.webq.dao.UserFileDownload;
 import eionet.webq.dto.UserFile;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 
 import javax.servlet.http.HttpSession;
 import java.util.Arrays;
@@ -36,53 +39,53 @@ import java.util.Collection;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.only;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 public class UserFileServiceImplTest {
+    @InjectMocks
     private UserFileServiceImpl service;
+    @Mock
     private FileStorage<String, UserFile> storage;
+    @Mock
     HttpSession mockSession;
+    @Mock
+    UserFileDownload userFileDownload;
     private final String userId = "userId";
+    private static final int FILE_ID = 1;
 
     @Before
     public void prepare() {
-        service = new UserFileServiceImpl();
-        storage = Mockito.mock(UserFileStorageImpl.class);
-        mockSession = Mockito.mock(HttpSession.class);
+        MockitoAnnotations.initMocks(this);
         Mockito.when(mockSession.getId()).thenReturn(userId);
-        service.storage = storage;
-        service.session = mockSession;
     }
 
     @After
     public void verifyGeneralMockCalls() {
-        verify(mockSession, only()).getId();
-        verifyNoMoreInteractions(mockSession, storage);
+        verify(mockSession).getId();
+        verifyNoMoreInteractions(mockSession, storage, userFileDownload);
     }
 
     @Test
     public void testSave() throws Exception {
-        int fileId = 1;
         UserFile fileToSave = new UserFile();
-        when(storage.save(fileToSave, userId)).thenReturn(fileId);
+        when(storage.save(fileToSave, userId)).thenReturn(FILE_ID);
 
         service.save(fileToSave);
 
-        verify(storage, only()).save(fileToSave, userId);
+        verify(storage).save(fileToSave, userId);
     }
 
     @Test
-    public void testGetById() throws Exception {
-        int fileId = 1;
+    public void fetchFileContentAlsoUpdatesDownloadTime() throws Exception {
         UserFile fileInStorage = new UserFile();
         fileInStorage.setName("file.name");
-        when(storage.fileContentBy(fileId, userId)).thenReturn(fileInStorage);
+        when(storage.fileContentBy(FILE_ID, userId)).thenReturn(fileInStorage);
 
-        assertThat(service.getById(fileId), equalTo(fileInStorage));
-        verify(storage, only()).fileContentBy(fileId, userId);
+        assertThat(service.getById(FILE_ID), equalTo(fileInStorage));
+        verify(storage).fileContentBy(FILE_ID, userId);
+        verify(userFileDownload).updateDownloadTime(FILE_ID);
     }
 
     @Test
@@ -93,7 +96,7 @@ public class UserFileServiceImplTest {
         Collection<UserFile> uploadedFiles = service.allUploadedFiles();
 
         assertThat(uploadedFiles, equalTo(filesInStorage));
-        verify(storage, only()).allFilesFor(userId);
+        verify(storage).allFilesFor(userId);
     }
 
     @Test
@@ -103,7 +106,7 @@ public class UserFileServiceImplTest {
 
         service.updateContent(fileToUpdate);
 
-        verify(storage, only()).update(fileToUpdate, userId);
+        verify(storage).update(fileToUpdate, userId);
     }
 
     @Test

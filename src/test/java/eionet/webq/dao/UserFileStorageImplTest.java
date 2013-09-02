@@ -221,7 +221,7 @@ public class UserFileStorageImplTest {
     @Test
     public void allowsToUpdateDownloadTime() throws Exception {
         UserFile userFile = saveAndGetBackSavedFileForDefaultUser();
-        userFileDownload.updateDownloadTime(userFile);
+        userFileDownload.updateDownloadTime(userFile.getId());
 
         UserFile updatedFile = getFirstUploadedFileAndAssertThatItIsTheOnlyOneAvailableFor(userId);
         assertNotNull(updatedFile.getDownloaded());

@@ -131,8 +131,8 @@ public class UserFileStorageImpl extends AbstractDao<UserFile> implements FileSt
     }
 
     @Override
-    public void updateDownloadTime(UserFile file) {
-        jdbcTemplate.update(sqlProperties.getProperty("update.user.file.download.time"), file.getId());
+    public void updateDownloadTime(int userFileId) {
+        jdbcTemplate.update(sqlProperties.getProperty("update.user.file.download.time"), userFileId);
     }
 
     @Override
