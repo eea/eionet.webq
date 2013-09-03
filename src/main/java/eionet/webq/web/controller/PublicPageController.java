@@ -54,7 +54,7 @@ import java.util.Collection;
  * @author Enriko Käsper
  */
 @Controller
-@RequestMapping("/")
+@RequestMapping
 public class PublicPageController {
     /**
      * Service for user uploaded files.
@@ -104,7 +104,7 @@ public class PublicPageController {
      * @param model holder for model attributes
      * @return view name
      */
-    @RequestMapping(value = "uploadXml", method = RequestMethod.POST)
+    @RequestMapping(value = "/uploadXml", method = RequestMethod.POST)
     public String upload(@Valid @ModelAttribute UploadForm uploadForm, BindingResult result, Model model) {
         if (!result.hasErrors()) {
             UserFile file = uploadForm.getUserFile();

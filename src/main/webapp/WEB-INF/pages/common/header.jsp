@@ -6,6 +6,7 @@
         <a id="ewlink" href="http://www.ewindows.eu.org/">EnviroWindows</a>
     </div>
     <div id="righttools">
+        <a href="<c:url value="/projects/"/>" id="loginlink">Login</a>
         <a id="printlink" title="Print this page" href="javascript:this.print();"><span>Print</span></a>
         <a id="fullscreenlink" href="javascript:toggleFullScreenMode()" title="Switch to/from full screen mode"><span>Switch to/from full screen mode</span></a>
         <%--TODO about page--%>

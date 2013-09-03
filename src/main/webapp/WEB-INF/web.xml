@@ -31,7 +31,6 @@
         <filter-class>de.betterform.agent.web.filter.XFormsFilter</filter-class>
     </filter>
 
-
     <!--  XForms filter mapping
         maps the XFormsFilter to a specified Servlet or url-pattern. This example uses a
         url-pattern that matches all document under the forms directory. Other examples would be:
@@ -42,38 +41,17 @@
         <filter-name>XFormsFilter</filter-name>
         <url-pattern>/xform/*</url-pattern>
     </filter-mapping>
-<!--
-    <filter-mapping>
-        <filter-name>XFormsFilter</filter-name>
-        <url-pattern>/en/support.html</url-pattern>
-    </filter-mapping>
--->
 
-<!--
+    <!-- Spring security-->
+    <filter>
+        <filter-name>springSecurityFilterChain</filter-name>
+        <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
+    </filter>
     <filter-mapping>
-        <filter-name>XSLTFilter</filter-name>
-        <servlet-name>inspector</servlet-name>
+        <filter-name>springSecurityFilterChain</filter-name>
+        <url-pattern>/*</url-pattern>
     </filter-mapping>
--->
 
-    <!--
-        Chains the XFormsFilter with the XFormsPostServlet. The XFormsPostServlet parses the form from
-        the request and passes it to the XFormsFilter (via request attribute)
-     -->
-<!--
-    <filter-mapping>
-        <filter-name>XFormsFilter</filter-name>
-        <servlet-name>XFormsPostServlet</servlet-name>
-    </filter-mapping>
--->
-
-<!--
-    alternative mapping if binding the Filter to a servlet.
-    <filter-mapping>
-        <filter-name>XFormsFilter</filter-name>
-        <servlet-name>XFormsRequest</servlet-name>
-    </filter-mapping>
--->
     <servlet>
         <servlet-name>error</servlet-name>
         <servlet-class>de.betterform.agent.web.servlet.ErrorServlet</servlet-class>
@@ -86,20 +64,6 @@
         <url-pattern>/error/*</url-pattern>
     </servlet-mapping>
 
-<!--
-    <servlet>
-        <servlet-name>XFormsServlet</servlet-name>
-        <servlet-class>de.betterform.agent.web.servlet.XFormsServlet</servlet-class>
-    </servlet>
--->
-
-<!--
-    <servlet>
-        <servlet-name>XFormsRequestServlet</servlet-name>
-        <servlet-class>de.betterform.agent.web.servlet.XFormsRequestServlet</servlet-class>
-    </servlet>
--->
-
 
 
     <servlet>
@@ -109,53 +73,7 @@
             <param-name>debug</param-name>
             <param-value>true</param-value>
         </init-param>
-
-        <!-- DEPRECATED -->
-<!--
-        This entry may be uncommented to use relative paths in the served html-forms. Remember change the
-        betterform.forms.uri.relative parameter of XFormsServlet as well.
-        <init-param>
-            <param-name>activeReverseAjaxEnabled</param-name>
-            <param-value>true</param-value>
-        </init-param>
--->
     </servlet>
-
-
-<!--
-    <servlet-mapping>
-        <servlet-name>XFormsRequestServlet</servlet-name>
-        <url-pattern>/XFormsRequestServlet</url-pattern>
-    </servlet-mapping>
--->
-
-<!--
-     <servlet>
-        <servlet-name>CsrfTestServlet</servlet-name>
-        <servlet-class>de.betterform.agent.web.servlet.CsrfTestServlet</servlet-class>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>CsrfTestServlet</servlet-name>
-        <url-pattern>/CSRF</url-pattern>
-    </servlet-mapping>
--->
-
-
-
-    <!-- XFormsPostServlet
-        Servlet to handle HTTP Post requests containing XForms. See XFormsFilter mapping comments for further
-         information
-     -->
-<!--
-    <servlet>
-        <servlet-name>XFormsPostServlet</servlet-name>
-        <servlet-class>de.betterform.agent.web.servlet.XFormsPostServlet</servlet-class>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>XFormsPostServlet</servlet-name>
-        <url-pattern>/XFormsPost</url-pattern>
-    </servlet-mapping>
--->
 
     <servlet>
         <servlet-name>inspector</servlet-name>
@@ -218,16 +136,6 @@
         <servlet-class>de.betterform.agent.web.servlet.UploadServlet</servlet-class>
     </servlet>
 
-<!--
-    <servlet>
-        <servlet-name>XFormsServlet</servlet-name>
-        <servlet-class>de.betterform.agent.web.servlet.XFormsRepeater</servlet-class>
-        <init-param>
-            <param-name>useragent</param-name>
-            <param-value>dojo</param-value>
-        </init-param>
-    </servlet>
--->
     <servlet-mapping>
         <servlet-name>Flux</servlet-name>
         <url-pattern>/Flux/*</url-pattern>
@@ -238,27 +146,6 @@
         <url-pattern>/FileUpload</url-pattern>
     </servlet-mapping>
 
-
-<!--
-    Umcomment the respective entries when using XFormsServlet or XFormsRequestServlet.
-
-    <servlet-mapping>
-        <servlet-name>XFormsServlet</servlet-name>
-        <url-pattern>/XFormsServlet</url-pattern>
-    </servlet-mapping>
-
-        <servlet-mapping>
-            <servlet-name>XFormsServlet</servlet-name>
-            <url-pattern>/XFormsServlet</url-pattern>
-        </servlet-mapping>
--->
-
-<!--
-        <servlet-mapping>
-            <servlet-name>XFormsRequest</servlet-name>
-            <url-pattern>/xfrequest</url-pattern>
-        </servlet-mapping>
--->
 
     <servlet-mapping>
         <servlet-name>ResourceServlet</servlet-name>
@@ -272,12 +159,6 @@
         <servlet-name>ViewServlet</servlet-name>
         <url-pattern>/view</url-pattern>
     </servlet-mapping>
-<!--
-    <servlet-mapping>
-        <servlet-name>XFormsServlet</servlet-name>
-        <url-pattern>/repeater/*</url-pattern>
-    </servlet-mapping>
--->
 
     <servlet>
         <servlet-name>FormsServlet</servlet-name>
@@ -301,30 +182,7 @@
         <servlet-name>FileStoreServlet</servlet-name>
         <url-pattern>/FileStore</url-pattern>
     </servlet-mapping>
-<!--
-    <security-constraint>
-        <web-resource-collection>
-            <web-resource-name>betterForm Member Area</web-resource-name>
-            <url-pattern>/jsp/*</url-pattern>
-            <http-method>DELETE</http-method>
-            <http-method>GET</http-method>
-            <http-method>POST</http-method>
-            <http-method>PUT</http-method>
-        </web-resource-collection>
-        <auth-constraint>
-            <role-name>tomcat</role-name>
-            <role-name>role1</role-name>
-        </auth-constraint>
-    </security-constraint>
-    <login-config>
-        <auth-method>FORM</auth-method>
-        <realm-name>Example Form-Based Authentication Area</realm-name>
-        <form-login-config>
-            <form-login-page>/login.jsp</form-login-page>
-            <form-error-page>/login_error.jsp</form-error-page>
-        </form-login-config>
-    </login-config>
--->
+
     <listener>
         <listener-class>de.betterform.agent.web.servlet.BfServletContextListener</listener-class>
     </listener>
