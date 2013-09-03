@@ -83,7 +83,7 @@
 
     <bean id="singleLogoutFilter" class="org.jasig.cas.client.session.SingleSignOutFilter"/>
     <bean id="requestSingleLogoutFilter" class="org.springframework.security.web.authentication.logout.LogoutFilter">
-        <constructor-arg value="${cas.server.host}/logout?service=${cas.service}"/>
+        <constructor-arg value="${cas.server.host}/logout?url=${cas.service}"/>
         <constructor-arg>
             <bean class="org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler"/>
         </constructor-arg>
