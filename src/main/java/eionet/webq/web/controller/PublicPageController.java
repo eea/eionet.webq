@@ -96,6 +96,17 @@ public class PublicPageController {
     }
 
     /**
+     * Redirects to welcome page after login.
+     *
+     * @param model holder for model attributes
+     * @return view name
+     */
+    @RequestMapping(value = "/login")
+    public String login(Model model) {
+        return welcome(model);
+    }
+
+    /**
      * Shows page which allows to perform SingleSignOut.
      *
      * @return view name

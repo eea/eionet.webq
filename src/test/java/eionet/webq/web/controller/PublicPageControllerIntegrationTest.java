@@ -56,6 +56,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 public class PublicPageControllerIntegrationTest extends AbstractContextControllerTests {
@@ -168,6 +169,16 @@ public class PublicPageControllerIntegrationTest extends AbstractContextControll
                 description.appendText("Expected 1 element with id greater than 0 and title=" + testFile.getTitle());
             }
         }));
+    }
+
+    @Test
+    public void loginReturnsWelcomeView() throws Exception {
+        request(get("/login")).andExpect(view().name("index"));
+    }
+
+    @Test
+    public void logoutReturnsLogoutAllAppsView() throws Exception {
+        request(get("/logout")).andExpect(view().name("logout_all_apps"));
     }
 
     private ResultActions requestIndexPage() throws Exception {

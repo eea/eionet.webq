@@ -14,7 +14,7 @@
                 <a href="<c:url value="/j_spring_security_logout"/>" id="logoutlink">Logout(${userName})</a>
             </c:when>
             <c:otherwise>
-                <a href="<c:url value="/projects/"/>" id="loginlink">Login</a>
+                <a href="<c:url value="/login"/>" id="loginlink">Login</a>
             </c:otherwise>
         </c:choose>
         <a id="printlink" title="Print this page" href="javascript:this.print();"><span>Print</span></a>
