@@ -6,4 +6,6 @@
        http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.2.xsd">
     <util:properties id="conversion" location="classpath:conversion_service.properties"/>
     <util:properties id="sql_statements" location="classpath:eionet/webq/dao/sql_statements.properties"/>
+    <util:properties id="cas" location="classpath:cas.properties"/>
+    <util:properties id="db" location="classpath:db.properties"/>
 </beans>
