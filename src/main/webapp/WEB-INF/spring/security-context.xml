@@ -77,6 +77,8 @@
 
     <security:user-service id="userService"> <!--TODO userService-->
         <security:user name="dmitrant" password="" authorities="ROLE_USER" />
+        <security:user name="kasperen" password="" authorities="ROLE_USER" />
+        <security:user name="roug" password="" authorities="ROLE_USER" />
     </security:user-service>
 
     <bean id="singleLogoutFilter" class="org.jasig.cas.client.session.SingleSignOutFilter"/>
