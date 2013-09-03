@@ -2,7 +2,6 @@
 <%@page pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@ taglib prefix="tiles" uri="http://tiles.apache.org/tags-tiles" %>
-<%@ taglib prefix="title" uri="http://tiles.apache.org/tags-tiles" %>
 
 <!DOCTYPE html>
 <html>
@@ -20,17 +19,11 @@
     <link rel="stylesheet" type="text/css" href="http://www.eionet.europa.eu/styles/eionet2007/screen.css" media="screen" title="Eionet 2007 style" />
     <link rel="stylesheet" type="text/css" href="<c:url value="/css/eionet2007.css"/>" media="screen" title="Eionet 2007 style" />
     <script type="text/javascript" src="<c:url value="/js/pageops.js"/>"></script>
-    <title:insertAttribute name="specific_header" ignore="true"/>
+    <tiles:insertAttribute name="specific_header" ignore="true"/>
 </head>
 <body>
 <div id="container">
     <tiles:insertAttribute name="header" />
-    <div id="leftcolumn" class="localnav">
-        <ul>
-            <li><a href="<c:url value="/"/>">My xml files</a></li>
-            <li><a href="<c:url value="/projects/"/>">Webform projects</a></li>
-        </ul>
-    </div>
     <div id="workarea" class="documentContent">
         <c:if test="${not empty message}">
             <div id="message" class="system-msg">${message}</div>
