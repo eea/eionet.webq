@@ -10,7 +10,7 @@
                   value="http://localhost:8080/webq2/j_spring_cas_security_check"/> <!--TODO app url-->
         <property name="sendRenew" value="false"/>
     </bean>
-
+    <!--Non UI actions and public, won't need any security -->
     <security:http security="none" pattern="/download/convert*"/>
     <security:http security="none" pattern="/download/user_file*"/>
     <security:http security="none" pattern="/upload*"/>
@@ -32,8 +32,9 @@
     <security:http security="none" pattern="/FormBrowser"/>
     <security:http security="none" pattern="/inspector/**"/>
     <security:http security="none" pattern="/error/**"/>
-    <security:http security="none" pattern="/"/>
+    <!--Security information is required-->
     <security:http entry-point-ref="casEntryPoint" pattern="/**" use-expressions="true">
+        <security:intercept-url pattern="/" access="permitAll()"/>
         <security:intercept-url pattern="/**" access="isAuthenticated()"/>
         <security:custom-filter position="CAS_FILTER" ref="casFilter" />
     </security:http>

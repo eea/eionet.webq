@@ -1,4 +1,5 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags"%>
 
 <div id="toolribbon">
     <div id="lefttools">
@@ -6,7 +7,16 @@
         <a id="ewlink" href="http://www.ewindows.eu.org/">EnviroWindows</a>
     </div>
     <div id="righttools">
-        <a href="<c:url value="/projects/"/>" id="loginlink">Login</a>
+        <sec:authorize access="isAuthenticated()" var="authenticated"/>
+        <c:choose>
+            <c:when test="${authenticated}">
+                <sec:authentication property="name" var="userName"/>
+                <a href="<c:url value="/logout"/>" id="logoutlink">Logout(${userName})</a>
+            </c:when>
+            <c:otherwise>
+                <a href="<c:url value="/projects/"/>" id="loginlink">Login</a>
+            </c:otherwise>
+        </c:choose>
         <a id="printlink" title="Print this page" href="javascript:this.print();"><span>Print</span></a>
         <a id="fullscreenlink" href="javascript:toggleFullScreenMode()" title="Switch to/from full screen mode"><span>Switch to/from full screen mode</span></a>
         <%--TODO about page--%>
