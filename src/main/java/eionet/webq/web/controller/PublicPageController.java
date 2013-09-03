@@ -84,7 +84,7 @@ public class PublicPageController {
      * @param model holder for model attributes
      * @return view name
      */
-    @RequestMapping(value = "/", method = RequestMethod.GET)
+    @RequestMapping(value = "/")
     public String welcome(Model model) {
         model.addAttribute("uploadedFiles", allFilesWithConversions());
         model.addAttribute("allWebForms", allWebForms());
@@ -93,6 +93,16 @@ public class PublicPageController {
             model.addAttribute(uploadForm, new UploadForm());
         }
         return "index";
+    }
+
+    /**
+     * Shows page which allows to perform SingleSignOut.
+     *
+     * @return view name
+     */
+    @RequestMapping(value = "/logout")
+    public String logout() {
+        return "logout_all_apps";
     }
 
     /**
