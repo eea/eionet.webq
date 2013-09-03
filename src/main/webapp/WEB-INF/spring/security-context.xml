@@ -6,33 +6,12 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
        http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
 
-    <!--Non UI actions and public, won't need any security -->
-    <security:http security="none" pattern="/download/convert*"/>
-    <security:http security="none" pattern="/download/user_file*"/>
-    <security:http security="none" pattern="/upload*"/>
-    <security:http security="none" pattern="/saveXml"/>
-    <security:http security="none" pattern="/remove/files*"/>
-    <security:http security="none" pattern="/startWebform*"/>
-    <security:http security="none" pattern="/xform/**"/>
-    <security:http security="none" pattern="/bfResources/**"/>
-    <security:http security="none" pattern="/*.html"/>
-    <security:http security="none" pattern="/forms/**"/>
-    <security:http security="none" pattern="/js/**"/>
-    <security:http security="none" pattern="/css/**"/>
-    <security:http security="none" pattern="/images/**"/>
-    <security:http security="none" pattern="/Flux/**"/>
-    <security:http security="none" pattern="/FileUpload*"/>
-    <security:http security="none" pattern="/PlainHtml/**"/>
-    <security:http security="none" pattern="/view"/>
-    <security:http security="none" pattern="/FileStore"/>
-    <security:http security="none" pattern="/FormBrowser"/>
-    <security:http security="none" pattern="/inspector/**"/>
-    <security:http security="none" pattern="/error/**"/>
     <!--Security information is required-->
     <security:http entry-point-ref="casEntryPoint" pattern="/**" use-expressions="true">
-        <security:intercept-url pattern="/" access="permitAll()"/>
-        <security:intercept-url pattern="/logout" access="permitAll()"/>
-        <security:intercept-url pattern="/**" access="isAuthenticated()"/>
+        <security:intercept-url pattern="/login" access="isAuthenticated()"/>
+        <security:intercept-url pattern="/projects/**" access="isAuthenticated()"/>
+        <security:intercept-url pattern="/download/project/**" access="isAuthenticated()"/>
+        <security:intercept-url pattern="/**" access="permitAll()"/>
         <security:custom-filter position="CAS_FILTER" ref="casFilter" />
         <security:logout logout-success-url="/logout"/>
         <security:custom-filter ref="requestSingleLogoutFilter" before="LOGOUT_FILTER"/>
