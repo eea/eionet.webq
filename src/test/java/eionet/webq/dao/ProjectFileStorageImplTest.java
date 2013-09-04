@@ -104,6 +104,7 @@ public class ProjectFileStorageImplTest {
         assertThat(uploadedFile.getXmlSchema(), equalTo(testFileForUpload.getXmlSchema()));
         assertThat(uploadedFile.isActive(), equalTo(testFileForUpload.isActive()));
         assertThat(uploadedFile.isMainForm(), equalTo(testFileForUpload.isMainForm()));
+        assertThat(uploadedFile.getRemoteFileUrl(), equalTo(testFileForUpload.getRemoteFileUrl()));
     }
 
     @Test
@@ -139,6 +140,7 @@ public class ProjectFileStorageImplTest {
         beforeUpdate.setDescription("brand new description");
         beforeUpdate.setEmptyInstanceUrl("brand new instance url");
         beforeUpdate.setNewXmlFileName("brand new xml file name");
+        beforeUpdate.setRemoteFileUrl("brand-new-remote-file-url");
         beforeUpdate.setActive(true);
         beforeUpdate.setMainForm(true);
 
@@ -313,6 +315,7 @@ public class ProjectFileStorageImplTest {
         assertThat(after.getDescription(), equalTo(before.getDescription()));
         assertThat(after.isActive(), equalTo(before.isActive()));
         assertThat(after.isMainForm(), equalTo(before.isMainForm()));
+        assertThat(after.getRemoteFileUrl(), equalTo(before.getRemoteFileUrl()));
     }
 
     private int addOneFile() {
@@ -334,6 +337,7 @@ public class ProjectFileStorageImplTest {
         projectFile.setDescription("Main web form for questionnaire");
         projectFile.setUserName("User Name");
         projectFile.setFile(new UploadedFile("test-filename", "Web-form content".getBytes()));
+        projectFile.setRemoteFileUrl("localhost/test-file.xml");
         projectFile.setEmptyInstanceUrl("empty-instance-url");
         projectFile.setNewXmlFileName("new-xml-file-name");
         projectFile.setXmlSchema("test-xml-schema");

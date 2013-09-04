@@ -31,6 +31,7 @@ CREATE TABLE IF NOT EXISTS PROJECT_FILE(
   file_name varchar(255),
   file_size_in_bytes bigint,
   file_type varchar(255),
+  remote_file_url varchar(500),
   new_xml_file_name varchar(255),
   empty_instance_url varchar(255),
   file_content mediumblob,

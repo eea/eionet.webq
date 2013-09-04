@@ -21,6 +21,7 @@ CREATE TABLE IF NOT EXISTS PROJECT_FILE(
   title varchar2(255),
   file_name varchar2(255),
   file_size_in_bytes varchar2(255),
+  remote_file_url varchar2(500),
   new_xml_file_name varchar2(255),
   empty_instance_url varchar2(255),
   file_content blob,

@@ -74,13 +74,14 @@ public class ProjectFileStorageImpl extends AbstractDao<ProjectFile>
                         ps.setLong(5, projectFile.getFileSizeInBytes());
                         ProjectFileType fileType = projectFile.getFileType();
                         ps.setString(6, fileType != null ? fileType.name() : null);
-                        ps.setString(7, projectFile.getNewXmlFileName());
-                        ps.setString(8, projectFile.getEmptyInstanceUrl());
-                        ps.setString(9, projectFile.getXmlSchema());
-                        ps.setString(10, projectFile.getDescription());
-                        ps.setString(11, projectFile.getUserName());
-                        ps.setBoolean(12, projectFile.isActive());
-                        ps.setBoolean(13, projectFile.isMainForm());
+                        ps.setString(7, projectFile.getRemoteFileUrl());
+                        ps.setString(8, projectFile.getNewXmlFileName());
+                        ps.setString(9, projectFile.getEmptyInstanceUrl());
+                        ps.setString(10, projectFile.getXmlSchema());
+                        ps.setString(11, projectFile.getDescription());
+                        ps.setString(12, projectFile.getUserName());
+                        ps.setBoolean(13, projectFile.isActive());
+                        ps.setBoolean(14, projectFile.isMainForm());
                     }
                 }
                 , keyHolder);
@@ -112,6 +113,7 @@ public class ProjectFileStorageImpl extends AbstractDao<ProjectFile>
                     lobCreator.setBlobAsBytes(ps, index++, projectFile.getFileContent());
                     ps.setLong(index++, projectFile.getFileSizeInBytes());
                 }
+                ps.setString(index++, projectFile.getRemoteFileUrl());
                 ps.setString(index++, projectFile.getNewXmlFileName());
                 ps.setString(index++, projectFile.getEmptyInstanceUrl());
                 ps.setTimestamp(index++, new Timestamp(System.currentTimeMillis()));
