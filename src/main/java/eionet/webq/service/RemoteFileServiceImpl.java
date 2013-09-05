@@ -40,16 +40,16 @@ public class RemoteFileServiceImpl implements RemoteFileService {
     RestOperations downloader;
 
     @Override
-    public byte[] fileContent(String remoteFileUrl) {
+    public byte[] fileContent(String remoteFileUrl) throws FileNotAvailableException {
         ResponseEntity<byte[]> download = downloader.getForEntity(remoteFileUrl, byte[].class);
         if (download.getStatusCode() != HttpStatus.OK || !download.hasBody()) {
-            throw new RuntimeException("Response is not OK for " + remoteFileUrl);
+            throw new FileNotAvailableException("Response is not OK or body not attached for " + remoteFileUrl);
         }
         return download.getBody();
     }
 
     @Override
-    public boolean isChecksumMatches(byte[] localFile, String remoteFileUrl) {
+    public boolean isChecksumMatches(byte[] localFile, String remoteFileUrl) throws FileNotAvailableException {
         byte[] remoteFile = fileContent(remoteFileUrl);
         return crc32Checksum(localFile) == crc32Checksum(remoteFile);
     }

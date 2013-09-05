@@ -35,8 +35,6 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
-/**
- */
 public class RemoteFileServiceImplTest {
     private final byte[] FILE_CONTENT_IN_RESPONSE = "test file content".getBytes();
     @InjectMocks
@@ -57,6 +55,20 @@ public class RemoteFileServiceImplTest {
         assertThat(bytes, equalTo(FILE_CONTENT_IN_RESPONSE));
     }
 
+    @Test(expected = FileNotAvailableException.class)
+    public void throwsExceptionIfResponseIsNotOK() throws Exception {
+        httpResponseWithBytes(FILE_CONTENT_IN_RESPONSE, HttpStatus.BAD_REQUEST);
+
+        remoteFileService.fileContent(url);
+    }
+
+    @Test(expected = FileNotAvailableException.class)
+    public void throwsExceptionIfResponseDoesNotHaveBody() throws Exception {
+        httpResponseWithBytes(null, HttpStatus.OK);
+
+        remoteFileService.fileContent(url);
+    }
+
     @Test
     public void checksumForFilesMustBeEqual() throws Exception {
         httpResponseWithBytes();
@@ -71,8 +83,11 @@ public class RemoteFileServiceImplTest {
     }
 
     private void httpResponseWithBytes() {
-        when(restOperations.getForEntity(url, byte[].class))
-                .thenReturn(new ResponseEntity<byte[]>(FILE_CONTENT_IN_RESPONSE, HttpStatus.OK));
+        httpResponseWithBytes(FILE_CONTENT_IN_RESPONSE, HttpStatus.OK);
     }
 
+    private void httpResponseWithBytes(byte[] responseBody, HttpStatus status) {
+        when(restOperations.getForEntity(url, byte[].class))
+                .thenReturn(new ResponseEntity<byte[]>(responseBody, status));
+    }
 }

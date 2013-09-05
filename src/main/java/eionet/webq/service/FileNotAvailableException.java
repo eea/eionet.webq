@@ -21,26 +21,16 @@
 package eionet.webq.service;
 
 /**
- * Remote files service through {@link java.net.URL}.
+ * Exception signals that file request returned
+ * NOT {@link org.springframework.http.HttpStatus.OK} code or response has no body attached.
  */
-public interface RemoteFileService {
+public class FileNotAvailableException extends Exception {
     /**
-     * Fetches file content from url.
+     * Constructs this exception with message.
      *
-     * @param remoteFileUrl url
-     * @return bytes of content
-     * @throws FileNotAvailableException if response is not OK
+     * @param message message describing exception.
      */
-    byte[] fileContent(String remoteFileUrl) throws FileNotAvailableException;
-
-    /**
-     * Checks whether checksum match.
-     *
-     * @param localFile local file bytes
-     * @param remoteFileUrl remote file url.
-     * @return checksum comparison result.
-     * @throws FileNotAvailableException if response is not OK
-     */
-    boolean isChecksumMatches(byte[] localFile, String remoteFileUrl) throws FileNotAvailableException;
-
+    public FileNotAvailableException(String message) {
+        super(message);
+    }
 }
