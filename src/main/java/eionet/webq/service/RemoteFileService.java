@@ -20,8 +20,6 @@
  */
 package eionet.webq.service;
 
-import java.net.URL;
-
 /**
  * Remote files service through {@link java.net.URL}.
  */
@@ -29,10 +27,10 @@ public interface RemoteFileService {
     /**
      * Fetches file content from url.
      *
-     * @param url url
+     * @param remoteFileUrl url
      * @return bytes of content
      */
-    byte[] fileContent(URL url);
+    byte[] fileContent(String remoteFileUrl);
 
     /**
      * Checks whether checksum match.
@@ -41,5 +39,5 @@ public interface RemoteFileService {
      * @param remoteFileUrl remote file url.
      * @return checksum comparison result.
      */
-    boolean isChecksumMatches(byte[] localFile, URL remoteFileUrl);
+    boolean isChecksumMatches(byte[] localFile, String remoteFileUrl);
 }

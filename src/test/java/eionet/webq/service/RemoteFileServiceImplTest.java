@@ -20,88 +20,59 @@
  */
 package eionet.webq.service;
 
-import org.apache.commons.io.IOUtils;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.simpleframework.http.Request;
-import org.simpleframework.http.Response;
-import org.simpleframework.http.core.Container;
-import org.simpleframework.http.core.ContainerServer;
-import org.simpleframework.transport.Server;
-import org.simpleframework.transport.connect.Connection;
-import org.simpleframework.transport.connect.SocketConnection;
-import org.springframework.http.MediaType;
-
-import java.io.IOException;
-import java.io.OutputStream;
-import java.net.InetSocketAddress;
-import java.net.ServerSocket;
-import java.net.URI;
-import java.net.URL;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.RestOperations;
 
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.mockito.Mockito.when;
 
 /**
  */
 public class RemoteFileServiceImplTest {
     private final byte[] FILE_CONTENT_IN_RESPONSE = "test file content".getBytes();
-    private RemoteFileService remoteFileService = new RemoteFileServiceImpl();
-    private Connection connection;
-    private URL url;
+    @InjectMocks
+    private RemoteFileServiceImpl remoteFileService;
+    @Mock
+    RestOperations restOperations;
+    private final String url = "http://file.url";
 
     @Before
     public void setUp() throws Exception {
-        Server server = new ContainerServer(new FileResponse());
-        ServerSocket serverSocket = new ServerSocket(0);
-        InetSocketAddress address = new InetSocketAddress(serverSocket.getLocalPort());
-        serverSocket.close();
-        url = new URI("http://" + address.getHostName() + ":" + address.getPort()).toURL();
-        connection = new SocketConnection(server);
-        connection.connect(address);
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        connection.close();
+        MockitoAnnotations.initMocks(this);
     }
 
     @Test
     public void fetchesFileContentFromUrl() throws Exception {
+        httpResponseWithBytes();
         byte[] bytes = remoteFileService.fileContent(url);
         assertThat(bytes, equalTo(FILE_CONTENT_IN_RESPONSE));
     }
 
     @Test
     public void checksumForFilesMustBeEqual() throws Exception {
+        httpResponseWithBytes();
         assertTrue(remoteFileService.isChecksumMatches(FILE_CONTENT_IN_RESPONSE, url));
     }
 
     @Test
     public void filesMustMismatch() throws Exception {
+        httpResponseWithBytes();
         byte[] otherContent = "some other test file content".getBytes();
         assertFalse(remoteFileService.isChecksumMatches(otherContent, url));
     }
 
-    private final class FileResponse implements Container {
-        @Override
-        public void handle(Request request, Response response) {
-            OutputStream outputStream = null;
-            try {
-                response.setContentType(MediaType.TEXT_XML_VALUE);
-                response.setContentLength(FILE_CONTENT_IN_RESPONSE.length);
-                outputStream = response.getOutputStream();
-                IOUtils.write(FILE_CONTENT_IN_RESPONSE, outputStream);
-            } catch (IOException e) {
-                e.printStackTrace();
-                fail("Unable to write response.");
-            } finally {
-                IOUtils.closeQuietly(outputStream);
-            }
-        }
+    private void httpResponseWithBytes() {
+        when(restOperations.getForEntity(url, byte[].class))
+                .thenReturn(new ResponseEntity<byte[]>(FILE_CONTENT_IN_RESPONSE, HttpStatus.OK));
     }
+
 }

@@ -20,11 +20,12 @@
  */
 package eionet.webq.service;
 
-import org.apache.commons.io.IOUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestOperations;
 
-import java.io.IOException;
-import java.net.URL;
 import java.util.zip.CRC32;
 
 /**
@@ -32,19 +33,23 @@ import java.util.zip.CRC32;
  */
 @Service
 public class RemoteFileServiceImpl implements RemoteFileService {
+    /**
+     * Used for file download.
+     */
+    @Autowired
+    RestOperations downloader;
 
     @Override
-    public byte[] fileContent(URL fileLocation) {
-        try {
-            return IOUtils.toByteArray(fileLocation.openStream());
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw new RuntimeException(e);
+    public byte[] fileContent(String remoteFileUrl) {
+        ResponseEntity<byte[]> download = downloader.getForEntity(remoteFileUrl, byte[].class);
+        if (download.getStatusCode() != HttpStatus.OK || !download.hasBody()) {
+            throw new RuntimeException("Response is not OK for " + remoteFileUrl);
         }
+        return download.getBody();
     }
 
     @Override
-    public boolean isChecksumMatches(byte[] localFile, URL remoteFileUrl) {
+    public boolean isChecksumMatches(byte[] localFile, String remoteFileUrl) {
         byte[] remoteFile = fileContent(remoteFileUrl);
         return crc32Checksum(localFile) == crc32Checksum(remoteFile);
     }
