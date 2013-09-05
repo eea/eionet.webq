@@ -13,7 +13,10 @@
 </div>
 <h1>Project: ${projectEntry.projectId}</h1>
 <p><strong>${projectEntry.description}</strong> (created <fmt:formatDate pattern="dd MMM yyyy" value="${projectEntry.created}" />)</p>
-
+<c:if test="${not empty fileToUpdate}">
+    <div class="system-msg">File ${fileToUpdate} could be updated from remote storage.
+        <a href="<c:url value="/projects/remote/update/${projectEntry.projectId}/file/${fileToUpdateId}"/>">Click here to update it</a></div>
+</c:if>
 <c:if test="${empty allProjectFiles}">
     <h2>Project files</h2>
     <div>No project files yet.</div>
@@ -26,7 +29,7 @@
     <table class="datatable">
         <thead>
             <tr>
-                <th/>
+                <th></th>
                 <th>Title</th>
                 <th>File</th>
                 <th>Last modified</th>
@@ -35,6 +38,7 @@
                     <th>Main form</th>
                 </c:if>
                 <th>Username</th>
+                <th>Check for updates</th>
             </tr>
         </thead>
         <tbody>
@@ -51,6 +55,16 @@
                     <td><input type="checkbox" ${projectFile.mainForm ? 'checked="checked"' : ''} disabled="disabled"/></td>
                 </c:if>
                 <td>${projectFile.userName}</td>
+                <td>
+                    <c:choose>
+                        <c:when test="${not empty projectFile.remoteFileUrl}">
+                            <input type="button" onclick="window.location = '<c:url value="/projects/remote/check/updates/${projectEntry.projectId}/file/${projectFile.id}"/>'" value="Check">
+                        </c:when>
+                        <c:otherwise>
+                            No remote file URL
+                        </c:otherwise>
+                    </c:choose>
+                </td>
             </tr>
             <tr class="dialogTemplate">
                 <td colspan="5">

@@ -48,6 +48,10 @@
                 </tr>
             </c:if>
             <tr>
+                <th scope="row"><label for="remoteFileUrl">Remote file URL</label></th>
+                <td><f:input path="remoteFileUrl" style="width:500px"/></td>
+            </tr>
+            <tr>
                 <th scope="row"><label for="description">Description</label></th>
                 <td><f:textarea path="description" cols="60"/></td>
             </tr>

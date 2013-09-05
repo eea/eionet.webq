@@ -24,9 +24,13 @@ import eionet.webq.dto.ProjectEntry;
 import eionet.webq.dto.ProjectFile;
 import eionet.webq.dto.ProjectFileType;
 import eionet.webq.dto.util.ProjectFileInfo;
+import eionet.webq.service.FileNotAvailableException;
 import eionet.webq.service.ProjectFileService;
 import eionet.webq.service.ProjectService;
+import eionet.webq.service.RemoteFileService;
+import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -36,8 +40,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-
-import javax.validation.Valid;
 
 /**
  * Spring controller to manage projects.
@@ -60,6 +62,11 @@ public class ProjectsController {
      */
     static final String ALL_PROJECT_FILES_ATTRIBUTE = "allProjectFiles";
     /**
+     * Message source.
+     */
+    @Autowired
+    MessageSourceAccessor messages;
+    /**
      * Access to project folders.
      */
     @Autowired
@@ -69,6 +76,11 @@ public class ProjectsController {
      */
     @Autowired
     private ProjectFileService projectFileService;
+    /**
+     * Access to remote files.
+     */
+    @Autowired
+    private RemoteFileService remoteFileService;
 
     /**
      * All projects handler.
@@ -218,9 +230,35 @@ public class ProjectsController {
      */
     @RequestMapping(value = "/{projectFolderId}/webform/remove")
     public String removeWebForm(@PathVariable String projectFolderId, @RequestParam int[] fileId, Model model) {
-        ProjectEntry byProjectId = projectService.getByProjectId(projectFolderId);
-        projectFileService.remove(byProjectId, fileId);
-        return viewProject(byProjectId, model);
+        ProjectEntry project = projectService.getByProjectId(projectFolderId);
+        projectFileService.remove(project, fileId);
+        return viewProject(project, model);
+    }
+
+    /**
+     * Checks whether file is eligible for update from remote source.
+     *
+     * @param projectFolderId project id for file
+     * @param fileId file name
+     * @param model model attributes holder
+     * @return view name
+     */
+    @RequestMapping(value = "/remote/check/updates/{projectFolderId}/file/{fileId}")
+    public String checkForUpdates(@PathVariable String projectFolderId, @PathVariable int fileId, Model model) {
+        ProjectEntry project = projectService.getByProjectId(projectFolderId);
+        ProjectFile file = projectFileService.getById(fileId);
+        String fileName = file.getFileName();
+        try {
+            if (remoteFileService.isChecksumMatches(file.getFileContent(), file.getRemoteFileUrl())) {
+                model.addAttribute("message", messages.getMessage("no.updates.for.file", new Object[] {fileName}));
+            } else {
+                model.addAttribute("fileToUpdate", fileName);
+                model.addAttribute("fileToUpdateId", file.getId());
+            }
+        } catch (FileNotAvailableException e) {
+            model.addAttribute("message", messages.getMessage("remote.file.not.available", new Object[] {fileName}));
+        }
+        return viewProject(project, model);
     }
 
     /**

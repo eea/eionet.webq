@@ -1,39 +1,48 @@
 package eionet.webq.web.controller;
 
-import eionet.webq.dao.ProjectFolders;
-import eionet.webq.dto.ProjectEntry;
-import eionet.webq.dto.ProjectFile;
-import eionet.webq.dto.ProjectFileType;
-import eionet.webq.dto.UploadedFile;
-import eionet.webq.service.ProjectFileService;
-import org.hamcrest.BaseMatcher;
-import org.hamcrest.Description;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
-import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-import org.springframework.util.MultiValueMap;
-
-import java.util.Collection;
-
 import static eionet.webq.web.controller.ProjectsController.PROJECT_ENTRY_MODEL_ATTRIBUTE;
 import static eionet.webq.web.controller.ProjectsController.WEB_FORM_UPLOAD_ATTRIBUTE;
 import static java.lang.String.valueOf;
 import static org.hamcrest.core.IsEqual.equalTo;
+import static org.hamcrest.core.IsNull.nullValue;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.fileUpload;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
+
+import eionet.webq.dao.ProjectFolders;
+import eionet.webq.dto.ProjectEntry;
+import eionet.webq.dto.ProjectFile;
+import eionet.webq.dto.ProjectFileType;
+import eionet.webq.dto.UploadedFile;
+import eionet.webq.service.ProjectFileService;
+import java.util.Collection;
+import java.util.Locale;
+import org.hamcrest.BaseMatcher;
+import org.hamcrest.Description;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.support.MessageSourceAccessor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestOperations;
 
 /*
  * The contents of this file are subject to the Mozilla Public
@@ -64,6 +73,10 @@ public class ProjectsControllerIntegrationTest extends AbstractProjectsControlle
     private ProjectFolders projectFolders;
     @Autowired
     private ProjectFileService projectFileService;
+    @Autowired
+    private RestOperations fileDownload;
+    @Autowired
+    MessageSourceAccessor messages;
 
     @Test
     public void returnsAllProjectsViewName() throws Exception {
@@ -245,6 +258,46 @@ public class ProjectsControllerIntegrationTest extends AbstractProjectsControlle
                 content().bytes(testWebFormUpload().getFileContent()));
     }
 
+    @Test
+    public void checkFileChangesFromRemoteLocation() throws Exception {
+        uploadFilesForDefaultProject(1);
+        when(fileDownload.getForEntity(anyString(), eq(byte[].class)))
+                .thenReturn(new ResponseEntity<byte[]>("test-file-content".getBytes(), HttpStatus.OK));
+        ProjectFile uploadedFile = theOnlyOneUploadedFile();
+
+        request(MockMvcRequestBuilders.get("/projects/remote/check/updates/" + DEFAULT_PROJECT_ID + "/file/" + uploadedFile.getId()))
+                .andExpect(model().attribute("fileToUpdate", uploadedFile.getFileName()))
+                .andExpect(model().attribute("fileToUpdateId", uploadedFile.getId()));
+    }
+
+    @Test
+    public void returnsMessageIfNoChangesRequired() throws Exception {
+        ProjectFile file = uploadFilesForDefaultProject(1);
+        when(fileDownload.getForEntity(anyString(), eq(byte[].class)))
+                .thenReturn(new ResponseEntity<byte[]>(file.getFileContent(), HttpStatus.OK));
+        ProjectFile uploadedFile = theOnlyOneUploadedFile();
+
+        request(MockMvcRequestBuilders.get("/projects/remote/check/updates/" + DEFAULT_PROJECT_ID + "/file/" + uploadedFile.getId()))
+                .andExpect(model().attribute("fileToUpdate", nullValue()))
+                .andExpect(model().attribute("fileToUpdateId", nullValue()))
+                .andExpect(model().attribute("message",
+                        messages.getMessage("no.updates.for.file", new Object[]{uploadedFile.getFileName()})));
+    }
+
+    @Test
+    public void whenFileNotAccessibleShowsMessage() throws Exception {
+        uploadFilesForDefaultProject(1);
+        when(fileDownload.getForEntity(anyString(), eq(byte[].class)))
+                .thenReturn(new ResponseEntity<byte[]>(HttpStatus.BAD_REQUEST));
+        ProjectFile uploadedFile = theOnlyOneUploadedFile();
+
+        request(MockMvcRequestBuilders.get("/projects/remote/check/updates/" + DEFAULT_PROJECT_ID + "/file/" + uploadedFile.getId()))
+                .andExpect(model().attribute("fileToUpdate", nullValue()))
+                .andExpect(model().attribute("fileToUpdateId", nullValue()))
+                .andExpect(model().attribute("message", messages.getMessage("remote.file.not.available",
+                        new Object[]{uploadedFile.getFileName()})));
+    }
+
     private ProjectFile theOnlyOneUploadedFile() {
         Collection<ProjectFile> projectFiles = allFilesForDefaultProject();
         assertThat(projectFiles.size(), equalTo(1));
@@ -282,6 +335,7 @@ public class ProjectsControllerIntegrationTest extends AbstractProjectsControlle
         projectFile.setTitle("title");
         projectFile.setFileType(ProjectFileType.WEBFORM);
         projectFile.setFile(new UploadedFile("file-name", "test-content".getBytes()));
+        projectFile.setRemoteFileUrl("file.url");
         projectFile.setUserName("test-user");
         return projectFile;
     }

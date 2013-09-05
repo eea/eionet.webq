@@ -40,7 +40,11 @@
     </bean>
 
     <bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource">
-        <property name="basename" value="messages/error_messages"/>
+        <property name="basename" value="messages/application_messages"/>
+    </bean>
+
+    <bean id="messageSourceAncestor" class="org.springframework.context.support.MessageSourceAccessor">
+        <constructor-arg index="0" ref="messageSource"/>
     </bean>
 
     <bean id="validator" class="org.springframework.validation.beanvalidation.LocalValidatorFactoryBean">
