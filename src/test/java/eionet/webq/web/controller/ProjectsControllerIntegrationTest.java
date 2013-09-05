@@ -1,31 +1,11 @@
 package eionet.webq.web.controller;
 
-import static eionet.webq.web.controller.ProjectsController.PROJECT_ENTRY_MODEL_ATTRIBUTE;
-import static eionet.webq.web.controller.ProjectsController.WEB_FORM_UPLOAD_ATTRIBUTE;
-import static java.lang.String.valueOf;
-import static org.hamcrest.core.IsEqual.equalTo;
-import static org.hamcrest.core.IsNull.nullValue;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.fileUpload;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
-
 import eionet.webq.dao.ProjectFolders;
 import eionet.webq.dto.ProjectEntry;
 import eionet.webq.dto.ProjectFile;
 import eionet.webq.dto.ProjectFileType;
 import eionet.webq.dto.UploadedFile;
 import eionet.webq.service.ProjectFileService;
-import java.util.Collection;
-import java.util.Locale;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.junit.Test;
@@ -43,6 +23,26 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestOperations;
+
+import java.util.Collection;
+
+import static eionet.webq.web.controller.ProjectsController.PROJECT_ENTRY_MODEL_ATTRIBUTE;
+import static eionet.webq.web.controller.ProjectsController.WEB_FORM_UPLOAD_ATTRIBUTE;
+import static java.lang.String.valueOf;
+import static org.hamcrest.core.IsEqual.equalTo;
+import static org.hamcrest.core.IsNull.nullValue;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.fileUpload;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
 /*
  * The contents of this file are subject to the Mozilla Public
@@ -296,6 +296,33 @@ public class ProjectsControllerIntegrationTest extends AbstractProjectsControlle
                 .andExpect(model().attribute("fileToUpdateId", nullValue()))
                 .andExpect(model().attribute("message", messages.getMessage("remote.file.not.available",
                         new Object[]{uploadedFile.getFileName()})));
+    }
+
+    @Test
+    public void allowsFileUpdateFromRemote() throws Exception {
+        uploadFilesForDefaultProject(1);
+        byte[] newContent = "new-file-content".getBytes();
+        when(fileDownload.getForEntity(anyString(), eq(byte[].class)))
+                .thenReturn(new ResponseEntity<byte[]>(newContent, HttpStatus.OK));
+        ProjectFile uploadedFile = theOnlyOneUploadedFile();
+        request(MockMvcRequestBuilders.get("/projects/remote/update/" + DEFAULT_PROJECT_ID + "/file/" + uploadedFile.getId()));
+
+        ProjectEntry defaultProject = projectFolders.getByProjectId(DEFAULT_PROJECT_ID);
+        assertThat(projectFileService.fileContentBy(uploadedFile.getFileName(), defaultProject).getFileContent(), equalTo(newContent));
+    }
+
+    @Test
+    public void showsErrorMessageWhenRemoteFileNotAccesible() throws Exception {
+        ProjectFile testFile = uploadFilesForDefaultProject(1);
+        when(fileDownload.getForEntity(anyString(), eq(byte[].class)))
+                .thenReturn(new ResponseEntity<byte[]>(HttpStatus.BAD_REQUEST));
+        ProjectFile uploadedFile = theOnlyOneUploadedFile();
+        request(MockMvcRequestBuilders.get("/projects/remote/update/" + DEFAULT_PROJECT_ID + "/file/" + uploadedFile.getId()))
+                .andExpect(model().attribute("message", messages.getMessage("unable.to.update.file")));
+
+        ProjectEntry defaultProject = projectFolders.getByProjectId(DEFAULT_PROJECT_ID);
+        assertThat(projectFileService.fileContentBy(uploadedFile.getFileName(), defaultProject).getFileContent(),
+                equalTo(testFile.getFileContent()));
     }
 
     private ProjectFile theOnlyOneUploadedFile() {

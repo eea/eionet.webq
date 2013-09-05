@@ -92,6 +92,13 @@ public class ProjectFileServiceImpl implements ProjectFileService {
         return projectFileStorage.allFilesFor(project);
     }
 
+    @Override
+    public void updateContent(int id, byte[] content, ProjectEntry project) {
+        ProjectFile file = projectFileStorage.fileById(id);
+        file.setFileContent(content);
+        projectFileStorage.update(file, project);
+    }
+
     /**
      * Try to extract xml schema from file content if required.
      *

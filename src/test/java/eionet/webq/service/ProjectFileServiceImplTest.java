@@ -152,6 +152,15 @@ public class ProjectFileServiceImplTest {
         verify(projectFileStorage).allFilesFor(project);
     }
 
+    @Test
+    public void savesNewFileContent() throws Exception {
+        when(projectFileStorage.fileById(1)).thenReturn(testFile);
+        service.updateContent(1, "new-content".getBytes(), testProject);
+
+        verify(projectFileStorage).fileById(1);
+        verify(projectFileStorage).update(testFile, testProject);
+    }
+
     private ProjectFile fileWithType(ProjectFileType type) {
         ProjectFile file = new ProjectFile();
         file.setFileType(type);

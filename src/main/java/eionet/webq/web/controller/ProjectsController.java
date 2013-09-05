@@ -28,7 +28,6 @@ import eionet.webq.service.FileNotAvailableException;
 import eionet.webq.service.ProjectFileService;
 import eionet.webq.service.ProjectService;
 import eionet.webq.service.RemoteFileService;
-import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.dao.DuplicateKeyException;
@@ -40,6 +39,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+
+import javax.validation.Valid;
 
 /**
  * Spring controller to manage projects.
@@ -257,6 +258,26 @@ public class ProjectsController {
             }
         } catch (FileNotAvailableException e) {
             model.addAttribute("message", messages.getMessage("remote.file.not.available", new Object[] {fileName}));
+        }
+        return viewProject(project, model);
+    }
+
+    /**
+     * Updates project content.
+     *
+     * @param projectFolderId project folder id associated with file
+     * @param fileId file id
+     * @param model model attribute holder
+     * @return view name
+     */
+    @RequestMapping(value = "/remote/update/{projectFolderId}/file/{fileId}")
+    public String updateFileContent(@PathVariable String projectFolderId, @PathVariable int fileId, Model model) {
+        ProjectEntry project = projectService.getByProjectId(projectFolderId);
+        ProjectFile file = projectFileService.getById(fileId); //TODO no  file content here
+        try {
+            projectFileService.updateContent(fileId, remoteFileService.fileContent(file.getRemoteFileUrl()), project);
+        } catch (FileNotAvailableException e) {
+            model.addAttribute("message", messages.getMessage("unable.to.update.file"));
         }
         return viewProject(project, model);
     }

@@ -40,6 +40,15 @@ public interface ProjectFileService {
     void saveOrUpdate(ProjectFile file, ProjectEntry project);
 
     /**
+     * Updates file content.
+     *
+     * @param id file id in storage
+     * @param content new file content
+     * @param project project this file belongs
+     */
+    void updateContent(int id, byte[] content, ProjectEntry project);
+
+    /**
      * Retrieve file data by id in storage without file content.
      * To get content consider usage of {@link ProjectFileService#fileContentBy(String, ProjectEntry)}
      *
