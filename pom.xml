@@ -19,6 +19,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <spring-security.version>3.1.4.RELEASE</spring-security.version>
+        <env>local</env>
     </properties>
 
     <repositories>
@@ -271,7 +272,7 @@
             </plugin>
         </plugins>
         <filters>
-            <filter>config/local.properties</filter>
+            <filter>config/${env}.properties</filter>
         </filters>
         <resources>
             <resource>
