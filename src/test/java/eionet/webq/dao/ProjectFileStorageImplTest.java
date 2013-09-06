@@ -20,11 +20,18 @@
  */
 package eionet.webq.dao;
 
-import configuration.ApplicationTestContextWithMockSession;
-import eionet.webq.dto.ProjectEntry;
-import eionet.webq.dto.ProjectFile;
-import eionet.webq.dto.ProjectFileType;
-import eionet.webq.dto.UploadedFile;
+import static eionet.webq.dto.ProjectFileType.FILE;
+import static eionet.webq.dto.ProjectFileType.WEBFORM;
+import static org.hamcrest.core.IsEqual.equalTo;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+
+import java.util.Collection;
+import java.util.Date;
+import java.util.Iterator;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -35,17 +42,11 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import java.util.Collection;
-import java.util.Date;
-import java.util.Iterator;
-
-import static eionet.webq.dto.ProjectFileType.FILE;
-import static eionet.webq.dto.ProjectFileType.WEBFORM;
-import static org.hamcrest.core.IsEqual.equalTo;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import configuration.ApplicationTestContextWithMockSession;
+import eionet.webq.dto.ProjectEntry;
+import eionet.webq.dto.ProjectFile;
+import eionet.webq.dto.ProjectFileType;
+import eionet.webq.dto.UploadedFile;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {ApplicationTestContextWithMockSession.class})
@@ -264,8 +265,8 @@ public class ProjectFileStorageImplTest {
         assertThat(projectFiles.size(), equalTo(2));
 
         Iterator<ProjectFile> iterator = projectFiles.iterator();
-        assertThat(iterator.next().getFileType(), equalTo(FILE));
         assertThat(iterator.next().getFileType(), equalTo(WEBFORM));
+        assertThat(iterator.next().getFileType(), equalTo(FILE));
     }
 
     @Test(expected = DuplicateKeyException.class)
