@@ -15,7 +15,7 @@
             maxHeight: 300,
             modal: true,
             buttons: {
-                "Remove" : function() {
+                "Delete" : function() {
                     window.location = callUrl;
                 },
                 Cancel: function() {

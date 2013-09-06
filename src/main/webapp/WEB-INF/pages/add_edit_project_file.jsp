@@ -1,6 +1,7 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="f" uri="http://www.springframework.org/tags/form" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ taglib prefix="s" uri="http://www.springframework.org/tags" %>
 
 <c:choose>
     <c:when test="${projectFile.fileType == 'WEBFORM'}">
@@ -14,6 +15,7 @@
 
 <h1>Save ${fileTypeLabel}</h1>
     <c:url var="saveUrl" value="/projects/${projectEntry.projectId}/webform/save"/>
+    <s:eval expression="T(org.apache.commons.io.FileUtils).byteCountToDisplaySize(projectFile.fileSizeInBytes)" var="humanReadableFileSize"/>
     <f:form modelAttribute="projectFile" action="${saveUrl}" method="post" enctype="multipart/form-data">
         <f:errors path="*" element="div" cssClass="error-msg"/>
         <table class="datatable">
@@ -43,7 +45,7 @@
                 <tr>
                     <th scope="row">Size</th>
                     <td>
-                            ${projectFile.fileSizeInBytes} bytes
+                        ${humanReadableFileSize} (${projectFile.fileSizeInBytes} bytes)
                     </td>
                 </tr>
             </c:if>

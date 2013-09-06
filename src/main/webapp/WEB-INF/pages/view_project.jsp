@@ -5,10 +5,10 @@
 <div id="drop-operations">
     <h2>Operations</h2>
     <ul>
-        <li><span><a title="Edit project" href="<c:url value="/projects/edit?projectId=${projectEntry.projectId}"/>">Edit project</a></span></li>
-        <li><span><a href="#" onclick="removeProject();">Remove project</a></span></li>
         <li><span><a title="Add webform" href="<c:url value="/projects/${projectEntry.projectId}/webform/add"/>">Add webform</a></span></li>
         <li><span><a title="Add file" href="<c:url value="/projects/${projectEntry.projectId}/file/add"/>">Add file</a></span></li>
+        <li><span><a title="Edit project" href="<c:url value="/projects/edit?projectId=${projectEntry.projectId}"/>">Edit project</a></span></li>
+        <li><span><a href="#" onclick="removeProject();">Delete project</a></span></li>
     </ul>
 </div>
 <h1>Project: ${projectEntry.projectId}</h1>
@@ -48,7 +48,7 @@
             <tr>
                 <td><input type="checkbox" name="fileId" value="${projectFile.id}"/></td>
                 <td>${projectFile.title}</td>
-                <td><a href="#" onclick="view_file($('#${popup_id}'), <c:out value="${isWebForm ? 500 : 400}"/>)">${projectFile.fileName}</a> ${humanReadableFileSize}</td>
+                <td><a href="#" onclick="view_file($('#${popup_id}'), <c:out value="${isWebForm ? 800 : 600}"/>)">${projectFile.fileName}</a> ${humanReadableFileSize}</td>
                 <td><fmt:formatDate pattern="dd MMM yyyy HH:mm:ss" value="${projectFile.updated}" /></td>
                 <c:if test="${isWebForm}">
                     <td><input type="checkbox" ${projectFile.active ? 'checked="checked"' : ''} disabled="disabled"/></td>
@@ -69,7 +69,7 @@
             <tr class="dialogTemplate">
                 <td colspan="5">
                     <div title="File for project '${projectEntry.projectId}'" id="view-file-${projectFile.id}" >
-                        <table class="datatable">
+                        <table class="datatable" style="width:100%">
                             <tr>
                                 <th scope="row">Title</th>
                                 <td>${projectFile.title}</td>
@@ -80,7 +80,7 @@
                             </tr>
                             <tr>
                                 <th scope="row">File size</th>
-                                <td>${humanReadableFileSize}(${projectFile.fileSizeInBytes} bytes)</td>
+                                <td>${humanReadableFileSize} (${projectFile.fileSizeInBytes} bytes)</td>
                             </tr>
                             <tr>
                                 <th scope="row">Last modified</th>
@@ -116,28 +116,24 @@
                                 <th scope="row">Username</th>
                                 <td>${projectFile.userName}</td>
                             </tr>
-                            <tr>
-                                <th scope="row">Actions</th>
-                                <td>
-                                    <a href="<c:url value="/projects/${projectEntry.projectId}/webform/edit/?fileId=${projectFile.id}"/>">Edit</a>
-                                    <a href="#" onclick="removeFile('${projectFile.id}');">Remove</a>
-                                </td>
-                            </tr>
                         </table>
+                        <input type="button" onclick="$('#${popup_id}').dialog('close');" value="Close"/>
+                        <input type="button" onclick="window.location = '<c:url value="/projects/${projectEntry.projectId}/webform/edit/?fileId=${projectFile.id}"/>'" value="Edit"/>
+                        <input type="button" onclick="removeFile('${projectFile.id}');" value="Delete"/>
                     </div>
                 </td>
             </tr>
         </c:forEach>
         </tbody>
     </table>
-    <input type="submit" value="Remove selected files">
+    <input type="submit" value="Delete selected files">
     </form>
 </c:forEach>
 
-<div id="remove-file" title="Remove project file?" class="dialogTemplate">
-    <p>This file will be removed. Are you sure?</p>
+<div id="remove-file" title="Delete project file?" class="dialogTemplate">
+    <p>This file will be deleted. Are you sure?</p>
 </div>
 
-<div id="remove-project" title="Remove project?" class="dialogTemplate">
-    <p>This project and all its files will be removed. Are you sure?</p>
+<div id="remove-project" title="Delete project?" class="dialogTemplate">
+    <p>This project and all its files will be deleted. Are you sure?</p>
 </div>

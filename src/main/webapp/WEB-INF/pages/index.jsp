@@ -159,7 +159,7 @@
             </c:forEach>
             </tbody>
         </table>
-        <input type="submit" value="Remove selected files"/>
+        <input type="submit" value="Delete selected files"/>
         </form>
 </div>
 </c:if>
