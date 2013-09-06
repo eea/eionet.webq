@@ -11,7 +11,7 @@
         <c:choose>
             <c:when test="${authenticated}">
                 <sec:authentication property="name" var="userName"/>
-                <a href="<c:url value="/j_spring_security_logout"/>" id="logoutlink">Logout(${userName})</a>
+                <a href="<c:url value="/j_spring_security_logout"/>" id="logoutlink">Logout (${userName})</a>
             </c:when>
             <c:otherwise>
                 <a href="<c:url value="/login"/>" id="loginlink">Login</a>

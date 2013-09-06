@@ -29,11 +29,18 @@
         padding-top:1em;
         clear:both;
     }
+    .action{
+        margin-bottom:0.5em;
+    }
 </style>
 
 <h1>Web Questionnaires</h1>
-<div class="warning-msg">The files are stored in the system temporarily.</div>
-<div class="tip-msg">Please download your modified files. All files will be deleted if your session expires or if you close your web browser!</div>
+<p>The system lets you create and edit XML files by using webforms.
+<ul>
+    <li>By selecting "Start a new webform" your are able to fill in your data on empty webform and the XML file is created automatically. </li>
+    <li>If you already have an XML file that you want to edit, then select "Upload XML file". Appropriate actions will be available if your XML file conforms to any of the webform stored in the system.</li>
+</ul></p>
+<p><strong>After editing your file do not forget to download it!</strong> The files are stored in the system temporarily and they will be deleted if your session expires or if you close your web browser.</p>
 <div class="container">
     <c:url var="uploadUrl" value="/uploadXml"/>
     <f:form modelAttribute="uploadForm" action="${uploadUrl}" method="POST" enctype="multipart/form-data">
@@ -74,6 +81,7 @@
 <c:if test="${not empty uploadedFiles}">
 <div class="files">
     <h2>My XML files</h2>
+        <div class="important-msg"><strong>Note</strong><p>Please download your modified files!</p></div>
         <form method="post" action="<c:url value="/remove/files"/>">
         <table class="datatable" style="width:100%">
             <thead>
@@ -87,15 +95,26 @@
             <tbody>
             <c:forEach items="${uploadedFiles}" var="file">
                 <c:url value="/download/user_file?fileId=${file.id}" var="downloadLink"/>
+                <s:eval expression="T(eionet.webq.dto.util.UserFileInfo).isNotUpdatedOrDownloadedAfterUpdateUsingForm(file)"
+                    var="downloadedAfterUpdateOrNotChanged"/>
+                <s:eval expression="T(org.apache.commons.io.FileUtils).byteCountToDisplaySize(file.sizeInBytes)" var="humanReadableFileSize"/>
                 <tr>
                     <td>
                         <input type="checkbox" name="selectedUserFile" value="${file.id}">
                     </td>
                     <td>
-                        ${file.name}
+                        <c:choose>
+                            <c:when test="${not downloadedAfterUpdateOrNotChanged}">
+                                <strong>${file.name}</strong>
+                            </c:when>
+                            <c:otherwise>
+                                ${file.name}
+                            </c:otherwise>
+                        </c:choose>
+
                     </td>
                     <td>
-                        File size: ${file.sizeInBytes} bytes<br/>
+                        File size: ${humanReadableFileSize}<br/>
                         Created: <fmt:formatDate pattern="dd MMM yyyy HH:mm:ss" value="${file.created}" /><br/>
                         Updated:  <fmt:formatDate pattern="dd MMM yyyy HH:mm:ss" value="${file.updated}" /><br/>
                         Downloaded:  <c:choose>
@@ -108,9 +127,7 @@
                         </c:choose>
                     </td>
                     <td>
-                        <p>
-                        <s:eval expression="T(eionet.webq.dto.util.UserFileInfo).isNotUpdatedOrDownloadedAfterUpdateUsingForm(file)"
-                                var="downloadedAfterUpdateOrNotChanged"/>
+                        <div class="action">
                             <c:choose>
                                 <c:when test="${not downloadedAfterUpdateOrNotChanged}">
                                     <c:set var="updateNote" value="(NB! updated through web form)"/>
@@ -119,21 +136,23 @@
                                     <c:set var="updateNote" value=""/>
                                 </c:otherwise>
                             </c:choose>
-                        <a href="${downloadLink}" onclick="this.text='Download'" title="Download file">Download ${updateNote}</a>
-                        </p>
+                        <a href="${downloadLink}" onclick="this.childNodes[1].innerText='';" title="Download file">Download <span style="color:red;text-decoration:none"> ${updateNote}</span></a>
+                        </div>
                         <c:forEach var="webForm" items="${allWebForms}">
                             <c:if test="${file.xmlSchema eq webForm.xmlSchema}">
-                                <strong><a href="<c:url value="/xform/?formId=${webForm.id}&instance=${downloadLink}&amp;fileId=${file.id}&amp;base_uri=${pageContext.request.contextPath}"/>">Edit
-                                    with '${webForm.title}' web form</a></strong><br/>
+                                <div class="action"><strong><a href="<c:url value="/xform/?formId=${webForm.id}&instance=${downloadLink}&amp;fileId=${file.id}&amp;base_uri=${pageContext.request.contextPath}"/>">Edit
+                                    with '${webForm.title}' web form</a></strong></div>
                             </c:if>
                         </c:forEach>
                         <c:if test="${not empty file.availableConversions}">
+                        <div class="action">
                             View file as:
                             <ul>
                             <c:forEach items="${file.availableConversions}" var="conversion">
                                 <li><a href="<c:url value="/download/convert?fileId=${file.id}&conversionId=${conversion.id}"/>">${conversion.description}</a></li>
                             </c:forEach>
                             </ul>
+                        </div>
                         </c:if>
                     </td>
                 </tr>
