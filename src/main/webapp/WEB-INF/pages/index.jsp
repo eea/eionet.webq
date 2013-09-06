@@ -3,12 +3,6 @@
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib prefix="s" uri="http://www.springframework.org/tags" %>
 
-<script type="text/javascript">
-    function getSelectedFileValue() {
-        var select = document.getElementById('selectFile');
-        return select.options[select.selectedIndex].value;
-    }
-</script>
 <style type="text/css">
     .container {
         padding-top:1em;
@@ -81,7 +75,7 @@
 <c:if test="${not empty uploadedFiles}">
 <div class="files">
     <h2>My XML files</h2>
-        <div class="important-msg"><strong>Note</strong><p>Please download your modified files!</p></div>
+        <div hidden="hidden" class="important-msg" id="not-downloaded-files-present"><strong>Note</strong><p>Please download your modified files!</p></div>
         <form method="post" action="<c:url value="/remove/files"/>">
         <table class="datatable" style="width:100%">
             <thead>
@@ -98,6 +92,7 @@
                 <s:eval expression="T(eionet.webq.dto.util.UserFileInfo).isNotUpdatedOrDownloadedAfterUpdateUsingForm(file)"
                     var="downloadedAfterUpdateOrNotChanged"/>
                 <s:eval expression="T(org.apache.commons.io.FileUtils).byteCountToDisplaySize(file.sizeInBytes)" var="humanReadableFileSize"/>
+                <c:set var="id-prefix" value="${file.id}-"/>
                 <tr>
                     <td>
                         <input type="checkbox" name="selectedUserFile" value="${file.id}">
@@ -117,7 +112,7 @@
                         File size: ${humanReadableFileSize}<br/>
                         Created: <fmt:formatDate pattern="dd MMM yyyy HH:mm:ss" value="${file.created}" /><br/>
                         Updated:  <fmt:formatDate pattern="dd MMM yyyy HH:mm:ss" value="${file.updated}" /><br/>
-                        Downloaded:  <c:choose>
+                        Downloaded:  <span id="${id-prefix}downloaded"><c:choose>
                         <c:when test="${not empty file.downloaded}">
                             <fmt:formatDate pattern="dd MMM yyyy HH:mm:ss" value="${file.downloaded}" />
                         </c:when>
@@ -125,6 +120,7 @@
                             never
                         </c:otherwise>
                         </c:choose>
+                        </span>
                     </td>
                     <td>
                         <div class="action">
@@ -136,7 +132,8 @@
                                     <c:set var="updateNote" value=""/>
                                 </c:otherwise>
                             </c:choose>
-                        <a href="${downloadLink}" onclick="this.childNodes[1].innerText='';" title="Download file">Download <span style="color:red;text-decoration:none"> ${updateNote}</span></a>
+                        <a href="${downloadLink}" onclick="hideNotDownloadedNote('${id-prefix}');" title="Download file">Download
+                            <span id="${id-prefix}not-downloaded" class="not-downloaded" style="color:red;text-decoration:none"> ${updateNote}</span></a>
                         </div>
                         <c:forEach var="webForm" items="${allWebForms}">
                             <c:if test="${file.xmlSchema eq webForm.xmlSchema}">
