@@ -80,7 +80,6 @@ public class ProjectFile {
     /**
      * User name of user who uploaded web form.
      */
-    @NotEmpty
     private String userName;
     /**
      * timestamp of first upload of the file.

@@ -79,10 +79,6 @@
                     <td><f:checkbox path="mainForm" id="mainForm"/></td>
                 </tr>
             </c:if>
-            <tr>
-                <th scope="row"><label for="userName">Username</label></th>
-                <td><f:input path="userName"/></td>
-            </tr>
         </table>
         <f:hidden path="id"/>
         <f:hidden path="fileType"/>

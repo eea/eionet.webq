@@ -24,6 +24,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestOperations;
 
+import java.security.Principal;
 import java.util.Collection;
 
 import static eionet.webq.web.controller.ProjectsController.PROJECT_ENTRY_MODEL_ATTRIBUTE;
@@ -243,7 +244,7 @@ public class ProjectsControllerIntegrationTest extends AbstractProjectsControlle
         ProjectFile projectFile = theOnlyOneUploadedFile();
         String newTitle = "new title";
         request(post("/projects/" + DEFAULT_PROJECT_ID + "/webform/save").param("title", newTitle)
-                .param("userName", projectFile.getUserName()).param("id", valueOf(projectFile.getId())));
+                .param("id", valueOf(projectFile.getId())).principal(mockPrincipal(projectFile.getUserName())));
 
         ProjectFile updated = theOnlyOneUploadedFile();
         assertThat(updated.getTitle(), equalTo(newTitle));
@@ -367,12 +368,12 @@ public class ProjectsControllerIntegrationTest extends AbstractProjectsControlle
         return projectFile;
     }
 
-    private ResultActions uploadWebFormForDefaultProject(ProjectFile projectFile) throws Exception {
+    private ResultActions uploadWebFormForDefaultProject(final ProjectFile projectFile) throws Exception {
         return request(fileUpload("/projects/" + DEFAULT_PROJECT_ID + "/webform/save")
                 .file(new MockMultipartFile("file", projectFile.getFileName(), MediaType.APPLICATION_XML_VALUE, projectFile.getFileContent()))
                 .param("title", projectFile.getTitle()).param("active", Boolean.toString(projectFile.isActive()))
-                .param("description", projectFile.getDescription()).param("userName", projectFile.getUserName())
-                .param("fileType", projectFile.getFileType().name()));
+                .param("description", projectFile.getDescription()).param("fileType", projectFile.getFileType().name())
+                .principal(mockPrincipal(projectFile.getUserName())));
     }
 
     private void saveProjectWithId(String projectId) {
@@ -400,6 +401,15 @@ public class ProjectsControllerIntegrationTest extends AbstractProjectsControlle
         saveProjectWithId(DEFAULT_PROJECT_ID);
         request(get("/projects/" + DEFAULT_PROJECT_ID + path)).andExpect(view().name("add_edit_project_file"))
                 .andExpect(model().attribute(WEB_FORM_UPLOAD_ATTRIBUTE, new FileTypeMatcher(type)));
+    }
+
+    private Principal mockPrincipal(final String name) {
+        return new Principal() {
+            @Override
+            public String getName() {
+                return name;
+            }
+        };
     }
 
     private static class FileTypeMatcher extends BaseMatcher<ProjectFile> {

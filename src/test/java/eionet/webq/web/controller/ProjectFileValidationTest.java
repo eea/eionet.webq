@@ -14,6 +14,8 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
+import java.security.Principal;
+
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.fileUpload;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
@@ -37,19 +39,19 @@ public class ProjectFileValidationTest extends AbstractContextControllerTests {
 
     @Test
     public void titleIsEmpty() throws Exception {
-        MvcResult result = request(SaveRequestBuilder.fileUploadBuilder().withUserName().build()).andReturn();
+        MvcResult result = request(SaveRequestBuilder.fileUploadBuilder().withPrincipal().build()).andReturn();
 
         assertFieldError(getFirstAndOnlyFieldError(result), "title", "NotEmpty.projectFile.title");
     }
 
     @Test
     public void noFileAttached() throws Exception {
-        MvcResult mvcResult = request(SaveRequestBuilder.postBuilder().withUserName().withTitle().build()).andReturn();
+        MvcResult mvcResult = request(SaveRequestBuilder.postBuilder().withPrincipal().withTitle().build()).andReturn();
         assertFieldError(getFirstAndOnlyFieldError(mvcResult), "file", "project.file.null");
     }
 
     @Test
-    public void noUserName() throws Exception {
+    public void noPrincipal() throws Exception {
         MvcResult mvcResult = request(SaveRequestBuilder.fileUploadBuilder().withTitle().build()).andReturn();
         assertFieldError(getFirstAndOnlyFieldError(mvcResult), "userName", "NotEmpty.projectFile.userName");
     }
@@ -62,7 +64,7 @@ public class ProjectFileValidationTest extends AbstractContextControllerTests {
     }
 
     private ResultActions allRequiredFieldsFilledInWithDefaultValues() throws Exception {
-        return request(SaveRequestBuilder.fileUploadBuilder().withTitle().withUserName().withFileType().build());
+        return request(SaveRequestBuilder.fileUploadBuilder().withTitle().withPrincipal().withFileType().build());
     }
 
     @Override
@@ -84,12 +86,17 @@ public class ProjectFileValidationTest extends AbstractContextControllerTests {
         public static SaveRequestBuilder postBuilder() {
             return new SaveRequestBuilder(post(SAVE_PROJECT_FILE_URL));
         }
-        
-        public SaveRequestBuilder withUserName() {
-            request.param("userName", "test-userName");
+
+        public SaveRequestBuilder withPrincipal() {
+            request.principal(new Principal() {
+                @Override
+                public String getName() {
+                    return "test-userName";
+                }
+            });
             return this;
         }
-        
+
         public SaveRequestBuilder withTitle() {
             request.param("title", "test-title");
             return this;

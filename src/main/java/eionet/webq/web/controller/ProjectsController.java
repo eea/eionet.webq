@@ -43,6 +43,8 @@ import eionet.webq.service.ProjectFileService;
 import eionet.webq.service.ProjectService;
 import eionet.webq.service.RemoteFileService;
 
+import java.security.Principal;
+
 /**
  * Spring controller to manage projects.
  *
@@ -172,11 +174,15 @@ public class ProjectsController {
      * @param model model attribute holder
      * @param projectFile web form upload related object
      * @param bindingResult request binding to {@link eionet.webq.dto.ProjectFile} result
+     * @param principal user principal
      * @return view name
      */
     @RequestMapping(value = "/{projectFolderId}/webform/save")
     public String newWebForm(@PathVariable String projectFolderId, @Valid @ModelAttribute ProjectFile projectFile,
-            BindingResult bindingResult, Model model) {
+            BindingResult bindingResult, Model model, Principal principal) {
+        if (principal == null) {
+            bindingResult.rejectValue("userName", "NotEmpty.projectFile.userName");
+        }
         if (ProjectFileInfo.isNew(projectFile) && ProjectFileInfo.fileIsEmpty(projectFile)) {
             bindingResult.rejectValue("file", "project.file.null");
         }
@@ -184,6 +190,7 @@ public class ProjectsController {
         if (bindingResult.hasErrors()) {
             return addOrEditProjectFile(currentProject, projectFile, model);
         }
+        projectFile.setUserName(principal.getName());
         try {
             projectFileService.saveOrUpdate(projectFile, currentProject);
             model.addAttribute("message", "Webform added/updated.");
