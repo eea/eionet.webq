@@ -11,6 +11,7 @@
         <security:intercept-url pattern="/login" access="isAuthenticated()"/>
         <security:intercept-url pattern="/projects/**" access="hasRole('DEVELOPER')"/>
         <security:intercept-url pattern="/download/project/**" access="hasRole('DEVELOPER')"/>
+        <security:intercept-url pattern="/users/**" access="hasRole('ADMIN')"/>
         <security:intercept-url pattern="/**" access="permitAll()"/>
         <security:custom-filter position="CAS_FILTER" ref="casFilter" />
         <security:logout logout-success-url="/logout"/>
@@ -52,10 +53,6 @@
             </bean>
         </property>
         <property name="key" value="an_id_for_this_auth_provider_only"/>
-    </bean>
-
-    <bean id="userService" class="org.springframework.security.provisioning.JdbcUserDetailsManager">
-        <property name="dataSource" ref="dataSource"/>
     </bean>
 
     <bean id="singleLogoutFilter" class="org.jasig.cas.client.session.SingleSignOutFilter"/>

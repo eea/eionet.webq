@@ -9,6 +9,7 @@
     <div id="righttools">
         <sec:authorize access="isAuthenticated()" var="authenticated"/>
         <sec:authorize access="hasRole('DEVELOPER')" var="isDeveloper"/>
+        <sec:authorize access="hasRole('ADMIN')" var="isAdmin"/>
         <c:choose>
             <c:when test="${authenticated}">
                 <sec:authentication property="name" var="userName"/>
@@ -58,6 +59,9 @@
         <li><a href="<c:url value="/"/>">My xml files</a></li>
         <c:if test="${isDeveloper}">
             <li><a href="<c:url value="/projects/"/>">Webform projects</a></li>
+        </c:if>
+        <c:if test="${isAdmin}">
+            <li><a href="<c:url value="/users/new"/>">Add new user</a></li>
         </c:if>
     </ul>
 </div>

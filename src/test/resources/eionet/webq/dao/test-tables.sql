@@ -35,3 +35,15 @@ CREATE TABLE IF NOT EXISTS PROJECT_FILE(
   updated datetime default current_timestamp);
 
 CREATE UNIQUE INDEX IF NOT EXISTS unique_project_file_name ON project_file(project_id, file_name);
+
+CREATE TABLE IF NOT EXISTS users(
+  username varchar2(255) unique,
+  password varchar2(255),
+  enabled boolean);
+
+CREATE TABLE IF NOT EXISTS authorities(
+  username varchar2(255),
+  authority varchar2(255),
+  constraint fk_authorities_users foreign key(username) references users(username));
+
+CREATE UNIQUE INDEX IF NOT EXISTS unique_username_authority ON authorities(username,authority);
