@@ -195,6 +195,7 @@ public class PublicPageController {
      * @param formId webform id
      * @param request current request
      * @return redirection URL of webform with correct parameters
+     * @throws FileNotAvailableException if empty instance URL is filled for selected webform, but the resource is not available.
      */
     @RequestMapping(value = "/startWebform")
     public String startWebFormSaveFile(@RequestParam int formId, HttpServletRequest request) throws FileNotAvailableException {
@@ -202,7 +203,7 @@ public class PublicPageController {
         UserFile file = new UserFile();
         file.setName(StringUtils.defaultIfEmpty(webForm.getNewXmlFileName(), "new_form.xml"));
         file.setXmlSchema(webForm.getXmlSchema());
-        if (!webForm.getEmptyInstanceUrl().isEmpty()) {
+        if (!StringUtils.isEmpty(webForm.getEmptyInstanceUrl())) {
             byte[] content = remoteFileService.fileContent(webForm.getEmptyInstanceUrl());
             file.setContent(content);
             file.setSizeInBytes(content.length);

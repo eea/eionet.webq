@@ -37,6 +37,7 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import eionet.webq.dto.ProjectFile;
 import eionet.webq.dto.UserFile;
 import eionet.webq.service.ProjectFileService;
+import eionet.webq.service.RemoteFileService;
 import eionet.webq.service.UserFileService;
 
 /**
@@ -50,6 +51,8 @@ public class PublicPageControllerTest {
     private UserFileService userFileService;
     @InjectMocks
     private PublicPageController publicPageController = new PublicPageController();
+    @Mock
+    private RemoteFileService remoteFileService;
 
     @Before
     public void setUp() throws Exception {
@@ -90,6 +93,8 @@ public class PublicPageControllerTest {
 
     private UserFile saveFileAndGetParameterFromServiceCall(ProjectFile projectFile) throws Exception{
         when(projectFileService.getById(WEB_FORM_ID)).thenReturn(projectFile);
+        byte[] testContent = "test-content".getBytes();
+        when(remoteFileService.fileContent(projectFile.getEmptyInstanceUrl())).thenReturn(testContent);
 
         publicPageController.startWebFormSaveFile(WEB_FORM_ID, new MockHttpServletRequest());
 
