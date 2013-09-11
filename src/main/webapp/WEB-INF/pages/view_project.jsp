@@ -38,7 +38,7 @@
                     <th>Main form</th>
                 </c:if>
                 <th>Username</th>
-                <th>Check for updates</th>
+                <th>Remote location</th>
             </tr>
         </thead>
         <tbody>
@@ -48,7 +48,7 @@
             <tr>
                 <td><input type="checkbox" name="fileId" value="${projectFile.id}"/></td>
                 <td>${projectFile.title}</td>
-                <td><a href="#" onclick="view_file($('#${popup_id}'), <c:out value="${isWebForm ? 800 : 600}"/>)">${projectFile.fileName}</a> ${humanReadableFileSize}</td>
+                <td><a href="#" onclick="view_file($('#${popup_id}'), <c:out value="${isWebForm ? 800 : 600}"/>)">${projectFile.fileName}</a> (${humanReadableFileSize})</td>
                 <td><fmt:formatDate pattern="dd MMM yyyy HH:mm:ss" value="${projectFile.updated}" /></td>
                 <c:if test="${isWebForm}">
                     <td><input type="checkbox" ${projectFile.active ? 'checked="checked"' : ''} disabled="disabled"/></td>
@@ -58,7 +58,7 @@
                 <td>
                     <c:choose>
                         <c:when test="${not empty projectFile.remoteFileUrl}">
-                            <input type="button" onclick="window.location = '<c:url value="/projects/remote/check/updates/${projectEntry.projectId}/file/${projectFile.id}"/>'" value="Check">
+                            <input type="button" onclick="window.location = '<c:url value="/projects/remote/check/updates/${projectEntry.projectId}/file/${projectFile.id}"/>'" value="Check for updates">
                         </c:when>
                         <c:otherwise>
                             No remote file URL
