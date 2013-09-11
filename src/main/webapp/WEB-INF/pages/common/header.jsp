@@ -61,7 +61,7 @@
             <li><a href="<c:url value="/projects/"/>">Webform projects</a></li>
         </c:if>
         <c:if test="${isAdmin}">
-            <li><a href="<c:url value="/users/new"/>">Add new user</a></li>
+            <li><a href="<c:url value="/users/new"/>">Add/replace user role</a></li>
         </c:if>
     </ul>
 </div>
