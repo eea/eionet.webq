@@ -10,6 +10,7 @@
         http://www.springframework.org/schema/beans/spring-beans-3.2.xsd">
 
     <bean id="exceptionHandler" class="org.springframework.web.servlet.handler.SimpleMappingExceptionResolver">
+        <property name="warnLogCategory" value="webq2"/>
         <property name="exceptionMappings">
             <props>
                 <prop key="org.springframework.web.multipart.MaxUploadSizeExceededException">max_upload_size_exceeded</prop>
