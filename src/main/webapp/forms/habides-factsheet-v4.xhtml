@@ -18,7 +18,7 @@
         <link rel="stylesheet" type="text/css" href="http://www.eionet.europa.eu/styles/eionet2007/print.css" media="print" />
         <link rel="stylesheet" type="text/css" href="http://www.eionet.europa.eu/styles/eionet2007/handheld.css" media="handheld" />
         <link rel="stylesheet" type="text/css" href="http://www.eionet.europa.eu/styles/eionet2007/screen.css" media="screen" title="Eionet 2007 style" />
-        <link rel="stylesheet" type="text/css" href="../../bfResources/scripts/dojox/highlight/resources/highlight.css" />
+        <link rel="stylesheet" type="text/css" href="../bfResources/scripts/dojox/highlight/resources/highlight.css" />
 
         <style type="text/css">
             .bold{
@@ -30,13 +30,54 @@
                 padding-right:5px;
                 font-size:0.8em;
             }
+			.red{
+				color:red;
+				}
+			.bold label{
+				font-weight: bold;
+				padding-right:5px;
+			}
+			.bold span{
+				font-weight: bold;
+				padding-right:5px;
+			}
+			.semi-wide-inp input{
+				width: 200px;
+			}
+			.wide-inp input{
+				width: 600px;
+			}
             .section {
                 margin-top: 10px;
                 padding: 5px;
             }
-            div.section {
+            div.section-buttons {
+                margin-top: 10px;
                 background: #f3f3f3;
-            }
+                padding: 5px;
+            }	
+			/*
+			#workarea table.xfContainer {
+				background-color: #f3f3f3;
+				empty-cells: show;
+			}
+			*/
+			.datatable tr.xfRepeatHeader td{
+				background-color: #F6F6F6;
+				border-bottom: 2px solid white;
+				font-weight: bold;
+				text-align: center;
+			}
+			.xfContainer .appBfVerticalTable td.bfVerticalTableLabel{
+				color: #666666;
+				background-color: #F6F6F6;
+				border-bottom: 2px solid white;
+				font-weight: bold;
+				text-align: right;
+				margin: 0;
+				padding: 0.3em;
+				vertical-align: top;
+			}			
             div.header{
                 background-color: #dddddd;
                 border-color: #aaaaaa;
@@ -45,14 +86,25 @@
                 background-color: #dddddd;
                 border-color: #aaaaaa;
             }
-        </style>
+			.xfContainer .xfGroupLabel{
+				color:steelblue;
+				font-size:1.2em;
+				font-weight:bold;
+				margin-bottom:10px;
+				margin-top:10px;
+				border-bottom:thin solid;
+			}
+			.xfRepeatIndex{
+				background-color: #e4f1bc;
+			}
+		</style>
         <xf:model id="main-model">
             <!-- ##########            DEFAULT instance          ############-->
             <xf:instance xmlns="" id="default">
                 <derogations/>
             </xf:instance>
             <!-- instance for EMPTY XML structure -->
-            <xf:instance xmlns="" id="emptyinstance" src="http://webq.eionet.europa.eu/xml/habides-derogations-instance.xml">
+            <xf:instance xmlns="" id="emptyinstance" src="http://webqdev.eionet.europa.eu/xml/habides-derogations-instance.xml">
                 <derogations/>
             </xf:instance>
             <!-- ##########            SUBMISSIONS          ############ -->
@@ -100,11 +152,11 @@
                 <!--xf:bind id="b-user_derog_ref" nodeset="derogation/@user_derogation_ref"/-->
 
                 <xf:bind id="b-directive" nodeset="@directive" required="true()"/>
-                <xf:bind id="b-licensingAuthority" nodeset="licensingAuthority"/>
-                <xf:bind id="b-validFrom" type="xs:date" nodeset="licenseValidFrom"/>
-                <xf:bind id="b-validUntil" type="xs:date" nodeset="licenseValidUntil"/>
+                <xf:bind id="b-licensingAuthority" nodeset="licensingAuthority" required="true()"/>
+                <xf:bind id="b-validFrom" type="xs:date" nodeset="licenseValidFrom" required="true()" constraint="string-length(.)=0 or string-length(../licenseValidUntil)=0 or number(replace(., '-', '')) - number(replace(../licenseValidUntil, '-', '')) &lt; 0"/>
+                <xf:bind id="b-validUntil" type="xs:date" nodeset="licenseValidUntil" required="true()" constraint="string-length(.)=0 or string-length(../licenseValidUntil)=0 or  number(replace(., '-', '')) - number(replace(../licenseValidFrom, '-', '')) &gt; 0"/>
                 <xf:bind id="b-sensitive" type="xs:boolean" nodeset="sensitive"/>
-                <xf:bind id="b-numberOfLicenses" type="integer" nodeset="numberOfLicenses"/>
+                <xf:bind id="b-numberOfLicenses" nodeset="numberOfLicenses" constraint="string-length(.)=0 or number(.) &gt; 0"/>
                 <xf:bind id="b-alternativesAssessed" nodeset="alternativesAssessed" required="true()"/>
             </xf:bind>
 
@@ -114,7 +166,7 @@
                 <data>
                     <!-- common helper data -->
                     <instanceUrl></instanceUrl>
-                    <emptyInstanceUrl>http://webq.eionet.europa.eu/xml/habides-derogations-instance.xml</emptyInstanceUrl>
+                    <emptyInstanceUrl>http://webqdev.eionet.europa.eu/xml/habides-derogations-instance.xml</emptyInstanceUrl>
                     <save_message/>
                     <save_message_ok/>
                     <save_message_err/>
@@ -122,13 +174,64 @@
 
 
                     <!-- Habides form specific helper data -->
+					<derogIndex>1</derogIndex>
                     <user/>
                     <activeDirective/>
-                </data>
+					<trigger-switch/>
+					<tblDerogEmpty/>
+					<tblDerogFilled/>
+					<selBioRegion/>
+					<tblBioRegEmpty/>
+					<tblBioRegFilled/>
+					<tblSpeciesFilled/>
+					<tblSpeciesEmpty/>
+					<selRegion/>
+					<tblRegionEmpty/>
+					<tblRegionFilled/>
+					<ftActivity/>
+					<selActivity-birds/>
+					<selActivity-habitats/>
+					<tblActivityEmpty/>
+					<tblActivityFilled/>
+					<ftMethod/>
+					<selMethod-birds/>
+					<selMethod-habitats/>
+					<tblMethodEmpty/>
+					<tblMethodFilled/>
+					<speciesFreetextValue/>
+					<selSpecies-birds/>
+					<selSpecies-habitats/>
+					<selMainGroup/>
+					<selMiddleGroup/>
+					<selLowerGroup-birds/>
+					<selLowerGroup-habitats/>
+
+					<derogEditButton/>
+					<derogDeleteButton/>
+					<speciesDeleteButton/>
+				</data>
             </xf:instance>
             <xf:bind id="b-user" nodeset="instance('context')/user" required="true()"/>
+            <xf:bind nodeset="instance('context')/trigger-switch" readonly="false"/>
+			
+			<!-- ##########           HELPER   BINDINGS          ############-->	
+			<xf:bind id="b-derogation-tblempty" nodeset="instance('context')/tblDerogEmpty" relevant="count(instance('default')/derogation)=1 and  string-length(instance('default')/derogation[1]/@directive)=0"/>
+			<xf:bind id="b-derogation-tblfilled" nodeset="instance('context')/tblDerogFilled" calculate="count(instance('default')/derogation) &gt; 1 or  string-length(instance('default')/derogation[1]/@directive) &gt; 0"/>
+			<xf:bind id="b-derogEditButton" nodeset="instance('context')/derogEditButton" relevant="instance('context')/tblDerogFilled='true'"/>
+			<xf:bind id="b-derogDeleteButton" nodeset="instance('context')/derogDeleteButton" relevant="instance('context')/tblDerogFilled='true'"/>
 
-            <xf:instance xmlns="" id="countries" src="http://webq.eionet.europa.eu/xml/habides_country_lookup.xml"/>
+			<xf:bind id="b-derogIndex" nodeset="instance('context')/derogIndex" type="xs:integer"/>
+			
+			<xf:bind id="b-tblSpeciesFilled" nodeset="instance('context')/tblSpeciesFilled" type="xs:boolean"
+				calculate="count(instance('default')/derogation[position() = instance('context')/derogIndex]/species) &gt; 1 or  string-length(instance('default')/derogation[position() = instance('context')/derogIndex]/species[1]) &gt; 0"/>
+			<xf:bind id="b-speciesDeleteButton" nodeset="instance('context')/speciesDeleteButton" relevant="instance('context')/tblSpeciesFilled='true'"/>
+			
+			<xf:bind id="b-species-freetext-value" nodeset="instance('context')/speciesFreetextValue"/>
+			<xf:bind id="b-sel-species-birds" nodeset="instance('context')/selSpecies-birds" relevant="instance('context')/activeDirective='birds' "/>
+			<xf:bind id="b-sel-species-habitats" nodeset="instance('context')/selSpecies-habitats" relevant="instance('context')/activeDirective='habitats' "/>
+
+
+            <xf:instance xmlns="" id="countries" src="http://webqdev.eionet.europa.eu/xml/habides_country_lookup.xml"/>
 
             <!-- Directives -->
             <xf:instance xmlns="" id="directives">
@@ -158,9 +261,12 @@
             <xf:action ev:event="my-insert">
                 <xf:setvalue ref="/derogations/derogation[index('rDerogList')]/@directive" value="instance('directives')/directive[@type=instance('context')/activeDirective]/@id"/>
                 <xf:setvalue ref="/derogations/derogation[index('rDerogList')]/@userIdentity" value="instance('context')/user"/>
-                <xf:setvalue ref="/derogations/derogation[index('rDerogList')]/@derogation_reference" value="concat(instance('default')/derogation[index('rDerogList')]/@userIdentity,'-',if(instance('context')/activeDirective='birds') then 'B'  else 'H','-',count(instance('default')/derogation[@directive=instance('directives')/directive[@type=instance('context')/activeDirective]/@id]),'-',substring(now(),1,4),substring(now(),6,2),substring(now(),9,2),substring(now(),12,2),substring(now(),15,2),substring(now(),18,2))"/>
+                <xf:setvalue ref="/derogations/derogation[index('rDerogList')]/@derogation_reference" value="concat(instance('default')/@country,'-',instance('default')/derogation[index('rDerogList')]/@userIdentity,'-',if(instance('context')/activeDirective='birds') then 'B'  else 'H','-',count(instance('default')/derogation[@directive=instance('directives')/directive[@type=instance('context')/activeDirective]/@id]),'-',substring(now(),1,4),substring(now(),6,2),substring(now(),9,2),substring(now(),12,2),substring(now(),15,2),substring(now(),18,2))"/>
             </xf:action>
             <xf:action ev:event="my-reset-all">
+			
+				<!-- TODO Reset all elements -->
+				
                 <xf:setvalue ref="/derogations/derogation[index('rDerogList')]/@directive" value="''"/>
                 <xf:setvalue ref="/derogations/derogation[index('rDerogList')]/@userIdentity" value="''"/>
                 <xf:setvalue ref="/derogations/derogation[index('rDerogList')]/@derogation_reference" value="''"/>
@@ -172,9 +278,51 @@
                 <xf:setvalue ref="/derogations/derogation[index('rDerogList')]/numberOfLicenses" value="''"/>
                 <xf:refresh/>
             </xf:action>
+            <xf:action ev:event="my-edit">
+                <xf:setvalue ref="instance('context')/activeDirective" value="instance('directives')/directive[@id = instance('default')/derogation[index('rDerogList')]/@directive]/@type"/>
+				<xf:setvalue ref="instance('context')/derogIndex" value="index('rDerogList')"/>
+			</xf:action>
         </xf:model>
+		<xf:model id="lookups-model">
+			<!-- Lookups-->
+			<xf:instance xmlns="" id="species" src="http://webqdev.eionet.europa.eu/xml/habides_species_lookup.xml"/>
+			<!--
+			<xf:instance xmlns="" id="bioregions" src="xml/habides_bioregions_lookup.xml" />
+			<xf:instance xmlns="" id="activities" src="xml/habides_activities_lookup.xml"/>
+			<xf:instance xmlns="" id="methods" src="xml/habides_methods_lookup.xml"/>
+			<xf:instance xmlns="" id="reasons" src="xml/habides_reasons_lookup.xml"/>
+			<xf:instance xmlns="" id="countries" src="xml/habides_country_lookup.xml" />
+			-->
+<!-- species  -->
+				<!--f:bind id="b-lowergr-label" nodeset="instance('context')/lowerGroupLabel" calculate="if(instance('directives')/directive[@id= instance('default')/derogation[index('rDerogList')]/@directive]/@type='habitats','Lower group','Family species')"/-->
+				<xf:bind id="b-maingroup" nodeset="instance('species')/helpers/main_groups/main_group">
+					<xf:bind id="b-maingroup-name" nodeset="."/>
+				</xf:bind>
+				
+<!--
+				<xf:bind id="b-middlegroup" nodeset="instance('species')/helpers/middle_groups/middle_group[@main_group=instance('context')/selMainGroup]">
+					<xf:bind id="b-middlegroup-name" nodeset="."/>
+				</xf:bind>
+
+				<xf:bind id="b-lowergroup-habitats" nodeset="instance('species')/helpers/lower_groups[@type = 'habitats']/lower_group[@middle_group=instance('context')/selMiddleGroup]">
+					<xf:bind id="b-lowergroup-name-habitats" nodeset="."/>
+				</xf:bind>
+
+				<xf:bind id="b-lowergroup-birds" nodeset="instance('species')/helpers/lower_groups[@type = 'birds']/lower_group[@middle_group=instance('context')/selMiddleGroup]">
+					<xf:bind id="b-lowergroup-name-birds" nodeset="."/>
+				</xf:bind>
+
+				<xf:bind id="b-species-list-habitats" nodeset="instance('species')/species[@type = 'habitats']/specie[lower_group=instance('context')/selLowerGroup-habitats]">
+					<xf:bind id="b-species-name-habitats" nodeset="specname"/>
+				</xf:bind>
+				<xf:bind id="b-species-list-birds" nodeset="instance('species')/species[@type = 'birds']/specie[lower_group=instance('context')/selLowerGroup-birds]">
+					<xf:bind id="b-species-name-birds" nodeset="specname"/>
+				</xf:bind>
+-->
+		</xf:model>
     </head>
-    <body>
+    <body class="fullscreen tundra">
+		<div id="workarea">
         <!-- ##################################            FORM HEADER            ############################################-->
         <h1>Habitats and Birds Derogations</h1>
         <xf:group bind="b-saveresult-message-ok">
@@ -192,7 +340,7 @@
         <div class="section header">
             <xf:group>
                 <xf:dispatch targetid="main-model" name="set-content-modified" ev:event="xforms-value-changed" />
-                <xf:select1 appearance="minimal" bind="b-country" incremental="true">
+                <xf:select1 appearance="minimal" bind="b-country">
                     <xf:label class="bold">Country</xf:label>
                     <xf:itemset nodeset="instance('countries')/data">
                         <xf:label ref="name"/>
@@ -202,84 +350,80 @@
                     <xf:alert>Mandatory field!</xf:alert>
                 </xf:select1>
 
-                <xf:input bind="b-user" incremental="true">
+                <xf:input bind="b-user">
                     <xf:label class="bold">User Identity</xf:label>
                     <xf:alert>Mandatory field!</xf:alert>
                 </xf:input>
             </xf:group>
         </div>
         <!-- ##################################          TABS          ############################################-->
-        <!--
         <div>
 <xf:group>
-    <xf:label>Cases</xf:label>
-    <div style="display:none;">
-        <xf:trigger id="t-case-list">
+		<!--
+    <div>
+        <xf:trigger id="t-case-list" ref="instance('context')/trigger-switch">
             <xf:label>Derogations list</xf:label>
             <xf:toggle case="case-list"></xf:toggle>
         </xf:trigger>
         <xf:trigger id="t-case-edit">
             <xf:label>Edit derogation</xf:label>
             <xf:toggle case="case-edit"></xf:toggle>
+            <xf:dispatch targetid="main-model" name="my-edit"/>
         </xf:trigger>
         <xf:trigger id="t-case-view">
             <xf:label>View derogation</xf:label>
             <xf:toggle case="case-view"></xf:toggle>
         </xf:trigger>
     </div>
-
-    <xf:switch id="switch1" appearance="dijit:TabContainer">
+	-->
+    <xf:switch id="switch1">
         <xf:case id="case-list" selected="true">
             <xf:label>Case 1</xf:label>
-            <div class="caseContent" style="background:#bbbbff">
-                <h2>List</h2>
-            </div>
-        </xf:case>
-        <xf:case id="case-edit">
-            <xf:label>Case 2</xf:label>
-            <div class="caseContent" style="background:#ccccff">
-                <h2>Edit</h2>
-                <p>This is some content for the second case</p>
-            </div>
-        </xf:case>
-        <xf:case id="case-view">
-            <xf:label>View</xf:label>
-            <div class="caseContent" style="background:#ddddff">
-                <h2>CASE 3</h2>
-                <p>This is some content for the third case</p>
-            </div>
-        </xf:case>
-    </xf:switch>
-</xf:group>
-</div>
--->
-        <div class="section">
+            <div class="caseContent">
+                <h2>List of derogations</h2>
         <!-- ##################################         DEROGATIONS LIST           ############################################-->
         <xf:group>
             <xf:dispatch targetid="main-model" name="set-content-modified" ev:event="xforms-value-changed" />
-            <xf:repeat id="rDerogList" bind="b-derogation" appearance="compact">
+            <xf:repeat id="rDerogList" nodeset="derogation" appearance="compact" class="datatable">
                 <xf:output ref="@derogation_reference">
                     <xf:label class="bold">Derogation Reference</xf:label>
                 </xf:output>
-                <xf:input ref="licenseValidFrom">
+                <xf:output value="if (string-length(@directive) &gt; 0) then if (@directive = instance('directives')/directive[@type='birds']/@id) then 'Birds' else 'Habitats' else ''">
+                    <xf:label class="bold">Directive</xf:label>
+                </xf:output>
+                <xf:output ref="licenseValidFrom">
                     <xf:label class="bold">License Valid From</xf:label>
-                </xf:input>
-                <xf:input ref="licenseValidUntil">
+                </xf:output>
+                <xf:output ref="licenseValidUntil">
                     <xf:label class="bold">License Valid Until</xf:label>
-                </xf:input>
-                <xf:input ref="sensitive">
+                </xf:output>
+                <xf:output value="if (sensitive='true') then 'sensitive' else ''">
                     <xf:label class="bold">Sensitive</xf:label>
-                </xf:input>
+                </xf:output>
+		        <xf:trigger appearance="minimal" bind="b-derogEditButton">
+					<xf:label>Edit</xf:label>
+					<xf:hint>Open editing form</xf:hint>
+					<xf:toggle case="case-edit"></xf:toggle>
+                    <xf:dispatch targetid="main-model" name="my-edit"/>
+				</xf:trigger>
+		        <xf:trigger appearance="minimal" bind="b-derogDeleteButton">
+					<xf:label>Delete</xf:label>
+                    <xf:hint>Deletes selected derogation from report</xf:hint>
+                    <xf:dispatch targetid="main-model" name="my-reset-all"
+                        if="count(instance('default')/derogation) = 1 and instance('default')/derogation[1]/@derogation_reference != ''"/>
+                    <xf:delete ref="instance('default')/derogation" at="index('rDerogList')" if="count(instance('default')/derogation) > 1"/>
+                    <xf:dispatch targetid="main-model" name="set-content-modified"/>
+				</xf:trigger>
+
             </xf:repeat>
         </xf:group>
-        </div>
-        <div class="section">
+        <div class="section section-buttons">
             <xf:group>
                 <xf:trigger>
                     <xf:label>Create HABITATS derogation</xf:label>
                     <xf:action>
                         <xf:setvalue ref="instance('context')/activeDirective" value="'habitats'"/>
-                        <xf:insert bind="b-derogation" at="last()" position="after" origin="instance('emptyinstance')/derogation"
+                        <xf:insert nodeset="/derogations/derogation" at="last()" position="after" origin="instance('emptyinstance')/derogation"
                             if="count(instance('default')/derogation)&gt;1 or instance('default')/derogation[1]/@derogation_reference!=''"/>
                         <xf:dispatch targetid="main-model" name="my-insert"/>
                     </xf:action>
@@ -288,24 +432,15 @@
                     <xf:label>Create BIRDS derogation</xf:label>
                     <xf:action>
                         <xf:setvalue ref="instance('context')/activeDirective" value="'birds'"/>
-                        <xf:insert bind="b-derogation" at="last()" position="after" origin="instance('emptyinstance')/derogation"
+                        <xf:insert nodeset="instance('default')/derogation" at="last()" position="after" origin="instance('emptyinstance')/derogation"
                             if="count(instance('default')/derogation)&gt;1 or instance('default')/derogation[1]/@derogation_reference!=''"/>
                         <xf:dispatch targetid="main-model" name="my-insert"/>
                     </xf:action>
                 </xf:trigger>
-                <xf:trigger>
-                    <xf:label>Delete derogation</xf:label>
-                    <xf:hint>Deletes selected derogation from report</xf:hint>
-                    <xf:action>
-                        <xf:dispatch targetid="main-model" name="my-reset-all"
-                            if="count(instance('default')/derogation)=1 and instance('default')/derogation[1]/@derogation_reference!=''"/>
-                        <xf:delete bind="b-derogation" at="index('rDerogList')" if="count(instance('default')/derogation)&gt;1"/>
-                        <xf:dispatch targetid="main-model" name="set-content-modified"/>
 
-                    </xf:action>
-                </xf:trigger>
             </xf:group>
         </div>
+		</div>
         <div class="section bottom-buttons">
         <!-- ##################################          BUTTONS            ############################################-->
         <xf:group appearance="minimal">
@@ -350,6 +485,167 @@
                 </div>
             </xf:group>
         </bfc:dialog>
+        </xf:case>
+
+   		<!-- ##################################         EDIT           ############################################-->
+        <xf:case id="case-edit">
+            <xf:label>Case 2</xf:label>
+            <div class="caseContent">
+                <h2>Edit derogation</h2>
+				<div class="section-buttons">
+					<xf:trigger id="t-case-list">
+						<xf:label>Back to list of derogations</xf:label>
+						<xf:toggle case="case-list"></xf:toggle>
+					</xf:trigger>
+				</div>
+				<xf:group id="gDerogEdit" ref="instance('default')/derogation[index('rDerogList')]">
+					<xf:dispatch targetid="main-model" name="set-content-modified" ev:event="xforms-value-changed" />
+					<xf:group appearance="compact">
+						<xf:label>Derogation</xf:label>
+					
+					<xf:group appearance="bf:verticalTable">
+						<xf:output class="semi-wide-inp bold" ref="@derogation_reference"><xf:label>Derogation reference</xf:label></xf:output>			
+						<xf:output class="semi-wide-inp bold" value="instance('directives')/directive[@id = instance('default')//derogation[index('rDerogList')]/@directive]"><xf:label>Directive</xf:label></xf:output>			
+						<xf:output class="semi-wide-inp" ref="@userIdentity"><xf:label>User Identity</xf:label></xf:output>			
+						<xf:input class="semi-wide-inp" ref="@user_derogation_ref"><xf:label>User defined reference</xf:label></xf:input>			
+						<xf:input class="semi-wide-inp" ref="licensingAuthority"><xf:label>Licensing authority</xf:label></xf:input>
+						<xf:input ref="licenseValidFrom">
+							<xf:label>License valid from</xf:label>
+							<xf:hint>Select the date when the license was valid from.</xf:hint>
+							<xf:alert>Required field. "Valid from" should be before "Valid until"</xf:alert>
+						</xf:input>
+						<xf:input ref="licenseValidUntil">
+							<xf:label>License valid until</xf:label>
+							<xf:hint>Select the date until the license is valid.</xf:hint>
+							<xf:alert>Required field. "Valid until" should be after "Valid from"</xf:alert>
+						</xf:input>
+						<xf:input class="semi-wide-inp" ref="numberOfLicenses"><xf:label >Number of licenses</xf:label><xf:hint>Numeric field</xf:hint><xf:alert>Numeric field &gt; 0</xf:alert></xf:input>
+						<xf:input ref="sensitive"><xf:label class="red">Sensitive</xf:label>
+						<!--
+								<xf:action ev:event="xforms-value-changed">
+									<xf:setvalue f:ref="/derogations/derogation[index('rDerogList')]/sensitive" value="instance('context')/sensitive" />
+								</xf:action>
+						-->
+						</xf:input>
+					</xf:group>
+					</xf:group>
+
+					<xf:group appearance="compact">
+						<xf:label>Species</xf:label>
+						<xf:repeat appearance="compact" id="rSpecies" nodeset="species" class="datatable">
+							<xf:output ref="." class="wide-inp"><xf:label/></xf:output>
+							<xf:trigger appearance="minimal" bind="b-speciesDeleteButton">
+								<xf:label>Delete</xf:label>	
+								<xf:setvalue ref="instance('default')/derogation[index('rDerogList')]/species[1]" value="''" if="count(instance('default')/derogation[index('rDerogList')]/species) = 1" />
+								<xf:delete nodeset="instance('default')/derogation[index('rDerogList')]/species" at="index('rSpecies')" if="count(instance('default')/derogation[index('rDerogList')]/species) > 1" />
+							</xf:trigger>
+						</xf:repeat>
+						<xf:trigger>
+							<xf:label> Add species </xf:label>
+							<bfc:show dialog="speciesDialog" ev:event="DOMActivate"/>
+						</xf:trigger>
+
+   		<!-- ##################################         add species        ############################################-->
+
+					<bfc:dialog id="speciesDialog">
+						<xf:label>Add species</xf:label>
+						<xf:group appearance="bf:verticalTable">
+					<!--
+								<xf:select1 ref="instance('context')/selMainGroup" appearance="minimal">
+								<xf:label>Main group</xf:label>
+								<xf:itemset bind="b-maingroup">
+									<xf:label bind="b-maingroup-name" />
+									<xf:value bind="b-maingroup-name" />
+								</xf:itemset>
+							</xf:select1>
+					<xf:select1 ref="instance('context')/selMiddleGroup" appearance="minimal">
+						<xf:label>Middle group</xf:label>
+						<xf:itemset bind="b-middlegroup">
+							<xf:label bind="b-middlegroup-name" />
+							<xf:value bind="b-middlegroup-name" />
+						</xf:itemset>
+					</xf:select1>
+					<xf:select1 ref="instance('context')/selLowerGroup-birds" appearance="minimal">
+						<xf:label>Family species</xf:label>
+						<xf:itemset bind="b-lowergroup-birds">
+							<xf:label bind="b-lowergroup-name-birds" />
+							<xf:value bind="b-lowergroup-name-birds" />
+						</xf:itemset>
+					</xf:select1>
+					<xf:select1 ref="instance('context')/selSpecies-birds" appearance="minimal">
+						<xf:label>Species name</xf:label>
+						<xf:itemset bind="b-species-list-birds">
+							<xf:label bind="b-species-name-birds" />
+							<xf:value bind="b-species-name-birds" />
+						</xf:itemset>
+					</xf:select1>
+					<xf:select1 ref="instance('context')/selLowerGroup-habitats" appearance="minimal">
+						<xf:label>Lower group</xf:label>
+						<xf:itemset bind="b-lowergroup-habitats">
+							<xf:label bind="b-lowergroup-name-habitats" />
+							<xf:value bind="b-lowergroup-name-habitats" />
+						</xf:itemset>
+					</xf:select1>
+					<xf:select1 ref="instance('context')/selSpecies-habitats" appearance="minimal">
+						<xf:label>Species name</xf:label>
+						<xf:itemset bind="b-species-list-habitats">
+							<xf:label bind="b-species-name-habitats" />
+							<xf:value bind="b-species-name-habitats" />
+						</xf:itemset>
+					</xf:select1>
+					-->
+							<xf:output value="''"/>
+							<xf:input class="wide-inp" bind="b-species-freetext-value"><xf:label>Species as free text</xf:label></xf:input>
+						</xf:group>
+						<xf:group>
+							<div class="section-buttons">
+								<xf:trigger>
+									<xf:label> Add </xf:label>
+									<xf:insert at="last()" position="after" nodeset="/derogations/derogation[index('rDerogList')]/species"
+										if="count(/derogations/derogation[index('rDerogList')]/species)&gt;1 or /derogations/derogation[index('rDerogList')]/species[1] != '' and
+										(string-length(instance('context')/speciesFreetextValue) &gt; 0)"/>
+									<xf:setvalue ref="/derogations/derogation[index('rDerogList')]/species[index('rSpecies')]" value="instance('context')/speciesFreetextValue" if="string-length(instance('context')/*[name()=concat('selSpecies-',instance('context')/activeDirective)]) = 0 and string-length(instance('context')/speciesFreetextValue) > 0"/>
+									<xf:setvalue ref="/derogations/derogation[index('rDerogList')]/species[index('rSpecies')]" value="instance('context')/*[name()=concat('selSpecies-',instance('context')/activeDirective)]" if="string-length(instance('context')/*[name()=concat('selSpecies-',instance('context')/activeDirective)]) > 0 "/>
+									<xf:setvalue ref="instance('context')/speciesFreetextValue" value="''" />
+									<bfc:hide dialog="speciesDialog" ev:event="DOMActivate"></bfc:hide>
+								</xf:trigger>
+								<xf:trigger>
+									<xf:label>Cancel</xf:label>
+									<bfc:hide dialog="speciesDialog" ev:event="DOMActivate"></bfc:hide>
+								</xf:trigger>
+							</div>
+						</xf:group>
+					</bfc:dialog>
+				</xf:group>
+					<xf:group appearance="compact">
+						<xf:label>Geography</xf:label>
+						<xf:input ref="location" class="wide-inp"><xf:label>Location</xf:label></xf:input>
+
+					</xf:group>
+				</xf:group>
+				<div class="section-buttons">
+				<xf:trigger id="t-case-list">
+					<xf:label>Back to list of derogations</xf:label>
+					<xf:toggle case="case-list"></xf:toggle>
+				</xf:trigger>
+				</div>
+            </div>
+        </xf:case>
+        <xf:case id="case-view">
+            <xf:label>View</xf:label>
+            <div class="caseContent" style="background:#ddddff">
+                <h2>View directive</h2>
+                <p>This is some content for the third case</p>
+            </div>
+        </xf:case>
+    </xf:switch>
+</xf:group>
+</div>
+
         <xf:output ref="instance('context')/contentModified"><xf:label>Content modified: </xf:label></xf:output>
+		<xf:output value="instance('context')/derogIndex"/>
+		<xf:output value="instance('context')/tblSpeciesFilled"/>
+		<xf:output value="count(if (instance('context')/derogIndex castable as xs:integer) then instance('default')/derogation[number(instance('context')/derogIndex)]/species else 1)"/>
+		</div>
     </body>
 </html>
