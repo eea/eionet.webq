@@ -110,7 +110,9 @@
                                 </c:otherwise>
                             </c:choose>
                         <a href="${downloadLink}" onclick="hideNotDownloadedNote('${id-prefix}');" title="Download file">Download
-                            <span id="${id-prefix}not-downloaded" class="not-downloaded" style="color:red;text-decoration:none"> ${updateNote}</span></a>
+                            <c:if test="${not empty updateNote}">
+                                <span id="${id-prefix}not-downloaded" class="not-downloaded" style="color:red;text-decoration:none"> ${updateNote}</span></a>
+                            </c:if>
                         </div>
                         <c:forEach var="webForm" items="${allWebForms}">
                             <c:if test="${file.xmlSchema eq webForm.xmlSchema}">
