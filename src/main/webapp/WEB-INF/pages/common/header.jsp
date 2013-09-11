@@ -8,6 +8,7 @@
     </div>
     <div id="righttools">
         <sec:authorize access="isAuthenticated()" var="authenticated"/>
+        <sec:authorize access="hasRole('DEVELOPER')" var="isDeveloper"/>
         <c:choose>
             <c:when test="${authenticated}">
                 <sec:authentication property="name" var="userName"/>
@@ -55,7 +56,7 @@
 <div id="leftcolumn" class="localnav">
     <ul>
         <li><a href="<c:url value="/"/>">My xml files</a></li>
-        <c:if test="${authenticated}">
+        <c:if test="${isDeveloper}">
             <li><a href="<c:url value="/projects/"/>">Webform projects</a></li>
         </c:if>
     </ul>

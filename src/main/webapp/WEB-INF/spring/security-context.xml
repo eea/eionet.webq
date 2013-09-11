@@ -9,8 +9,8 @@
     <!--Security information is required-->
     <security:http entry-point-ref="casEntryPoint" pattern="/**" use-expressions="true">
         <security:intercept-url pattern="/login" access="isAuthenticated()"/>
-        <security:intercept-url pattern="/projects/**" access="isAuthenticated()"/>
-        <security:intercept-url pattern="/download/project/**" access="isAuthenticated()"/>
+        <security:intercept-url pattern="/projects/**" access="hasRole('DEVELOPER')"/>
+        <security:intercept-url pattern="/download/project/**" access="hasRole('DEVELOPER')"/>
         <security:intercept-url pattern="/**" access="permitAll()"/>
         <security:custom-filter position="CAS_FILTER" ref="casFilter" />
         <security:logout logout-success-url="/logout"/>
@@ -54,11 +54,9 @@
         <property name="key" value="an_id_for_this_auth_provider_only"/>
     </bean>
 
-    <security:user-service id="userService"> <!--TODO userService-->
-        <security:user name="dmitrant" password="" authorities="ROLE_USER" />
-        <security:user name="kasperen" password="" authorities="ROLE_USER" />
-        <security:user name="roug" password="" authorities="ROLE_USER" />
-    </security:user-service>
+    <bean id="userService" class="org.springframework.security.provisioning.JdbcUserDetailsManager">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
 
     <bean id="singleLogoutFilter" class="org.jasig.cas.client.session.SingleSignOutFilter"/>
     <bean id="requestSingleLogoutFilter" class="org.springframework.security.web.authentication.logout.LogoutFilter">

@@ -44,3 +44,14 @@ CREATE TABLE IF NOT EXISTS PROJECT_FILE(
   updated timestamp,
   primary key (id),
   unique index project_to_file_name (project_id, file_name)) DEFAULT CHARACTER SET utf8;
+
+CREATE TABLE IF NOT EXISTS users(
+  username varchar(255) unique,
+  password varchar(255),
+  enabled boolean) DEFAULT CHARACTER SET utf8;
+
+CREATE TABLE IF NOT EXISTS authorities(
+  username varchar(255),
+  authority varchar(255),
+  constraint fk_authorities_users foreign key(username) references users(username),
+  unique index ix_auth_username (username,authority)) DEFAULT CHARACTER SET utf8;
