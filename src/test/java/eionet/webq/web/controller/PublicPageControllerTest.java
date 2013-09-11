@@ -20,10 +20,11 @@
  */
 package eionet.webq.web.controller;
 
-import eionet.webq.dto.ProjectFile;
-import eionet.webq.dto.UserFile;
-import eionet.webq.service.ProjectFileService;
-import eionet.webq.service.UserFileService;
+import static org.hamcrest.core.IsEqual.equalTo;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -33,10 +34,10 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 
-import static org.hamcrest.core.IsEqual.equalTo;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import eionet.webq.dto.ProjectFile;
+import eionet.webq.dto.UserFile;
+import eionet.webq.service.ProjectFileService;
+import eionet.webq.service.UserFileService;
 
 /**
  */
@@ -87,7 +88,7 @@ public class PublicPageControllerTest {
         assertThat(response.getContentAsByteArray(), equalTo(testContent));
     }
 
-    private UserFile saveFileAndGetParameterFromServiceCall(ProjectFile projectFile) {
+    private UserFile saveFileAndGetParameterFromServiceCall(ProjectFile projectFile) throws Exception{
         when(projectFileService.getById(WEB_FORM_ID)).thenReturn(projectFile);
 
         publicPageController.startWebFormSaveFile(WEB_FORM_ID, new MockHttpServletRequest());

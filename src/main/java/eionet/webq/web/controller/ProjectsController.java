@@ -20,14 +20,8 @@
  */
 package eionet.webq.web.controller;
 
-import eionet.webq.dto.ProjectEntry;
-import eionet.webq.dto.ProjectFile;
-import eionet.webq.dto.ProjectFileType;
-import eionet.webq.dto.util.ProjectFileInfo;
-import eionet.webq.service.FileNotAvailableException;
-import eionet.webq.service.ProjectFileService;
-import eionet.webq.service.ProjectService;
-import eionet.webq.service.RemoteFileService;
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.dao.DuplicateKeyException;
@@ -40,7 +34,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import javax.validation.Valid;
+import eionet.webq.dto.ProjectEntry;
+import eionet.webq.dto.ProjectFile;
+import eionet.webq.dto.ProjectFileType;
+import eionet.webq.dto.util.ProjectFileInfo;
+import eionet.webq.service.FileNotAvailableException;
+import eionet.webq.service.ProjectFileService;
+import eionet.webq.service.ProjectService;
+import eionet.webq.service.RemoteFileService;
 
 /**
  * Spring controller to manage projects.

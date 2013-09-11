@@ -3,31 +3,6 @@
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib prefix="s" uri="http://www.springframework.org/tags" %>
 
-<style type="text/css">
-    .container {
-        padding-top:1em;
-        width: 100%;
-    }
-    .col1 {
-        float: left;
-        width: 50%;
-    }
-    .col2 {
-        float: right;
-        width: 50%;
-    }
-    .container legend{
-        font-weight:bold;
-    }
-    .files{
-        padding-top:1em;
-        clear:both;
-    }
-    .action{
-        margin-bottom:0.5em;
-    }
-</style>
-
 <h1>Web Questionnaires</h1>
 <p>The system lets you create and edit XML files by using webforms.
 <ul>
@@ -35,15 +10,17 @@
     <li>If you already have an XML file that you want to edit, then select "Upload XML file". Appropriate actions will be available if your XML file conforms to any of the webform stored in the system.</li>
 </ul></p>
 <p><strong>After editing your file do not forget to download it!</strong> The files are stored in the system temporarily and they will be deleted if your session expires or if you close your web browser.</p>
+
+<p><input type="button" value="Start a new webform" onclick="showStartWebformArea()"/> or <input type="button" value="Upload XML file" onclick="showUploadXmlArea()"/></p>
 <div class="container">
     <c:url var="uploadUrl" value="/uploadXml"/>
     <f:form modelAttribute="uploadForm" action="${uploadUrl}" method="POST" enctype="multipart/form-data">
         <f:errors path="*" element="div" cssClass="error-msg"/>
-        <div class="col1">
+        <div class="col1" id="startWebformArea">
         <fieldset>
             <legend>Start a new web form</legend>
             <p>
-                <label for="selectFile">1. Select the web form</label><br/>
+                <label for="selectFile">1. Select the web form</label>
                 <select id="selectFile" name="selectFile" title="Select new webform">
                     <c:forEach var="form" items="${allWebForms}">
                         <option value="<c:url value="/startWebform?formId=${form.id}"/>">${form.title}</option>
@@ -55,7 +32,7 @@
             </p>
         </fieldset>
         </div>
-    <div class="col2">
+    <div class="col2" id="uploadXmlArea">
         <fieldset>
             <legend>Upload XML file</legend>
 
