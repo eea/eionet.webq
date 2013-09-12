@@ -57,7 +57,7 @@
 <div id="leftcolumn" class="localnav">
     <ul>
         <li><a href="<c:url value="/"/>">My xml files</a></li>
-        <c:if test="${isDeveloper}">
+        <c:if test="${isDeveloper or isAdmin}">
             <li><a href="<c:url value="/projects/"/>">Webform projects</a></li>
         </c:if>
         <c:if test="${isAdmin}">
