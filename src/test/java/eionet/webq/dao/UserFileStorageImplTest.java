@@ -23,36 +23,39 @@ package eionet.webq.dao;
 import configuration.ApplicationTestContextWithMockSession;
 import eionet.webq.dto.UploadedFile;
 import eionet.webq.dto.UserFile;
+import org.hibernate.LazyInitializationException;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.dao.DataAccessException;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.transaction.annotation.Transactional;
 
+import javax.validation.ConstraintViolationException;
 import java.util.Collection;
 import java.util.Iterator;
 
 import static junit.framework.TestCase.assertNotNull;
-import static junit.framework.TestCase.assertNull;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertThat;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {ApplicationTestContextWithMockSession.class})
+@Transactional
 public class UserFileStorageImplTest {
     @Autowired
     @Qualifier("user-files")
     private FileStorage<String, UserFile> storage;
     @Autowired
     private UserFileDownload userFileDownload;
+    @Autowired
+    SessionFactory sessionFactory;
     private String userId = userId();
     private String otherUserId = "other" + userId;
-
-    @Autowired
-    JdbcTemplate template;
 
     @Test
     public void saveUploadedFileToStorageWithoutException() {
@@ -77,24 +80,24 @@ public class UserFileStorageImplTest {
         assertNotNull(fileFromDb.getUpdated());
     }
 
-    @Test(expected = DataAccessException.class)
+    @Test(expected = ConstraintViolationException.class)
     public void saveIgnoresId() throws Exception {
         UserFile userFile = new UserFile();
         userFile.setId(15);
 
-        uploadFileForUser(userId, userFile);
+        saveFileForUser(userId, userFile);
 
         storage.fileContentBy(15, userId);
     }
 
-    @Test(expected = DataAccessException.class)
+    @Test
     public void userCannotGetOtherUserFiles() throws Exception {
         uploadSingleFileFor(userId);
         uploadSingleFileFor(otherUserId);
 
         UserFile fileUploadedByAnotherUser = getFirstUploadedFileAndAssertThatItIsTheOnlyOneAvailableFor(otherUserId);
 
-        storage.fileContentBy(fileUploadedByAnotherUser.getId(), userId);
+        Assert.assertNull(storage.fileContentBy(fileUploadedByAnotherUser.getId(), userId));
     }
 
     @Test
@@ -102,6 +105,7 @@ public class UserFileStorageImplTest {
         String savedFileName = "file_to_retrieve.xml";
         UserFile fileToUpload = new UserFile();
         fileToUpload.setName(savedFileName);
+        fileToUpload.setXmlSchema("test-schema");
         storage.save(fileToUpload, userId);
 
         UserFile userFile = getFirstUploadedFileAndAssertThatItIsTheOnlyOneAvailableFor(userId);
@@ -110,28 +114,41 @@ public class UserFileStorageImplTest {
 
     @Test
     public void allFilesSavedForOneUserCanBeRetrieved() throws Exception {
-        uploadFilesFor(userId, 3);
+        saveFilesFor(userId, 3);
 
         assertThat(storage.allFilesFor(userId).size(), equalTo(3));
     }
 
     @Test
     public void filesRetrievedOnlyForSpecifiedUser() throws Exception {
-        uploadFilesFor(userId, 3);
-        uploadFilesFor(otherUserId, 2);
+        saveFilesFor(userId, 3);
+        saveFilesFor(otherUserId, 2);
 
         assertThat(storage.allFilesFor(userId).size(), equalTo(3));
     }
 
-    @Test
-    public void allFilesWillNotFetchFilesContent() throws Exception {
-        UserFile fileWithContent = fileWithContent("File content".getBytes());
+    @Test(expected = LazyInitializationException.class)
+    public void filesContentIsFetchedLazily() throws Exception {
+        storage.save(fileWithContentAndXmlSchema("test-content".getBytes()), userId);
+        Session currentSession = sessionFactory.getCurrentSession();
+        currentSession.clear();
 
-        uploadFilesFor(userId, 10, fileWithContent);
-        Collection<UserFile> uploadedFiles = getAllFilesForUserAndAssertThatResultSetSizeIsAsExpected(userId, 10);
-        for (UserFile file : uploadedFiles) {
-            assertNull(file.getContent());
-        }
+        UserFile theOnlyFile = getFirstUploadedFileAndAssertThatItIsTheOnlyOneAvailableFor(userId);
+        currentSession.evict(theOnlyFile);
+
+        theOnlyFile.getContent();//content must be not initialized
+    }
+
+    @Test
+    public void fileContentWillBeLoadedOnDemand() throws Exception {
+        byte[] testContent = "aaaaa".getBytes();
+        storage.save(fileWithContentAndXmlSchema(testContent), userId);
+        Session currentSession = sessionFactory.getCurrentSession();
+        currentSession.clear();
+
+        UserFile theOnlyFile = getFirstUploadedFileAndAssertThatItIsTheOnlyOneAvailableFor(userId);
+
+        assertThat(theOnlyFile.getContent(), equalTo(testContent));
     }
 
     @Test
@@ -150,7 +167,7 @@ public class UserFileStorageImplTest {
 
     @Test
     public void fileContentCouldBeChanged() {
-        uploadFileForUser(userId, fileWithContent("initial content".getBytes()));
+        saveFileForUser(userId, fileWithContentAndXmlSchema("initial content".getBytes()));
         byte[] newContentBytes = "new content".getBytes();
         UserFile uploadedFile = getFirstUploadedFileAndAssertThatItIsTheOnlyOneAvailableFor(userId);
 
@@ -162,7 +179,7 @@ public class UserFileStorageImplTest {
     @Test
     public void userCannotChangeOtherUserContent() throws Exception {
         byte[] originalContent = (userId + " content").getBytes();
-        uploadFileForUser(userId, fileWithContent(originalContent));
+        saveFileForUser(userId, fileWithContentAndXmlSchema(originalContent));
         UserFile uploadedFileByOtherUser = getFirstUploadedFileAndAssertThatItIsTheOnlyOneAvailableFor(userId);
 
         UserFile contentChangeRequestFile =
@@ -173,9 +190,11 @@ public class UserFileStorageImplTest {
         assertThat(storage.fileContentBy(uploadedFileByOtherUser.getId(), userId).getContent(), equalTo(originalContent));
     }
 
-    @Test(expected = UnsupportedOperationException.class)
     public void getByIdNotImplemented() throws Exception {
-        storage.fileById(1);
+        UserFile file = fileWithContentAndXmlSchema(userId.getBytes());
+        saveFileForUser(userId, file);
+        UserFile userFile = storage.fileById(file.getId());
+        org.junit.Assert.assertNotNull(userFile);
     }
 
     @Test
@@ -189,7 +208,7 @@ public class UserFileStorageImplTest {
 
     @Test
     public void allowsBulkRemoval() throws Exception {
-        uploadFilesFor(userId, 2);
+        saveFilesFor(userId, 2);
         Iterator<UserFile> it = storage.allFilesFor(userId).iterator();
 
         storage.remove(userId, it.next().getId(), it.next().getId());
@@ -202,7 +221,7 @@ public class UserFileStorageImplTest {
         UserFile userFile =
                 new UserFile(new UploadedFile("name", "test_content".getBytes()), "xmlSchema");
         int fileId = storage.save(userFile, userId);
-        int maxId = template.queryForInt("SELECT MAX(id) from user_xml");
+        int maxId = (Integer)sessionFactory.getCurrentSession().createQuery("SELECT MAX(id) from UserFile").uniqueResult() ;
 
         assertThat(fileId, equalTo(maxId));
     }
@@ -223,8 +242,20 @@ public class UserFileStorageImplTest {
         UserFile userFile = saveAndGetBackSavedFileForDefaultUser();
         userFileDownload.updateDownloadTime(userFile.getId());
 
-        UserFile updatedFile = getFirstUploadedFileAndAssertThatItIsTheOnlyOneAvailableFor(userId);
+        sessionFactory.getCurrentSession().clear();
+
+        UserFile updatedFile = storage.fileById(userFile.getId());
         assertNotNull(updatedFile.getDownloaded());
+    }
+
+    @Test
+    public void updatedTimeIsChangedAfterRecordUpdateInStorage() throws Exception {
+        UserFile userFile = saveAndGetBackSavedFileForDefaultUser();
+        userFile.setUpdated(null);
+
+        storage.update(userFile, userFile.getUserId());
+
+        assertNotNull(storage.fileById(userFile.getId()).getUpdated());
     }
 
     private UserFile saveAndGetBackSavedFileForDefaultUser() {
@@ -233,32 +264,29 @@ public class UserFileStorageImplTest {
     }
 
     private void uploadSingleFileFor(String userId) {
-        uploadFilesFor(userId, 1);
+        saveFilesFor(userId, 1);
     }
 
-    private UserFile fileWithContent(byte[] content) {
+    private UserFile fileWithContentAndXmlSchema(byte[] content) {
         UserFile userFile = new UserFile();
+        userFile.setXmlSchema("xml-schema");
         userFile.setContent(content);
         return userFile;
     }
 
     private UserFile fileWithContentAndId(byte[] content, int id) {
-        UserFile userFile = fileWithContent(content);
+        UserFile userFile = fileWithContentAndXmlSchema(content);
         userFile.setId(id);
         return userFile;
     }
 
-    private void uploadFilesFor(String userId, int count) {
-        uploadFilesFor(userId, count, new UserFile());
-    }
-
-    private void uploadFilesFor(String userId, int count, UserFile file) {
+    private void saveFilesFor(String userId, int count) {
         for (int i = 0; i < count; i++) {
-            uploadFileForUser(userId, file);
+            saveFileForUser(userId, fileWithContentAndXmlSchema("test-content".getBytes()));
         }
     }
 
-    private void uploadFileForUser(String userId, UserFile file) {
+    private void saveFileForUser(String userId, UserFile file) {
         storage.save(file, userId);
     }
 

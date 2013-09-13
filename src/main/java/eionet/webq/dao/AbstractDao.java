@@ -1,33 +1,30 @@
 package eionet.webq.dao;
 
-import java.util.Properties;
-
+import org.hibernate.Criteria;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.jdbc.core.BeanPropertyRowMapper;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Common logic for DAO classes.
  *
  * @param <T> DTO
  */
+@Transactional
 public abstract class AbstractDao<T> {
     /**
-     * Sql statements properties.
+     * Session factory.
      */
-    @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
     @Autowired
-    @Qualifier("sql_statements")
-    Properties sqlProperties;
+    private SessionFactory sessionFactory;
 
+    protected Criteria getCriteria() {
+        return getCurrentSession().createCriteria(getDtoClass());
+    }
 
-    /**
-     * Row mapper for web form upload.
-     *
-     * @return {@link org.springframework.jdbc.core.BeanPropertyRowMapper} for {@link #getDtoClass()}
-     */
-    BeanPropertyRowMapper<T> rowMapper() {
-        return BeanPropertyRowMapper.newInstance(getDtoClass());
+    protected Session getCurrentSession() {
+        return sessionFactory.getCurrentSession();
     }
 
     /**

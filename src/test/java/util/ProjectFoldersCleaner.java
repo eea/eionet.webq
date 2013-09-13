@@ -1,7 +1,7 @@
 package util;
 
+import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
 
 /*
  * The contents of this file are subject to the Mozilla Public
@@ -25,9 +25,9 @@ import org.springframework.jdbc.core.JdbcTemplate;
  */
 public class ProjectFoldersCleaner {
     @Autowired
-    private JdbcTemplate template;
+    private SessionFactory sessionFactory;
 
     public void removeAllProjects() {
-        template.execute("DELETE FROM project_folder");
+        sessionFactory.getCurrentSession().createQuery("DELETE FROM ProjectEntry").executeUpdate();
     }
 }

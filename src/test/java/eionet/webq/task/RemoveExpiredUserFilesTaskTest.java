@@ -20,40 +20,49 @@
  */
 package eionet.webq.task;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.util.Date;
-import java.util.Properties;
-
 import org.apache.commons.lang3.time.DateUtils;
+import org.hibernate.Query;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.jdbc.core.JdbcTemplate;
+
+import java.sql.Timestamp;
+import java.util.Date;
+import java.util.Properties;
+
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  */
 public class RemoveExpiredUserFilesTaskTest {
     @Mock
-    JdbcTemplate template;
-    
+    private SessionFactory factory;
     @Mock
-    Properties properties;
-
+    private Session session;
+    @Mock
+    private Query query;
+    @Mock
+    private Properties properties;
     @InjectMocks
-    RemoveExpiredUserFilesTask removeExpiredUserFilesTask;
+    private RemoveExpiredUserFilesTask removeExpiredUserFilesTask;
     private int expirationTimeInHours = 1;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         when(properties.getProperty("user.file.expiration.hours")).thenReturn(Integer.toString(expirationTimeInHours));
+        when(factory.getCurrentSession()).thenReturn(session);
+        when(session.createQuery(anyString())).thenReturn(query);
+        when(query.setTimestamp(anyString(), any(Timestamp.class))).thenReturn(query);
     }
 
     @Test
@@ -61,7 +70,7 @@ public class RemoveExpiredUserFilesTaskTest {
         removeExpiredUserFilesTask.removeExpiredUserFiles();
 
         ArgumentCaptor<Date> dateCaptor = ArgumentCaptor.forClass(Date.class);
-        verify(template).update(anyString(), dateCaptor.capture());
+        verify(query).setTimestamp(anyString(), dateCaptor.capture());
 
         Date expectedDate = DateUtils.addHours(new Date(), -expirationTimeInHours);
         assertEquals(expectedDate.getTime(), dateCaptor.getValue().getTime(), 1000);

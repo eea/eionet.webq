@@ -20,21 +20,38 @@
  */
 package eionet.webq.dto;
 
+import org.hibernate.annotations.Generated;
 import org.hibernate.validator.constraints.NotEmpty;
 
+import javax.persistence.Column;
+import javax.persistence.Embedded;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import java.util.Date;
 
 /**
  * DTO for web form upload.
  */
+@Entity
+@Table(name = "project_file")
 public class ProjectFile {
     /**
      * Auto generated id.
      */
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
     /**
      * {@link eionet.webq.dto.ProjectEntry#id} connected with this file.
      */
+    @Column(updatable = false)
     private int projectId;
     /**
      * Form title.
@@ -44,6 +61,7 @@ public class ProjectFile {
     /**
      * Uploaded file.
      */
+    @Embedded
     private UploadedFile file = new UploadedFile();
     /**
      * Remote file location(typically VCS link).
@@ -76,6 +94,8 @@ public class ProjectFile {
     /**
      * Project file type.
      */
+    @Enumerated(value = EnumType.STRING)
+    @Column(updatable = false)
     private ProjectFileType fileType;
     /**
      * User name of user who uploaded web form.
@@ -84,10 +104,13 @@ public class ProjectFile {
     /**
      * timestamp of first upload of the file.
      */
+    @Temporal(TemporalType.TIMESTAMP)
+    @Generated(org.hibernate.annotations.GenerationTime.INSERT)
     private Date created;
     /**
      * timestamp of last update of the file.
      */
+    @Temporal(TemporalType.TIMESTAMP)
     private Date updated;
 
     public int getId() {
@@ -131,15 +154,6 @@ public class ProjectFile {
         return file.getSizeInBytes();
     }
 
-    /**
-     * Set size in bytes name for embedded {@link UploadedFile}.
-     *
-     * @param fileSizeInBytes size in bytes
-     */
-    public void setFileSizeInBytes(long fileSizeInBytes) {
-        file.setSizeInBytes(fileSizeInBytes);
-    }
-
     public String getNewXmlFileName() {
         return newXmlFileName;
     }
@@ -156,8 +170,18 @@ public class ProjectFile {
         this.emptyInstanceUrl = emptyInstanceUrl;
     }
 
+    /**
+     * Gets file content.
+     *
+     * @return file content or null.
+     */
     public byte[] getFileContent() {
-        return file.getContent();
+        UploadedFile.FileContent content = file.getContent();
+        if (content == null) {
+            return null;
+        } else {
+            return content.getFileContent();
+        }
     }
 
     /**
@@ -166,7 +190,13 @@ public class ProjectFile {
      * @param fileContent file content.
      */
     public void setFileContent(byte[] fileContent) {
-        file.setContent(fileContent);
+        UploadedFile.FileContent content = file.getContent();
+        if (content == null) {
+            file.setContent(new UploadedFile.FileContent(fileContent));
+        } else {
+            content.setFileContent(fileContent);
+        }
+        file.setSizeInBytes(fileContent.length);
     }
 
     public UploadedFile getFile() {

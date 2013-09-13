@@ -22,42 +22,69 @@ package eionet.webq.dto;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
+import javax.persistence.Column;
+import javax.persistence.Embedded;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+import javax.persistence.Transient;
 import java.util.Collection;
 import java.util.Date;
 
 /**
  * Data transfer object to pass uploaded file data across application.
  */
+@Entity
+@Table(name = "user_xml")
 public class UserFile {
     /**
      * File id in data storage.
      */
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
+    /**
+     * User id.
+     */
+    @Column(name = "user_id", updatable = false)
+    private String userId;
     /**
      * Uploaded file.
      */
+    @Embedded
     private UploadedFile file = new UploadedFile();
     /**
      * Xml schema name extracted during conversion.
      * @see eionet.webq.converter.MultipartFileConverter
      */
     @NotEmpty
+    @Column(name = "xml_schema")
     private String xmlSchema;
     /**
      * File upload date.
      */
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(insertable = false, updatable = false)
+    @org.hibernate.annotations.Generated(org.hibernate.annotations.GenerationTime.INSERT)
     private Date created;
     /**
      * Last change date.
      */
-    private Date updated;
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date updated = new Date();
     /**
      * Last download date.
      */
     private Date downloaded;
+
     /**
      * Available conversions for this file.
      */
+    @Transient
     private Collection<Conversion> availableConversions;
 
     /**
@@ -97,8 +124,17 @@ public class UserFile {
         file.setName(name);
     }
 
+    /**
+     * Returns content or null.
+     *
+     * @return content or null.
+     */
     public byte[] getContent() {
-        return file.getContent();
+        UploadedFile.FileContent content = file.getContent();
+        if (content == null) {
+            return null;
+        }
+        return content.getFileContent();
     }
     /**
      * Set file content for embedded {@link UploadedFile}.
@@ -106,19 +142,17 @@ public class UserFile {
      * @param content file content.
      */
     public void setContent(byte[] content) {
-        file.setContent(content);
+        UploadedFile.FileContent fileContent = file.getContent();
+        if (fileContent != null) {
+            fileContent.setFileContent(content);
+        } else {
+            file.setContent(new UploadedFile.FileContent(content));
+        }
+        file.setSizeInBytes(content.length);
     }
 
     public long getSizeInBytes() {
         return file.getSizeInBytes();
-    }
-    /**
-     * Set size in bytes name for embedded {@link UploadedFile}.
-     *
-     * @param sizeInBytes size in bytes
-     */
-    public void setSizeInBytes(long sizeInBytes) {
-        file.setSizeInBytes(sizeInBytes);
     }
 
     public String getXmlSchema() {
@@ -159,6 +193,14 @@ public class UserFile {
 
     public void setAvailableConversions(Collection<Conversion> availableConversions) {
         this.availableConversions = availableConversions;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
     @Override

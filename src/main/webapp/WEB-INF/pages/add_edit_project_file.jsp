@@ -29,7 +29,7 @@
                     <f:input path="file" type="file"/>
                 </td>
             </tr>
-            <c:if test="${not empty projectFile.fileContent}">
+            <c:if test="${not empty projectFile.file.content}">
                 <tr>
                     <th scope="row">Current file</th>
                     <td>

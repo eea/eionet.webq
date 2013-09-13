@@ -25,46 +25,37 @@ import eionet.webq.dto.ProjectEntry;
 import eionet.webq.dto.ProjectFile;
 import eionet.webq.dto.ProjectFileType;
 import eionet.webq.dto.UploadedFile;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
 import java.util.Iterator;
 
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {ApplicationTestContextWithMockSession.class})
+@Transactional
 public class WebFormStorageTest {
     @Autowired
     private WebFormStorage webFormStorage;
     @Autowired
     @Qualifier("project-files")
     private FileStorage<ProjectEntry, ProjectFile> projectFileStorage;
-    @Autowired
-    private JdbcTemplate template;
-    private ProjectFile webform = createProjectFile(ProjectFileType.WEBFORM); //will be reset after each test
     private ProjectEntry project = testProject();
-
-    @Before
-    public void setUp() throws Exception {
-        template.execute("DELETE FROM project_file");
-    }
 
     @Test
     public void allowsToFetchAllWebformsInRepository() throws Exception {
-        save(webform);
-        save(webform);
+        save(createWebform());
+        save(createWebform());
         save(createProjectFile(ProjectFileType.FILE));
 
         Collection<ProjectFile> activeWebForms = webFormStorage.getAllActiveWebForms();
@@ -77,10 +68,11 @@ public class WebFormStorageTest {
 
     @Test
     public void webformsMustBeActive() throws Exception {
-        save(webform);
+        save(createWebform());
 
-        webform.setActive(false);
-        save(webform);
+        ProjectFile otherWebform = createWebform();
+        otherWebform.setActive(false);
+        save(otherWebform);
 
         Collection<ProjectFile> allActiveWebForms = webFormStorage.getAllActiveWebForms();
         assertThat(allActiveWebForms.size(), equalTo(1));
@@ -89,10 +81,11 @@ public class WebFormStorageTest {
 
     @Test
     public void xmlSchemaMustBeSet() throws Exception {
-        save(webform);
+        save(createWebform());
 
-        webform.setXmlSchema(null);
-        save(webform);
+        ProjectFile otherWebform = createWebform();
+        otherWebform.setXmlSchema(null);
+        save(otherWebform);
 
         Collection<ProjectFile> allActiveWebForms = webFormStorage.getAllActiveWebForms();
         assertThat(allActiveWebForms.size(), equalTo(1));
@@ -101,32 +94,23 @@ public class WebFormStorageTest {
 
     @Test
     public void webformMustBeMarkedAsMainForm() throws Exception {
-        save(webform);
+        save(createWebform());
 
-        webform.setMainForm(false);
-        save(webform);
+        ProjectFile otherWebform = createWebform();
+        otherWebform.setMainForm(false);
+        save(otherWebform);
 
         Collection<ProjectFile> allActiveWebForms = webFormStorage.getAllActiveWebForms();
         assertThat(allActiveWebForms.size(), equalTo(1));
         assertTrue(allActiveWebForms.iterator().next().isMainForm());
     }
 
-    @Test
-    public void getAllReturnsRequiredFieldsAndNotUploadedFile() throws Exception {
-        ProjectFile projectFile = webFormWithAllFieldsSet();
-        save(projectFile);
-
-        Collection<ProjectFile> allActiveWebForms = webFormStorage.getAllActiveWebForms();
-        ProjectFile foundWebform = allActiveWebForms.iterator().next();
-        assertTrue(foundWebform.getId() > 0);
-        assertThat(foundWebform.getTitle(), equalTo(projectFile.getTitle()));
-        assertThat(foundWebform.getXmlSchema(), equalTo(projectFile.getXmlSchema()));
-
-        assertNull(foundWebform.getFileContent());
-    }
-
     private void save(ProjectFile projectFile) {
         projectFileStorage.save(projectFile, project);
+    }
+
+    private ProjectFile createWebform() {
+        return createProjectFile(ProjectFileType.WEBFORM);
     }
 
     private ProjectFile createProjectFile(ProjectFileType type) {
@@ -135,6 +119,8 @@ public class WebFormStorageTest {
         file.setActive(true);
         file.setMainForm(true);
         file.setXmlSchema("test-schema");
+        file.setTitle("test-title");
+        file.setUserName("test-username");
         return file;
     }
 

@@ -5,6 +5,7 @@ import org.mockito.Mockito;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportResource;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.web.client.RestOperations;
 import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 import util.CacheCleaner;
@@ -47,16 +48,19 @@ public class ApplicationTestContext {
     }
 
     @Bean
+    @Lazy
     public MultipartFileConverter converterBean() {
         return new MultipartFileConverter();
     }
 
     @Bean
+    @Lazy
     public CacheCleaner cacheCleaner() {
         return new CacheCleaner();
     }
 
     @Bean
+    @Lazy
     public ProjectFoldersCleaner projectsCleaner() {
         return new ProjectFoldersCleaner();
     }

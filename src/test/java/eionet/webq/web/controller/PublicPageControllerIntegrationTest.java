@@ -27,6 +27,7 @@ import eionet.webq.dto.ProjectFile;
 import eionet.webq.dto.ProjectFileType;
 import eionet.webq.dto.UserFile;
 import eionet.webq.service.ProjectFileService;
+import eionet.webq.service.UserFileService;
 import eionet.webq.web.AbstractContextControllerTests;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
@@ -35,10 +36,10 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestOperations;
 
 import java.util.ArrayList;
@@ -59,6 +60,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
 @RunWith(SpringJUnit4ClassRunner.class)
+@Transactional
 public class PublicPageControllerIntegrationTest extends AbstractContextControllerTests {
     private final String FILE_CONTENT_STRING = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
             + "<foo xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:noNamespaceSchemaLocation=\"bar\" />";
@@ -69,14 +71,13 @@ public class PublicPageControllerIntegrationTest extends AbstractContextControll
     @Autowired
     ProjectFileService projectFileService;
     @Autowired
-    JdbcTemplate jdbcTemplate;
+    UserFileService userFileService;
 
     @Before
     public void mockConversionServiceApiCall() {
         ListConversionResponse listConversionResponse = new ListConversionResponse();
         listConversionResponse.setConversions(new ArrayList<Conversion>());
         when(operations.getForObject(anyString(), eq(ListConversionResponse.class), any())).thenReturn(listConversionResponse);
-        jdbcTemplate.execute("DELETE FROM project_file");
     }
 
     @Test
@@ -153,6 +154,7 @@ public class PublicPageControllerIntegrationTest extends AbstractContextControll
         testFile.setXmlSchema("xml-schema");
         testFile.setTitle("test-title");
         testFile.setFileType(ProjectFileType.WEBFORM);
+        testFile.setUserName("test-user");
 
         projectFileService.saveOrUpdate(testFile, project);
 

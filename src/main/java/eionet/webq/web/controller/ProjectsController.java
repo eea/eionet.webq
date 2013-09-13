@@ -20,12 +20,21 @@
  */
 package eionet.webq.web.controller;
 
+import eionet.webq.dto.ProjectEntry;
+import eionet.webq.dto.ProjectFile;
+import eionet.webq.dto.ProjectFileType;
+import eionet.webq.dto.util.ProjectFileInfo;
+import eionet.webq.service.FileNotAvailableException;
+import eionet.webq.service.ProjectFileService;
+import eionet.webq.service.ProjectService;
+import eionet.webq.service.RemoteFileService;
+import org.hibernate.exception.ConstraintViolationException;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.support.MessageSourceAccessor;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -135,7 +144,7 @@ public class ProjectsController {
             try {
                 projectService.saveOrUpdate(project);
                 return allProjects(model);
-            } catch (DuplicateKeyException e) {
+            } catch (ConstraintViolationException e) {
                 bindingResult.rejectValue("projectId", "duplicate.project.id");
             }
         }
@@ -192,10 +201,11 @@ public class ProjectsController {
         }
         projectFile.setUserName(principal.getName());
         try {
+            projectFile.setProjectId(currentProject.getId());
             projectFileService.saveOrUpdate(projectFile, currentProject);
             model.addAttribute("message", "Webform added/updated.");
             return viewProject(currentProject, model);
-        } catch (DuplicateKeyException e) {
+        } catch (ConstraintViolationException e) {
             bindingResult.rejectValue("file", "project.file.duplicate.name");
             return addOrEditProjectFile(currentProject, projectFile, model);
         }
@@ -225,6 +235,7 @@ public class ProjectsController {
      * @return view name
      */
     @RequestMapping(value = "/{projectFolderId}/webform/edit")
+    @Transactional
     public String editWebForm(@PathVariable String projectFolderId, @RequestParam int fileId, Model model) {
         return addOrEditProjectFile(projectService.getByProjectId(projectFolderId), projectFileService.getById(fileId), model);
     }
@@ -253,6 +264,7 @@ public class ProjectsController {
      * @return view name
      */
     @RequestMapping(value = "/remote/check/updates/{projectFolderId}/file/{fileId}")
+    @Transactional
     public String checkForUpdates(@PathVariable String projectFolderId, @PathVariable int fileId, Model model) {
         ProjectEntry project = projectService.getByProjectId(projectFolderId);
         ProjectFile file = projectFileService.getById(fileId);
@@ -279,6 +291,7 @@ public class ProjectsController {
      * @return view name
      */
     @RequestMapping(value = "/remote/update/{projectFolderId}/file/{fileId}")
+    @Transactional
     public String updateFileContent(@PathVariable String projectFolderId, @PathVariable int fileId, Model model) {
         ProjectEntry project = projectService.getByProjectId(projectFolderId);
         ProjectFile file = projectFileService.getById(fileId); //TODO no  file content here

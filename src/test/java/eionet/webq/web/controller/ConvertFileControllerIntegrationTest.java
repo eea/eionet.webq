@@ -35,6 +35,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestOperations;
 import util.CacheCleaner;
 
@@ -52,6 +53,7 @@ import static org.springframework.http.MediaType.APPLICATION_XML_VALUE;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 @RunWith(SpringJUnit4ClassRunner.class)
+@Transactional
 public class ConvertFileControllerIntegrationTest extends AbstractContextControllerTests {
     private final String xmlSchema = "schema";
     private final byte[] FILE_CONTENT =

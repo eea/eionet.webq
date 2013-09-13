@@ -1,9 +1,12 @@
 package eionet.webq.dao;
 
 import eionet.webq.dto.ProjectEntry;
+import org.hibernate.SessionFactory;
+import org.hibernate.criterion.Order;
+import org.hibernate.criterion.Restrictions;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
 
@@ -31,42 +34,40 @@ import java.util.Collection;
 /**
  * Project folders interface implementation.
  */
+@Transactional
 @Repository
 public class ProjectFoldersImpl extends AbstractDao<ProjectEntry> implements ProjectFolders {
     /**
-     * Jdbc template for accessing data storage.
+     * Session factory.
      */
     @Autowired
-    private JdbcTemplate jdbcTemplate;
+    SessionFactory sessionFactory;
 
     @Override
+    @SuppressWarnings("unchecked")
     public Collection<ProjectEntry> getAllFolders() {
-        return jdbcTemplate.query(sqlProperties.getProperty("select.all.projects"), rowMapper());
+        return getCriteria().addOrder(Order.asc("projectId")).list();
     }
 
     @Override
     public void remove(String projectId) {
-        jdbcTemplate.update(sqlProperties.getProperty("delete.project.by.project.id"), projectId);
+        String hql = "DELETE from ProjectEntry where projectId=:projectId";
+        getCurrentSession().createQuery(hql).setString("projectId", projectId).executeUpdate();
     }
 
     @Override
     public void update(ProjectEntry project) {
-        if (project.getId() < 1) {
-            throw new RuntimeException("Unable to update project, since it is not present in database.");
-        }
-        jdbcTemplate.update(sqlProperties.getProperty("update.project"), project.getProjectId(),
-                project.getDescription(), project.getId());
+        getCurrentSession().merge(project);
     }
 
     @Override
     public void save(ProjectEntry projectEntry) {
-        jdbcTemplate.update(sqlProperties.getProperty("insert.project"), projectEntry.getProjectId(),
-                projectEntry.getDescription());
+        getCurrentSession().save(projectEntry);
     }
 
     @Override
     public ProjectEntry getByProjectId(String projectId) {
-        return jdbcTemplate.queryForObject(sqlProperties.getProperty("select.project.by.project.id"), rowMapper(), projectId);
+        return (ProjectEntry) getCriteria().add(Restrictions.eq("projectId", projectId)).uniqueResult();
     }
 
     @Override

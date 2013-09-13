@@ -8,11 +8,16 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.transaction.annotation.Transactional;
+import util.ProjectFoldersCleaner;
+
+import java.security.Principal;
+
+import java.security.Principal;
 
 import java.security.Principal;
 
@@ -20,17 +25,18 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
 @RunWith(SpringJUnit4ClassRunner.class)
+@Transactional
 public class ProjectFileValidationTest extends AbstractContextControllerTests {
     public static final String TEST_PROJECT_ID = "test-project";
     public static final String SAVE_PROJECT_FILE_URL = "/projects/" + TEST_PROJECT_ID + "/webform/save";
     @Autowired
     private ProjectService projectService;
     @Autowired
-    private JdbcTemplate template;
+    private ProjectFoldersCleaner cleaner;
 
     @Before
     public void addDefaultProject() {
-        template.update("DELETE FROM project_folder");
+        cleaner.removeAllProjects();
         ProjectEntry projectEntry = new ProjectEntry();
         projectEntry.setProjectId(TEST_PROJECT_ID);
         projectEntry.setDescription("test-description");

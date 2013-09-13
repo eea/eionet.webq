@@ -1,21 +1,21 @@
 package eionet.webq.dao;
 
-import static org.hamcrest.core.IsEqual.equalTo;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
-
 import configuration.ApplicationTestContextWithMockSession;
 import eionet.webq.dto.ProjectEntry;
-import java.util.Collection;
-import java.util.Iterator;
-import org.junit.Before;
+import org.hibernate.exception.ConstraintViolationException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import util.ProjectFoldersCleaner;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Collection;
+import java.util.Iterator;
+
+import static org.hamcrest.core.IsEqual.equalTo;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
 
 /*
  * The contents of this file are subject to the Mozilla Public
@@ -38,17 +38,11 @@ import util.ProjectFoldersCleaner;
  *        Anton Dmitrijev
  */
 @RunWith(SpringJUnit4ClassRunner.class)
+@Transactional
 @ContextConfiguration(classes = {ApplicationTestContextWithMockSession.class})
 public class ProjectFoldersTest {
     @Autowired
     private ProjectFolders folders;
-    @Autowired
-    private ProjectFoldersCleaner cleaner;
-
-    @Before
-    public void removeAllProjectEntries() {
-        cleaner.removeAllProjects();
-    }
 
     @Test
     public void allowToSaveProjectDataWithoutException() throws Exception {
@@ -85,7 +79,7 @@ public class ProjectFoldersTest {
         assertThat(iterator.next().getProjectId(), equalTo(lastFileName));
     }
 
-    @Test(expected = DuplicateKeyException.class)
+    @Test(expected = ConstraintViolationException.class)
     public void saveWithSameIdCausesException() throws Exception {
         folders.save(projectEntry("myId"));
         folders.save(projectEntry("myId"));
@@ -126,17 +120,12 @@ public class ProjectFoldersTest {
         String projectId = "project";
         folders.save(projectEntry(projectId));
         ProjectEntry savedProject = folders.getByProjectId(projectId);
-        String newProjectId = "updated project";
+        String newProjectId = "updated_project";
         savedProject.setProjectId(newProjectId);
         folders.update(savedProject);
 
         assertNotNull(folders.getByProjectId(newProjectId));
         assertThatAllFoldersSizeIs(1);
-    }
-
-    @Test(expected = RuntimeException.class)
-    public void forbidUpdateIfStorageIdIsNotSet() throws Exception {
-        folders.update(projectEntry("projectId"));
     }
 
     private void assertThatAllFoldersSizeIs(int count) {

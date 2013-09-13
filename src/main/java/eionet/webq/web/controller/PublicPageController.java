@@ -33,6 +33,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -169,16 +170,15 @@ public class PublicPageController {
      */
     @RequestMapping(value = "/saveXml", method = RequestMethod.POST)
     @ResponseBody
+    @Transactional
     public XmlSaveResult saveXml(@RequestParam int fileId, HttpServletRequest request) {
-        UserFile file = new UserFile();
         XmlSaveResult saveResult = null;
         InputStream input = null;
         try {
             input = request.getInputStream();
             byte[] fileContent = IOUtils.toByteArray(input);
+            UserFile file = userFileService.getById(fileId);
             file.setContent(fileContent);
-            file.setSizeInBytes(fileContent.length);
-            file.setId(fileId);
             userFileService.updateContent(file);
             saveResult = XmlSaveResult.valueOfSuccess();
         } catch (Exception e) {
@@ -206,7 +206,6 @@ public class PublicPageController {
         if (!StringUtils.isEmpty(webForm.getEmptyInstanceUrl())) {
             byte[] content = remoteFileService.fileContent(webForm.getEmptyInstanceUrl());
             file.setContent(content);
-            file.setSizeInBytes(content.length);
         }
         int fileId = userFileService.save(file);
         return "redirect:/xform/?formId=" + webForm.getId() + "&fileId=" + fileId + "&base_uri=" + request.getContextPath();
@@ -222,6 +221,7 @@ public class PublicPageController {
      * @throws IOException in case if writing of xForm to response failed
      */
     @RequestMapping(value = "/xform")
+    @Transactional
     public void startWebFormWriteFormToResponse(@RequestParam int formId, HttpServletResponse response) throws IOException {
         ProjectFile webForm = projectFileService.getById(formId);
         byte[] fileContent = webForm.getFileContent();

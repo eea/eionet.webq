@@ -3,7 +3,7 @@ id identity primary key,
 user_id varchar2(255),
 file_name varchar2(255),
 xml_schema varchar2(255),
-xml blob,
+file_content_id bigint,
 file_size_in_bytes bigint,
 created datetime default current_timestamp,
 updated datetime,
@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS PROJECT_FILE(
   remote_file_url varchar2(500),
   new_xml_file_name varchar2(255),
   empty_instance_url varchar2(255),
-  file_content blob,
+  file_content_id bigint,
   file_type varchar(255),
   xml_schema varchar2(2000),
   description varchar2(2000),
@@ -36,6 +36,11 @@ CREATE TABLE IF NOT EXISTS PROJECT_FILE(
 
 CREATE UNIQUE INDEX IF NOT EXISTS unique_project_file_name ON project_file(project_id, file_name);
 
+
+CREATE TABLE IF NOT EXISTS FILE_CONTENT (
+  id           identity primary key,
+  file_content blob
+);
 CREATE TABLE IF NOT EXISTS users(
   username varchar2(255) unique,
   password varchar2(255),

@@ -20,127 +20,73 @@
  */
 package eionet.webq.dao;
 
-import eionet.webq.dao.util.AbstractLobPreparedStatementCreator;
 import eionet.webq.dto.ProjectEntry;
 import eionet.webq.dto.ProjectFile;
 import eionet.webq.dto.ProjectFileType;
 import eionet.webq.dto.util.ProjectFileInfo;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.hibernate.Session;
+import org.hibernate.criterion.Order;
+import org.hibernate.criterion.Restrictions;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.jdbc.core.BatchPreparedStatementSetter;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.support.AbstractLobCreatingPreparedStatementCallback;
-import org.springframework.jdbc.support.GeneratedKeyHolder;
-import org.springframework.jdbc.support.KeyHolder;
-import org.springframework.jdbc.support.lob.LobCreator;
-import org.springframework.jdbc.support.lob.LobHandler;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Collection;
+
+import static org.hibernate.criterion.Restrictions.eq;
 
 /**
  * ProjectFileStorage implementation. Key id is {@link eionet.webq.dto.ProjectEntry#getId()}
  */
 @Repository
 @Qualifier("project-files")
+@Transactional
 public class ProjectFileStorageImpl extends AbstractDao<ProjectFile>
         implements FileStorage<ProjectEntry, ProjectFile>, WebFormStorage {
-    /**
-     * Jdbc template for accessing data storage.
-     */
-    @Autowired
-    private JdbcTemplate template;
-    /**
-     * Large objects handler. Used for storing and retrieving {@link java.sql.Blob} object from database.
-     */
-    @Autowired
-    private LobHandler lobHandler;
 
     @Override
     public int save(final ProjectFile projectFile, final ProjectEntry project) {
-
-        KeyHolder keyHolder = new GeneratedKeyHolder();
-        template.update(
-                new AbstractLobPreparedStatementCreator(lobHandler, sqlProperties.getProperty("insert.project.file"), "id") {
-                    @Override
-                    protected void setValues(PreparedStatement ps, LobCreator lobCreator) throws SQLException {
-                        ps.setInt(1, project.getId());
-                        ps.setString(2, projectFile.getTitle());
-                        lobCreator.setBlobAsBytes(ps, 3, projectFile.getFileContent());
-                        ps.setString(4, projectFile.getFileName());
-                        ps.setLong(5, projectFile.getFileSizeInBytes());
-                        ProjectFileType fileType = projectFile.getFileType();
-                        ps.setString(6, fileType != null ? fileType.name() : null);
-                        ps.setString(7, projectFile.getRemoteFileUrl());
-                        ps.setString(8, projectFile.getNewXmlFileName());
-                        ps.setString(9, projectFile.getEmptyInstanceUrl());
-                        ps.setString(10, projectFile.getXmlSchema());
-                        ps.setString(11, projectFile.getDescription());
-                        ps.setString(12, projectFile.getUserName());
-                        ps.setBoolean(13, projectFile.isActive());
-                        ps.setBoolean(14, projectFile.isMainForm());
-                    }
-                }
-                , keyHolder);
-        return keyHolder.getKey().intValue();
+        projectFile.setProjectId(project.getId());
+        getCurrentSession().save(projectFile);
+        return projectFile.getId();
     }
 
     @Override
     public ProjectFile fileById(int id) {
-        return template.queryForObject(sqlProperties.getProperty("select.file.by.id"), rowMapper(), id);
+        return (ProjectFile) getCurrentSession().byId(getDtoClass()).load(id);
     }
 
     @Override
     public void update(final ProjectFile projectFile, ProjectEntry projectEntry) {
-        final boolean updateFile = !ProjectFileInfo.fileIsEmpty(projectFile);
-        String updateStatement = updateFile ? sqlProperties.getProperty("update.project.file") : sqlProperties
-                        .getProperty("update.project.file.without.file");
-        template.execute(updateStatement, new AbstractLobCreatingPreparedStatementCallback(
-                lobHandler) {
-            @Override
-            protected void setValues(PreparedStatement ps, LobCreator lobCreator) throws SQLException {
-                int index = 1;
-                ps.setString(index++, projectFile.getTitle());
-                ps.setString(index++, projectFile.getXmlSchema());
-                ps.setString(index++, projectFile.getDescription());
-                ps.setString(index++, projectFile.getUserName());
-                ps.setBoolean(index++, projectFile.isActive());
-                ps.setBoolean(index++, projectFile.isMainForm());
-                if (updateFile) {
-                    lobCreator.setBlobAsBytes(ps, index++, projectFile.getFileContent());
-                    ps.setLong(index++, projectFile.getFileSizeInBytes());
-                }
-                ps.setString(index++, projectFile.getRemoteFileUrl());
-                ps.setString(index++, projectFile.getNewXmlFileName());
-                ps.setString(index++, projectFile.getEmptyInstanceUrl());
-                ps.setTimestamp(index++, new Timestamp(System.currentTimeMillis()));
-                ps.setInt(index, projectFile.getId());
+        if (projectFile.getProjectId() == projectEntry.getId()) {
+            Session currentSession = getCurrentSession();
+            if (ProjectFileInfo.fileIsEmpty(projectFile)) {
+                currentSession.createQuery("UPDATE ProjectFile SET title=:title, xmlSchema=:xmlSchema, " +
+                        " description=:description, userName=:userName, " +
+                        " active=:active, mainForm=:mainForm, remoteFileUrl=:remoteFileUrl, " +
+                        " newXmlFileName=:newXmlFileName, emptyInstanceUrl=:emptyInstanceUrl, updated=CURRENT_TIMESTAMP() " +
+                        " WHERE id=:id").setProperties(projectFile).executeUpdate();
+            } else {
+                projectFile.setUpdated(new Timestamp(System.currentTimeMillis()));
+                currentSession.merge(projectFile);
+                currentSession.flush();
             }
-        });
+        }
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public Collection<ProjectFile> allFilesFor(ProjectEntry project) {
-        return template.query(sqlProperties.getProperty("select.all.project.files"), rowMapper(), project.getId());
+        return getCriteria().add(eq("projectId", project.getId())).addOrder(Order.asc("id")).list();
     }
 
     @Override
-    public void remove(final ProjectEntry projectEntry, final int... fileId) {
-        template.batchUpdate(sqlProperties.getProperty("delete.project.file"), new BatchPreparedStatementSetter() {
-            @Override
-            public void setValues(PreparedStatement ps, int i) throws SQLException {
-                ps.setInt(1, fileId[i]);
-                ps.setInt(2, projectEntry.getId());
-            }
-
-            @Override
-            public int getBatchSize() {
-                return fileId.length;
-            }
-        });
+    public void remove(final ProjectEntry projectEntry, final int... fileIds) {
+        for (int fileId : fileIds) {
+            getCurrentSession().createQuery("delete from ProjectFile where id=:id")
+                    .setInteger("id", fileId).executeUpdate();
+        }
     }
 
     @Override
@@ -150,13 +96,16 @@ public class ProjectFileStorageImpl extends AbstractDao<ProjectFile>
 
     @Override
     public ProjectFile fileContentBy(String name, ProjectEntry projectEntry) {
-        return template.queryForObject(sqlProperties.getProperty("select.project.file.content.by.name"), rowMapper(),
-                projectEntry.getId(), name);
+        return (ProjectFile) getCriteria()
+                .add(Restrictions.and(eq("projectId", projectEntry.getId()), eq("file.name", name))).uniqueResult();
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public Collection<ProjectFile> getAllActiveWebForms() {
-        return template.query(sqlProperties.getProperty("select.all.active.webforms"), rowMapper());
+        return getCriteria().add(
+                Restrictions.and(eq("fileType", ProjectFileType.WEBFORM), eq("active", true), eq("mainForm", true),
+                        Restrictions.isNotNull("xmlSchema"))).list();
     }
 
     @Override

@@ -9,9 +9,9 @@ CREATE TABLE IF NOT EXISTS USER_XML(
   id int AUTO_INCREMENT,
   user_id varchar(100),
   file_name varchar(255),
-  xml_schema varchar(255),
-  xml mediumblob,
   file_size_in_bytes bigint,
+  file_content_id int,
+  xml_schema varchar(255),
   created timestamp default current_timestamp,
   updated timestamp,
   downloaded timestamp,
@@ -30,11 +30,11 @@ CREATE TABLE IF NOT EXISTS PROJECT_FILE(
   title varchar(255),
   file_name varchar(255),
   file_size_in_bytes bigint,
+  file_content_id int,
   file_type varchar(255),
   remote_file_url varchar(500),
   new_xml_file_name varchar(255),
   empty_instance_url varchar(255),
-  file_content mediumblob,
   xml_schema varchar(255),
   description varchar(1000),
   user_name varchar(50),
@@ -44,6 +44,12 @@ CREATE TABLE IF NOT EXISTS PROJECT_FILE(
   updated timestamp,
   primary key (id),
   unique index project_to_file_name (project_id, file_name)) DEFAULT CHARACTER SET utf8;
+
+CREATE TABLE IF NOT EXISTS FILE_CONTENT (
+  id           INT AUTO_INCREMENT,
+  file_content MEDIUMBLOB,
+  PRIMARY KEY (id)
+);
 
 CREATE TABLE IF NOT EXISTS users(
   username varchar(255) unique,

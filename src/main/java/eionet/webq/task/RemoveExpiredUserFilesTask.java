@@ -22,9 +22,9 @@ package eionet.webq.task;
 
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.log4j.Logger;
+import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -45,7 +45,7 @@ public class RemoveExpiredUserFilesTask {
      * Jdbc template.
      */
     @Autowired
-    JdbcTemplate jdbcTemplate;
+    SessionFactory factory;
     /**
      * Task properties.
      */
@@ -59,10 +59,11 @@ public class RemoveExpiredUserFilesTask {
     @Scheduled(cron = "0 0 0 * * *")
     public void removeExpiredUserFiles() {
         Integer hoursAgo = getExpirationHours();
-        Date date = DateUtils.addHours(new Date(), -hoursAgo);
-        LOGGER.info("Removing user files created before " + date + "(in storage more than " + hoursAgo + " hours). ");
+        Date allowedDate = DateUtils.addHours(new Date(), -hoursAgo);
+        LOGGER.info("Removing user files created before " + allowedDate + "(in storage more than " + hoursAgo + " hours). ");
 
-        int rowsAffected = jdbcTemplate.update("DELETE FROM user_xml WHERE created < ?", new Timestamp(date.getTime()));
+        int rowsAffected = factory.getCurrentSession().createQuery("DELETE FROM UserFile WHERE created < :allowedDate")
+                .setTimestamp("allowedDate", new Timestamp(allowedDate.getTime())).executeUpdate();
 
         LOGGER.info("Removal successful. Removed " + rowsAffected + " files.");
     }

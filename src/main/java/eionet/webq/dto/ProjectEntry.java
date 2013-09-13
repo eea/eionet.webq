@@ -23,21 +23,34 @@ package eionet.webq.dto;
 
 import org.hibernate.validator.constraints.Length;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import javax.validation.constraints.Pattern;
 import java.util.Date;
 
 /**
  * Data transfer object, represents project entry.
  */
+@Entity
+@Table(name = "project_folder")
 public class ProjectEntry {
     /**
      * project id in storage.
      */
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
     /**
      * project entry id.
      * must be unique.
      */
+    @Column(name = "project_id")
     @Length(min = 1, max = 255)
     @Pattern(regexp = "[A-Za-z0-9-\\._~]*")
     private String projectId;
@@ -49,6 +62,9 @@ public class ProjectEntry {
     /**
      * project entry creation date.
      */
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(insertable = false, updatable = false)
+    @org.hibernate.annotations.Generated(org.hibernate.annotations.GenerationTime.INSERT)
     private Date created;
 
     public int getId() {

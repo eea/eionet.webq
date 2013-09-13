@@ -25,14 +25,14 @@ import eionet.webq.dto.UploadedFile;
 import eionet.webq.dto.UserFile;
 import eionet.webq.service.UserFileService;
 import org.apache.commons.lang.time.DateUtils;
-import org.junit.After;
+import org.hibernate.SessionFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
 import java.util.Date;
@@ -44,24 +44,20 @@ import static org.junit.Assert.assertThat;
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {ApplicationTestContextWithMockSession.class})
+@Transactional
 public class RemoveExpiredUserFilesTaskIntegrationTest {
     @Autowired
     RemoveExpiredUserFilesTask task;
     @Autowired
     UserFileService userFileService;
     @Autowired
-    JdbcTemplate template;
+    SessionFactory factory;
 
     @Before
     public void setUp() throws Exception {
         UserFile file = new UserFile(
                 new UploadedFile("file-to-remove", "content-to-remove".getBytes()), "schema");
         userFileService.save(file);
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        template.update("DELETE FROM user_xml");
     }
 
     @Test
@@ -74,7 +70,9 @@ public class RemoveExpiredUserFilesTaskIntegrationTest {
     @Test
     public void removeFileIfItIsExpired() throws Exception {
         Date expired = DateUtils.addSeconds(DateUtils.addHours(new Date(), -task.getExpirationHours()), -1);
-        template.update("UPDATE user_xml SET created=?", new Timestamp(expired.getTime()));
+        factory.getCurrentSession().createQuery("UPDATE UserFile SET created=:created")
+                .setTimestamp("created", new Timestamp(expired.getTime())).executeUpdate();
+
         assertThat(userFileService.allUploadedFiles().size(), equalTo(1));
 
         task.removeExpiredUserFiles();

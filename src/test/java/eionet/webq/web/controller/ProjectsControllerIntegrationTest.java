@@ -8,6 +8,7 @@ import eionet.webq.dto.UploadedFile;
 import eionet.webq.service.ProjectFileService;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
+import org.hibernate.SessionFactory;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +22,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestOperations;
 
@@ -66,6 +68,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  *        Anton Dmitrijev
  */
 @RunWith(SpringJUnit4ClassRunner.class)
+@Transactional
 public class ProjectsControllerIntegrationTest extends AbstractProjectsControllerTests {
     private static final String ADD_EDIT_PROJECT_VIEW = "add_edit_project";
     private static final String DEFAULT_PROJECT_ID = "DEFAULT_PROJECT_ID";
@@ -74,6 +77,8 @@ public class ProjectsControllerIntegrationTest extends AbstractProjectsControlle
     private ProjectFolders projectFolders;
     @Autowired
     private ProjectFileService projectFileService;
+    @Autowired
+    SessionFactory sessionFactory;
     @Autowired
     private RestOperations fileDownload;
     @Autowired
@@ -245,7 +250,8 @@ public class ProjectsControllerIntegrationTest extends AbstractProjectsControlle
         String newTitle = "new title";
         request(post("/projects/" + DEFAULT_PROJECT_ID + "/webform/save").param("title", newTitle)
                 .param("id", valueOf(projectFile.getId())).principal(mockPrincipal(projectFile.getUserName())));
-
+        sessionFactory.getCurrentSession().clear();
+        
         ProjectFile updated = theOnlyOneUploadedFile();
         assertThat(updated.getTitle(), equalTo(newTitle));
     }

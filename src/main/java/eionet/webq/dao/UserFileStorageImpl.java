@@ -20,26 +20,17 @@
  */
 package eionet.webq.dao;
 
-import eionet.webq.dao.util.AbstractLobPreparedStatementCreator;
-import eionet.webq.dto.UploadedFile;
 import eionet.webq.dto.UserFile;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.hibernate.criterion.Restrictions;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.jdbc.core.BatchPreparedStatementSetter;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
-import org.springframework.jdbc.core.support.AbstractLobCreatingPreparedStatementCallback;
-import org.springframework.jdbc.support.GeneratedKeyHolder;
-import org.springframework.jdbc.support.KeyHolder;
-import org.springframework.jdbc.support.lob.LobCreator;
-import org.springframework.jdbc.support.lob.LobHandler;
 import org.springframework.stereotype.Repository;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Collection;
+import java.util.Date;
+
+import static org.hibernate.criterion.Restrictions.and;
+import static org.hibernate.criterion.Restrictions.eq;
 
 /**
  * {@link FileStorage} implementation for user files.
@@ -47,82 +38,41 @@ import java.util.Collection;
 @Repository
 @Qualifier("user-files")
 public class UserFileStorageImpl extends AbstractDao<UserFile> implements FileStorage<String, UserFile>, UserFileDownload {
-    /**
-     * {@link JdbcTemplate} to perform data access operations.
-     */
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
-    /**
-     * Large objects handles. Used for storing and retrieving {@link java.sql.Blob} object from database.
-     */
-    @Autowired
-    private LobHandler lobHandler;
 
     @Override
     public int save(final UserFile file, final String userId) {
-
-        KeyHolder keyHolder = new GeneratedKeyHolder();
-        jdbcTemplate.update(
-                new AbstractLobPreparedStatementCreator(lobHandler, sqlProperties.getProperty("insert.user.file"), "id") {
-                    @Override
-                    protected void setValues(PreparedStatement ps, LobCreator lobCreator) throws SQLException {
-                        ps.setString(1, userId);
-                        ps.setString(2, file.getName());
-                        ps.setString(3, file.getXmlSchema());
-                        lobCreator.setBlobAsBytes(ps, 4, file.getContent());
-                        ps.setLong(5, file.getSizeInBytes());
-                    }
-                }
-                , keyHolder);
-        return keyHolder.getKey().intValue();
+        file.setUserId(userId);
+        getCurrentSession().save(file);
+        return file.getId();
     }
 
     @Override
     public UserFile fileContentBy(int id, String userId) {
-        Object[] params = {id, userId};
-        return jdbcTemplate.queryForObject(sqlProperties.getProperty("select.user.file.content"), params,
-                new RowMapper<UserFile>() {
-                    @Override
-                    public UserFile mapRow(ResultSet rs, int rowNum) throws SQLException {
-                        return new UserFile(new UploadedFile(rs.getString(1), lobHandler.getBlobAsBytes(rs, 2)), null);
-                    }
-                });
+        return (UserFile) getCriteria().add(and(eq("id", id), eq("userId", userId))).uniqueResult();
     }
 
     @Override
     public void update(final UserFile file, final String userId) {
-        jdbcTemplate.execute(sqlProperties.getProperty("update.user.file"),
-                new AbstractLobCreatingPreparedStatementCallback(lobHandler) {
-                    @Override
-                    protected void setValues(PreparedStatement ps, LobCreator lobCreator) throws SQLException {
-                        lobCreator.setBlobAsBytes(ps, 1, file.getContent());
-                        ps.setLong(2, file.getSizeInBytes());
-                        ps.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
-                        ps.setInt(4, file.getId());
-                        ps.setString(5, userId);
-                    }
-                });
+        UserFile userFile = (UserFile) getCriteria().add(Restrictions.idEq(file.getId())).uniqueResult();
+        getCurrentSession().evict(userFile);
+        if (userId.equals(userFile.getUserId())) {
+            file.setUpdated(new Timestamp(System.currentTimeMillis()));
+            getCurrentSession().update(file);
+        }
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public Collection<UserFile> allFilesFor(String userId) {
-        return jdbcTemplate.query(sqlProperties.getProperty("select.all.file.for.user"), new Object[] {userId}, rowMapper());
+        return getCriteria().add(eq("userId", userId)).list();
     }
 
     @Override
-    public void remove(final String userId, final int... id) {
-        jdbcTemplate.batchUpdate(sqlProperties.getProperty("delete.user.file"), new BatchPreparedStatementSetter() {
-            @Override
-            public void setValues(PreparedStatement ps, int i) throws SQLException {
-                ps.setInt(1, id[i]);
-                ps.setString(2, userId);
-            }
-
-            @Override
-            public int getBatchSize() {
-                return id.length;
-            }
-        });
+    public void remove(final String userId, final int... ids) {
+        for (int id : ids) {
+            getCurrentSession().createQuery("delete from UserFile where id in :fileIds")
+                    .setParameter("fileIds", id).executeUpdate();
+        }
     }
 
     @Override
@@ -132,12 +82,13 @@ public class UserFileStorageImpl extends AbstractDao<UserFile> implements FileSt
 
     @Override
     public void updateDownloadTime(int userFileId) {
-        jdbcTemplate.update(sqlProperties.getProperty("update.user.file.download.time"), userFileId);
+        getCurrentSession().createQuery("update UserFile set downloaded=:downloaded")
+                .setTimestamp("downloaded", new Date()).executeUpdate();
     }
 
     @Override
     public UserFile fileById(int id) {
-        throw new UnsupportedOperationException();
+        return (UserFile) getCurrentSession().byId(getDtoClass()).load(id);
     }
 
     @Override

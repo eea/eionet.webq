@@ -52,6 +52,6 @@ public class MultipartFileConverter implements Converter<MultipartFile, UserFile
     public UserFile convert(MultipartFile multipartFile) {
         UploadedFile uploadedFile = toUploadedFileConverter.convert(multipartFile);
         LOGGER.info("Converting " + uploadedFile);
-        return new UserFile(uploadedFile, xmlSchemaExtractor.extractXmlSchema(uploadedFile.getContent()));
+        return new UserFile(uploadedFile, xmlSchemaExtractor.extractXmlSchema(uploadedFile.getContent().getFileContent()));
     }
 }

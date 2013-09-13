@@ -32,6 +32,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -76,6 +77,7 @@ public class FileDownloadController {
      * @param response http response to write file
      */
     @RequestMapping(value = "/user_file")
+    @Transactional
     public void downloadUserFile(@RequestParam int fileId, HttpServletResponse response) {
         UserFile file = userFileService.getById(fileId);
         addXmlFileHeaders(response, file.getName());
@@ -90,6 +92,7 @@ public class FileDownloadController {
      * @param response http response to write file
      */
     @RequestMapping(value = "/project/{projectId}/file/{fileName:.*}")
+    @Transactional
     public void downloadProjectFile(@PathVariable String projectId, @PathVariable String fileName, HttpServletResponse response) {
         ProjectFile projectFile = projectFileService.fileContentBy(fileName, projectService.getByProjectId(projectId));
         addXmlFileHeaders(response, encodeAsUrl(fileName));
@@ -104,6 +107,7 @@ public class FileDownloadController {
      * @param response object where conversion result will be written
      */
     @RequestMapping("/convert")
+    @Transactional
     public void convertXmlFile(@RequestParam int fileId, @RequestParam int conversionId, HttpServletResponse response) {
         UserFile fileContent = userFileService.getById(fileId);
         ResponseEntity<byte[]> convert = conversionService.convert(fileContent, conversionId);

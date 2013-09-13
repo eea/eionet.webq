@@ -4,6 +4,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.FieldError;
 
 import static org.apache.commons.lang3.StringUtils.EMPTY;
@@ -30,6 +31,7 @@ import static org.apache.commons.lang3.StringUtils.repeat;
  *        Anton Dmitrijev
  */
 @RunWith(SpringJUnit4ClassRunner.class)
+@Transactional
 public class ProjectValidationTest extends AbstractProjectsControllerTests {
 
     public static final String VALIDATION_CODE_BODY = ".projectEntry.";

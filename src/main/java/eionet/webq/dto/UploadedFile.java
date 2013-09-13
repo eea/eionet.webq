@@ -20,21 +20,39 @@
  */
 package eionet.webq.dto;
 
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Embeddable;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.Lob;
+import javax.persistence.OneToOne;
+import javax.persistence.Table;
+
 /**
  * Class represents uploaded file.
  */
+@Embeddable
 public class UploadedFile {
     /**
      * File name.
      */
+    @Column(name = "file_name", updatable = false)
     private String name;
     /**
      * File content bytes.
      */
-    private byte[] content;
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name = "file_content_id")
+    private FileContent fileContent;
     /**
      * File size in bytes.
      */
+    @Column(name = "file_size_in_bytes")
     private long sizeInBytes;
 
     /**
@@ -46,7 +64,7 @@ public class UploadedFile {
      */
     public UploadedFile(String name, byte[] content) {
         this.name = name;
-        this.content = content;
+        this.fileContent = new FileContent(content);
         this.sizeInBytes = content.length;
     }
 
@@ -64,12 +82,12 @@ public class UploadedFile {
         this.name = name;
     }
 
-    public byte[] getContent() {
-        return content;
+    public FileContent getContent() {
+        return fileContent;
     }
 
-    public void setContent(byte[] content) {
-        this.content = content;
+    public void setContent(FileContent content) {
+        this.fileContent = content;
     }
 
     public long getSizeInBytes() {
@@ -82,7 +100,57 @@ public class UploadedFile {
 
     @Override
     public String toString() {
-        return "UploadedFile{" + "name='" + name + '\'' + ", content="
-                + (content != null ? content.length : null) + ", sizeInBytes=" + sizeInBytes + '}';
+        return "UploadedFile{" + "name='" + name + '\'' + ", sizeInBytes=" + sizeInBytes + '}';
+    }
+
+    /**
+     * FileContent entity.
+     */
+    @Entity
+    @Table(name = "file_content")
+    public static class FileContent {
+        /**
+         * Id.
+         */
+        @Id
+        @GeneratedValue(strategy = GenerationType.AUTO)
+        private int id;
+        /**
+         * File content.
+         */
+        @Lob
+        @Column(nullable = false)
+        private byte[] fileContent;
+
+        /**
+         * Creates file content with content.
+         *
+         * @param fileContent file content bytes
+         */
+        public FileContent(byte[] fileContent) {
+            this.fileContent = fileContent;
+        }
+
+        /**
+         * Empty constructor for reflexion.
+         */
+        public FileContent() {
+        }
+
+        public int getId() {
+            return id;
+        }
+
+        public void setId(int id) {
+            this.id = id;
+        }
+
+        public byte[] getFileContent() {
+            return fileContent;
+        }
+
+        public void setFileContent(byte[] fileContent) {
+            this.fileContent = fileContent;
+        }
     }
 }

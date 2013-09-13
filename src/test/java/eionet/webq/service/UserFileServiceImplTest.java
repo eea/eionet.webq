@@ -80,6 +80,7 @@ public class UserFileServiceImplTest {
     @Test
     public void fetchFileContentAlsoUpdatesDownloadTime() throws Exception {
         UserFile fileInStorage = new UserFile();
+        fileInStorage.setContent("test-file-content".getBytes());
         fileInStorage.setName("file.name");
         when(storage.fileContentBy(FILE_ID, userId)).thenReturn(fileInStorage);
 

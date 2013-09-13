@@ -20,198 +20,192 @@
  */
 package eionet.webq.dao;
 
-import static eionet.webq.dto.ProjectFileType.FILE;
-import static eionet.webq.dto.ProjectFileType.WEBFORM;
-import static org.hamcrest.core.IsEqual.equalTo;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-
-import java.util.Collection;
-import java.util.Date;
-import java.util.Iterator;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.dao.DuplicateKeyException;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-
 import configuration.ApplicationTestContextWithMockSession;
 import eionet.webq.dto.ProjectEntry;
 import eionet.webq.dto.ProjectFile;
 import eionet.webq.dto.ProjectFileType;
 import eionet.webq.dto.UploadedFile;
+import eionet.webq.dto.util.ProjectFileInfo;
+import org.hibernate.LazyInitializationException;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.transaction.annotation.Transactional;
+
+import javax.validation.ConstraintViolationException;
+import java.util.Collection;
+import java.util.Iterator;
+
+import static eionet.webq.dto.ProjectFileType.FILE;
+import static eionet.webq.dto.ProjectFileType.WEBFORM;
+import static org.hamcrest.core.IsEqual.equalTo;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {ApplicationTestContextWithMockSession.class})
+@Transactional
 public class ProjectFileStorageImplTest {
 
     @Autowired
     @Qualifier("project-files")
     FileStorage<ProjectEntry, ProjectFile> projectFileStorage;
     @Autowired
-    JdbcTemplate template;
+    SessionFactory sessionFactory;
 
-    private ProjectEntry projectEntry = testProjectEntry();
+    private Session currentSession;
+    private ProjectEntry projectEntry = testProjectEntry(1);
     private ProjectFile testFileForUpload = projectFileWithoutTypeSet();
+    private ProjectFile defaultProjectFile;
 
     @Before
-    public void removeAllProjectFiles() {
-        template.update("DELETE FROM project_file");
+    public void setUp() throws Exception {
+        defaultProjectFile = projectFileWithFileType(WEBFORM);
+        defaultProjectFile.setFileName("UniqueName");
+        projectFileStorage.save(defaultProjectFile, testProjectEntry(2));
+        currentSession = sessionFactory.getCurrentSession();
     }
 
     @Test
     public void saveWebformWithoutException() throws Exception {
-        ProjectEntry projectEntry = testProjectEntry();
         ProjectFile projectFile = projectFileWithoutTypeSet();
         projectFileStorage.save(projectFile, projectEntry);
     }
 
     @Test
     public void emptyCollectionIfFilesForProjectNotFound() throws Exception {
-        assertThat(projectFileStorage.allFilesFor(testProjectEntry()).size(), equalTo(0));
+        assertThat(projectFileStorage.allFilesFor(projectEntry).size(), equalTo(0));
     }
 
-    @Test
+    @Test(expected = LazyInitializationException.class)
     public void allFilesQueryDoesNotReturnFileContent() throws Exception {
-        addOneFile();
-        addOneFile();
+        addOneFile("fileName1");
+        Session currentSession = sessionFactory.getCurrentSession();
+        currentSession.clear();
 
-        Collection<ProjectFile> projectFiles = projectFileStorage.allFilesFor(testProjectEntry());
-        assertThat(projectFiles.size(), equalTo(2));
+        Collection<ProjectFile> projectFiles = projectFileStorage.allFilesFor(projectEntry);
+        assertThat(projectFiles.size(), equalTo(1));
+        ProjectFile file = projectFiles.iterator().next();
+        currentSession.evict(file);
 
-        for (ProjectFile projectFile : projectFiles) {
-            assertNull(projectFile.getFileContent());
-        }
+        file.getFileContent();
     }
 
     @Test
     public void saveWebformAndRetrieveItBackWithSameData() throws Exception {
-        addOneFile();
+        ProjectFile projectFile = addOneFile("fileName1");
 
-        ProjectFile uploadedFile = getUploadedFileAndAssertThatItIsTheOnlyOne();
-
-        assertThat(uploadedFile.getFileContent(), equalTo(testFileForUpload.getFileContent()));
-        assertThat(uploadedFile.getProjectId(), equalTo(projectEntry.getId()));
-        assertThat(uploadedFile.getTitle(), equalTo(testFileForUpload.getTitle()));
-        assertThat(uploadedFile.getDescription(), equalTo(testFileForUpload.getDescription()));
-        assertThat(uploadedFile.getUserName(), equalTo(testFileForUpload.getUserName()));
-        assertThat(uploadedFile.getXmlSchema(), equalTo(testFileForUpload.getXmlSchema()));
-        assertThat(uploadedFile.isActive(), equalTo(testFileForUpload.isActive()));
-        assertThat(uploadedFile.isMainForm(), equalTo(testFileForUpload.isMainForm()));
-        assertThat(uploadedFile.getRemoteFileUrl(), equalTo(testFileForUpload.getRemoteFileUrl()));
+        assertThat(projectFile.getFileContent(), equalTo(testFileForUpload.getFileContent()));
+        assertThat(projectFile.getProjectId(), equalTo(projectEntry.getId()));
+        assertThat(projectFile.getTitle(), equalTo(testFileForUpload.getTitle()));
+        assertThat(projectFile.getDescription(), equalTo(testFileForUpload.getDescription()));
+        assertThat(projectFile.getUserName(), equalTo(testFileForUpload.getUserName()));
+        assertThat(projectFile.getXmlSchema(), equalTo(testFileForUpload.getXmlSchema()));
+        assertThat(projectFile.isActive(), equalTo(testFileForUpload.isActive()));
+        assertThat(projectFile.isMainForm(), equalTo(testFileForUpload.isMainForm()));
+        assertThat(projectFile.getRemoteFileUrl(), equalTo(testFileForUpload.getRemoteFileUrl()));
+        assertThat(projectFile.getFileSizeInBytes(), equalTo(testFileForUpload.getFileSizeInBytes()));
     }
 
     @Test
     public void allowToRemoveFilesByFileId() throws Exception {
-        addOneFile();
+        ProjectEntry project = testProjectEntry(defaultProjectFile.getProjectId());
+        projectFileStorage.remove(project, defaultProjectFile.getId());
 
-        ProjectFile uploadedFile = getUploadedFileAndAssertThatItIsTheOnlyOne();
-
-        projectFileStorage.remove(projectEntry, uploadedFile.getId());
-
-        assertThat(projectFileStorage.allFilesFor(projectEntry).size(), equalTo(0));
+        assertThat(projectFileStorage.allFilesFor(project).size(), equalTo(0));
     }
 
     @Test
     public void allowToBulkRemoveFilesByFileId() throws Exception {
-        addOneFile();
-        addOneFile();
+        ProjectFile file1 = addOneFile("fileName1");
+        ProjectFile file2 = addOneFile("fileName2");
 
-        Iterator<ProjectFile> it = projectFileStorage.allFilesFor(projectEntry).iterator();
-
-        projectFileStorage.remove(projectEntry, it.next().getId(), it.next().getId());
+        projectFileStorage.remove(projectEntry, file1.getId(), file2.getId());
 
         assertThat(projectFileStorage.allFilesFor(projectEntry).size(), equalTo(0));
     }
 
     @Test
     public void allowToEditProjectFile() throws Exception {
-        addOneFile();
-        ProjectFile beforeUpdate = getUploadedFileAndAssertThatItIsTheOnlyOne();
-        beforeUpdate.setTitle("brand new title");
-        beforeUpdate.setXmlSchema("brand new schema");
-        beforeUpdate.setFile(new UploadedFile("new file name", "brand new content".getBytes()));
-        beforeUpdate.setDescription("brand new description");
-        beforeUpdate.setEmptyInstanceUrl("brand new instance url");
-        beforeUpdate.setNewXmlFileName("brand new xml file name");
-        beforeUpdate.setRemoteFileUrl("brand-new-remote-file-url");
-        beforeUpdate.setActive(true);
-        beforeUpdate.setMainForm(true);
+        defaultProjectFile.setTitle("brand new title");
+        defaultProjectFile.setXmlSchema("brand new schema");
+        defaultProjectFile.setFile(new UploadedFile("new file name", "brand new content".getBytes()));
+        defaultProjectFile.setDescription("brand new description");
+        defaultProjectFile.setEmptyInstanceUrl("brand new instance url");
+        defaultProjectFile.setNewXmlFileName("brand new xml file name");
+        defaultProjectFile.setRemoteFileUrl("brand-new-remote-file-url");
+        defaultProjectFile.setActive(true);
+        defaultProjectFile.setMainForm(true);
 
-        projectFileStorage.update(beforeUpdate, projectEntry);
+        projectFileStorage.update(defaultProjectFile, projectEntry);
 
-        ProjectFile updatedFile = projectFileStorage.fileById(beforeUpdate.getId());
-        assertFieldsEquals(beforeUpdate, updatedFile);
+        ProjectFile updatedFile = projectFileStorage.fileById(defaultProjectFile.getId());
+        assertFieldsEquals(defaultProjectFile, updatedFile);
     }
 
     @Test
     public void fileNameIsImmutableAfterSave() throws Exception {
-        String immutableName = "ImmutableName";
-        testFileForUpload.setFileName(immutableName);
-        int fileId = projectFileStorage.save(testFileForUpload, projectEntry);
+        String fileNameBeforeUpdate = defaultProjectFile.getFileName();
+        String newName = "ChangeName";
+        assertNotEquals(fileNameBeforeUpdate, newName);
 
-        ProjectFile fileFromStorage = projectFileStorage.fileById(fileId);
-        fileFromStorage.setFileName("ChangeName");
-        projectFileStorage.update(fileFromStorage, projectEntry);
+        defaultProjectFile.setFileName(newName);
+        projectFileStorage.update(defaultProjectFile, projectEntry);
 
-        assertThat(projectFileStorage.fileById(fileId).getFileName(), equalTo(immutableName));
+        currentSession.clear();
+        assertThat(projectFileStorage.fileById(defaultProjectFile.getId()).getFileName(), equalTo(fileNameBeforeUpdate));
     }
 
     @Test
     public void doNotAllowToOverwriteFileWithEmptyFile() throws Exception {
-        addOneFile();
-        ProjectFile beforeUpdate = getUploadedFileAndAssertThatItIsTheOnlyOne();
+        ProjectFile projectFile = projectFileWithFileType(WEBFORM);
+        projectFile.setFileName(defaultProjectFile.getFileName());
+        projectFile.setFileContent(new byte[0]);
+        projectFile.setId(defaultProjectFile.getId());
+        projectFileStorage.update(projectFile, testProjectEntry(defaultProjectFile.getProjectId()));
 
-        beforeUpdate.setFileContent(new byte[0]);
-        projectFileStorage.update(beforeUpdate, projectEntry);
+        currentSession.refresh(defaultProjectFile);
 
-        ProjectFile projectFile = projectFileStorage.fileById(beforeUpdate.getId());
-        assertNotNull(projectFile.getFileContent());
+        assertFalse(ProjectFileInfo.fileIsEmpty(defaultProjectFile));
+        assertNotNull(defaultProjectFile.getFileContent());
     }
 
     @Test
     public void updateWillNotChangeProjectId() throws Exception {
-        addOneFile();
-        ProjectFile beforeUpdate = getUploadedFileAndAssertThatItIsTheOnlyOne();
-        beforeUpdate.setProjectId(10000);
+        int newProjectId = 10000;
+        defaultProjectFile.setProjectId(newProjectId);
 
-        projectFileStorage.update(beforeUpdate, projectEntry);
+        projectFileStorage.update(defaultProjectFile, projectEntry);
+        currentSession.refresh(defaultProjectFile);
 
-        ProjectFile updatedFile = getUploadedFileAndAssertThatItIsTheOnlyOne();
-
-        assertTrue(updatedFile.getProjectId() != beforeUpdate.getProjectId());
+        assertTrue(defaultProjectFile.getProjectId() != newProjectId);
     }
 
     @Test
     public void updateChangesUpdatedField() throws Exception {
-        addOneFile();
-        clearUpdatedColumnForAllFiles();
+        currentSession.createQuery("update ProjectFile set updated = null").executeUpdate();
+        currentSession.refresh(defaultProjectFile);
 
-        ProjectFile beforeUpdate = getUploadedFileAndAssertThatItIsTheOnlyOne();
-        Date updatedTime = beforeUpdate.getUpdated();
-        assertNull(updatedTime);
+        projectFileStorage.update(defaultProjectFile, testProjectEntry(defaultProjectFile.getProjectId()));
+        currentSession.refresh(defaultProjectFile);
 
-        projectFileStorage.update(beforeUpdate, projectEntry);
-
-        ProjectFile updatedFile = getUploadedFileAndAssertThatItIsTheOnlyOne();
-        Date updatedAfterFileUpdate = updatedFile.getUpdated();
-
-        assertNotNull(updatedAfterFileUpdate);
+        assertNotNull(defaultProjectFile.getUpdated());
     }
 
     @Test
     public void allowToGetFileById() throws Exception {
-        addOneFile();
-        ProjectFile uploadedFile = getUploadedFileAndAssertThatItIsTheOnlyOne();
+        int fileId = projectFileStorage.save(projectFileWithoutTypeSet(), projectEntry);
 
-        ProjectFile byId = projectFileStorage.fileById(uploadedFile.getId());
+        ProjectFile byId = projectFileStorage.fileById(fileId);
 
         assertFieldsEquals(testFileForUpload, byId);
     }
@@ -223,53 +217,63 @@ public class ProjectFileStorageImplTest {
 
     @Test
     public void getIdAfterSave() throws Exception {
-        ProjectEntry projectEntry = testProjectEntry();
         ProjectFile projectFile = projectFileWithoutTypeSet();
 
         int fileId = projectFileStorage.save(projectFile, projectEntry);
-        int maxId = template.queryForInt("SELECT MAX(id) from project_file");
+        int maxId = (Integer) sessionFactory.getCurrentSession().createQuery("SELECT MAX(id) from ProjectFile").uniqueResult();
 
         assertThat(fileId, equalTo(maxId));
     }
 
     @Test
     public void webFormFileTypeCouldBeSavedToDatabase() throws Exception {
-        ProjectFile projectFile = saveAndGetBackProjectFileWithFileType(WEBFORM);
+        ProjectFile file = projectFileWithFileType(ProjectFileType.WEBFORM);
+        projectFileStorage.save(file, projectEntry);
 
-        assertThat(projectFile.getFileType(), equalTo(WEBFORM));
+        currentSession.refresh(file);
+
+        assertThat(file.getFileType(), equalTo(WEBFORM));
     }
 
     @Test
     public void projectFileTypeCouldBeSavedToDatabase() throws Exception {
-        ProjectFile projectFile = saveAndGetBackProjectFileWithFileType(ProjectFileType.FILE);
+        ProjectFile file = projectFileWithFileType(ProjectFileType.FILE);
+        projectFileStorage.save(file, projectEntry);
 
-        assertThat(projectFile.getFileType(), equalTo(ProjectFileType.FILE));
+        currentSession.refresh(file);
+
+        assertThat(file.getFileType(), equalTo(ProjectFileType.FILE));
     }
 
     @Test
     public void fileTypeCouldNotBeUpdated() throws Exception {
-        ProjectFile projectFile = saveAndGetBackProjectFileWithFileType(WEBFORM);
-        projectFile.setFileType(ProjectFileType.FILE);
+        ProjectFile projectFile = projectFileWithFileType(WEBFORM);
+        projectFileStorage.save(projectFile, projectEntry);
 
+        projectFile.setFileType(ProjectFileType.FILE);
         projectFileStorage.update(projectFile, projectEntry);
 
+        currentSession.clear();
         assertThat(projectFileStorage.fileById(projectFile.getId()).getFileType(), equalTo(WEBFORM));
     }
 
     @Test
     public void whenListingAllFilesFileTypeIsSet() throws Exception {
-        setFileTypeAndSave(FILE);
-        setFileTypeAndSave(WEBFORM);
+        ProjectFile file1 = projectFileWithFileType(FILE);
+        ProjectFile file2 = projectFileWithFileType(WEBFORM);
+        file2.setFileName("WEBFORM");
+        projectFileStorage.save(file1, projectEntry);
+        projectFileStorage.save(file2, projectEntry);
 
         Collection<ProjectFile> projectFiles = projectFileStorage.allFilesFor(projectEntry);
         assertThat(projectFiles.size(), equalTo(2));
 
         Iterator<ProjectFile> iterator = projectFiles.iterator();
-        assertThat(iterator.next().getFileType(), equalTo(WEBFORM));
         assertThat(iterator.next().getFileType(), equalTo(FILE));
+        assertThat(iterator.next().getFileType(), equalTo(WEBFORM));
     }
 
-    @Test(expected = DuplicateKeyException.class)
+    @Test(expected = ConstraintViolationException.class)
     public void fileNameMustBeUnique() throws Exception {
         ProjectFile file = new ProjectFile();
         file.setFileName("file.xml");
@@ -286,26 +290,6 @@ public class ProjectFileStorageImplTest {
         assertThat(file.getFileContent(), equalTo(testFileForUpload.getFileContent()));
     }
 
-    private int setFileTypeAndSave(ProjectFileType fileType) {
-        testFileForUpload.setFileType(fileType);
-        return addOneFile();
-    }
-
-    private ProjectFile saveAndGetBackProjectFileWithFileType(ProjectFileType type) {
-        return projectFileStorage.fileById(setFileTypeAndSave(type));
-    }
-
-    private void clearUpdatedColumnForAllFiles() {
-        template.update("UPDATE project_file SET updated = NULL");
-    }
-
-    private ProjectFile getUploadedFileAndAssertThatItIsTheOnlyOne() {
-        Collection<ProjectFile> projectFiles = projectFileStorage.allFilesFor(projectEntry);
-        assertThat(projectFiles.size(), equalTo(1));
-
-        return projectFileStorage.fileById(projectFiles.iterator().next().getId());
-    }
-
     private void assertFieldsEquals(ProjectFile before, ProjectFile after) {
         assertThat(after.getTitle(), equalTo(before.getTitle()));
         assertThat(after.getXmlSchema(), equalTo(before.getXmlSchema()));
@@ -319,14 +303,16 @@ public class ProjectFileStorageImplTest {
         assertThat(after.getRemoteFileUrl(), equalTo(before.getRemoteFileUrl()));
     }
 
-    private int addOneFile() {
-        testFileForUpload.setFileName(testFileForUpload.getFileName() + "+");//unique name
-        return projectFileStorage.save(testFileForUpload, projectEntry);
+    private ProjectFile addOneFile(String name) {
+        ProjectFile file = projectFileWithoutTypeSet();
+        file.setFileName(name);
+        projectFileStorage.save(file, projectEntry);
+        return file;
     }
 
-    private ProjectEntry testProjectEntry() {
+    private ProjectEntry testProjectEntry(int id) {
         ProjectEntry projectEntry = new ProjectEntry();
-        projectEntry.setId(1);
+        projectEntry.setId(id);
         return projectEntry;
     }
 
@@ -343,5 +329,15 @@ public class ProjectFileStorageImplTest {
         projectFile.setNewXmlFileName("new-xml-file-name");
         projectFile.setXmlSchema("test-xml-schema");
         return projectFile;
+    }
+
+    private ProjectFile projectFileWithFileType(ProjectFileType type) {
+        ProjectFile projectFile = projectFileWithoutTypeSet();
+        projectFile.setFileType(type);
+        return projectFile;
+    }
+
+    private ProjectFile getPreparedProjectFile() {
+        return projectFileStorage.fileById(1);
     }
 }
