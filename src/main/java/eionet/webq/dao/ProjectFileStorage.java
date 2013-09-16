@@ -43,7 +43,7 @@ public interface ProjectFileStorage {
      * @param id id
      * @return file from storage
      */
-    ProjectFile fileById(int id);
+    ProjectFile findById(int id);
 
     /**
      * Updates file in storage, does not update empty file content and size if file content is empty.
@@ -60,7 +60,7 @@ public interface ProjectFileStorage {
      * @return files collection
      */
     @SuppressWarnings("unchecked")
-    Collection<ProjectFile> allFilesFor(ProjectEntry project);
+    Collection<ProjectFile> findAllFilesFor(ProjectEntry project);
 
     /**
      * Removes file(-s) by id(-s).
@@ -77,5 +77,5 @@ public interface ProjectFileStorage {
      * @param projectEntry project where this file belongs
      * @return project
      */
-    ProjectFile fileContentBy(String name, ProjectEntry projectEntry);
+    ProjectFile findByNameAndProject(String name, ProjectEntry projectEntry);
 }

@@ -81,7 +81,7 @@ public class ProjectFileStorageImplTest {
 
     @Test
     public void emptyCollectionIfFilesForProjectNotFound() throws Exception {
-        assertThat(projectFileStorage.allFilesFor(projectEntry).size(), equalTo(0));
+        assertThat(projectFileStorage.findAllFilesFor(projectEntry).size(), equalTo(0));
     }
 
     @Test(expected = LazyInitializationException.class)
@@ -90,7 +90,7 @@ public class ProjectFileStorageImplTest {
         Session currentSession = sessionFactory.getCurrentSession();
         currentSession.clear();
 
-        Collection<ProjectFile> projectFiles = projectFileStorage.allFilesFor(projectEntry);
+        Collection<ProjectFile> projectFiles = projectFileStorage.findAllFilesFor(projectEntry);
         assertThat(projectFiles.size(), equalTo(1));
         ProjectFile file = projectFiles.iterator().next();
         currentSession.evict(file);
@@ -119,7 +119,7 @@ public class ProjectFileStorageImplTest {
         ProjectEntry project = testProjectEntry(defaultProjectFile.getProjectId());
         projectFileStorage.remove(project, defaultProjectFile.getId());
 
-        assertThat(projectFileStorage.allFilesFor(project).size(), equalTo(0));
+        assertThat(projectFileStorage.findAllFilesFor(project).size(), equalTo(0));
     }
 
     @Test
@@ -129,7 +129,7 @@ public class ProjectFileStorageImplTest {
 
         projectFileStorage.remove(projectEntry, file1.getId(), file2.getId());
 
-        assertThat(projectFileStorage.allFilesFor(projectEntry).size(), equalTo(0));
+        assertThat(projectFileStorage.findAllFilesFor(projectEntry).size(), equalTo(0));
     }
 
     @Test
@@ -146,7 +146,7 @@ public class ProjectFileStorageImplTest {
 
         projectFileStorage.update(defaultProjectFile, projectEntry);
 
-        ProjectFile updatedFile = projectFileStorage.fileById(defaultProjectFile.getId());
+        ProjectFile updatedFile = projectFileStorage.findById(defaultProjectFile.getId());
         assertFieldsEquals(defaultProjectFile, updatedFile);
     }
 
@@ -160,7 +160,7 @@ public class ProjectFileStorageImplTest {
         projectFileStorage.update(defaultProjectFile, projectEntry);
 
         currentSession.clear();
-        assertThat(projectFileStorage.fileById(defaultProjectFile.getId()).getFileName(), equalTo(fileNameBeforeUpdate));
+        assertThat(projectFileStorage.findById(defaultProjectFile.getId()).getFileName(), equalTo(fileNameBeforeUpdate));
     }
 
     @Test
@@ -203,7 +203,7 @@ public class ProjectFileStorageImplTest {
     public void allowToGetFileById() throws Exception {
         int fileId = projectFileStorage.save(projectFileWithoutTypeSet(), projectEntry);
 
-        ProjectFile byId = projectFileStorage.fileById(fileId);
+        ProjectFile byId = projectFileStorage.findById(fileId);
 
         assertFieldsEquals(testFileForUpload, byId);
     }
@@ -247,7 +247,7 @@ public class ProjectFileStorageImplTest {
         projectFileStorage.update(projectFile, projectEntry);
 
         currentSession.clear();
-        assertThat(projectFileStorage.fileById(projectFile.getId()).getFileType(), equalTo(WEBFORM));
+        assertThat(projectFileStorage.findById(projectFile.getId()).getFileType(), equalTo(WEBFORM));
     }
 
     @Test
@@ -258,7 +258,7 @@ public class ProjectFileStorageImplTest {
         projectFileStorage.save(file1, projectEntry);
         projectFileStorage.save(file2, projectEntry);
 
-        Collection<ProjectFile> projectFiles = projectFileStorage.allFilesFor(projectEntry);
+        Collection<ProjectFile> projectFiles = projectFileStorage.findAllFilesFor(projectEntry);
         assertThat(projectFiles.size(), equalTo(2));
 
         Iterator<ProjectFile> iterator = projectFiles.iterator();
@@ -278,7 +278,7 @@ public class ProjectFileStorageImplTest {
     public void fetchFileContentByFileName() throws Exception {
         projectFileStorage.save(testFileForUpload, projectEntry);
 
-        ProjectFile file = projectFileStorage.fileContentBy(testFileForUpload.getFileName(), projectEntry);
+        ProjectFile file = projectFileStorage.findByNameAndProject(testFileForUpload.getFileName(), projectEntry);
 
         assertThat(file.getFileContent(), equalTo(testFileForUpload.getFileContent()));
     }
@@ -331,6 +331,6 @@ public class ProjectFileStorageImplTest {
     }
 
     private ProjectFile getPreparedProjectFile() {
-        return projectFileStorage.fileById(1);
+        return projectFileStorage.findById(1);
     }
 }

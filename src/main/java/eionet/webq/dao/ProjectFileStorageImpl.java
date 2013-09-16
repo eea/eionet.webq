@@ -40,8 +40,7 @@ import static org.hibernate.criterion.Restrictions.eq;
  */
 @Repository
 @Transactional
-public class ProjectFileStorageImpl extends AbstractDao<ProjectFile>
-        implements WebFormStorage, ProjectFileStorage {
+public class ProjectFileStorageImpl extends AbstractDao<ProjectFile> implements WebFormStorage, ProjectFileStorage {
 
     @Override
     public int save(final ProjectFile projectFile, final ProjectEntry project) {
@@ -51,44 +50,36 @@ public class ProjectFileStorageImpl extends AbstractDao<ProjectFile>
     }
 
     @Override
-    public ProjectFile fileById(int id) {
+    public ProjectFile findById(int id) {
         return (ProjectFile) getCurrentSession().byId(getDtoClass()).load(id);
     }
 
     @Override
     public void update(final ProjectFile projectFile, ProjectEntry projectEntry) {
         if (projectFile.getProjectId() == projectEntry.getId()) {
-            Session currentSession = getCurrentSession();
             if (ProjectFileInfo.fileIsEmpty(projectFile)) {
-                currentSession.createQuery("UPDATE ProjectFile SET title=:title, xmlSchema=:xmlSchema, "
-                        + " description=:description, userName=:userName, "
-                        + " active=:active, mainForm=:mainForm, remoteFileUrl=:remoteFileUrl, "
-                        + " newXmlFileName=:newXmlFileName, emptyInstanceUrl=:emptyInstanceUrl, updated=CURRENT_TIMESTAMP() "
-                        + " WHERE id=:id").setProperties(projectFile).executeUpdate();
+                updateWithoutChangingContent(projectFile);
             } else {
-                projectFile.setUpdated(new Timestamp(System.currentTimeMillis()));
-                currentSession.merge(projectFile);
-                currentSession.flush();
+                fullUpdate(projectFile);
             }
         }
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public Collection<ProjectFile> allFilesFor(ProjectEntry project) {
+    public Collection<ProjectFile> findAllFilesFor(ProjectEntry project) {
         return getCriteria().add(eq("projectId", project.getId())).addOrder(Order.asc("id")).list();
     }
 
     @Override
     public void remove(final ProjectEntry projectEntry, final int... fileIds) {
         for (int fileId : fileIds) {
-            getCurrentSession().createQuery("delete from ProjectFile where id=:id")
-                    .setInteger("id", fileId).executeUpdate();
+            getCurrentSession().createQuery("delete from ProjectFile where id=:id").setInteger("id", fileId).executeUpdate();
         }
     }
 
     @Override
-    public ProjectFile fileContentBy(String name, ProjectEntry projectEntry) {
+    public ProjectFile findByNameAndProject(String name, ProjectEntry projectEntry) {
         return (ProjectFile) getCriteria()
                 .add(Restrictions.and(eq("projectId", projectEntry.getId()), eq("file.name", name))).uniqueResult();
     }
@@ -104,5 +95,30 @@ public class ProjectFileStorageImpl extends AbstractDao<ProjectFile>
     @Override
     Class<ProjectFile> getDtoClass() {
         return ProjectFile.class;
+    }
+
+    /**
+     * Updates all fields.
+     *
+     * @param projectFile project file
+     */
+    private void fullUpdate(ProjectFile projectFile) {
+        Session currentSession = getCurrentSession();
+        projectFile.setUpdated(new Timestamp(System.currentTimeMillis()));
+        currentSession.merge(projectFile);
+        currentSession.flush();
+    }
+
+    /**
+     * Performs update without changing file content data.
+     *
+     * @param projectFile project file
+     */
+    private void updateWithoutChangingContent(ProjectFile projectFile) {
+        getCurrentSession().createQuery("UPDATE ProjectFile SET title=:title, xmlSchema=:xmlSchema, "
+                + " description=:description, userName=:userName, "
+                + " active=:active, mainForm=:mainForm, remoteFileUrl=:remoteFileUrl, "
+                + " newXmlFileName=:newXmlFileName, emptyInstanceUrl=:emptyInstanceUrl, updated=CURRENT_TIMESTAMP() "
+                + " WHERE id=:id").setProperties(projectFile).executeUpdate();
     }
 }

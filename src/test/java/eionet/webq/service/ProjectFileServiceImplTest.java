@@ -98,7 +98,7 @@ public class ProjectFileServiceImplTest {
     public void testFileById() throws Exception {
         service.getById(1);
 
-        verify(projectFileStorage).fileById(1);
+        verify(projectFileStorage).findById(1);
     }
 
     @Test
@@ -113,28 +113,28 @@ public class ProjectFileServiceImplTest {
     public void testAllFilesFor() throws Exception {
         service.filesDividedByTypeFor(testProject);
 
-        verify(projectFileStorage).allFilesFor(testProject);
+        verify(projectFileStorage).findAllFilesFor(testProject);
     }
 
     @Test
     public void whenFetchingAllFilesTheyAreDividedByType() throws Exception {
         ProjectFile projectXmlFile = fileWithType(FILE);
         ProjectFile webform = fileWithType(WEBFORM);
-        when(projectFileStorage.allFilesFor(testProject))
+        when(projectFileStorage.findAllFilesFor(testProject))
                 .thenReturn(Arrays.asList(projectXmlFile, webform));
 
         MultiValueMap<ProjectFileType,ProjectFile> filesByType = service.filesDividedByTypeFor(testProject);
 
         assertThat(filesByType.get(FILE), equalTo(Arrays.asList(projectXmlFile)));
         assertThat(filesByType.get(WEBFORM), equalTo(Arrays.asList(webform)));
-        verify(projectFileStorage).allFilesFor(testProject);
+        verify(projectFileStorage).findAllFilesFor(testProject);
     }
 
     @Test
     public void testFileContentBy() throws Exception {
         service.fileContentBy("name", testProject);
 
-        verify(projectFileStorage).fileContentBy("name", testProject);
+        verify(projectFileStorage).findByNameAndProject("name", testProject);
     }
 
     @Test
@@ -149,15 +149,15 @@ public class ProjectFileServiceImplTest {
         ProjectEntry project = new ProjectEntry();
         service.allFilesFor(project);
 
-        verify(projectFileStorage).allFilesFor(project);
+        verify(projectFileStorage).findAllFilesFor(project);
     }
 
     @Test
     public void savesNewFileContent() throws Exception {
-        when(projectFileStorage.fileById(1)).thenReturn(testFile);
+        when(projectFileStorage.findById(1)).thenReturn(testFile);
         service.updateContent(1, "new-content".getBytes(), testProject);
 
-        verify(projectFileStorage).fileById(1);
+        verify(projectFileStorage).findById(1);
         verify(projectFileStorage).update(testFile, testProject);
     }
 

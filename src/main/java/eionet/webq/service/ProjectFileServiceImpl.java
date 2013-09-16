@@ -63,13 +63,13 @@ public class ProjectFileServiceImpl implements ProjectFileService {
 
     @Override
     public ProjectFile getById(int id) {
-        return projectFileStorage.fileById(id);
+        return projectFileStorage.findById(id);
     }
 
     @Override
     public MultiValueMap<ProjectFileType, ProjectFile> filesDividedByTypeFor(ProjectEntry project) {
         MultiValueMap<ProjectFileType, ProjectFile> result = new LinkedMultiValueMap<ProjectFileType, ProjectFile>();
-        for (ProjectFile projectFile : projectFileStorage.allFilesFor(project)) {
+        for (ProjectFile projectFile : projectFileStorage.findAllFilesFor(project)) {
             result.add(projectFile.getFileType(), projectFile);
         }
         return result;
@@ -77,7 +77,7 @@ public class ProjectFileServiceImpl implements ProjectFileService {
 
     @Override
     public ProjectFile fileContentBy(String name, ProjectEntry project) {
-        return projectFileStorage.fileContentBy(name, project);
+        return projectFileStorage.findByNameAndProject(name, project);
     }
 
     @Override
@@ -87,12 +87,12 @@ public class ProjectFileServiceImpl implements ProjectFileService {
 
     @Override
     public Collection<ProjectFile> allFilesFor(ProjectEntry project) {
-        return projectFileStorage.allFilesFor(project);
+        return projectFileStorage.findAllFilesFor(project);
     }
 
     @Override
     public void updateContent(int id, byte[] content, ProjectEntry project) {
-        ProjectFile file = projectFileStorage.fileById(id);
+        ProjectFile file = projectFileStorage.findById(id);
         file.setFileContent(content);
         projectFileStorage.update(file, project);
     }
