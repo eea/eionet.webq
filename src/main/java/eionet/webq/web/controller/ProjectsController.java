@@ -29,8 +29,6 @@ import eionet.webq.service.ProjectFileService;
 import eionet.webq.service.ProjectService;
 import eionet.webq.service.RemoteFileService;
 import org.hibernate.exception.ConstraintViolationException;
-import javax.validation.Valid;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.stereotype.Controller;
@@ -43,15 +41,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import eionet.webq.dto.ProjectEntry;
-import eionet.webq.dto.ProjectFile;
-import eionet.webq.dto.ProjectFileType;
-import eionet.webq.dto.util.ProjectFileInfo;
-import eionet.webq.service.FileNotAvailableException;
-import eionet.webq.service.ProjectFileService;
-import eionet.webq.service.ProjectService;
-import eionet.webq.service.RemoteFileService;
-
+import javax.validation.Valid;
 import java.security.Principal;
 
 /**

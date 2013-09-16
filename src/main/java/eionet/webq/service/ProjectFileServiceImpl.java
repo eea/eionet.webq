@@ -21,13 +21,12 @@
 package eionet.webq.service;
 
 import eionet.webq.converter.XmlSchemaExtractor;
-import eionet.webq.dao.FileStorage;
+import eionet.webq.dao.ProjectFileStorage;
 import eionet.webq.dto.ProjectEntry;
 import eionet.webq.dto.ProjectFile;
 import eionet.webq.dto.ProjectFileType;
 import eionet.webq.dto.util.ProjectFileInfo;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -42,8 +41,7 @@ public class ProjectFileServiceImpl implements ProjectFileService {
      * Project files storage.
      */
     @Autowired
-    @Qualifier("project-files")
-    FileStorage<ProjectEntry, ProjectFile> projectFileStorage;
+    ProjectFileStorage projectFileStorage;
     /**
      * Extracts xml schema from project xml files.
      */

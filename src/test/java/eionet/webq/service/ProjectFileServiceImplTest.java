@@ -21,7 +21,7 @@
 package eionet.webq.service;
 
 import eionet.webq.converter.XmlSchemaExtractor;
-import eionet.webq.dao.FileStorage;
+import eionet.webq.dao.ProjectFileStorage;
 import eionet.webq.dto.ProjectEntry;
 import eionet.webq.dto.ProjectFile;
 import eionet.webq.dto.ProjectFileType;
@@ -47,7 +47,7 @@ import static org.mockito.Mockito.when;
 
 public class ProjectFileServiceImplTest {
     @Mock
-    FileStorage<ProjectEntry, ProjectFile> projectFileStorage;
+    ProjectFileStorage projectFileStorage;
     @Mock
     XmlSchemaExtractor xmlSchemaExtractor;
     @InjectMocks

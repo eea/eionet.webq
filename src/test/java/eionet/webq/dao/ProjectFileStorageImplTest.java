@@ -33,7 +33,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
@@ -57,8 +56,7 @@ import static org.junit.Assert.assertTrue;
 public class ProjectFileStorageImplTest {
 
     @Autowired
-    @Qualifier("project-files")
-    FileStorage<ProjectEntry, ProjectFile> projectFileStorage;
+    ProjectFileStorage projectFileStorage;
     @Autowired
     SessionFactory sessionFactory;
 
@@ -208,11 +206,6 @@ public class ProjectFileStorageImplTest {
         ProjectFile byId = projectFileStorage.fileById(fileId);
 
         assertFieldsEquals(testFileForUpload, byId);
-    }
-
-    @Test(expected = UnsupportedOperationException.class)
-    public void getContentByFileId() throws Exception {
-        projectFileStorage.fileContentBy(1, projectEntry);
     }
 
     @Test

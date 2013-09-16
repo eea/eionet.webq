@@ -43,7 +43,7 @@ import static org.hibernate.criterion.Restrictions.eq;
 @Qualifier("project-files")
 @Transactional
 public class ProjectFileStorageImpl extends AbstractDao<ProjectFile>
-        implements FileStorage<ProjectEntry, ProjectFile>, WebFormStorage {
+        implements WebFormStorage, ProjectFileStorage {
 
     @Override
     public int save(final ProjectFile projectFile, final ProjectEntry project) {
@@ -62,11 +62,11 @@ public class ProjectFileStorageImpl extends AbstractDao<ProjectFile>
         if (projectFile.getProjectId() == projectEntry.getId()) {
             Session currentSession = getCurrentSession();
             if (ProjectFileInfo.fileIsEmpty(projectFile)) {
-                currentSession.createQuery("UPDATE ProjectFile SET title=:title, xmlSchema=:xmlSchema, " +
-                        " description=:description, userName=:userName, " +
-                        " active=:active, mainForm=:mainForm, remoteFileUrl=:remoteFileUrl, " +
-                        " newXmlFileName=:newXmlFileName, emptyInstanceUrl=:emptyInstanceUrl, updated=CURRENT_TIMESTAMP() " +
-                        " WHERE id=:id").setProperties(projectFile).executeUpdate();
+                currentSession.createQuery("UPDATE ProjectFile SET title=:title, xmlSchema=:xmlSchema, "
+                        + " description=:description, userName=:userName, "
+                        + " active=:active, mainForm=:mainForm, remoteFileUrl=:remoteFileUrl, "
+                        + " newXmlFileName=:newXmlFileName, emptyInstanceUrl=:emptyInstanceUrl, updated=CURRENT_TIMESTAMP() "
+                        + " WHERE id=:id").setProperties(projectFile).executeUpdate();
             } else {
                 projectFile.setUpdated(new Timestamp(System.currentTimeMillis()));
                 currentSession.merge(projectFile);
@@ -87,11 +87,6 @@ public class ProjectFileStorageImpl extends AbstractDao<ProjectFile>
             getCurrentSession().createQuery("delete from ProjectFile where id=:id")
                     .setInteger("id", fileId).executeUpdate();
         }
-    }
-
-    @Override
-    public ProjectFile fileContentBy(int id, ProjectEntry projectEntry) {
-        throw new UnsupportedOperationException("Please use fileContentBy file name");
     }
 
     @Override
