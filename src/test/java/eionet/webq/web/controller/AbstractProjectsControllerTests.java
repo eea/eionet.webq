@@ -1,13 +1,3 @@
-package eionet.webq.web.controller;
-
-import eionet.webq.web.AbstractContextControllerTests;
-import org.junit.Before;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.web.servlet.MvcResult;
-import util.ProjectFoldersCleaner;
-
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-
 /*
  * The contents of this file are subject to the Mozilla Public
  * License Version 1.1 (the "License"); you may not use this file
@@ -28,15 +18,14 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
  * Contributor(s):
  *        Anton Dmitrijev
  */
+package eionet.webq.web.controller;
+
+import eionet.webq.web.AbstractContextControllerTests;
+import org.springframework.test.web.servlet.MvcResult;
+
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+
 public class AbstractProjectsControllerTests extends AbstractContextControllerTests {
-    @Autowired
-    private ProjectFoldersCleaner cleaner;
-
-    @Before
-    public void removeAllProjectFolders() {
-        cleaner.removeAllProjects();
-    }
-
     MvcResult addNewProject(String id, String description) throws Exception {
         return request(post("/projects/save").param("projectId", id).param("description", description)).andReturn();
     }

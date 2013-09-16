@@ -13,11 +13,6 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.transaction.annotation.Transactional;
-import util.ProjectFoldersCleaner;
-
-import java.security.Principal;
-
-import java.security.Principal;
 
 import java.security.Principal;
 
@@ -31,12 +26,9 @@ public class ProjectFileValidationTest extends AbstractContextControllerTests {
     public static final String SAVE_PROJECT_FILE_URL = "/projects/" + TEST_PROJECT_ID + "/webform/save";
     @Autowired
     private ProjectService projectService;
-    @Autowired
-    private ProjectFoldersCleaner cleaner;
 
     @Before
     public void addDefaultProject() {
-        cleaner.removeAllProjects();
         ProjectEntry projectEntry = new ProjectEntry();
         projectEntry.setProjectId(TEST_PROJECT_ID);
         projectEntry.setDescription("test-description");

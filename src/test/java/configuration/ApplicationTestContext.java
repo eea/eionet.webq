@@ -9,7 +9,6 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.web.client.RestOperations;
 import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 import util.CacheCleaner;
-import util.ProjectFoldersCleaner;
 
 /*
  * The contents of this file are subject to the Mozilla Public
@@ -57,11 +56,5 @@ public class ApplicationTestContext {
     @Lazy
     public CacheCleaner cacheCleaner() {
         return new CacheCleaner();
-    }
-
-    @Bean
-    @Lazy
-    public ProjectFoldersCleaner projectsCleaner() {
-        return new ProjectFoldersCleaner();
     }
 }
