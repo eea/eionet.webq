@@ -43,7 +43,7 @@ public interface UserFileStorage {
      * @param userId userId.
      * @return file content
      */
-    UserFile fileContentBy(int id, String userId);
+    UserFile findFile(int id, String userId);
 
     /**
      * Updates user file.
@@ -60,7 +60,7 @@ public interface UserFileStorage {
      * @return files collection
      */
     @SuppressWarnings("unchecked")
-    Collection<UserFile> allFilesFor(String userId);
+    Collection<UserFile> findAllUserFiles(String userId);
 
     /**
      * Removes files which belongs to user by file id.

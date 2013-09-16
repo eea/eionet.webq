@@ -68,7 +68,7 @@ public class UserFileStorageImplTest {
         storage.save(userFile, userId);
 
         UserFile fileFromDb = getFirstUploadedFileAndAssertThatItIsTheOnlyOneAvailableFor(userId);
-        UserFile fileContentFromDb = storage.fileContentBy(fileFromDb.getId(), userId);
+        UserFile fileContentFromDb = storage.findFile(fileFromDb.getId(), userId);
 
         assertThat(fileFromDb.getName(), equalTo(userFile.getName()));
         assertThat(fileContentFromDb.getContent(), equalTo(userFile.getContent()));
@@ -85,7 +85,7 @@ public class UserFileStorageImplTest {
 
         saveFileForUser(userId, userFile);
 
-        storage.fileContentBy(15, userId);
+        storage.findFile(15, userId);
     }
 
     @Test
@@ -95,7 +95,7 @@ public class UserFileStorageImplTest {
 
         UserFile fileUploadedByAnotherUser = getFirstUploadedFileAndAssertThatItIsTheOnlyOneAvailableFor(otherUserId);
 
-        Assert.assertNull(storage.fileContentBy(fileUploadedByAnotherUser.getId(), userId));
+        Assert.assertNull(storage.findFile(fileUploadedByAnotherUser.getId(), userId));
     }
 
     @Test
@@ -114,7 +114,7 @@ public class UserFileStorageImplTest {
     public void allFilesSavedForOneUserCanBeRetrieved() throws Exception {
         saveFilesFor(userId, 3);
 
-        assertThat(storage.allFilesFor(userId).size(), equalTo(3));
+        assertThat(storage.findAllUserFiles(userId).size(), equalTo(3));
     }
 
     @Test
@@ -122,7 +122,7 @@ public class UserFileStorageImplTest {
         saveFilesFor(userId, 3);
         saveFilesFor(otherUserId, 2);
 
-        assertThat(storage.allFilesFor(userId).size(), equalTo(3));
+        assertThat(storage.findAllUserFiles(userId).size(), equalTo(3));
     }
 
     @Test(expected = LazyInitializationException.class)
@@ -158,7 +158,7 @@ public class UserFileStorageImplTest {
         storage.save(fileToUpload, userId);
 
         UserFile uploadedFile = getFirstUploadedFileAndAssertThatItIsTheOnlyOneAvailableFor(userId);
-        UserFile fileContent = storage.fileContentBy(uploadedFile.getId(), userId);
+        UserFile fileContent = storage.findFile(uploadedFile.getId(), userId);
 
         assertThat(fileContent.getContent(), equalTo(contentBytes));
     }
@@ -171,7 +171,7 @@ public class UserFileStorageImplTest {
 
         storage.update(fileWithContentAndId(newContentBytes, uploadedFile.getId()), userId);
 
-        assertThat(storage.fileContentBy(uploadedFile.getId(), userId).getContent(), equalTo(newContentBytes));
+        assertThat(storage.findFile(uploadedFile.getId(), userId).getContent(), equalTo(newContentBytes));
     }
 
     @Test
@@ -185,13 +185,13 @@ public class UserFileStorageImplTest {
 
         storage.update(contentChangeRequestFile, otherUserId);
 
-        assertThat(storage.fileContentBy(uploadedFileByOtherUser.getId(), userId).getContent(), equalTo(originalContent));
+        assertThat(storage.findFile(uploadedFileByOtherUser.getId(), userId).getContent(), equalTo(originalContent));
     }
 
     public void getByIdNotImplemented() throws Exception {
         UserFile file = fileWithContentAndXmlSchema(userId.getBytes());
         saveFileForUser(userId, file);
-        UserFile userFile = storage.fileContentBy(file.getId(), userId);
+        UserFile userFile = storage.findFile(file.getId(), userId);
         org.junit.Assert.assertNotNull(userFile);
     }
 
@@ -201,17 +201,17 @@ public class UserFileStorageImplTest {
 
         storage.remove(userId, file.getId());
 
-        assertThat(storage.allFilesFor(userId).size(), equalTo(0));
+        assertThat(storage.findAllUserFiles(userId).size(), equalTo(0));
     }
 
     @Test
     public void allowsBulkRemoval() throws Exception {
         saveFilesFor(userId, 2);
-        Iterator<UserFile> it = storage.allFilesFor(userId).iterator();
+        Iterator<UserFile> it = storage.findAllUserFiles(userId).iterator();
 
         storage.remove(userId, it.next().getId(), it.next().getId());
 
-        assertThat(storage.allFilesFor(userId).size(), equalTo(0));
+        assertThat(storage.findAllUserFiles(userId).size(), equalTo(0));
     }
 
     @Test
@@ -237,7 +237,7 @@ public class UserFileStorageImplTest {
 
         sessionFactory.getCurrentSession().clear();
 
-        UserFile updatedFile = storage.fileContentBy(userFile.getId(), userId);
+        UserFile updatedFile = storage.findFile(userFile.getId(), userId);
         assertNotNull(updatedFile.getDownloaded());
     }
 
@@ -248,7 +248,7 @@ public class UserFileStorageImplTest {
 
         storage.update(userFile, userFile.getUserId());
 
-        assertNotNull(storage.fileContentBy(userFile.getId(), userId).getUpdated());
+        assertNotNull(storage.findFile(userFile.getId(), userId).getUpdated());
     }
 
     private UserFile saveAndGetBackSavedFileForDefaultUser() {
@@ -288,7 +288,7 @@ public class UserFileStorageImplTest {
     }
 
     private Collection<UserFile> getAllFilesForUserAndAssertThatResultSetSizeIsAsExpected(String userId, int resultSetSize) {
-        Collection<UserFile> userFiles = storage.allFilesFor(userId);
+        Collection<UserFile> userFiles = storage.findAllUserFiles(userId);
         assertThat(userFiles.size(), equalTo(resultSetSize));
         return userFiles;
     }

@@ -82,22 +82,22 @@ public class UserFileServiceImplTest {
         UserFile fileInStorage = new UserFile();
         fileInStorage.setContent("test-file-content".getBytes());
         fileInStorage.setName("file.name");
-        when(storage.fileContentBy(FILE_ID, userId)).thenReturn(fileInStorage);
+        when(storage.findFile(FILE_ID, userId)).thenReturn(fileInStorage);
 
-        assertThat(service.getById(FILE_ID), equalTo(fileInStorage));
-        verify(storage).fileContentBy(FILE_ID, userId);
+        assertThat(service.download(FILE_ID), equalTo(fileInStorage));
+        verify(storage).findFile(FILE_ID, userId);
         verify(userFileDownload).updateDownloadTime(FILE_ID);
     }
 
     @Test
     public void testAllUploadedFiles() throws Exception {
         Collection<UserFile> filesInStorage = Arrays.asList(new UserFile());
-        when(storage.allFilesFor(userId)).thenReturn(filesInStorage);
+        when(storage.findAllUserFiles(userId)).thenReturn(filesInStorage);
 
         Collection<UserFile> uploadedFiles = service.allUploadedFiles();
 
         assertThat(uploadedFiles, equalTo(filesInStorage));
-        verify(storage).allFilesFor(userId);
+        verify(storage).findAllUserFiles(userId);
     }
 
     @Test

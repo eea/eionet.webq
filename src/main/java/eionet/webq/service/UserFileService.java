@@ -46,6 +46,14 @@ public interface UserFileService {
     UserFile getById(int id);
 
     /**
+     * Keeps track on file download by user.
+     *
+     * @param id file id
+     * @return user file
+     */
+    UserFile download(int id);
+
+    /**
      * All uploaded files by current session user. {@link eionet.webq.dto.UserFile#getContent()} is not included into resulting
      * collection. Use {@link UserFileService#getById(int)} for fetching specific file content.
      *

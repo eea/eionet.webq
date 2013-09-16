@@ -79,7 +79,7 @@ public class FileDownloadController {
     @RequestMapping(value = "/user_file")
     @Transactional
     public void downloadUserFile(@RequestParam int fileId, HttpServletResponse response) {
-        UserFile file = userFileService.getById(fileId);
+        UserFile file = userFileService.download(fileId);
         addXmlFileHeaders(response, file.getName());
         writeToResponse(response, file.getContent());
     }

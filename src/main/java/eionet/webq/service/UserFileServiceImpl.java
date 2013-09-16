@@ -69,17 +69,22 @@ public class UserFileServiceImpl implements UserFileService {
 
     @Override
     public UserFile getById(int id) {
-        UserFile userFile = storage.fileContentBy(id, userId());
+        UserFile userFile = storage.findFile(id, userId());
         byte[] content = userFile.getContent();
-        userFileDownload.updateDownloadTime(id);
         LOGGER.info("File loaded. Name=" + userFile.getName() + ", content size=" + (content != null ? content.length : 0));
         return userFile;
     }
 
     @Override
+    public UserFile download(int id) {
+        userFileDownload.updateDownloadTime(id);
+        return getById(id);
+    }
+
+    @Override
     public Collection<UserFile> allUploadedFiles() {
         String userId = userId();
-        Collection<UserFile> userFiles = storage.allFilesFor(userId);
+        Collection<UserFile> userFiles = storage.findAllUserFiles(userId);
         LOGGER.info("Loaded " + userFiles.size() + " files for user=" + userId);
         return userFiles;
     }

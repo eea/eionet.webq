@@ -45,7 +45,7 @@ public class UserFileStorageImpl extends AbstractDao<UserFile> implements UserFi
     }
 
     @Override
-    public UserFile fileContentBy(int id, String userId) {
+    public UserFile findFile(int id, String userId) {
         return (UserFile) getCriteria().add(and(eq("id", id), eq("userId", userId))).uniqueResult();
     }
 
@@ -61,7 +61,7 @@ public class UserFileStorageImpl extends AbstractDao<UserFile> implements UserFi
 
     @SuppressWarnings("unchecked")
     @Override
-    public Collection<UserFile> allFilesFor(String userId) {
+    public Collection<UserFile> findAllUserFiles(String userId) {
         return getCriteria().add(eq("userId", userId)).list();
     }
 
