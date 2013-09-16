@@ -20,12 +20,11 @@
  */
 package eionet.webq.service;
 
-import eionet.webq.dao.FileStorage;
 import eionet.webq.dao.UserFileDownload;
+import eionet.webq.dao.UserFileStorage;
 import eionet.webq.dto.UserFile;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpSession;
@@ -41,8 +40,7 @@ public class UserFileServiceImpl implements UserFileService {
      * Uploaded files storage.
      */
     @Autowired
-    @Qualifier("user-files")
-    FileStorage<String, UserFile> storage;
+    UserFileStorage storage;
     /**
      * Current http session.
      */

@@ -21,8 +21,8 @@
 
 package eionet.webq.service;
 
-import eionet.webq.dao.FileStorage;
 import eionet.webq.dao.UserFileDownload;
+import eionet.webq.dao.UserFileStorage;
 import eionet.webq.dto.UserFile;
 import org.junit.After;
 import org.junit.Before;
@@ -47,7 +47,7 @@ public class UserFileServiceImplTest {
     @InjectMocks
     private UserFileServiceImpl service;
     @Mock
-    private FileStorage<String, UserFile> storage;
+    private UserFileStorage storage;
     @Mock
     HttpSession mockSession;
     @Mock

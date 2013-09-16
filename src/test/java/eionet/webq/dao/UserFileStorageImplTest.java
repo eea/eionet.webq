@@ -30,7 +30,6 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
@@ -48,8 +47,7 @@ import static org.junit.Assert.assertThat;
 @Transactional
 public class UserFileStorageImplTest {
     @Autowired
-    @Qualifier("user-files")
-    private FileStorage<String, UserFile> storage;
+    private UserFileStorage storage;
     @Autowired
     private UserFileDownload userFileDownload;
     @Autowired
@@ -193,7 +191,7 @@ public class UserFileStorageImplTest {
     public void getByIdNotImplemented() throws Exception {
         UserFile file = fileWithContentAndXmlSchema(userId.getBytes());
         saveFileForUser(userId, file);
-        UserFile userFile = storage.fileById(file.getId());
+        UserFile userFile = storage.fileContentBy(file.getId(), userId);
         org.junit.Assert.assertNotNull(userFile);
     }
 
@@ -226,11 +224,6 @@ public class UserFileStorageImplTest {
         assertThat(fileId, equalTo(maxId));
     }
 
-    @Test(expected = UnsupportedOperationException.class)
-    public void fileContentByNameNotSupported() throws Exception {
-        storage.fileContentBy("file.xml", userId);
-    }
-
     @Test
     public void lastDownloadTimeForSavedFileIsNull() throws Exception {
         UserFile file = saveAndGetBackSavedFileForDefaultUser();
@@ -244,7 +237,7 @@ public class UserFileStorageImplTest {
 
         sessionFactory.getCurrentSession().clear();
 
-        UserFile updatedFile = storage.fileById(userFile.getId());
+        UserFile updatedFile = storage.fileContentBy(userFile.getId(), userId);
         assertNotNull(updatedFile.getDownloaded());
     }
 
@@ -255,7 +248,7 @@ public class UserFileStorageImplTest {
 
         storage.update(userFile, userFile.getUserId());
 
-        assertNotNull(storage.fileById(userFile.getId()).getUpdated());
+        assertNotNull(storage.fileContentBy(userFile.getId(), userId).getUpdated());
     }
 
     private UserFile saveAndGetBackSavedFileForDefaultUser() {

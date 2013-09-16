@@ -22,7 +22,6 @@ package eionet.webq.dao;
 
 import eionet.webq.dto.UserFile;
 import org.hibernate.criterion.Restrictions;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Repository;
 
 import java.sql.Timestamp;
@@ -33,11 +32,10 @@ import static org.hibernate.criterion.Restrictions.and;
 import static org.hibernate.criterion.Restrictions.eq;
 
 /**
- * {@link FileStorage} implementation for user files.
+ * {@link eionet.webq.dao.UserFileStorage} implementation.
  */
 @Repository
-@Qualifier("user-files")
-public class UserFileStorageImpl extends AbstractDao<UserFile> implements FileStorage<String, UserFile>, UserFileDownload {
+public class UserFileStorageImpl extends AbstractDao<UserFile> implements UserFileDownload, UserFileStorage {
 
     @Override
     public int save(final UserFile file, final String userId) {
@@ -76,19 +74,9 @@ public class UserFileStorageImpl extends AbstractDao<UserFile> implements FileSt
     }
 
     @Override
-    public UserFile fileContentBy(String name, String userId) {
-        throw new UnsupportedOperationException("File name and userId pair is not unique in storage");
-    }
-
-    @Override
     public void updateDownloadTime(int userFileId) {
         getCurrentSession().createQuery("update UserFile set downloaded=:downloaded")
                 .setTimestamp("downloaded", new Date()).executeUpdate();
-    }
-
-    @Override
-    public UserFile fileById(int id) {
-        return (UserFile) getCurrentSession().byId(getDtoClass()).load(id);
     }
 
     @Override

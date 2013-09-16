@@ -27,7 +27,6 @@ import eionet.webq.dto.util.ProjectFileInfo;
 import org.hibernate.Session;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,10 +36,9 @@ import java.util.Collection;
 import static org.hibernate.criterion.Restrictions.eq;
 
 /**
- * ProjectFileStorage implementation. Key id is {@link eionet.webq.dto.ProjectEntry#getId()}
+ * ProjectFileStorage implementation.
  */
 @Repository
-@Qualifier("project-files")
 @Transactional
 public class ProjectFileStorageImpl extends AbstractDao<ProjectFile>
         implements WebFormStorage, ProjectFileStorage {
