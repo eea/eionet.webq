@@ -32,7 +32,7 @@
 
     <servlet-mapping>
         <servlet-name>XmlRpcServlet</servlet-name>
-        <url-pattern>/xmlrpc</url-pattern>
+        <url-pattern>/RpcRouter</url-pattern>
     </servlet-mapping>
 
     <!--  betterFORM XForms Filter -->
