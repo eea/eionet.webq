@@ -33,5 +33,13 @@ public interface WebFormService {
      *
      * @return collection of web forms.
      */
-    Collection<ProjectFile> allActiveWebForms();
+    Collection<ProjectFile> getAllActiveWebForms();
+
+    /**
+     * Finds all web forms for schemas.
+     *
+     * @param xmlSchemas xml schemas.
+     * @return collection of web forms found.
+     */
+    Collection<ProjectFile> findWebFormsForSchemas(Collection<String> xmlSchemas);
 }

@@ -50,28 +50,7 @@ public class AvailableFormsService extends SpringBeanAutowiringSupport {
      * @see org.apache.xmlrpc.webserver.XmlRpcServlet
      */
     public Map<String, String> getXForm(Object[] xmlSchemas) {
-        Collection<ProjectFile> allWebForms = webFormService.allActiveWebForms();
-        if (xmlSchemas == null || xmlSchemas.length == 0) {
-            return transformToSchemaFileNameMap(allWebForms);
-        }
-        return transformToSchemaFileNameMap(filter(allWebForms, xmlSchemasToList(xmlSchemas)));
-    }
-
-    /**
-     * Filters specified project files by required xml schemas.
-     *
-     * @param projectFiles project files
-     * @param xmlSchemas xml schemas
-     * @return collection of project files which belong to specified schemas.
-     */
-    private Collection<ProjectFile> filter(Collection<ProjectFile> projectFiles, Collection<String> xmlSchemas) {
-        List<ProjectFile> filtered = new ArrayList<ProjectFile>();
-        for (ProjectFile projectFile : projectFiles) {
-            if (xmlSchemas.contains(projectFile.getXmlSchema())) {
-                filtered.add(projectFile);
-            }
-        }
-        return filtered;
+        return transformToSchemaFileNameMap(webFormService.findWebFormsForSchemas(xmlSchemasToList(xmlSchemas)));
     }
 
     /**
@@ -89,13 +68,16 @@ public class AvailableFormsService extends SpringBeanAutowiringSupport {
     }
 
     /**
-     * Transforms {@link java.lang.Object[]} to {@link java.util.Collection<String>}
+     * Transforms {@link java.lang.Object[]} to {@link java.util.Collection<String>}.
      *
      * @param xmlSchemas xmlSchema array
      * @return collections of strings
      */
     private Collection<String> xmlSchemasToList(Object[] xmlSchemas) {
         List<String> transformationResult = new ArrayList<String>();
+        if (xmlSchemas == null) {
+            return transformationResult;
+        }
         for (Object xmlSchema : xmlSchemas) {
             transformationResult.add(xmlSchema.toString());
         }

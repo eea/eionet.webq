@@ -24,16 +24,20 @@ import eionet.webq.dto.ProjectFile;
 import eionet.webq.service.WebFormService;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Map;
 
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.anyCollectionOf;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
@@ -44,8 +48,6 @@ public class AvailableFormsServiceTest {
     @Mock
     private WebFormService webFormService;
     private ProjectFile file1 = webFormWithXmlSchemaAndName("1");
-    private ProjectFile file2 = webFormWithXmlSchemaAndName("2");
-    private ProjectFile file3 = webFormWithXmlSchemaAndName("3");
 
     @Before
     public void setUp() throws Exception {
@@ -53,22 +55,38 @@ public class AvailableFormsServiceTest {
     }
 
     @Test
-    public void returnsAllAvailableFormsIfProvidedXmlSchemasArrayIsEmpty() throws Exception {
-        when(webFormService.allActiveWebForms()).thenReturn(Arrays.asList(file1, file2, file3));
-
-        assertThat(availableFormsService.getXForm(new Object[0]).size(), equalTo(3));
+    @SuppressWarnings("unchecked")
+    public void nullArrayReferenceToGetXFormParameterTransformedToEmptyListOfXmlSchemas() throws Exception {
+        availableFormsService.getXForm(null);
+    
+        ArgumentCaptor<Collection> xmlSchemasCollection = ArgumentCaptor.forClass(Collection.class);
+        verify(webFormService).findWebFormsForSchemas(xmlSchemasCollection.capture());
+        assertTrue(xmlSchemasCollection.getValue().isEmpty());
     }
 
     @Test
-    public void forNullXmlSchemasArgumentToGetXFormReturnTheSameResultAsForEmptyArray() throws Exception {
-        when(webFormService.allActiveWebForms()).thenReturn(Arrays.asList(file1, file2));
+    @SuppressWarnings("unchecked")
+    public void emptyArrayParameterToGetXFormWillBeTransformedToEmptyCollection() throws Exception {
+        availableFormsService.getXForm(new Object[0]);
 
-        assertThat(availableFormsService.getXForm(null), equalTo(availableFormsService.getXForm(new Object[0])));
+        ArgumentCaptor<Collection> xmlSchemasCollection = ArgumentCaptor.forClass(Collection.class);
+        verify(webFormService).findWebFormsForSchemas(xmlSchemasCollection.capture());
+        assertTrue(xmlSchemasCollection.getValue().isEmpty());
+    }
+
+    @Test
+    public void arrayWithValuesPassedToGetXFormWillBeTransformedToCollectionWithValues() throws Exception {
+        availableFormsService.getXForm(new Object[] {file1.getXmlSchema()});
+
+        ArgumentCaptor<Collection> xmlSchemasCollection = ArgumentCaptor.forClass(Collection.class);
+        verify(webFormService).findWebFormsForSchemas(xmlSchemasCollection.capture());
+
+        assertThat(xmlSchemasCollection.getValue().size(), equalTo(1));
     }
 
     @Test
     public void returnsMapContainingXmlSchemaAsAKeyAndFileNameAsValue() throws Exception {
-        when(webFormService.allActiveWebForms()).thenReturn(Arrays.asList(file1));
+        when(webFormService.findWebFormsForSchemas(anyCollectionOf(String.class))).thenReturn(Arrays.asList(file1));
 
         Map<String, String> xForms = availableFormsService.getXForm(null);
         assertThat(xForms.size(), equalTo(1));
@@ -78,34 +96,13 @@ public class AvailableFormsServiceTest {
     @Test
     public void returnsOnlyFirstFileNameForTheSameSchema() throws Exception {
         ProjectFile fileWithSameSchemaAsFile1 = webFormWithXmlSchemaAndName("fileWithSameSchemaAsFile1", file1.getXmlSchema());
-        when(webFormService.allActiveWebForms()).thenReturn(Arrays.asList(file1, fileWithSameSchemaAsFile1));
+        when(webFormService.findWebFormsForSchemas(anyCollectionOf(String.class)))
+                .thenReturn(Arrays.asList(file1, fileWithSameSchemaAsFile1));
 
         Map<String, String> xForms = availableFormsService.getXForm(null);
 
         assertThat(xForms.size(), equalTo(1));
         assertThat(xForms.get(file1.getXmlSchema()), equalTo(file1.getFileName()));
-    }
-
-    @Test
-    public void getXFormReturnSpecificResultForSchemaInParameter() throws Exception {
-        when(webFormService.allActiveWebForms()).thenReturn(Arrays.asList(file1, file2));
-
-        Map<String, String> xForms = availableFormsService.getXForm(new Object[]{file1.getXmlSchema()});
-
-        assertThat(xForms.size(), equalTo(1));
-        assertTrue(xForms.containsKey(file1.getXmlSchema()));
-        assertTrue(xForms.containsValue(file1.getFileName()));
-    }
-
-    @Test
-    public void allowToSpecifyMoreThanOneXmlSchema() throws Exception {
-        when(webFormService.allActiveWebForms()).thenReturn(Arrays.asList(file1, file2, file3));
-
-        Map<String, String> xForms = availableFormsService.getXForm(new Object[]{file1.getXmlSchema(), file3.getXmlSchema()});
-
-        assertThat(xForms.size(), equalTo(2));
-        assertTrue(xForms.containsKey(file1.getXmlSchema()));
-        assertTrue(xForms.containsKey(file3.getXmlSchema()));
     }
 
     private ProjectFile webFormWithXmlSchemaAndName(String fileName) {

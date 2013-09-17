@@ -20,15 +20,16 @@
  */
 package eionet.webq.web.controller;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.Collection;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.validation.Valid;
-
+import eionet.webq.dto.ProjectFile;
+import eionet.webq.dto.UploadForm;
+import eionet.webq.dto.UserFile;
+import eionet.webq.dto.XmlSaveResult;
+import eionet.webq.service.ConversionService;
+import eionet.webq.service.FileNotAvailableException;
+import eionet.webq.service.ProjectFileService;
+import eionet.webq.service.RemoteFileService;
+import eionet.webq.service.UserFileService;
+import eionet.webq.service.WebFormService;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,16 +43,13 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import eionet.webq.dao.WebFormStorage;
-import eionet.webq.dto.ProjectFile;
-import eionet.webq.dto.UploadForm;
-import eionet.webq.dto.UserFile;
-import eionet.webq.dto.XmlSaveResult;
-import eionet.webq.service.ConversionService;
-import eionet.webq.service.FileNotAvailableException;
-import eionet.webq.service.ProjectFileService;
-import eionet.webq.service.RemoteFileService;
-import eionet.webq.service.UserFileService;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.Collection;
 
 /**
  * Base controller for front page actions.
@@ -76,7 +74,7 @@ public class PublicPageController {
      * WebForms storage.
      */
     @Autowired
-    private WebFormStorage webFormStorage;
+    private WebFormService webFormService;
     /**
      * WebForms storage.
      */
@@ -251,6 +249,6 @@ public class PublicPageController {
      * @return collection of active webforms.
      */
     private Collection<ProjectFile> allWebForms() {
-        return webFormStorage.getAllActiveWebForms();
+        return webFormService.getAllActiveWebForms();
     }
 }
