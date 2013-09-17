@@ -20,11 +20,16 @@
  */
 package eionet.webq.web.service;
 
-import eionet.webq.service.ProjectFileService;
+import eionet.webq.dto.ProjectFile;
+import eionet.webq.service.WebFormService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.context.support.SpringBeanAutowiringSupport;
 
-import java.util.Collections;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -34,17 +39,66 @@ public class AvailableFormsService extends SpringBeanAutowiringSupport {
      * Project files service.
      */
     @Autowired
-    ProjectFileService service;
+    WebFormService webFormService;
 
     /**
-     * XML-RPC method.
+     * XML-RPC method for querying web forms availability.
+     * Expected that xmlSchemas array should contain strings.
      *
-     * @param xmlSchema xmlSchema array
+     * @param xmlSchemas xmlSchema array
      * @return map of xml schema to XForm file name
      * @see org.apache.xmlrpc.webserver.XmlRpcServlet
      */
-    public Map<String, String> getXForm(Object[] xmlSchema) {
-        Object schema = xmlSchema[0];
-        return Collections.singletonMap(schema.toString(), "dir199913_2011_xform.xhtml");
+    public Map<String, String> getXForm(Object[] xmlSchemas) {
+        Collection<ProjectFile> allWebForms = webFormService.allActiveWebForms();
+        if (xmlSchemas == null || xmlSchemas.length == 0) {
+            return transformToSchemaFileNameMap(allWebForms);
+        }
+        return transformToSchemaFileNameMap(filter(allWebForms, xmlSchemasToList(xmlSchemas)));
+    }
+
+    /**
+     * Filters specified project files by required xml schemas.
+     *
+     * @param projectFiles project files
+     * @param xmlSchemas xml schemas
+     * @return collection of project files which belong to specified schemas.
+     */
+    private Collection<ProjectFile> filter(Collection<ProjectFile> projectFiles, Collection<String> xmlSchemas) {
+        List<ProjectFile> filtered = new ArrayList<ProjectFile>();
+        for (ProjectFile projectFile : projectFiles) {
+            if (xmlSchemas.contains(projectFile.getXmlSchema())) {
+                filtered.add(projectFile);
+            }
+        }
+        return filtered;
+    }
+
+    /**
+     * Transforms project files to map where key is xml schema and value is file name.
+     *
+     * @param webForms web forms
+     * @return map where key is xml schema and value is file name
+     */
+    private Map<String, String> transformToSchemaFileNameMap(Collection<ProjectFile> webForms) {
+        MultiValueMap<String, String> schemaToFileNameMap = new LinkedMultiValueMap<String, String>();
+        for (ProjectFile file : webForms) {
+            schemaToFileNameMap.add(file.getXmlSchema(), file.getFileName());
+        }
+        return schemaToFileNameMap.toSingleValueMap();
+    }
+
+    /**
+     * Transforms {@link java.lang.Object[]} to {@link java.util.Collection<String>}
+     *
+     * @param xmlSchemas xmlSchema array
+     * @return collections of strings
+     */
+    private Collection<String> xmlSchemasToList(Object[] xmlSchemas) {
+        List<String> transformationResult = new ArrayList<String>();
+        for (Object xmlSchema : xmlSchemas) {
+            transformationResult.add(xmlSchema.toString());
+        }
+        return transformationResult;
     }
 }
