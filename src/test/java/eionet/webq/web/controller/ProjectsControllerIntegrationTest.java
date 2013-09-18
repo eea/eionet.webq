@@ -1,10 +1,10 @@
 package eionet.webq.web.controller;
 
 import eionet.webq.dao.ProjectFolders;
-import eionet.webq.dto.ProjectEntry;
-import eionet.webq.dto.ProjectFile;
-import eionet.webq.dto.ProjectFileType;
-import eionet.webq.dto.UploadedFile;
+import eionet.webq.dao.orm.ProjectEntry;
+import eionet.webq.dao.orm.ProjectFile;
+import eionet.webq.dao.orm.ProjectFileType;
+import eionet.webq.dao.orm.UploadedFile;
 import eionet.webq.service.ProjectFileService;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;

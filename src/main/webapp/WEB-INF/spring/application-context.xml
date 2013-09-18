@@ -26,7 +26,7 @@
         <property name="dataSource" ref="dataSource"/>
         <property name="packagesToScan">
             <list>
-                <value>eionet.webq.dto</value>
+                <value>eionet.webq.dao.orm</value>
             </list>
         </property>
         <property name="namingStrategy">

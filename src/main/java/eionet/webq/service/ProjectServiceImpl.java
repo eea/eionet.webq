@@ -22,7 +22,7 @@ package eionet.webq.service;
  */
 
 import eionet.webq.dao.ProjectFolders;
-import eionet.webq.dto.ProjectEntry;
+import eionet.webq.dao.orm.ProjectEntry;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

@@ -1,7 +1,7 @@
 package eionet.webq.web;
 
 import configuration.ApplicationTestContext;
-import eionet.webq.dto.UserFile;
+import eionet.webq.dao.orm.UserFile;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpSession;

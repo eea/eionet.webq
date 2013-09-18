@@ -18,8 +18,9 @@
  * Contributor(s):
  *        Enriko Käsper
  */
-package eionet.webq.dto;
+package eionet.webq.dao.orm;
 
+import eionet.webq.dto.Conversion;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.persistence.Column;

@@ -18,37 +18,14 @@
  * Contributor(s):
  *        Anton Dmitrijev
  */
-package eionet.webq.dto.util;
-
-import eionet.webq.dto.ProjectFile;
+package eionet.webq.dao.orm;
 
 /**
- * Utility methods for {@link ProjectFile}.
+ * Project types.
  */
-public final class ProjectFileInfo {
+public enum ProjectFileType {
     /**
-     * No instantiation.
+     * Every project type must belong to one type.
      */
-    private ProjectFileInfo() {
-    }
-
-    /**
-     * Check whether this file is new.
-     *
-     * @param file file to be checked
-     * @return is new
-     */
-    public static boolean isNew(ProjectFile file) {
-        return file.getId() == 0;
-    }
-
-    /**
-     * Check whether this file has empty content.
-     *
-     * @param file file to be checked
-     * @return is empty
-     */
-    public static boolean fileIsEmpty(ProjectFile file) {
-        return file.getFileSizeInBytes() == 0;
-    }
+    FILE, WEBFORM
 }

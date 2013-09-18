@@ -18,14 +18,9 @@
  * Contributor(s):
  *        Anton Dmitrijev
  */
-package eionet.webq.dto;
+package eionet.webq.web.controller.cdr;
 
 /**
- * Project types.
  */
-public enum ProjectFileType {
-    /**
-     * Every project type must belong to one type.
-     */
-    FILE, WEBFORM
+public class CdrIntegrationController {
 }

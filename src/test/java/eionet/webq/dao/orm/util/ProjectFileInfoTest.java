@@ -18,10 +18,10 @@
  * Contributor(s):
  *        Anton Dmitrijev
  */
-package eionet.webq.dto.util;
+package eionet.webq.dao.orm.util;
 
-import eionet.webq.dto.ProjectFile;
-import eionet.webq.dto.UploadedFile;
+import eionet.webq.dao.orm.ProjectFile;
+import eionet.webq.dao.orm.UploadedFile;
 import org.junit.Test;
 
 import static org.junit.Assert.assertFalse;

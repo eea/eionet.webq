@@ -22,7 +22,7 @@ package eionet.webq.service;
 
 import eionet.webq.dao.UserFileDownload;
 import eionet.webq.dao.UserFileStorage;
-import eionet.webq.dto.UserFile;
+import eionet.webq.dao.orm.UserFile;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

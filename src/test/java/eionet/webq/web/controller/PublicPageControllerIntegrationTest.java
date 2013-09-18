@@ -20,12 +20,12 @@
  */
 package eionet.webq.web.controller;
 
+import eionet.webq.dao.orm.ProjectEntry;
+import eionet.webq.dao.orm.ProjectFile;
+import eionet.webq.dao.orm.ProjectFileType;
+import eionet.webq.dao.orm.UserFile;
 import eionet.webq.dto.Conversion;
 import eionet.webq.dto.ListConversionResponse;
-import eionet.webq.dto.ProjectEntry;
-import eionet.webq.dto.ProjectFile;
-import eionet.webq.dto.ProjectFileType;
-import eionet.webq.dto.UserFile;
 import eionet.webq.service.ProjectFileService;
 import eionet.webq.service.UserFileService;
 import eionet.webq.web.AbstractContextControllerTests;

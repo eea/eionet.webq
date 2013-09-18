@@ -20,6 +20,8 @@
  */
 package eionet.webq.dto;
 
+import eionet.webq.dao.orm.UserFile;
+
 import javax.validation.Valid;
 
 /**

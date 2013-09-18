@@ -1,7 +1,7 @@
 package eionet.webq.web.controller;
 
-import eionet.webq.dto.ProjectEntry;
-import eionet.webq.dto.ProjectFileType;
+import eionet.webq.dao.orm.ProjectEntry;
+import eionet.webq.dao.orm.ProjectFileType;
 import eionet.webq.service.ProjectService;
 import eionet.webq.web.AbstractContextControllerTests;
 import org.junit.Before;

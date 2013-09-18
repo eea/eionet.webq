@@ -1,6 +1,6 @@
 package eionet.webq.dao;
 
-import eionet.webq.dto.ProjectEntry;
+import eionet.webq.dao.orm.ProjectEntry;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;

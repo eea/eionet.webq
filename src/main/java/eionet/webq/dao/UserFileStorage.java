@@ -20,7 +20,7 @@
  */
 package eionet.webq.dao;
 
-import eionet.webq.dto.UserFile;
+import eionet.webq.dao.orm.UserFile;
 
 import java.util.Collection;
 

@@ -20,8 +20,8 @@
  */
 package eionet.webq.service;
 
+import eionet.webq.dao.orm.UserFile;
 import eionet.webq.dto.Conversion;
-import eionet.webq.dto.UserFile;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;

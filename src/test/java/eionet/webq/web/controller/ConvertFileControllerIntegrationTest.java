@@ -20,9 +20,9 @@
  */
 package eionet.webq.web.controller;
 
+import eionet.webq.dao.orm.UserFile;
 import eionet.webq.dto.Conversion;
 import eionet.webq.dto.ListConversionResponse;
-import eionet.webq.dto.UserFile;
 import eionet.webq.web.AbstractContextControllerTests;
 import org.junit.Before;
 import org.junit.Test;

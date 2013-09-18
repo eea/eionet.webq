@@ -21,10 +21,10 @@
 package eionet.webq.dao;
 
 import configuration.ApplicationTestContextWithMockSession;
-import eionet.webq.dto.ProjectEntry;
-import eionet.webq.dto.ProjectFile;
-import eionet.webq.dto.ProjectFileType;
-import eionet.webq.dto.UploadedFile;
+import eionet.webq.dao.orm.ProjectEntry;
+import eionet.webq.dao.orm.ProjectFile;
+import eionet.webq.dao.orm.ProjectFileType;
+import eionet.webq.dao.orm.UploadedFile;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;

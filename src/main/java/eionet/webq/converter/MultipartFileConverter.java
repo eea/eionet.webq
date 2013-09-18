@@ -20,15 +20,15 @@
  */
 package eionet.webq.converter;
 
-import eionet.webq.dto.UploadedFile;
-import eionet.webq.dto.UserFile;
+import eionet.webq.dao.orm.UploadedFile;
+import eionet.webq.dao.orm.UserFile;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
- * Performs converting from {@link MultipartFile} to {@link eionet.webq.dto.UserFile}.
+ * Performs converting from {@link MultipartFile} to {@link eionet.webq.dao.orm.UserFile}.
  *
  * @see Converter
  */

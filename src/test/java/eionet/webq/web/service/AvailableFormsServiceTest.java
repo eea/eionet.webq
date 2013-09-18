@@ -20,7 +20,7 @@
  */
 package eionet.webq.web.service;
 
-import eionet.webq.dto.ProjectFile;
+import eionet.webq.dao.orm.ProjectFile;
 import eionet.webq.service.WebFormService;
 import org.junit.Before;
 import org.junit.Test;

@@ -20,10 +20,10 @@
  */
 package eionet.webq.web.controller;
 
-import eionet.webq.dto.ProjectEntry;
-import eionet.webq.dto.ProjectFile;
-import eionet.webq.dto.ProjectFileType;
-import eionet.webq.dto.util.ProjectFileInfo;
+import eionet.webq.dao.orm.ProjectEntry;
+import eionet.webq.dao.orm.ProjectFile;
+import eionet.webq.dao.orm.ProjectFileType;
+import eionet.webq.dao.orm.util.ProjectFileInfo;
 import eionet.webq.service.FileNotAvailableException;
 import eionet.webq.service.ProjectFileService;
 import eionet.webq.service.ProjectService;
@@ -172,7 +172,7 @@ public class ProjectsController {
      * @param projectFolderId project id for webform
      * @param model model attribute holder
      * @param projectFile web form upload related object
-     * @param bindingResult request binding to {@link eionet.webq.dto.ProjectFile} result
+     * @param bindingResult request binding to {@link eionet.webq.dao.orm.ProjectFile} result
      * @param principal user principal
      * @return view name
      */

@@ -20,7 +20,7 @@
  */
 package eionet.webq.converter;
 
-import eionet.webq.dto.UploadedFile;
+import eionet.webq.dao.orm.UploadedFile;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;

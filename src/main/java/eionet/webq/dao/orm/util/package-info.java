@@ -3,4 +3,4 @@
  *
  * This package is intended to help avoiding business logic in dto classes.
  */
-package eionet.webq.dto.util;
+package eionet.webq.dao.orm.util;

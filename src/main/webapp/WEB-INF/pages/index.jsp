@@ -66,7 +66,7 @@
             <tbody>
             <c:forEach items="${uploadedFiles}" var="file">
                 <c:url value="/download/user_file?fileId=${file.id}" var="downloadLink"/>
-                <s:eval expression="T(eionet.webq.dto.util.UserFileInfo).isNotUpdatedOrDownloadedAfterUpdateUsingForm(file)"
+                <s:eval expression="T(eionet.webq.dao.orm.util.UserFileInfo).isNotUpdatedOrDownloadedAfterUpdateUsingForm(file)"
                     var="downloadedAfterUpdateOrNotChanged"/>
                 <s:eval expression="T(org.apache.commons.io.FileUtils).byteCountToDisplaySize(file.sizeInBytes)" var="humanReadableFileSize"/>
                 <c:set var="id-prefix" value="${file.id}-"/>

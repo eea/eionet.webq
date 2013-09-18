@@ -1,7 +1,7 @@
 package eionet.webq.service;
 
 import eionet.webq.dao.ProjectFolders;
-import eionet.webq.dto.ProjectEntry;
+import eionet.webq.dao.orm.ProjectEntry;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;

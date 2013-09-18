@@ -18,14 +18,14 @@
  * Contributor(s):
  *        Anton Dmitrijev
  */
-package eionet.webq.dto.util;
+package eionet.webq.dao.orm.util;
 
-import eionet.webq.dto.UserFile;
+import eionet.webq.dao.orm.UserFile;
 
 import java.util.Date;
 
 /**
- * Provides utility methods for {@link eionet.webq.dto.UserFile}.
+ * Provides utility methods for {@link eionet.webq.dao.orm.UserFile}.
  */
 public final class UserFileInfo {
     /**

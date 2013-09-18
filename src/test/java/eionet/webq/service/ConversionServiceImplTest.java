@@ -21,10 +21,10 @@
 package eionet.webq.service;
 
 import configuration.ApplicationTestContextWithMockSession;
+import eionet.webq.dao.orm.UploadedFile;
+import eionet.webq.dao.orm.UserFile;
 import eionet.webq.dto.Conversion;
 import eionet.webq.dto.ListConversionResponse;
-import eionet.webq.dto.UploadedFile;
-import eionet.webq.dto.UserFile;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

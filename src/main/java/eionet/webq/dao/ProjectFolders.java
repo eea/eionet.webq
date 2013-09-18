@@ -21,7 +21,7 @@ package eionet.webq.dao;
  *        Anton Dmitrijev
  */
 
-import eionet.webq.dto.ProjectEntry;
+import eionet.webq.dao.orm.ProjectEntry;
 
 import java.util.Collection;
 

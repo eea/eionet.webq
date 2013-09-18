@@ -25,7 +25,7 @@ package eionet.webq.dao;
  */
 public interface UserFileDownload {
     /**
-     * Updates {@link eionet.webq.dto.UserFile} downloaded timestamp.
+     * Updates {@link eionet.webq.dao.orm.UserFile} downloaded timestamp.
      *
      * @param userFileId file to be updated.
      */

@@ -20,11 +20,11 @@
  */
 package eionet.webq.web.controller;
 
-import static org.hamcrest.core.IsEqual.equalTo;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
+import eionet.webq.dao.orm.ProjectFile;
+import eionet.webq.dao.orm.UserFile;
+import eionet.webq.service.ProjectFileService;
+import eionet.webq.service.RemoteFileService;
+import eionet.webq.service.UserFileService;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -34,11 +34,10 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 
-import eionet.webq.dto.ProjectFile;
-import eionet.webq.dto.UserFile;
-import eionet.webq.service.ProjectFileService;
-import eionet.webq.service.RemoteFileService;
-import eionet.webq.service.UserFileService;
+import static org.hamcrest.core.IsEqual.equalTo;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  */

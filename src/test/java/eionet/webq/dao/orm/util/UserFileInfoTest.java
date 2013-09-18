@@ -18,14 +18,14 @@
  * Contributor(s):
  *        Anton Dmitrijev
  */
-package eionet.webq.dto.util;
+package eionet.webq.dao.orm.util;
 
-import eionet.webq.dto.UserFile;
+import eionet.webq.dao.orm.UserFile;
 import org.junit.Test;
 
 import java.util.Date;
 
-import static eionet.webq.dto.util.UserFileInfo.isDownloadedAfterUpdate;
+import static eionet.webq.dao.orm.util.UserFileInfo.isDownloadedAfterUpdate;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 

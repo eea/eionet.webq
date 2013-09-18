@@ -18,7 +18,7 @@
  * Contributor(s):
  *        Anton Dmitrijev
  */
-package eionet.webq.dto;
+package eionet.webq.dao.orm;
 
 import org.hibernate.annotations.Generated;
 import org.hibernate.validator.constraints.NotEmpty;
@@ -49,7 +49,7 @@ public class ProjectFile {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
     /**
-     * {@link eionet.webq.dto.ProjectEntry#id} connected with this file.
+     * {@link eionet.webq.dao.orm.ProjectEntry#id} connected with this file.
      */
     @Column(updatable = false)
     private int projectId;

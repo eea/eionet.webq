@@ -1,7 +1,7 @@
 package eionet.webq.dao;
 
 import configuration.ApplicationTestContextWithMockSession;
-import eionet.webq.dto.ProjectEntry;
+import eionet.webq.dao.orm.ProjectEntry;
 import org.hibernate.exception.ConstraintViolationException;
 import org.junit.Test;
 import org.junit.runner.RunWith;

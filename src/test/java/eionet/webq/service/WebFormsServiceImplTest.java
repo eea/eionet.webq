@@ -21,7 +21,7 @@
 package eionet.webq.service;
 
 import eionet.webq.dao.WebFormStorage;
-import eionet.webq.dto.ProjectFile;
+import eionet.webq.dao.orm.ProjectFile;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;

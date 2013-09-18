@@ -20,9 +20,9 @@
  */
 package eionet.webq.web.controller;
 
-import eionet.webq.dto.ProjectFile;
+import eionet.webq.dao.orm.ProjectFile;
+import eionet.webq.dao.orm.UserFile;
 import eionet.webq.dto.UploadForm;
-import eionet.webq.dto.UserFile;
 import eionet.webq.dto.XmlSaveResult;
 import eionet.webq.service.ConversionService;
 import eionet.webq.service.FileNotAvailableException;

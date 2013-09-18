@@ -22,10 +22,10 @@ package eionet.webq.service;
 
 import eionet.webq.converter.XmlSchemaExtractor;
 import eionet.webq.dao.ProjectFileStorage;
-import eionet.webq.dto.ProjectEntry;
-import eionet.webq.dto.ProjectFile;
-import eionet.webq.dto.ProjectFileType;
-import eionet.webq.dto.UploadedFile;
+import eionet.webq.dao.orm.ProjectEntry;
+import eionet.webq.dao.orm.ProjectFile;
+import eionet.webq.dao.orm.ProjectFileType;
+import eionet.webq.dao.orm.UploadedFile;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -36,8 +36,8 @@ import org.springframework.util.MultiValueMap;
 
 import java.util.Arrays;
 
-import static eionet.webq.dto.ProjectFileType.FILE;
-import static eionet.webq.dto.ProjectFileType.WEBFORM;
+import static eionet.webq.dao.orm.ProjectFileType.FILE;
+import static eionet.webq.dao.orm.ProjectFileType.WEBFORM;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;

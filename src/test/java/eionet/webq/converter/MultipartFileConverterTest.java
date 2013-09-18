@@ -21,7 +21,7 @@
 package eionet.webq.converter;
 
 import configuration.ApplicationTestContextWithMockSession;
-import eionet.webq.dto.UserFile;
+import eionet.webq.dao.orm.UserFile;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;

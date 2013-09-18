@@ -23,7 +23,7 @@ package eionet.webq.service;
 
 import eionet.webq.dao.UserFileDownload;
 import eionet.webq.dao.UserFileStorage;
-import eionet.webq.dto.UserFile;
+import eionet.webq.dao.orm.UserFile;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

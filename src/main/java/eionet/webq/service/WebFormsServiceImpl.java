@@ -21,7 +21,7 @@
 package eionet.webq.service;
 
 import eionet.webq.dao.WebFormStorage;
-import eionet.webq.dto.ProjectFile;
+import eionet.webq.dao.orm.ProjectFile;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;

@@ -1,4 +1,4 @@
-package eionet.webq.dto;
+package eionet.webq.dao.orm;
 
 /*
  * The contents of this file are subject to the Mozilla Public

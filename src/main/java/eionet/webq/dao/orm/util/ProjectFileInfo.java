@@ -18,28 +18,37 @@
  * Contributor(s):
  *        Anton Dmitrijev
  */
-package eionet.webq.service;
+package eionet.webq.dao.orm.util;
 
 import eionet.webq.dao.orm.ProjectFile;
 
-import java.util.Collection;
-
 /**
- * Operations with webForms.
+ * Utility methods for {@link ProjectFile}.
  */
-public interface WebFormService {
+public final class ProjectFileInfo {
     /**
-     * Returns all active web forms from storage.
-     *
-     * @return collection of web forms.
+     * No instantiation.
      */
-    Collection<ProjectFile> getAllActiveWebForms();
+    private ProjectFileInfo() {
+    }
 
     /**
-     * Finds all web forms for schemas.
+     * Check whether this file is new.
      *
-     * @param xmlSchemas xml schemas.
-     * @return collection of web forms found.
+     * @param file file to be checked
+     * @return is new
      */
-    Collection<ProjectFile> findWebFormsForSchemas(Collection<String> xmlSchemas);
+    public static boolean isNew(ProjectFile file) {
+        return file.getId() == 0;
+    }
+
+    /**
+     * Check whether this file has empty content.
+     *
+     * @param file file to be checked
+     * @return is empty
+     */
+    public static boolean fileIsEmpty(ProjectFile file) {
+        return file.getFileSizeInBytes() == 0;
+    }
 }

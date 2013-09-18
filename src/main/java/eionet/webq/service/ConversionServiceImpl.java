@@ -20,9 +20,9 @@
  */
 package eionet.webq.service;
 
+import eionet.webq.dao.orm.UserFile;
 import eionet.webq.dto.Conversion;
 import eionet.webq.dto.ListConversionResponse;
-import eionet.webq.dto.UserFile;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;

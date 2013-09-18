@@ -18,7 +18,7 @@
  * Contributor(s):
  *        Anton Dmitrijev
  */
-package eionet.webq.dto;
+package eionet.webq.dao.orm;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;

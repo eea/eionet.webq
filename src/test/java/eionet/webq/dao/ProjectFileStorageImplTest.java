@@ -21,11 +21,11 @@
 package eionet.webq.dao;
 
 import configuration.ApplicationTestContextWithMockSession;
-import eionet.webq.dto.ProjectEntry;
-import eionet.webq.dto.ProjectFile;
-import eionet.webq.dto.ProjectFileType;
-import eionet.webq.dto.UploadedFile;
-import eionet.webq.dto.util.ProjectFileInfo;
+import eionet.webq.dao.orm.ProjectEntry;
+import eionet.webq.dao.orm.ProjectFile;
+import eionet.webq.dao.orm.ProjectFileType;
+import eionet.webq.dao.orm.UploadedFile;
+import eionet.webq.dao.orm.util.ProjectFileInfo;
 import org.hibernate.LazyInitializationException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -41,8 +41,8 @@ import javax.validation.ConstraintViolationException;
 import java.util.Collection;
 import java.util.Iterator;
 
-import static eionet.webq.dto.ProjectFileType.FILE;
-import static eionet.webq.dto.ProjectFileType.WEBFORM;
+import static eionet.webq.dao.orm.ProjectFileType.FILE;
+import static eionet.webq.dao.orm.ProjectFileType.WEBFORM;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;

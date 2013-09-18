@@ -20,8 +20,8 @@
  */
 package eionet.webq.web.controller;
 
-import eionet.webq.dto.ProjectFile;
-import eionet.webq.dto.UserFile;
+import eionet.webq.dao.orm.ProjectFile;
+import eionet.webq.dao.orm.UserFile;
 import eionet.webq.service.ConversionService;
 import eionet.webq.service.ProjectFileService;
 import eionet.webq.service.ProjectService;
@@ -100,7 +100,7 @@ public class FileDownloadController {
     }
 
     /**
-     * Performs conversion of specified {@link eionet.webq.dto.UserFile} to specific format.
+     * Performs conversion of specified {@link eionet.webq.dao.orm.UserFile} to specific format.
      * Format is defined by conversionId.
      * @param fileId file id, which will be loaded and converted
      * @param conversionId id of conversion to be used

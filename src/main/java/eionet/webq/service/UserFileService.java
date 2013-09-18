@@ -20,7 +20,7 @@
  */
 package eionet.webq.service;
 
-import eionet.webq.dto.UserFile;
+import eionet.webq.dao.orm.UserFile;
 
 import java.util.Collection;
 
@@ -38,7 +38,7 @@ public interface UserFileService {
 
     /**
      * Fetches uploaded file from storage by specified id. User access to this file must be checked. Only
-     * {@link eionet.webq.dto.UserFile#getName()} and {@link eionet.webq.dto.UserFile#getContent()} will be set.
+     * {@link eionet.webq.dao.orm.UserFile#getName()} and {@link eionet.webq.dao.orm.UserFile#getContent()} will be set.
      *
      * @param id file id
      * @return uploaded file
@@ -54,7 +54,7 @@ public interface UserFileService {
     UserFile download(int id);
 
     /**
-     * All uploaded files by current session user. {@link eionet.webq.dto.UserFile#getContent()} is not included into resulting
+     * All uploaded files by current session user. {@link eionet.webq.dao.orm.UserFile#getContent()} is not included into resulting
      * collection. Use {@link UserFileService#getById(int)} for fetching specific file content.
      *
      * @return All uploaded files by current session user.
@@ -62,8 +62,8 @@ public interface UserFileService {
     Collection<UserFile> allUploadedFiles();
 
     /**
-     * Update file content and updated time in storage. Only {@link eionet.webq.dto.UserFile#getContent()},
-     * {@link eionet.webq.dto.UserFile#getSizeInBytes()} and {@link eionet.webq.dto.UserFile#updated} will be set.
+     * Update file content and updated time in storage. Only {@link eionet.webq.dao.orm.UserFile#getContent()},
+     * {@link eionet.webq.dao.orm.UserFile#getSizeInBytes()} and {@link eionet.webq.dao.orm.UserFile#updated} will be set.
      *
      * @param file content to be updated in storage
      */
