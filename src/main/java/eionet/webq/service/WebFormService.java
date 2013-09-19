@@ -37,6 +37,7 @@ public interface WebFormService {
 
     /**
      * Finds all web forms for schemas.
+     * All returned web forms are active.
      *
      * @param xmlSchemas xml schemas.
      * @return collection of web forms found.

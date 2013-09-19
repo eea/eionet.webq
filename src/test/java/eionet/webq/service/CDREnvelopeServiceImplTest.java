@@ -107,8 +107,8 @@ public class CDREnvelopeServiceImplTest {
         Iterator<XmlFile> it = filesData.iterator();
 
         assertThat(filesData.size(), equalTo(2));
-        assertThat(it.next().fullName, equalTo(firstFileData[0]));
-        assertThat(it.next().fullName, equalTo(secondFileData[0]));
+        assertThat(it.next().getFullName(), equalTo(firstFileData[0]));
+        assertThat(it.next().getFullName(), equalTo(secondFileData[0]));
     }
 
     @Test(expected = CDREnvelopeException.class)

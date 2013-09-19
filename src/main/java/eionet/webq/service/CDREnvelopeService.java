@@ -41,15 +41,15 @@ public interface CDREnvelopeService {
         /**
          * File full name.
          */
-        public final String fullName;
+        private String fullName;
         /**
          * File title.
          */
-        public final String title;
+        private String title;
         /**
          * File xml schema.
          */
-        public final String xmlSchema;
+        private String xmlSchema;
 
         /**
          * Constructs file.
@@ -62,6 +62,18 @@ public interface CDREnvelopeService {
             this.fullName = fullName;
             this.title = title;
             this.xmlSchema = xmlSchema;
+        }
+
+        public String getFullName() {
+            return fullName;
+        }
+
+        public String getTitle() {
+            return title;
+        }
+
+        public String getXmlSchema() {
+            return xmlSchema;
         }
     }
 }
