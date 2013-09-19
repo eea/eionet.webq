@@ -22,11 +22,15 @@ package eionet.webq.web.controller.cdr;
 
 import eionet.webq.converter.RequestToWebQMenuParameters;
 import eionet.webq.dto.WebQMenuParameters;
+import eionet.webq.service.CDREnvelopeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import javax.servlet.http.HttpServletRequest;
+
+import static eionet.webq.service.CDREnvelopeService.XmlFile;
 
 /**
  * Provides integration options with CDR.
@@ -39,6 +43,11 @@ public class CDRIntegrationController {
      */
     @Autowired
     private RequestToWebQMenuParameters converter;
+    /**
+     * CDR envelope service.
+     */
+    @Autowired
+    private CDREnvelopeService envelopeService;
 
     /**
      * Deliver with WebForms.
@@ -49,6 +58,7 @@ public class CDRIntegrationController {
     @RequestMapping("/WebQMenu")
     public String menu(HttpServletRequest request) {
         WebQMenuParameters parameters = converter.convert(request);
+        MultiValueMap<String, XmlFile> xmlFiles = envelopeService.getXmlFiles(parameters);
         return "index";
     }
 }

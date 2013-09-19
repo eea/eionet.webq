@@ -1,6 +1,7 @@
 package configuration;
 
 import eionet.webq.converter.MultipartFileConverter;
+import org.apache.xmlrpc.client.XmlRpcClient;
 import org.mockito.Mockito;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -39,6 +40,11 @@ public class ApplicationTestContext {
     @Bean
     public RestOperations mockRestOperations() {
         return Mockito.mock(RestOperations.class);
+    }
+
+    @Bean
+    public XmlRpcClient xmlRpcClient() {
+        return Mockito.mock(XmlRpcClient.class);
     }
 
     @Bean
