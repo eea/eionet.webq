@@ -20,7 +20,35 @@
  */
 package eionet.webq.web.controller.cdr;
 
+import eionet.webq.converter.RequestToWebQMenuParameters;
+import eionet.webq.dto.WebQMenuParameters;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import javax.servlet.http.HttpServletRequest;
+
 /**
+ * Provides integration options with CDR.
  */
-public class CdrIntegrationController {
+@Controller
+public class CDRIntegrationController {
+
+    /**
+     * Converts request to WebQMenuParameters.
+     */
+    @Autowired
+    private RequestToWebQMenuParameters converter;
+
+    /**
+     * Deliver with WebForms.
+     *
+     * @param request parameters of this action
+     * @return view name
+     */
+    @RequestMapping("/WebQMenu")
+    public String menu(HttpServletRequest request) {
+        WebQMenuParameters parameters = converter.convert(request);
+        return "index";
+    }
 }
