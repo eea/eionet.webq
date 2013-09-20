@@ -57,6 +57,12 @@ public class UserFileServiceImpl implements UserFileService {
     @Autowired
     UserFileDownload userFileDownload;
     /**
+     * Remote file service.
+     */
+    @Autowired
+    RemoteFileService remoteFileService;
+
+    /**
      * Static logger for this class.
      */
     private static final Logger LOGGER = Logger.getLogger(UserFileServiceImpl.class);
@@ -65,6 +71,12 @@ public class UserFileServiceImpl implements UserFileService {
     public int save(UserFile file) {
         LOGGER.info("Saving uploaded file=" + file);
         return storage.save(file, userId());
+    }
+
+    @Override
+    public int saveWithContentFromRemoteLocation(UserFile file, String url) throws FileNotAvailableException {
+        file.setContent(remoteFileService.fileContent(url));
+        return save(file);
     }
 
     @Override

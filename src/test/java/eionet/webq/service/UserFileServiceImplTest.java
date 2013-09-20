@@ -27,6 +27,7 @@ import eionet.webq.dao.orm.UserFile;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -38,6 +39,7 @@ import java.util.Collection;
 
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -52,6 +54,8 @@ public class UserFileServiceImplTest {
     HttpSession mockSession;
     @Mock
     UserFileDownload userFileDownload;
+    @Mock
+    RemoteFileService remoteFileService;
     private final String userId = "userId";
     private static final int FILE_ID = 1;
 
@@ -116,5 +120,17 @@ public class UserFileServiceImplTest {
         service.removeFilesById(fileIds);
 
         verify(storage).remove(userId, fileIds);
+    }
+
+    @Test
+    public void allowToFetchFileContentFromExternalUrl() throws Exception {
+        String url = "external-file.url";
+        byte[] fileContent = "remote-file-content".getBytes();
+        when(remoteFileService.fileContent(url)).thenReturn(fileContent);
+        service.saveWithContentFromRemoteLocation(new UserFile(), url);
+
+        ArgumentCaptor<UserFile> userFileArgument = ArgumentCaptor.forClass(UserFile.class);
+        verify(storage).save(userFileArgument.capture(), anyString());
+        assertThat(userFileArgument.getValue().getContent(), equalTo(fileContent));
     }
 }

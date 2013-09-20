@@ -37,6 +37,16 @@ public interface UserFileService {
     int save(UserFile file);
 
     /**
+     * Save data from uploaded file to storage.
+     *
+     * @param file uploaded file to be saved to storagena
+     * @param url url from which file content will be loaded
+     * @return auto generated id of inserted record
+     * @throws eionet.webq.service.FileNotAvailableException if remote file not available
+     */
+    int saveWithContentFromRemoteLocation(UserFile file, String url) throws FileNotAvailableException;
+
+    /**
      * Fetches uploaded file from storage by specified id. User access to this file must be checked. Only
      * {@link eionet.webq.dao.orm.UserFile#getName()} and {@link eionet.webq.dao.orm.UserFile#getContent()} will be set.
      *
