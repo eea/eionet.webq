@@ -77,17 +77,22 @@ public class IntegrationWithCDRController {
      * @param request parameters of this action
      * @param model model
      * @return view name
+     * @throws eionet.webq.service.FileNotAvailableException if one redirect to xform remote file not found.
      */
     @RequestMapping("/WebQMenu")
-    public String menu(HttpServletRequest request, Model model) {
+    public String menu(HttpServletRequest request, Model model) throws FileNotAvailableException {
         WebQMenuParameters parameters = converter.convert(request);
         MultiValueMap<String, XmlFile> xmlFiles = envelopeService.getXmlFiles(parameters);
         Collection<String> requiredSchemas =
                 StringUtils.isNotEmpty(parameters.getSchema()) ? Arrays.asList(parameters.getSchema()) : xmlFiles.keySet();
+        Collection<ProjectFile> webForms = webFormService.findWebFormsForSchemas(requiredSchemas);
 
+        if (hasOnlyOneFileAndWebFormForSameSchema(xmlFiles, webForms)) {
+            return redirectToEditWebForm(request, xmlFiles, webForms);
+        }
         model.addAttribute("parameters", parameters);
         model.addAttribute("xmlFiles", xmlFiles);
-        model.addAttribute("availableWebForms", webFormService.findWebFormsForSchemas(requiredSchemas));
+        model.addAttribute("availableWebForms", webForms);
         return "deliver_menu";
     }
 
@@ -109,5 +114,33 @@ public class IntegrationWithCDRController {
 
         int fileId = userFileService.saveWithContentFromRemoteLocation(userFile, remoteFileUrl);
         return "redirect:/xform/?formId=" + formId + "&fileId=" + fileId + "&base_uri=" + request.getContextPath();
+    }
+
+    /**
+     * Check whether there is only 1 file and 1 schema available and their xml schemas match.
+     *
+     * @param xmlFiles xml files
+     * @param webForms webforms
+     * @return true iff there are only 1 file and schema with equal xml schema
+     */
+    private boolean hasOnlyOneFileAndWebFormForSameSchema(MultiValueMap<String, XmlFile> xmlFiles, Collection<ProjectFile> webForms) {
+        return webForms.size() == 1
+                && xmlFiles.size() == 1
+                && xmlFiles.get(webForms.iterator().next().getXmlSchema()).size() == 1;
+    }
+
+    /**
+     * Redirects to edit form.
+     *
+     * @param request current request
+     * @param xmlFiles xml files
+     * @param webForms web forms
+     * @return redirect string
+     * @throws FileNotAvailableException if remote file not available
+     */
+    private String redirectToEditWebForm(HttpServletRequest request, MultiValueMap<String, XmlFile> xmlFiles, Collection<ProjectFile> webForms) throws FileNotAvailableException {
+        ProjectFile onlyOneAvailableForm = webForms.iterator().next();
+        XmlFile onlyOneAvailableFile = xmlFiles.getFirst(onlyOneAvailableForm.getXmlSchema());
+        return editWithWebForm(onlyOneAvailableForm.getId(), onlyOneAvailableFile.getTitle(), onlyOneAvailableFile.getFullName(), request);
     }
 }

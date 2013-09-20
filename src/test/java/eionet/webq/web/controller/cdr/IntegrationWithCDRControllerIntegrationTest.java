@@ -65,7 +65,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @Transactional
-public class IntegrationWithCDRControllerTest extends AbstractContextControllerTests {
+public class IntegrationWithCDRControllerIntegrationTest extends AbstractContextControllerTests {
     @Autowired
     private XmlRpcClient xmlRpcClient;
     @Autowired
@@ -108,10 +108,11 @@ public class IntegrationWithCDRControllerTest extends AbstractContextControllerT
 
         rpcClientWillReturnFileForSchema(xmlSchema);
         saveAvailableWebFormWithSchema(xmlSchema);
+        saveAvailableWebFormWithSchema(xmlSchema);
 
         Collection<ProjectFile> webForms = (Collection<ProjectFile>) requestToWebQMenuAndGetModelAttribute("availableWebForms");
 
-        assertThat(webForms.size(), equalTo(1));
+        assertThat(webForms.size(), equalTo(2));
     }
 
     @Test
@@ -131,6 +132,18 @@ public class IntegrationWithCDRControllerTest extends AbstractContextControllerT
 
         UserFile file = userFileStorage.findFile(extractFileIdFromXFormRedirectUrl(redirectedUrl), session.getId());
         assertThat(file.getContent(), equalTo(fileContent));
+    }
+
+    @Test
+    public void ifOnlyOneFileAndWebFormAvailableDoRedirectToEdit() throws Exception {
+        String xmlSchema = "schema";
+        rpcClientWillReturnFileForSchema(xmlSchema);
+        saveAvailableWebFormWithSchema(xmlSchema);
+
+        MvcResult mvcResult =
+                mvc().perform(post("/WebQMenu").param("envelope", ENVELOPE_URL)).andExpect(status().isFound()).andReturn();
+
+        assertTrue(mvcResult.getResponse().getRedirectedUrl().startsWith("/xform"));
     }
 
     private int saveAvailableWebFormWithSchema(String xmlSchema) {
