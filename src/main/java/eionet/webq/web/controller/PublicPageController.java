@@ -27,7 +27,6 @@ import eionet.webq.dto.XmlSaveResult;
 import eionet.webq.service.ConversionService;
 import eionet.webq.service.FileNotAvailableException;
 import eionet.webq.service.ProjectFileService;
-import eionet.webq.service.RemoteFileService;
 import eionet.webq.service.UserFileService;
 import eionet.webq.service.WebFormService;
 import org.apache.commons.io.IOUtils;
@@ -50,6 +49,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Collection;
+
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 /**
  * Base controller for front page actions.
@@ -80,11 +81,6 @@ public class PublicPageController {
      */
     @Autowired
     ProjectFileService projectFileService;
-    /**
-     * Access to remote files.
-     */
-    @Autowired
-    private RemoteFileService remoteFileService;
 
     /**
      * Action to be performed on http GET method and path '/'.
@@ -198,14 +194,13 @@ public class PublicPageController {
     @RequestMapping(value = "/startWebform")
     public String startWebFormSaveFile(@RequestParam int formId, HttpServletRequest request) throws FileNotAvailableException {
         ProjectFile webForm = projectFileService.getById(formId);
+        String emptyInstanceUrl = webForm.getEmptyInstanceUrl();
         UserFile file = new UserFile();
         file.setName(StringUtils.defaultIfEmpty(webForm.getNewXmlFileName(), "new_form.xml"));
         file.setXmlSchema(webForm.getXmlSchema());
-        if (!StringUtils.isEmpty(webForm.getEmptyInstanceUrl())) {
-            byte[] content = remoteFileService.fileContent(webForm.getEmptyInstanceUrl());
-            file.setContent(content);
-        }
-        int fileId = userFileService.save(file);
+        int fileId = isNotEmpty(emptyInstanceUrl)
+                ? userFileService.saveWithContentFromRemoteLocation(file, emptyInstanceUrl)
+                : userFileService.save(file);
         return "redirect:/xform/?formId=" + webForm.getId() + "&fileId=" + fileId + "&base_uri=" + request.getContextPath();
     }
 
