@@ -20,6 +20,12 @@
                         <th>File link</th>
                         <td>${file.fullName}</td>
                     </tr>
+                    <c:if test="${parameters.newFormCreationAllowed}">
+                        <tr>
+                            <th>New form</th>
+                            <td><a href="<c:url value="/startWebform?formId=${webForm.id}"/>" title="Fill new form">Fill new ${webForm.title} form</a></td>
+                        </tr>
+                    </c:if>
                     <tr>
                         <th>Edit</th>
                         <c:url var="editLink" value="/cdr/edit/file?formId=${webForm.id}&fileName=${file.title}&remoteFileUrl=${file.fullName}"/>
