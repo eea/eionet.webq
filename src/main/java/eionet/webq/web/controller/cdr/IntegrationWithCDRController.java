@@ -30,9 +30,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpServletRequest;
-
 import java.util.Arrays;
 import java.util.Collection;
 
@@ -58,7 +58,7 @@ public class IntegrationWithCDRController {
      * Operations with web forms.
      */
     @Autowired
-    private WebFormService service;
+    private WebFormService webFormService;
 
     /**
      * Deliver with WebForms.
@@ -76,7 +76,19 @@ public class IntegrationWithCDRController {
 
         model.addAttribute("parameters", parameters);
         model.addAttribute("xmlFiles", xmlFiles);
-        model.addAttribute("availableWebForms", service.findWebFormsForSchemas(requiredSchemas));
+        model.addAttribute("availableWebForms", webFormService.findWebFormsForSchemas(requiredSchemas));
         return "deliver_menu";
+    }
+
+    /**
+     * Edit envelope file with web form.
+     *
+     * @param formId web form id
+     * @param request current request
+     * @return view name
+     */
+    @RequestMapping("/cdr/edit/file")
+    public String editWithWebForm(@RequestParam int formId, HttpServletRequest request) {
+        return "redirect:/xform/?formId=" + formId  + "&fileId=1&base_uri=" + request.getContextPath();
     }
 }

@@ -20,18 +20,6 @@
  */
 package eionet.webq.web.controller.cdr;
 
-import static eionet.webq.service.CDREnvelopeService.XmlFile;
-import static java.util.Collections.singletonMap;
-import static org.hamcrest.core.IsEqual.equalTo;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyList;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
-
 import eionet.webq.dao.orm.ProjectEntry;
 import eionet.webq.dao.orm.ProjectFile;
 import eionet.webq.dao.orm.ProjectFileType;
@@ -50,6 +38,19 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.MultiValueMap;
 
 import java.util.Collection;
+
+import static eionet.webq.service.CDREnvelopeService.XmlFile;
+import static java.util.Collections.singletonMap;
+import static org.hamcrest.core.IsEqual.equalTo;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyList;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
 /**
  */
@@ -101,6 +102,12 @@ public class IntegrationWithCDRControllerTest extends AbstractContextControllerT
         Collection<ProjectFile> webForms = (Collection<ProjectFile>) requestToWebQMenuAndGetModelAttribute("availableWebForms");
 
         assertThat(webForms.size(), equalTo(1));
+    }
+
+    @Test
+    public void whenEditCdrFileRedirectToXFormsEngine() throws Exception {
+        mvc().perform(post("/cdr/edit/file").param("formId", "1"))
+                .andExpect(redirectedUrl("/xform/?formId=1&fileId=1&base_uri="));
     }
 
     private void saveAvailableWebFormWithSchema(String xmlSchema) {
