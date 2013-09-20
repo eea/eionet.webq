@@ -10,7 +10,6 @@
     <c:otherwise>
         <h2>The following web forms are available</h2>
         <c:forEach items="${availableWebForms}" var="webForm">
-            <span>Existing data files in this envelope:</span>
             <table class="dataTable">
                 <c:forEach items="${xmlFiles[webForm.xmlSchema]}" var="file">
                     <tr>
@@ -23,7 +22,8 @@
                     </tr>
                     <tr>
                         <th>Edit</th>
-                        <td><a href="<c:url var="editLink" value="/startWebform?formId=${webForm.id}"/>" title="Edit with Web Form">Edit with web form ${webForm.title}</a></td>
+                        <c:url var="editLink" value="/cdr/edit/file?formId=${webForm.id}&fileName=${file.title}&remoteFileUrl=${file.fullName}"/>
+                        <td><a href="${editLink}" title="Edit with Web Form">Edit with web form ${webForm.title}</a></td>
                     </tr>
                 </c:forEach>
             </table>
