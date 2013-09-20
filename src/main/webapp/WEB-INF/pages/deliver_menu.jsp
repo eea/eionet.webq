@@ -1,6 +1,9 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
 <h1>Edit with web form</h1>
+<c:if test="${not parameters.authorizationSet}">
+    <div class="error-msg">Warning! Could not find authentication info from HTTP request. It is not allowed to save data on Web Forms!</div>
+</c:if>
 
 <c:choose>
     <c:when test="${empty availableWebForms or empty xmlFiles}">
@@ -8,31 +11,18 @@
         <a href="${parameters.envelopeUrl}"title="go back to envelope">Go back to envelope</a>
     </c:when>
     <c:otherwise>
-        <h2>The following web forms are available</h2>
+        <c:if test="${parameters.newFormCreationAllowed}">
+            <h2>The following web forms are available</h2>
+            <c:forEach items="${availableWebForms}" var="webForm">
+                <a href="<c:url value="/startWebform?formId=${webForm.id}"/>" title="Fill new form">Fill new ${webForm.title} form</a><br />
+            </c:forEach>
+        </c:if>
+        <h2>Existing data files in this envelope</h2>
         <c:forEach items="${availableWebForms}" var="webForm">
-            <table class="dataTable">
                 <c:forEach items="${xmlFiles[webForm.xmlSchema]}" var="file">
-                    <tr>
-                        <th>File name</th>
-                        <td>${file.title}</td>
-                    </tr>
-                    <tr>
-                        <th>File link</th>
-                        <td>${file.fullName}</td>
-                    </tr>
-                    <c:if test="${parameters.newFormCreationAllowed}">
-                        <tr>
-                            <th>New form</th>
-                            <td><a href="<c:url value="/startWebform?formId=${webForm.id}"/>" title="Fill new form">Fill new ${webForm.title} form</a></td>
-                        </tr>
-                    </c:if>
-                    <tr>
-                        <th>Edit</th>
-                        <c:url var="editLink" value="/cdr/edit/file?formId=${webForm.id}&fileName=${file.title}&remoteFileUrl=${file.fullName}"/>
-                        <td><a href="${editLink}" title="Edit with Web Form">Edit with web form ${webForm.title}</a></td>
-                    </tr>
+                    <c:url var="editLink" value="/cdr/edit/file?formId=${webForm.id}&fileName=${file.title}&remoteFileUrl=${file.fullName}"/>
+                    <a href="${editLink}" title="Edit with Web Form">Edit ${file.title} with web form ${webForm.title}</a><br />
                 </c:forEach>
-            </table>
         </c:forEach>
     </c:otherwise>
 </c:choose>
