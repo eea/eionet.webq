@@ -25,14 +25,22 @@ import eionet.webq.dao.orm.ProjectFile;
 import java.util.Collection;
 
 /**
- * Interface for interactions with webforms repository.
+ * Interface for interactions with web forms repository.
  */
 public interface WebFormStorage {
     /**
-     * Retrieves all webforms which are set as active and main form,
+     * Retrieves all web forms which are set as active and main form,
      * also xml schema must be set.
      *
-     * @return collection of webforms
+     * @return collection of web forms
      */
     Collection<ProjectFile> getAllActiveWebForms();
+
+    /**
+     * Get active web form by id.
+     *
+     * @param id web form id
+     * @return active web form
+     */
+    ProjectFile getActiveWebFormById(int id);
 }

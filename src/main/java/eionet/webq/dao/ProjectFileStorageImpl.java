@@ -25,6 +25,7 @@ import eionet.webq.dao.orm.ProjectFile;
 import eionet.webq.dao.orm.ProjectFileType;
 import eionet.webq.dao.orm.util.ProjectFileInfo;
 import org.hibernate.Session;
+import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
@@ -93,6 +94,11 @@ public class ProjectFileStorageImpl extends AbstractDao<ProjectFile> implements 
     }
 
     @Override
+    public ProjectFile getActiveWebFormById(int id) {
+        return (ProjectFile) getCriteria().add(Restrictions.and(activeWebFormCriterion(), Restrictions.idEq(id))).uniqueResult();
+    }
+
+    @Override
     Class<ProjectFile> getDtoClass() {
         return ProjectFile.class;
     }
@@ -120,5 +126,15 @@ public class ProjectFileStorageImpl extends AbstractDao<ProjectFile> implements 
                 + " active=:active, mainForm=:mainForm, remoteFileUrl=:remoteFileUrl, "
                 + " newXmlFileName=:newXmlFileName, emptyInstanceUrl=:emptyInstanceUrl, updated=CURRENT_TIMESTAMP() "
                 + " WHERE id=:id").setProperties(projectFile).executeUpdate();
+    }
+
+    /**
+     * Criterion defining active web form.
+     *
+     * @return criterion
+     */
+    private Criterion activeWebFormCriterion() {
+        return Restrictions.and(eq("fileType", ProjectFileType.WEBFORM), eq("active", true), eq("mainForm", true),
+                Restrictions.isNotNull("xmlSchema"));
     }
 }

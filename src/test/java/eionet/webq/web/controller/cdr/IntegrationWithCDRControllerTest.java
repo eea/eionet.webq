@@ -20,9 +20,11 @@
  */
 package eionet.webq.web.controller.cdr;
 
+import eionet.webq.dao.UserFileStorage;
 import eionet.webq.dao.orm.ProjectEntry;
 import eionet.webq.dao.orm.ProjectFile;
 import eionet.webq.dao.orm.ProjectFileType;
+import eionet.webq.dao.orm.UserFile;
 import eionet.webq.dto.WebQMenuParameters;
 import eionet.webq.service.ProjectFileService;
 import eionet.webq.web.AbstractContextControllerTests;
@@ -32,12 +34,19 @@ import org.apache.xmlrpc.client.XmlRpcClientConfig;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestOperations;
 
 import java.util.Collection;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static eionet.webq.service.CDREnvelopeService.XmlFile;
 import static java.util.Collections.singletonMap;
@@ -49,7 +58,7 @@ import static org.mockito.Matchers.anyList;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
 /**
@@ -58,14 +67,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Transactional
 public class IntegrationWithCDRControllerTest extends AbstractContextControllerTests {
     @Autowired
-    private IntegrationWithCDRController controller;
-    @Autowired
     private XmlRpcClient xmlRpcClient;
     @Autowired
     private ProjectFileService projectFileService;
+    @Autowired
+    private RestOperations restOperations;
+    @Autowired
+    private UserFileStorage userFileStorage;
 
     public static final String ENVELOPE_URL = "http://cdr.envelope.eu";
-
 
     @Test
     public void menuReturnsViewName() throws Exception {
@@ -105,12 +115,25 @@ public class IntegrationWithCDRControllerTest extends AbstractContextControllerT
     }
 
     @Test
-    public void whenEditCdrFileRedirectToXFormsEngine() throws Exception {
-        mvc().perform(post("/cdr/edit/file").param("formId", "1"))
-                .andExpect(redirectedUrl("/xform/?formId=1&fileId=1&base_uri="));
+    public void editCdrFileWillSaveFileLocallyAndRedirectToXFormsEngine() throws Exception {
+        MockHttpSession session = new MockHttpSession();
+        byte[] fileContent = "file-content".getBytes();
+        when(restOperations.getForEntity(anyString(), any(Class.class)))
+                .thenReturn(new ResponseEntity<byte[]>(fileContent, HttpStatus.OK));
+
+        int formId = saveAvailableWebFormWithSchema("schema");
+
+        MvcResult mvcResult = mvc().perform(post("/cdr/edit/file").param("formId", String.valueOf(formId)).param("fileName", "file.xml")
+                .param("remoteFileUrl", "http://remote-file.url").session(session))
+                .andExpect(status().isFound()).andReturn();
+
+        String redirectedUrl = mvcResult.getResponse().getRedirectedUrl();
+
+        UserFile file = userFileStorage.findFile(extractFileIdFromXFormRedirectUrl(redirectedUrl), session.getId());
+        assertThat(file.getContent(), equalTo(fileContent));
     }
 
-    private void saveAvailableWebFormWithSchema(String xmlSchema) {
+    private int saveAvailableWebFormWithSchema(String xmlSchema) {
         ProjectFile file = new ProjectFile();
         file.setXmlSchema(xmlSchema);
         file.setActive(true);
@@ -119,6 +142,7 @@ public class IntegrationWithCDRControllerTest extends AbstractContextControllerT
         file.setFileContent("content".getBytes());
         file.setFileType(ProjectFileType.WEBFORM);
         projectFileService.saveOrUpdate(file, new ProjectEntry());
+        return file.getId();
     }
 
     private void rpcClientWillReturnFileForSchema(String xmlSchema) throws XmlRpcException {
@@ -132,5 +156,13 @@ public class IntegrationWithCDRControllerTest extends AbstractContextControllerT
 
     private ResultActions requestWebQMenu() throws Exception {
         return request(post("/WebQMenu").param("envelope", ENVELOPE_URL));
+    }
+
+    private int extractFileIdFromXFormRedirectUrl(String redirectUrl) {
+        String redirectUrlRegex = "/xform/\\?formId=\\d+&fileId=(\\d+)&base_uri=";
+        Matcher matcher = Pattern.compile(redirectUrlRegex).matcher(redirectUrl);
+
+        assertTrue(matcher.find());
+        return Integer.valueOf(matcher.group(1));
     }
 }

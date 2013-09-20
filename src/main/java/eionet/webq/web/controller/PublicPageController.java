@@ -26,7 +26,6 @@ import eionet.webq.dto.UploadForm;
 import eionet.webq.dto.XmlSaveResult;
 import eionet.webq.service.ConversionService;
 import eionet.webq.service.FileNotAvailableException;
-import eionet.webq.service.ProjectFileService;
 import eionet.webq.service.UserFileService;
 import eionet.webq.service.WebFormService;
 import org.apache.commons.io.IOUtils;
@@ -76,11 +75,6 @@ public class PublicPageController {
      */
     @Autowired
     private WebFormService webFormService;
-    /**
-     * WebForms storage.
-     */
-    @Autowired
-    ProjectFileService projectFileService;
 
     /**
      * Action to be performed on http GET method and path '/'.
@@ -193,7 +187,7 @@ public class PublicPageController {
      */
     @RequestMapping(value = "/startWebform")
     public String startWebFormSaveFile(@RequestParam int formId, HttpServletRequest request) throws FileNotAvailableException {
-        ProjectFile webForm = projectFileService.getById(formId);
+        ProjectFile webForm = webFormService.findActiveWebFormById(formId);
         String emptyInstanceUrl = webForm.getEmptyInstanceUrl();
         UserFile file = new UserFile();
         file.setName(StringUtils.defaultIfEmpty(webForm.getNewXmlFileName(), "new_form.xml"));
@@ -216,7 +210,7 @@ public class PublicPageController {
     @RequestMapping(value = "/xform")
     @Transactional
     public void startWebFormWriteFormToResponse(@RequestParam int formId, HttpServletResponse response) throws IOException {
-        ProjectFile webForm = projectFileService.getById(formId);
+        ProjectFile webForm = webFormService.findActiveWebFormById(formId);
         byte[] fileContent = webForm.getFileContent();
         response.setContentLength(fileContent.length);
         response.setContentType("application/xhtml+html");

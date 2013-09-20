@@ -24,7 +24,6 @@ import configuration.ApplicationTestContextWithMockSession;
 import eionet.webq.dao.orm.ProjectEntry;
 import eionet.webq.dao.orm.ProjectFile;
 import eionet.webq.dao.orm.ProjectFileType;
-import eionet.webq.dao.orm.UploadedFile;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -103,8 +102,17 @@ public class WebFormStorageTest {
         assertTrue(allActiveWebForms.iterator().next().isMainForm());
     }
 
-    private void save(ProjectFile projectFile) {
-        projectFileStorage.save(projectFile, project);
+    @Test
+    public void getActiveWebFormById() throws Exception {
+        ProjectFile webform = createWebform();
+        int id = save(webform);
+        ProjectFile file = webFormStorage.getActiveWebFormById(id);
+
+        assertThat(file.getTitle(), equalTo(webform.getTitle()));
+    }
+
+    private int save(ProjectFile projectFile) {
+        return projectFileStorage.save(projectFile, project);
     }
 
     private ProjectFile createWebform() {
@@ -120,18 +128,6 @@ public class WebFormStorageTest {
         file.setTitle("test-title");
         file.setUserName("test-username");
         return file;
-    }
-
-    private ProjectFile webFormWithAllFieldsSet() {
-        ProjectFile projectFile = createProjectFile(ProjectFileType.WEBFORM);
-        projectFile.setFile(new UploadedFile("test.xml", "test-content".getBytes()));
-        projectFile.setEmptyInstanceUrl("emptyInstanceUrl");
-        projectFile.setNewXmlFileName("newXmlFileName");
-        projectFile.setDescription("description");
-        projectFile.setTitle("title");
-        projectFile.setUserName("userName");
-        projectFile.setMainForm(true);
-        return projectFile;
     }
 
     private ProjectEntry testProject() {

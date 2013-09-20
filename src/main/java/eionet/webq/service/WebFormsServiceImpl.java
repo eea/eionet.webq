@@ -47,6 +47,11 @@ public class WebFormsServiceImpl implements WebFormService {
     }
 
     @Override
+    public ProjectFile findActiveWebFormById(int id) {
+        return storage.getActiveWebFormById(id);
+    }
+
+    @Override
     public Collection<ProjectFile> findWebFormsForSchemas(Collection<String> xmlSchemas) {
         Collection<ProjectFile> allActiveWebForms = getAllActiveWebForms();
         if (CollectionUtils.isEmpty(xmlSchemas)) {

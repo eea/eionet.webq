@@ -99,6 +99,14 @@ public class WebFormsServiceImplTest {
         assertThat(it.next(), equalTo(file3));
     }
 
+    @Test
+    public void findActiveWebFormById() throws Exception {
+        int webFormId = Integer.MAX_VALUE / 42;
+        webFormService.findActiveWebFormById(webFormId);
+
+        verify(storage).getActiveWebFormById(webFormId);
+    }
+
     private ProjectFile webFormWithXmlSchema(String fileName) {
         ProjectFile projectFile = new ProjectFile();
         projectFile.setXmlSchema("schema" + fileName);

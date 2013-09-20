@@ -82,8 +82,7 @@ public class UserFileServiceImpl implements UserFileService {
     @Override
     public UserFile getById(int id) {
         UserFile userFile = storage.findFile(id, userId());
-        byte[] content = userFile.getContent();
-        LOGGER.info("File loaded. Name=" + userFile.getName() + ", content size=" + (content != null ? content.length : 0));
+        LOGGER.info("Loaded user file=" + userFile);
         return userFile;
     }
 

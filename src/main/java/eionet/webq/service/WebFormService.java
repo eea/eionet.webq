@@ -36,6 +36,14 @@ public interface WebFormService {
     Collection<ProjectFile> getAllActiveWebForms();
 
     /**
+     * Find active web form by id.
+     *
+     * @param id form id
+     * @return web form
+     */
+    ProjectFile findActiveWebFormById(int id);
+
+    /**
      * Finds all web forms for schemas.
      * All returned web forms are active.
      *

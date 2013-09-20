@@ -22,9 +22,9 @@ package eionet.webq.web.controller;
 
 import eionet.webq.dao.orm.ProjectFile;
 import eionet.webq.dao.orm.UserFile;
-import eionet.webq.service.ProjectFileService;
 import eionet.webq.service.RemoteFileService;
 import eionet.webq.service.UserFileService;
+import eionet.webq.service.WebFormService;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -45,7 +45,7 @@ public class PublicPageControllerTest {
 
     public static final int WEB_FORM_ID = 1;
     @Mock
-    private ProjectFileService projectFileService;
+    private WebFormService webFormService;
     @Mock
     private UserFileService userFileService;
     @InjectMocks
@@ -80,7 +80,7 @@ public class PublicPageControllerTest {
         ProjectFile projectFile = new ProjectFile();
         byte[] testContent = "test-content".getBytes();
         projectFile.setFileContent(testContent);
-        when(projectFileService.getById(WEB_FORM_ID)).thenReturn(projectFile);
+        when(webFormService.findActiveWebFormById(WEB_FORM_ID)).thenReturn(projectFile);
 
         MockHttpServletResponse response = new MockHttpServletResponse();
         publicPageController.startWebFormWriteFormToResponse(WEB_FORM_ID, response);
@@ -91,7 +91,7 @@ public class PublicPageControllerTest {
     }
 
     private UserFile saveFileAndGetParameterFromServiceCall(ProjectFile projectFile) throws Exception{
-        when(projectFileService.getById(WEB_FORM_ID)).thenReturn(projectFile);
+        when(webFormService.findActiveWebFormById(WEB_FORM_ID)).thenReturn(projectFile);
         byte[] testContent = "test-content".getBytes();
         when(remoteFileService.fileContent(projectFile.getEmptyInstanceUrl())).thenReturn(testContent);
 

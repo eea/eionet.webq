@@ -21,8 +21,13 @@
 package eionet.webq.web.controller.cdr;
 
 import eionet.webq.converter.RequestToWebQMenuParameters;
+import eionet.webq.dao.orm.ProjectFile;
+import eionet.webq.dao.orm.UploadedFile;
+import eionet.webq.dao.orm.UserFile;
 import eionet.webq.dto.WebQMenuParameters;
 import eionet.webq.service.CDREnvelopeService;
+import eionet.webq.service.FileNotAvailableException;
+import eionet.webq.service.UserFileService;
 import eionet.webq.service.WebFormService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,6 +64,12 @@ public class IntegrationWithCDRController {
      */
     @Autowired
     private WebFormService webFormService;
+    /**
+     * User file service.
+     */
+    @Autowired
+    private UserFileService userFileService;
+
 
     /**
      * Deliver with WebForms.
@@ -84,11 +95,19 @@ public class IntegrationWithCDRController {
      * Edit envelope file with web form.
      *
      * @param formId web form id
+     * @param fileName file name
+     * @param remoteFileUrl remote file url
      * @param request current request
      * @return view name
+     * @throws eionet.webq.service.FileNotAvailableException if remote file not available
      */
     @RequestMapping("/cdr/edit/file")
-    public String editWithWebForm(@RequestParam int formId, HttpServletRequest request) {
-        return "redirect:/xform/?formId=" + formId  + "&fileId=1&base_uri=" + request.getContextPath();
+    public String editWithWebForm(@RequestParam int formId, @RequestParam String fileName,
+                                  @RequestParam String remoteFileUrl, HttpServletRequest request) throws FileNotAvailableException {
+        ProjectFile webForm = webFormService.findActiveWebFormById(formId);
+        UserFile userFile = new UserFile(new UploadedFile(fileName, new byte[0]), webForm.getXmlSchema());
+
+        int fileId = userFileService.saveWithContentFromRemoteLocation(userFile, remoteFileUrl);
+        return "redirect:/xform/?formId=" + formId + "&fileId=" + fileId + "&base_uri=" + request.getContextPath();
     }
 }
