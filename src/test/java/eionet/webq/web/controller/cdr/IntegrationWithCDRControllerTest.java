@@ -115,12 +115,36 @@ public class IntegrationWithCDRControllerTest {
     }
 
     @Test
-    public void redirectsToWebFormIfThereIsOnlyOneWebFormAndOneFileAvailableForTheSameSchema() throws Exception {
+    public void noRedirectIf1WebFormAnd1FileForSameSchemaButAddParameterSet() throws Exception {
+        getXmlFilesWillReturnFilesAmountOf(1);
+        thereWillBeWebFormsAmountOf(1);
+
+        WebQMenuParameters menuParameters = new WebQMenuParameters();
+        menuParameters.setNewFormCreationAllowed(true);
+        when(converter.convert(any(HttpServletRequest.class))).thenReturn(menuParameters);
+
+        assertNoRedirectOnMenuCall();
+    }
+
+    @Test
+    public void redirectsToWebFormIfThereAreOnlyOneWebFormAndOneFileAvailableForTheSameSchema() throws Exception {
         getXmlFilesWillReturnFilesAmountOf(1);
         thereWillBeWebFormsAmountOf(1);
         when(webFormService.findActiveWebFormById(anyInt())).thenReturn(new ProjectFile());
 
         assertThat(controller.menu(new MockHttpServletRequest(), mock(Model.class)), StringStartsWith.startsWith("redirect:/xform/"));
+    }
+
+    @Test
+    public void redirectsToWebFormIfThereIsOneWebFormNoFilesAndNewFilesCreationIsAllowed() throws Exception {
+        getXmlFilesWillReturnFilesAmountOf(0);
+        thereWillBeWebFormsAmountOf(1);
+        when(webFormService.findActiveWebFormById(anyInt())).thenReturn(new ProjectFile());
+        WebQMenuParameters menuParameters = new WebQMenuParameters();
+        menuParameters.setNewFormCreationAllowed(true);
+        when(converter.convert(any(HttpServletRequest.class))).thenReturn(menuParameters);
+
+        assertThat(controller.menu(new MockHttpServletRequest(), mock(Model.class)), StringStartsWith.startsWith("redirect:/startWebform"));
     }
 
     private void thereWillBeWebFormsAmountOf(int amount) {

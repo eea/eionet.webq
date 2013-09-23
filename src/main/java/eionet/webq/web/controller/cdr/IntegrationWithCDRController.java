@@ -88,8 +88,11 @@ public class IntegrationWithCDRController {
                 StringUtils.isNotEmpty(parameters.getSchema()) ? Arrays.asList(parameters.getSchema()) : xmlFiles.keySet();
         Collection<ProjectFile> webForms = webFormService.findWebFormsForSchemas(requiredSchemas);
 
-        if (hasOnlyOneFileAndWebFormForSameSchema(xmlFiles, webForms)) {
+        if (hasOnlyOneFileAndWebFormForSameSchema(xmlFiles, webForms, parameters)) {
             return redirectToEditWebForm(request, xmlFiles, webForms);
+        }
+        if (oneWebFormAndNoFilesButNewFileCreationIsAllowed(xmlFiles, webForms, parameters)) {
+            return "redirect:/startWebform?formId=" + webForms.iterator().next().getId();
         }
         model.addAttribute("parameters", parameters);
         model.addAttribute("xmlFiles", xmlFiles);
@@ -121,17 +124,32 @@ public class IntegrationWithCDRController {
      * Check whether there is only 1 file and 1 schema available and their xml schemas match.
      *
      * @param xmlFiles xml files
-     * @param webForms webforms
+     * @param webForms web forms
+     * @param parameters request parameters
      * @return true iff there are only 1 file and schema with equal xml schema
      */
-    private boolean hasOnlyOneFileAndWebFormForSameSchema(MultiValueMap<String, XmlFile> xmlFiles, Collection<ProjectFile> webForms) {
-        if (webForms.size() == 1 && xmlFiles.size() == 1) {
+    private boolean hasOnlyOneFileAndWebFormForSameSchema(MultiValueMap<String, XmlFile> xmlFiles,
+            Collection<ProjectFile> webForms, WebQMenuParameters parameters) {
+        if (webForms.size() == 1 && xmlFiles.size() == 1 && !parameters.isNewFormCreationAllowed()) {
             List<XmlFile> filesForSchema = xmlFiles.get(webForms.iterator().next().getXmlSchema());
             if (filesForSchema != null && filesForSchema.size() == 1) {
                 return true;
             }
         }
         return false;
+    }
+
+    /**
+     * Check whether there is no files and only one form available. Adding new files must be allowed.
+     *
+     * @param xmlFiles xml files
+     * @param webForms web forms
+     * @param parameters request parameters
+     * @return true iff only one form, no files and creation of new files allowed.
+     */
+    private boolean oneWebFormAndNoFilesButNewFileCreationIsAllowed(MultiValueMap<String, XmlFile> xmlFiles,
+            Collection<ProjectFile> webForms, WebQMenuParameters parameters) {
+        return webForms.size() == 1 && xmlFiles.size() == 0 && parameters.isNewFormCreationAllowed();
     }
 
     /**
@@ -143,9 +161,11 @@ public class IntegrationWithCDRController {
      * @return redirect string
      * @throws FileNotAvailableException if remote file not available
      */
-    private String redirectToEditWebForm(HttpServletRequest request, MultiValueMap<String, XmlFile> xmlFiles, Collection<ProjectFile> webForms) throws FileNotAvailableException {
+    private String redirectToEditWebForm(HttpServletRequest request, MultiValueMap<String, XmlFile> xmlFiles,
+            Collection<ProjectFile> webForms) throws FileNotAvailableException {
         ProjectFile onlyOneAvailableForm = webForms.iterator().next();
         XmlFile onlyOneAvailableFile = xmlFiles.getFirst(onlyOneAvailableForm.getXmlSchema());
-        return editWithWebForm(onlyOneAvailableForm.getId(), onlyOneAvailableFile.getTitle(), onlyOneAvailableFile.getFullName(), request);
+        return editWithWebForm(onlyOneAvailableForm.getId(), onlyOneAvailableFile.getTitle(), onlyOneAvailableFile.getFullName(),
+                request);
     }
 }
