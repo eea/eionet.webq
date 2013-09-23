@@ -40,6 +40,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
 import static eionet.webq.service.CDREnvelopeService.XmlFile;
 
@@ -124,9 +125,13 @@ public class IntegrationWithCDRController {
      * @return true iff there are only 1 file and schema with equal xml schema
      */
     private boolean hasOnlyOneFileAndWebFormForSameSchema(MultiValueMap<String, XmlFile> xmlFiles, Collection<ProjectFile> webForms) {
-        return webForms.size() == 1
-                && xmlFiles.size() == 1
-                && xmlFiles.get(webForms.iterator().next().getXmlSchema()).size() == 1;
+        if (webForms.size() == 1 && xmlFiles.size() == 1) {
+            List<XmlFile> filesForSchema = xmlFiles.get(webForms.iterator().next().getXmlSchema());
+            if (filesForSchema != null && filesForSchema.size() == 1) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
