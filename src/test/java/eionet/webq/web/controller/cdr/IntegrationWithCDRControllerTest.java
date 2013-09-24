@@ -37,21 +37,24 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.ui.Model;
 import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 import static eionet.webq.service.CDREnvelopeService.XmlFile;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.hamcrest.core.StringStartsWith.startsWith;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyCollectionOf;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -171,8 +174,7 @@ public class IntegrationWithCDRControllerTest {
     @Test
     public void webQEditRedirectsToWebForm() throws Exception {
         thereWillBeWebFormsAmountOf(1);
-        when(cdrRequest.getSchema()).thenReturn(XML_SCHEMA);
-        when(cdrRequest.getInstanceUrl()).thenReturn("http://instance.url");
+        cdrRequestWillContainXmlSchemaAndInstanceUrl();
 
         assertThat(controller.webQEdit(new MockHttpServletRequest(), model), startsWith("redirect:/xform/"));
     }
@@ -180,8 +182,7 @@ public class IntegrationWithCDRControllerTest {
     @Test
     public void webQEditRedirectsToWebQMenuIfFormsAmountMoreThan1() throws Exception {
         thereWillBeWebFormsAmountOf(2);
-        when(cdrRequest.getSchema()).thenReturn(XML_SCHEMA);
-        when(cdrRequest.getInstanceUrl()).thenReturn("http://instance.url");
+        cdrRequestWillContainXmlSchemaAndInstanceUrl();
 
         assertThat(controller.webQEdit(new MockHttpServletRequest(), model), equalTo("deliver_menu"));
     }
@@ -198,6 +199,28 @@ public class IntegrationWithCDRControllerTest {
         ArgumentCaptor<UserFile> userFileArgument = ArgumentCaptor.forClass(UserFile.class);
         verify(userFileService).saveWithContentFromRemoteLocation(userFileArgument.capture(), anyString());
         assertThat(userFileArgument.getValue().getName(), equalTo(fileName));
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void webQEditWillAddXmlFilesToModelIfThereAreMultipleForms() throws Exception {
+        thereWillBeWebFormsAmountOf(2);
+        cdrRequestWillContainXmlSchemaAndInstanceUrl();
+
+        controller.webQEdit(new MockHttpServletRequest(), model);
+        ArgumentCaptor<MultiValueMap> xmlFilesArgument = ArgumentCaptor.forClass(MultiValueMap.class);
+        verify(model).addAttribute(eq("xmlFiles"), xmlFilesArgument.capture());
+        MultiValueMap<String, XmlFile> xmlFiles = xmlFilesArgument.getValue();
+
+        assertTrue(xmlFiles.containsKey(XML_SCHEMA));
+        List<XmlFile> xmlFilesForSchema = xmlFiles.get(XML_SCHEMA);
+        assertThat(xmlFilesForSchema.size(), equalTo(1));
+        assertThat(xmlFilesForSchema.get(0).getFullName(), equalTo(cdrRequest.getInstanceUrl()));
+    }
+
+    private void cdrRequestWillContainXmlSchemaAndInstanceUrl() {
+        when(cdrRequest.getSchema()).thenReturn(XML_SCHEMA);
+        when(cdrRequest.getInstanceUrl()).thenReturn("http://instance.url");
     }
 
     private void thereWillBeWebFormsAmountOf(int amount) {
@@ -219,7 +242,7 @@ public class IntegrationWithCDRControllerTest {
         when(envelopeService.getXmlFiles(any(CdrRequest.class))).thenReturn(files);
 
         for (int i = 0; i < amount; i++) {
-            files.add(XML_SCHEMA, new XmlFile(null, null, XML_SCHEMA));
+            files.add(XML_SCHEMA, new XmlFile(null, null));
         }
     }
 }

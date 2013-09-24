@@ -82,7 +82,7 @@ public class CDREnvelopeServiceImpl implements CDREnvelopeService {
                     String xmlSchema = entry.getKey();
                     for (Object values : entry.getValue()) {
                         Object[] xmlFileData = (Object[]) values;
-                        result.add(xmlSchema, new XmlFile(xmlFileData[0].toString(), xmlFileData[1].toString(), xmlSchema));
+                        result.add(xmlSchema, new XmlFile(xmlFileData[0].toString(), xmlFileData[1].toString()));
                     }
                 }
             } catch (ClassCastException e) {
@@ -92,6 +92,7 @@ public class CDREnvelopeServiceImpl implements CDREnvelopeService {
         } else {
             LOGGER.warn("expected not null response from envelope service");
         }
+        LOGGER.info("Xml files received=" + result);
         return result;
     }
 

@@ -117,11 +117,13 @@ public class IntegrationWithCDRController {
         if (webForms.isEmpty()) {
             throw new IllegalArgumentException("no web forms for '" + schema + "' schema found");
         }
-        if (webForms.size() > 1) {
-            return deliverMenu(webForms, new LinkedMultiValueMap<String, XmlFile>(), parameters, model);
-        }
         String instanceUrl = parameters.getInstanceUrl();
         String fileName = instanceUrl.substring(instanceUrl.lastIndexOf("/") + 1);
+        if (webForms.size() > 1) {
+            LinkedMultiValueMap<String, XmlFile> xmlFiles = new LinkedMultiValueMap<String, XmlFile>();
+            xmlFiles.add(schema, new XmlFile(instanceUrl, fileName));
+            return deliverMenu(webForms, xmlFiles, parameters, model);
+        }
         return editFile(webForms.iterator().next(), fileName, instanceUrl, request);
     }
 

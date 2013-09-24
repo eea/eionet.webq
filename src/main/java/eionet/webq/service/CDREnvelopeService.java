@@ -46,22 +46,16 @@ public interface CDREnvelopeService {
          * File title.
          */
         private String title;
-        /**
-         * File xml schema.
-         */
-        private String xmlSchema;
 
         /**
          * Constructs file.
          *
          * @param fullName file full name.
          * @param title file title.
-         * @param xmlSchema xml schema.
          */
-        public XmlFile(String fullName, String title, String xmlSchema) {
+        public XmlFile(String fullName, String title) {
             this.fullName = fullName;
             this.title = title;
-            this.xmlSchema = xmlSchema;
         }
 
         public String getFullName() {
@@ -72,8 +66,9 @@ public interface CDREnvelopeService {
             return title;
         }
 
-        public String getXmlSchema() {
-            return xmlSchema;
+        @Override
+        public String toString() {
+            return "XmlFile{" + "fullName='" + fullName + '\'' + ", title='" + title + '\'' + '}';
         }
     }
 }
