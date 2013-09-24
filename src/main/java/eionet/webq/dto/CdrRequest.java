@@ -59,6 +59,14 @@ public class CdrRequest {
      * Authentication password.
      */
     private String password;
+    /**
+     * URL of xml file stored in CDR.
+     */
+    private String instance;
+    /**
+     * XML file title.
+     */
+    private String instanceTitle;
 
     public String getEnvelopeUrl() {
         return envelopeUrl;
@@ -130,5 +138,21 @@ public class CdrRequest {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getInstance() {
+        return instance;
+    }
+
+    public void setInstance(String instance) {
+        this.instance = instance;
+    }
+
+    public String getInstanceTitle() {
+        return instanceTitle;
+    }
+
+    public void setInstanceTitle(String instanceTitle) {
+        this.instanceTitle = instanceTitle;
     }
 }

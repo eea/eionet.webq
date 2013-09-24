@@ -49,6 +49,8 @@ public class CdrRequestConverter implements Converter<HttpServletRequest, CdrReq
         parameters.setJavascriptEnabled(Boolean.valueOf(request.getParameter("JavaScript")));
         parameters.setNewFormCreationAllowed(Boolean.valueOf(request.getParameter("add")));
         parameters.setNewFileName(request.getParameter("file_id"));
+        parameters.setInstance(request.getParameter("instance"));
+        parameters.setInstanceTitle(request.getParameter("instance_title"));
 
         String authorizationHeader = request.getHeader("Authorization");
         if (hasBasicAuthorization(authorizationHeader)) {

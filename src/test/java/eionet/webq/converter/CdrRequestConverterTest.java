@@ -33,27 +33,31 @@ import static org.junit.Assert.assertTrue;
 
 /**
  */
-public class RequestToCdrRequestTest {
+public class CdrRequestConverterTest {
     private final CdrRequestConverter cdrRequestConverter = new CdrRequestConverter();
     private MockHttpServletRequest request = new MockHttpServletRequest();
 
     @Test
-    public void buildsWebQRequestParameters() throws Exception {
+    public void buildsCdrRequestFromHttpRequest() throws Exception {
         request.addParameter("envelope", "cdr-envelope.url");
         request.addParameter("schema", "requested-schema");
         request.addParameter("language", "EN");
         request.addParameter("JavaScript", "true");
         request.addParameter("add", "true");
         request.addParameter("file_id", "new-file-name");
+        request.addParameter("instance", "http://instance.url");
+        request.addParameter("instance_title", "instance title");
 
-        CdrRequest convert = cdrRequestConverter.convert(request);
+        CdrRequest cdrRequest = cdrRequestConverter.convert(request);
 
-        assertThat(convert.getEnvelopeUrl(), equalTo(request.getParameter("envelope")));
-        assertThat(convert.getSchema(), equalTo(request.getParameter("schema")));
-        assertThat(convert.getLanguage(), equalTo(request.getParameter("language")));
-        assertThat(convert.isJavascriptEnabled(), equalTo(true));
-        assertThat(convert.isNewFormCreationAllowed(), equalTo(true));
-        assertThat(convert.getNewFileName(), equalTo(request.getParameter("file_id")));
+        assertThat(cdrRequest.getEnvelopeUrl(), equalTo(request.getParameter("envelope")));
+        assertThat(cdrRequest.getSchema(), equalTo(request.getParameter("schema")));
+        assertThat(cdrRequest.getLanguage(), equalTo(request.getParameter("language")));
+        assertThat(cdrRequest.isJavascriptEnabled(), equalTo(true));
+        assertThat(cdrRequest.isNewFormCreationAllowed(), equalTo(true));
+        assertThat(cdrRequest.getNewFileName(), equalTo(request.getParameter("file_id")));
+        assertThat(cdrRequest.getInstance(), equalTo(request.getParameter("instance")));
+        assertThat(cdrRequest.getInstanceTitle(), equalTo(request.getParameter("instance_title")));
     }
 
     @Test
