@@ -1,5 +1,5 @@
-Eionet WebQuestionnaires Service ver. 2
-======================================
+Eionet WebQuestionnaires 2
+==========================
 
 Introduction
 ------------
