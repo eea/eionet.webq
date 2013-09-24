@@ -172,7 +172,7 @@ public class IntegrationWithCDRControllerIntegrationTest extends AbstractContext
     }
 
     private int extractFileIdFromXFormRedirectUrl(String redirectUrl) {
-        String redirectUrlRegex = "/xform/\\?formId=\\d+&fileId=(\\d+)&base_uri=";
+        String redirectUrlRegex = "/xform/\\?formId=\\d+&instance=.*&fileId=(\\d+)&base_uri=";
         Matcher matcher = Pattern.compile(redirectUrlRegex).matcher(redirectUrl);
 
         assertTrue(matcher.find());

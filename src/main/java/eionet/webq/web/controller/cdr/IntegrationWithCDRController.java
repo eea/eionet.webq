@@ -175,7 +175,8 @@ public class IntegrationWithCDRController {
         userFile.setXmlSchema(webForm.getXmlSchema());
 
         int fileId = userFileService.saveWithContentFromRemoteLocation(userFile, remoteFileUrl);
-        return "redirect:/xform/?formId=" + webForm.getId() + "&fileId=" + fileId + "&base_uri=" + request.getContextPath();
+        return "redirect:/xform/?formId=" + webForm.getId() + "&instance=" + remoteFileUrl  + "&fileId=" + fileId
+                + "&base_uri=" + request.getContextPath();
     }
 
     /**
