@@ -62,7 +62,7 @@ public class CdrRequest {
     /**
      * URL of xml file stored in CDR.
      */
-    private String instance;
+    private String instanceUrl;
     /**
      * XML file title.
      */
@@ -140,12 +140,12 @@ public class CdrRequest {
         this.password = password;
     }
 
-    public String getInstance() {
-        return instance;
+    public String getInstanceUrl() {
+        return instanceUrl;
     }
 
-    public void setInstance(String instance) {
-        this.instance = instance;
+    public void setInstanceUrl(String instanceUrl) {
+        this.instanceUrl = instanceUrl;
     }
 
     public String getInstanceTitle() {

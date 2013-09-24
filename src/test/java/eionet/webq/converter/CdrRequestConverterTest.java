@@ -56,7 +56,7 @@ public class CdrRequestConverterTest {
         assertThat(cdrRequest.isJavascriptEnabled(), equalTo(true));
         assertThat(cdrRequest.isNewFormCreationAllowed(), equalTo(true));
         assertThat(cdrRequest.getNewFileName(), equalTo(request.getParameter("file_id")));
-        assertThat(cdrRequest.getInstance(), equalTo(request.getParameter("instance")));
+        assertThat(cdrRequest.getInstanceUrl(), equalTo(request.getParameter("instance")));
         assertThat(cdrRequest.getInstanceTitle(), equalTo(request.getParameter("instance_title")));
     }
 

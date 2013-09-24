@@ -22,7 +22,6 @@ package eionet.webq.web.controller.cdr;
 
 import eionet.webq.converter.CdrRequestConverter;
 import eionet.webq.dao.orm.ProjectFile;
-import eionet.webq.dao.orm.UploadedFile;
 import eionet.webq.dao.orm.UserFile;
 import eionet.webq.dto.CdrRequest;
 import eionet.webq.service.CDREnvelopeService;
@@ -81,7 +80,7 @@ public class IntegrationWithCDRController {
      * @throws eionet.webq.service.FileNotAvailableException if one redirect to xform remote file not found.
      */
     @RequestMapping("/WebQMenu")
-    public String menu(HttpServletRequest request, Model model) throws FileNotAvailableException {
+    public String webQMenu(HttpServletRequest request, Model model) throws FileNotAvailableException {
         CdrRequest parameters = converter.convert(request);
         MultiValueMap<String, XmlFile> xmlFiles = envelopeService.getXmlFiles(parameters);
         Collection<String> requiredSchemas =
@@ -100,10 +99,28 @@ public class IntegrationWithCDRController {
         return "deliver_menu";
     }
 
+    /**
+     * WebQEdit request handler.
+     *
+     * @param request current request
+     * @return view name
+     * @throws FileNotAvailableException if remote file not available.
+     */
     @RequestMapping("/WebQEdit")
-    public String edit() {
+    public String webQEdit(HttpServletRequest request) throws FileNotAvailableException {
+        CdrRequest parameters = converter.convert(request);
+        String schema = parameters.getSchema();
+        if (StringUtils.isEmpty(schema)) {
+            throw new IllegalArgumentException("schema parameter is required");
+        }
 
-        return "deliver_menu";
+        Collection<ProjectFile> webFormsForSchemas = webFormService.findWebFormsForSchemas(Arrays.asList(schema));
+        if (webFormsForSchemas.isEmpty()) {
+            throw new IllegalArgumentException("no web forms for '" + schema + "' schema found");
+        }
+        String instanceUrl = parameters.getInstanceUrl();
+        String fileName = instanceUrl.substring(instanceUrl.lastIndexOf("/") + 1);
+        return editFile(webFormsForSchemas.iterator().next(), fileName, instanceUrl, request);
     }
 
     /**
@@ -119,11 +136,27 @@ public class IntegrationWithCDRController {
     @RequestMapping("/cdr/edit/file")
     public String editWithWebForm(@RequestParam int formId, @RequestParam String fileName,
                                   @RequestParam String remoteFileUrl, HttpServletRequest request) throws FileNotAvailableException {
-        ProjectFile webForm = webFormService.findActiveWebFormById(formId);
-        UserFile userFile = new UserFile(new UploadedFile(fileName, new byte[0]), webForm.getXmlSchema());
+        return editFile(webFormService.findActiveWebFormById(formId), fileName, remoteFileUrl, request);
+    }
+
+    /**
+     * Saves new user file to db and returns redirect url to web form edit.
+     *
+     * @param webForm web form to be used for edit.
+     * @param fileName new file name
+     * @param remoteFileUrl remote file url
+     * @param request current request
+     * @return redirect url
+     * @throws FileNotAvailableException if remote file not available
+     */
+    private String editFile(ProjectFile webForm, String fileName, String remoteFileUrl, HttpServletRequest request)
+            throws FileNotAvailableException {
+        UserFile userFile = new UserFile();
+        userFile.setName(fileName);
+        userFile.setXmlSchema(webForm.getXmlSchema());
 
         int fileId = userFileService.saveWithContentFromRemoteLocation(userFile, remoteFileUrl);
-        return "redirect:/xform/?formId=" + formId + "&fileId=" + fileId + "&base_uri=" + request.getContextPath();
+        return "redirect:/xform/?formId=" + webForm.getId() + "&fileId=" + fileId + "&base_uri=" + request.getContextPath();
     }
 
     /**
