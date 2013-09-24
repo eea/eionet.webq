@@ -32,6 +32,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -93,34 +94,35 @@ public class IntegrationWithCDRController {
         if (oneWebFormAndNoFilesButNewFileCreationIsAllowed(xmlFiles, webForms, parameters)) {
             return "redirect:/startWebform?formId=" + webForms.iterator().next().getId();
         }
-        model.addAttribute("parameters", parameters);
-        model.addAttribute("xmlFiles", xmlFiles);
-        model.addAttribute("availableWebForms", webForms);
-        return "deliver_menu";
+        return deliverMenu(webForms, xmlFiles, parameters, model);
     }
 
     /**
      * WebQEdit request handler.
      *
      * @param request current request
+     * @param model model
      * @return view name
      * @throws FileNotAvailableException if remote file not available.
      */
     @RequestMapping("/WebQEdit")
-    public String webQEdit(HttpServletRequest request) throws FileNotAvailableException {
+    public String webQEdit(HttpServletRequest request, Model model) throws FileNotAvailableException {
         CdrRequest parameters = converter.convert(request);
         String schema = parameters.getSchema();
         if (StringUtils.isEmpty(schema)) {
             throw new IllegalArgumentException("schema parameter is required");
         }
 
-        Collection<ProjectFile> webFormsForSchemas = webFormService.findWebFormsForSchemas(Arrays.asList(schema));
-        if (webFormsForSchemas.isEmpty()) {
+        Collection<ProjectFile> webForms = webFormService.findWebFormsForSchemas(Arrays.asList(schema));
+        if (webForms.isEmpty()) {
             throw new IllegalArgumentException("no web forms for '" + schema + "' schema found");
+        }
+        if (webForms.size() > 1) {
+            return deliverMenu(webForms, new LinkedMultiValueMap<String, XmlFile>(), parameters, model);
         }
         String instanceUrl = parameters.getInstanceUrl();
         String fileName = instanceUrl.substring(instanceUrl.lastIndexOf("/") + 1);
-        return editFile(webFormsForSchemas.iterator().next(), fileName, instanceUrl, request);
+        return editFile(webForms.iterator().next(), fileName, instanceUrl, request);
     }
 
     /**
@@ -139,6 +141,21 @@ public class IntegrationWithCDRController {
         return editFile(webFormService.findActiveWebFormById(formId), fileName, remoteFileUrl, request);
     }
 
+    /**
+     * Sets passed parameters to model attributes and returns view name.
+     *
+     * @param webForms web forms
+     * @param xmlFiles xml files
+     * @param parameters cdr parameters
+     * @param model model
+     * @return view name
+     */
+    private String deliverMenu(Collection<ProjectFile> webForms, MultiValueMap<String, XmlFile> xmlFiles, CdrRequest parameters, Model model) {
+        model.addAttribute("parameters", parameters);
+        model.addAttribute("xmlFiles", xmlFiles);
+        model.addAttribute("availableWebForms", webForms);
+        return "deliver_menu";
+    }
     /**
      * Saves new user file to db and returns redirect url to web form edit.
      *

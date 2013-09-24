@@ -28,7 +28,6 @@ import eionet.webq.service.CDREnvelopeService;
 import eionet.webq.service.FileNotAvailableException;
 import eionet.webq.service.UserFileService;
 import eionet.webq.service.WebFormService;
-import org.hamcrest.core.StringStartsWith;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -46,6 +45,7 @@ import java.util.Collections;
 
 import static eionet.webq.service.CDREnvelopeService.XmlFile;
 import static org.hamcrest.core.IsEqual.equalTo;
+import static org.hamcrest.core.StringStartsWith.startsWith;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyCollectionOf;
@@ -71,6 +71,8 @@ public class IntegrationWithCDRControllerTest {
     CdrRequestConverter converter;
     @Mock
     CdrRequest cdrRequest;
+    @Mock
+    Model model;
 
     @Before
     public void setUp() throws Exception {
@@ -138,7 +140,7 @@ public class IntegrationWithCDRControllerTest {
         thereWillBeWebFormsAmountOf(1);
         when(webFormService.findActiveWebFormById(anyInt())).thenReturn(new ProjectFile());
 
-        assertThat(controller.webQMenu(new MockHttpServletRequest(), mock(Model.class)), StringStartsWith.startsWith("redirect:/xform/"));
+        assertThat(controller.webQMenu(new MockHttpServletRequest(), model), startsWith("redirect:/xform/"));
     }
 
     @Test
@@ -150,12 +152,12 @@ public class IntegrationWithCDRControllerTest {
         menuParameters.setNewFormCreationAllowed(true);
         when(converter.convert(any(HttpServletRequest.class))).thenReturn(menuParameters);
 
-        assertThat(controller.webQMenu(new MockHttpServletRequest(), mock(Model.class)), StringStartsWith.startsWith("redirect:/startWebform"));
+        assertThat(controller.webQMenu(new MockHttpServletRequest(), model), startsWith("redirect:/startWebform"));
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void webQEditThrowsExceptionIfNoXmlSchemaSpecified() throws Exception {
-        controller.webQEdit(new MockHttpServletRequest());
+        controller.webQEdit(new MockHttpServletRequest(), model);
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -163,7 +165,7 @@ public class IntegrationWithCDRControllerTest {
         thereWillBeWebFormsAmountOf(0);
         when(cdrRequest.getSchema()).thenReturn(XML_SCHEMA);
 
-        controller.webQEdit(new MockHttpServletRequest());
+        controller.webQEdit(new MockHttpServletRequest(), model);
     }
 
     @Test
@@ -172,7 +174,16 @@ public class IntegrationWithCDRControllerTest {
         when(cdrRequest.getSchema()).thenReturn(XML_SCHEMA);
         when(cdrRequest.getInstanceUrl()).thenReturn("http://instance.url");
 
-        assertThat(controller.webQEdit(new MockHttpServletRequest()), StringStartsWith.startsWith("redirect:/xform/"));
+        assertThat(controller.webQEdit(new MockHttpServletRequest(), model), startsWith("redirect:/xform/"));
+    }
+
+    @Test
+    public void webQEditRedirectsToWebQMenuIfFormsAmountMoreThan1() throws Exception {
+        thereWillBeWebFormsAmountOf(2);
+        when(cdrRequest.getSchema()).thenReturn(XML_SCHEMA);
+        when(cdrRequest.getInstanceUrl()).thenReturn("http://instance.url");
+
+        assertThat(controller.webQEdit(new MockHttpServletRequest(), model), equalTo("deliver_menu"));
     }
 
     @Test
@@ -182,7 +193,7 @@ public class IntegrationWithCDRControllerTest {
         String fileName = "file.name";
         when(cdrRequest.getInstanceUrl()).thenReturn("http://instance.url/" + fileName);
 
-        controller.webQEdit(new MockHttpServletRequest());
+        controller.webQEdit(new MockHttpServletRequest(), model);
 
         ArgumentCaptor<UserFile> userFileArgument = ArgumentCaptor.forClass(UserFile.class);
         verify(userFileService).saveWithContentFromRemoteLocation(userFileArgument.capture(), anyString());
@@ -200,7 +211,7 @@ public class IntegrationWithCDRControllerTest {
     }
 
     private void assertNoRedirectOnMenuCall() throws FileNotAvailableException {
-        assertThat(controller.webQMenu(new MockHttpServletRequest(), mock(Model.class)), equalTo("deliver_menu"));
+        assertThat(controller.webQMenu(new MockHttpServletRequest(), model), equalTo("deliver_menu"));
     }
 
     private void getXmlFilesWillReturnFilesAmountOf(int amount) {
