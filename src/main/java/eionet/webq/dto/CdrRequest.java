@@ -22,7 +22,7 @@ package eionet.webq.dto;
 
 /**
  */
-public class WebQMenuParameters {
+public class CdrRequest {
     /**
      * Envelope URL.
      */

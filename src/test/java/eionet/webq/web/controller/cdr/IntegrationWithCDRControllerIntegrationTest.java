@@ -25,7 +25,7 @@ import eionet.webq.dao.orm.ProjectEntry;
 import eionet.webq.dao.orm.ProjectFile;
 import eionet.webq.dao.orm.ProjectFileType;
 import eionet.webq.dao.orm.UserFile;
-import eionet.webq.dto.WebQMenuParameters;
+import eionet.webq.dto.CdrRequest;
 import eionet.webq.service.ProjectFileService;
 import eionet.webq.web.AbstractContextControllerTests;
 import org.apache.xmlrpc.XmlRpcException;
@@ -96,7 +96,7 @@ public class IntegrationWithCDRControllerIntegrationTest extends AbstractContext
 
     @Test
     public void parametersAreAccessibleViaModelForMenu() throws Exception {
-        WebQMenuParameters parameters = (WebQMenuParameters) requestToWebQMenuAndGetModelAttribute("parameters");
+        CdrRequest parameters = (CdrRequest) requestToWebQMenuAndGetModelAttribute("parameters");
 
         assertThat(parameters.getEnvelopeUrl(), equalTo(ENVELOPE_URL));
     }

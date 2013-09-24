@@ -20,11 +20,11 @@
  */
 package eionet.webq.web.controller.cdr;
 
-import eionet.webq.converter.RequestToWebQMenuParameters;
+import eionet.webq.converter.CdrRequestConverter;
 import eionet.webq.dao.orm.ProjectFile;
 import eionet.webq.dao.orm.UploadedFile;
 import eionet.webq.dao.orm.UserFile;
-import eionet.webq.dto.WebQMenuParameters;
+import eionet.webq.dto.CdrRequest;
 import eionet.webq.service.CDREnvelopeService;
 import eionet.webq.service.FileNotAvailableException;
 import eionet.webq.service.UserFileService;
@@ -51,10 +51,10 @@ import static eionet.webq.service.CDREnvelopeService.XmlFile;
 public class IntegrationWithCDRController {
 
     /**
-     * Converts request to WebQMenuParameters.
+     * Converts request to CdrRequest.
      */
     @Autowired
-    private RequestToWebQMenuParameters converter;
+    private CdrRequestConverter converter;
     /**
      * CDR envelope service.
      */
@@ -82,7 +82,7 @@ public class IntegrationWithCDRController {
      */
     @RequestMapping("/WebQMenu")
     public String menu(HttpServletRequest request, Model model) throws FileNotAvailableException {
-        WebQMenuParameters parameters = converter.convert(request);
+        CdrRequest parameters = converter.convert(request);
         MultiValueMap<String, XmlFile> xmlFiles = envelopeService.getXmlFiles(parameters);
         Collection<String> requiredSchemas =
                 StringUtils.isNotEmpty(parameters.getSchema()) ? Arrays.asList(parameters.getSchema()) : xmlFiles.keySet();
@@ -97,6 +97,12 @@ public class IntegrationWithCDRController {
         model.addAttribute("parameters", parameters);
         model.addAttribute("xmlFiles", xmlFiles);
         model.addAttribute("availableWebForms", webForms);
+        return "deliver_menu";
+    }
+
+    @RequestMapping("/WebQEdit")
+    public String edit() {
+
         return "deliver_menu";
     }
 
@@ -129,7 +135,7 @@ public class IntegrationWithCDRController {
      * @return true iff there are only 1 file and schema with equal xml schema
      */
     private boolean hasOnlyOneFileAndWebFormForSameSchema(MultiValueMap<String, XmlFile> xmlFiles,
-            Collection<ProjectFile> webForms, WebQMenuParameters parameters) {
+            Collection<ProjectFile> webForms, CdrRequest parameters) {
         if (webForms.size() == 1 && xmlFiles.size() == 1 && !parameters.isNewFormCreationAllowed()) {
             List<XmlFile> filesForSchema = xmlFiles.get(webForms.iterator().next().getXmlSchema());
             if (filesForSchema != null && filesForSchema.size() == 1) {
@@ -148,7 +154,7 @@ public class IntegrationWithCDRController {
      * @return true iff only one form, no files and creation of new files allowed.
      */
     private boolean oneWebFormAndNoFilesButNewFileCreationIsAllowed(MultiValueMap<String, XmlFile> xmlFiles,
-            Collection<ProjectFile> webForms, WebQMenuParameters parameters) {
+            Collection<ProjectFile> webForms, CdrRequest parameters) {
         return webForms.size() == 1 && xmlFiles.size() == 0 && parameters.isNewFormCreationAllowed();
     }
 

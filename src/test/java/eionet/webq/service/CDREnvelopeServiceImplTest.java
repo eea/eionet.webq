@@ -20,7 +20,7 @@
  */
 package eionet.webq.service;
 
-import eionet.webq.dto.WebQMenuParameters;
+import eionet.webq.dto.CdrRequest;
 import org.apache.xmlrpc.XmlRpcException;
 import org.apache.xmlrpc.client.XmlRpcClient;
 import org.apache.xmlrpc.client.XmlRpcClientConfig;
@@ -55,7 +55,7 @@ import static org.mockito.Mockito.when;
  */
 public class CDREnvelopeServiceImplTest {
 
-    private WebQMenuParameters parametersWithUrl = createWebQMenuParameters("http://cdr-envelope-service.eu");
+    private CdrRequest parametersWithUrl = createWebQMenuParameters("http://cdr-envelope-service.eu");
     @InjectMocks
     private CDREnvelopeServiceImpl cdrEnvelopeService;
     @Mock
@@ -79,16 +79,16 @@ public class CDREnvelopeServiceImplTest {
 
     @Test
     public void setAuthorizationInfoIfPresent() throws Exception {
-        WebQMenuParameters webQMenuParameters =
+        CdrRequest cdrRequest =
                 createWebQMenuParametersWithAuthorization("http://cdr-envelope-service.eu", "username", "password");
-        cdrEnvelopeService.getXmlFiles(webQMenuParameters);
+        cdrEnvelopeService.getXmlFiles(cdrRequest);
 
         ArgumentCaptor<XmlRpcClientConfigImpl> configCaptor = ArgumentCaptor.forClass(XmlRpcClientConfigImpl.class);
         verify(xmlRpcClient).execute(configCaptor.capture(), anyString(), anyList());
         XmlRpcClientConfigImpl config = configCaptor.getValue();
 
-        assertThat(config.getBasicUserName(), equalTo(webQMenuParameters.getUserName()));
-        assertThat(config.getBasicPassword(), equalTo(webQMenuParameters.getPassword()));
+        assertThat(config.getBasicUserName(), equalTo(cdrRequest.getUserName()));
+        assertThat(config.getBasicPassword(), equalTo(cdrRequest.getPassword()));
     }
 
     @Test
@@ -134,19 +134,19 @@ public class CDREnvelopeServiceImplTest {
         return when(xmlRpcClient.execute(any(XmlRpcClientConfig.class), anyString(), anyList()));
     }
 
-    private WebQMenuParameters createWebQMenuParameters(String url) {
-        WebQMenuParameters webQMenuParameters = new WebQMenuParameters();
-        webQMenuParameters.setEnvelopeUrl(url);
-        return webQMenuParameters;
+    private CdrRequest createWebQMenuParameters(String url) {
+        CdrRequest cdrRequest = new CdrRequest();
+        cdrRequest.setEnvelopeUrl(url);
+        return cdrRequest;
     }
 
-    private WebQMenuParameters createWebQMenuParametersWithAuthorization(String url, String userName, String password) {
-        WebQMenuParameters webQMenuParameters = new WebQMenuParameters();
-        webQMenuParameters.setEnvelopeUrl(url);
-        webQMenuParameters.setAuthorizationSet(true);
-        webQMenuParameters.setUserName(userName);
-        webQMenuParameters.setPassword(password);
-        return webQMenuParameters;
+    private CdrRequest createWebQMenuParametersWithAuthorization(String url, String userName, String password) {
+        CdrRequest cdrRequest = new CdrRequest();
+        cdrRequest.setEnvelopeUrl(url);
+        cdrRequest.setAuthorizationSet(true);
+        cdrRequest.setUserName(userName);
+        cdrRequest.setPassword(password);
+        return cdrRequest;
     }
     
 }

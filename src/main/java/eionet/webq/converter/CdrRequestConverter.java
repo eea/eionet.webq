@@ -20,7 +20,7 @@
  */
 package eionet.webq.converter;
 
-import eionet.webq.dto.WebQMenuParameters;
+import eionet.webq.dto.CdrRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.net.util.Base64;
 import org.springframework.core.convert.converter.Converter;
@@ -29,20 +29,20 @@ import org.springframework.stereotype.Component;
 import javax.servlet.http.HttpServletRequest;
 
 /**
- * Converts {@link javax.servlet.http.HttpServletRequest} to {@link eionet.webq.dto.WebQMenuParameters}.
+ * Converts {@link javax.servlet.http.HttpServletRequest} to {@link eionet.webq.dto.CdrRequest}.
  *
  * @see Converter
  */
 @Component
-public class RequestToWebQMenuParameters implements Converter<HttpServletRequest, WebQMenuParameters> {
+public class CdrRequestConverter implements Converter<HttpServletRequest, CdrRequest> {
     /**
      * Basic authorization prefix.
      */
     private static final String BASIC_AUTHORIZATION_PREFIX = "Basic ";
 
     @Override
-    public WebQMenuParameters convert(HttpServletRequest request) {
-        WebQMenuParameters parameters = new WebQMenuParameters();
+    public CdrRequest convert(HttpServletRequest request) {
+        CdrRequest parameters = new CdrRequest();
         parameters.setEnvelopeUrl(request.getParameter("envelope"));
         parameters.setSchema(request.getParameter("schema"));
         parameters.setLanguage(request.getParameter("language"));
@@ -63,7 +63,7 @@ public class RequestToWebQMenuParameters implements Converter<HttpServletRequest
      * @param parameters parameters.
      * @param credentials credentials.
      */
-    private void setAuthorizationDetails(WebQMenuParameters parameters, String[] credentials) {
+    private void setAuthorizationDetails(CdrRequest parameters, String[] credentials) {
         if (credentials.length != 2) {
             return;
         }

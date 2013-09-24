@@ -20,7 +20,7 @@
  */
 package eionet.webq.service;
 
-import eionet.webq.dto.WebQMenuParameters;
+import eionet.webq.dto.CdrRequest;
 import org.springframework.util.MultiValueMap;
 
 /**
@@ -32,7 +32,7 @@ public interface CDREnvelopeService {
      * @param parameters parameters
      * @return xml files grouped by xml schema
      */
-    MultiValueMap<String, XmlFile> getXmlFiles(WebQMenuParameters parameters);
+    MultiValueMap<String, XmlFile> getXmlFiles(CdrRequest parameters);
 
     /**
      * Envelope service xml file data.

@@ -20,7 +20,7 @@
  */
 package eionet.webq.converter;
 
-import eionet.webq.dto.WebQMenuParameters;
+import eionet.webq.dto.CdrRequest;
 import org.apache.commons.net.util.Base64;
 import org.junit.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -33,8 +33,8 @@ import static org.junit.Assert.assertTrue;
 
 /**
  */
-public class RequestToWebQMenuParametersTest {
-    private final RequestToWebQMenuParameters requestToWebQMenuParameters = new RequestToWebQMenuParameters();
+public class RequestToCdrRequestTest {
+    private final CdrRequestConverter cdrRequestConverter = new CdrRequestConverter();
     private MockHttpServletRequest request = new MockHttpServletRequest();
 
     @Test
@@ -46,7 +46,7 @@ public class RequestToWebQMenuParametersTest {
         request.addParameter("add", "true");
         request.addParameter("file_id", "new-file-name");
 
-        WebQMenuParameters convert = requestToWebQMenuParameters.convert(request);
+        CdrRequest convert = cdrRequestConverter.convert(request);
 
         assertThat(convert.getEnvelopeUrl(), equalTo(request.getParameter("envelope")));
         assertThat(convert.getSchema(), equalTo(request.getParameter("schema")));
@@ -58,7 +58,7 @@ public class RequestToWebQMenuParametersTest {
 
     @Test
     public void doesNotSetAuthorizationInfoIfNoAuthenticationHeaderInRequest() throws Exception {
-        WebQMenuParameters parameters = requestToWebQMenuParameters.convert(request);
+        CdrRequest parameters = cdrRequestConverter.convert(request);
 
         assertFalse(parameters.isAuthorizationSet());
         assertNull(parameters.getUserName());
@@ -69,7 +69,7 @@ public class RequestToWebQMenuParametersTest {
     public void doesNotSetAuthorizationInfoIfAuthorizationHeaderValueIsNotBASIC() throws Exception {
         request.setParameter("Authorization", "FORM 123");
 
-        WebQMenuParameters parameters = requestToWebQMenuParameters.convert(request);
+        CdrRequest parameters = cdrRequestConverter.convert(request);
 
         assertFalse(parameters.isAuthorizationSet());
         assertNull(parameters.getUserName());
@@ -80,7 +80,7 @@ public class RequestToWebQMenuParametersTest {
     public void setUserNameAndPasswordIfAuthorizationHeaderIsBASIC() throws Exception {
         request.addHeader("Authorization", "Basic " + new String(Base64.encodeBase64("username:password".getBytes())));
 
-        WebQMenuParameters parameters = requestToWebQMenuParameters.convert(request);
+        CdrRequest parameters = cdrRequestConverter.convert(request);
 
         assertTrue(parameters.isAuthorizationSet());
         assertThat(parameters.getUserName(), equalTo("username"));

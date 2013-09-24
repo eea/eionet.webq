@@ -20,9 +20,9 @@
  */
 package eionet.webq.web.controller.cdr;
 
-import eionet.webq.converter.RequestToWebQMenuParameters;
+import eionet.webq.converter.CdrRequestConverter;
 import eionet.webq.dao.orm.ProjectFile;
-import eionet.webq.dto.WebQMenuParameters;
+import eionet.webq.dto.CdrRequest;
 import eionet.webq.service.CDREnvelopeService;
 import eionet.webq.service.FileNotAvailableException;
 import eionet.webq.service.UserFileService;
@@ -64,12 +64,12 @@ public class IntegrationWithCDRControllerTest {
     @Mock
     UserFileService userFileService;
     @Mock
-    RequestToWebQMenuParameters converter;
+    CdrRequestConverter converter;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        when(converter.convert(any(HttpServletRequest.class))).thenReturn(new WebQMenuParameters());
+        when(converter.convert(any(HttpServletRequest.class))).thenReturn(new CdrRequest());
     }
 
     @Test
@@ -119,7 +119,7 @@ public class IntegrationWithCDRControllerTest {
         getXmlFilesWillReturnFilesAmountOf(1);
         thereWillBeWebFormsAmountOf(1);
 
-        WebQMenuParameters menuParameters = new WebQMenuParameters();
+        CdrRequest menuParameters = new CdrRequest();
         menuParameters.setNewFormCreationAllowed(true);
         when(converter.convert(any(HttpServletRequest.class))).thenReturn(menuParameters);
 
@@ -140,7 +140,7 @@ public class IntegrationWithCDRControllerTest {
         getXmlFilesWillReturnFilesAmountOf(0);
         thereWillBeWebFormsAmountOf(1);
         when(webFormService.findActiveWebFormById(anyInt())).thenReturn(new ProjectFile());
-        WebQMenuParameters menuParameters = new WebQMenuParameters();
+        CdrRequest menuParameters = new CdrRequest();
         menuParameters.setNewFormCreationAllowed(true);
         when(converter.convert(any(HttpServletRequest.class))).thenReturn(menuParameters);
 
@@ -163,7 +163,7 @@ public class IntegrationWithCDRControllerTest {
 
     private void getXmlFilesWillReturnFilesAmountOf(int amount) {
         LinkedMultiValueMap<String, XmlFile> files = new LinkedMultiValueMap<String, XmlFile>();
-        when(envelopeService.getXmlFiles(any(WebQMenuParameters.class))).thenReturn(files);
+        when(envelopeService.getXmlFiles(any(CdrRequest.class))).thenReturn(files);
 
         for (int i = 0; i < amount; i++) {
             files.add(XML_SCHEMA, new XmlFile(null, null, XML_SCHEMA));
