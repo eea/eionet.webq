@@ -53,7 +53,6 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyCollectionOf;
 import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -197,7 +196,7 @@ public class IntegrationWithCDRControllerTest {
         controller.webQEdit(new MockHttpServletRequest(), model);
 
         ArgumentCaptor<UserFile> userFileArgument = ArgumentCaptor.forClass(UserFile.class);
-        verify(userFileService).saveWithContentFromRemoteLocation(userFileArgument.capture(), anyString());
+        verify(userFileService).save(userFileArgument.capture());
         assertThat(userFileArgument.getValue().getName(), equalTo(fileName));
     }
 

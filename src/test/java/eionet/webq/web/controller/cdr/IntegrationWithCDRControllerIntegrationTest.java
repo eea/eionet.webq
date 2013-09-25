@@ -51,6 +51,7 @@ import java.util.regex.Pattern;
 import static eionet.webq.service.CDREnvelopeService.XmlFile;
 import static java.util.Collections.singletonMap;
 import static org.hamcrest.core.IsEqual.equalTo;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
@@ -75,7 +76,8 @@ public class IntegrationWithCDRControllerIntegrationTest extends AbstractContext
     @Autowired
     private UserFileStorage userFileStorage;
 
-    public static final String ENVELOPE_URL = "http://cdr.envelope.eu";
+    private static final String ENVELOPE_URL = "http://cdr.envelope.eu";
+    private static final String XML_SCHEMA = "cdr-specific-schema";
 
     @Test
     public void menuReturnsViewName() throws Exception {
@@ -85,13 +87,12 @@ public class IntegrationWithCDRControllerIntegrationTest extends AbstractContext
     @SuppressWarnings("unchecked")
     @Test
     public void expectXmlFilesSetForMenu() throws Exception {
-        String xmlSchema = "schema";
-        rpcClientWillReturnFileForSchema(xmlSchema);
+        rpcClientWillReturnFileForSchema(XML_SCHEMA);
 
         MultiValueMap<String, XmlFile> files = (MultiValueMap<String, XmlFile>) requestToWebQMenuAndGetModelAttribute("xmlFiles");
 
         assertThat(files.size(), equalTo(1));
-        assertTrue(files.containsKey(xmlSchema));
+        assertTrue(files.containsKey(XML_SCHEMA));
     }
 
     @Test
@@ -104,11 +105,9 @@ public class IntegrationWithCDRControllerIntegrationTest extends AbstractContext
     @SuppressWarnings("unchecked")
     @Test
     public void availableWebFormsAreAccessibleViaModelForMenu() throws Exception {
-        String xmlSchema = "cdr-specific-schema";
-
-        rpcClientWillReturnFileForSchema(xmlSchema);
-        saveAvailableWebFormWithSchema(xmlSchema);
-        saveAvailableWebFormWithSchema(xmlSchema);
+        rpcClientWillReturnFileForSchema(XML_SCHEMA);
+        saveAvailableWebFormWithSchema(XML_SCHEMA);
+        saveAvailableWebFormWithSchema(XML_SCHEMA);
 
         Collection<ProjectFile> webForms = (Collection<ProjectFile>) requestToWebQMenuAndGetModelAttribute("availableWebForms");
 
@@ -122,23 +121,25 @@ public class IntegrationWithCDRControllerIntegrationTest extends AbstractContext
         when(restOperations.getForEntity(anyString(), any(Class.class)))
                 .thenReturn(new ResponseEntity<byte[]>(fileContent, HttpStatus.OK));
 
-        int formId = saveAvailableWebFormWithSchema("schema");
+        String fileName = "file.xml";
+        int formId = saveAvailableWebFormWithSchema(XML_SCHEMA);
 
-        MvcResult mvcResult = mvc().perform(post("/cdr/edit/file").param("formId", String.valueOf(formId)).param("fileName", "file.xml")
+        MvcResult mvcResult = mvc().perform(post("/cdr/edit/file").param("formId", String.valueOf(formId)).param("fileName", fileName)
                 .param("remoteFileUrl", "http://remote-file.url").session(session))
                 .andExpect(status().isFound()).andReturn();
 
         String redirectedUrl = mvcResult.getResponse().getRedirectedUrl();
 
         UserFile file = userFileStorage.findFile(extractFileIdFromXFormRedirectUrl(redirectedUrl), session.getId());
-        assertThat(file.getContent(), equalTo(fileContent));
+        assertNull(file.getContent());
+        assertThat(file.getName(), equalTo(fileName));
+        assertThat(file.getXmlSchema(), equalTo(XML_SCHEMA));
     }
 
     @Test
     public void ifOnlyOneFileAndWebFormAvailableDoRedirectToEdit() throws Exception {
-        String xmlSchema = "schema";
-        rpcClientWillReturnFileForSchema(xmlSchema);
-        saveAvailableWebFormWithSchema(xmlSchema);
+        rpcClientWillReturnFileForSchema(XML_SCHEMA);
+        saveAvailableWebFormWithSchema(XML_SCHEMA);
 
         MvcResult mvcResult =
                 mvc().perform(post("/WebQMenu").param("envelope", ENVELOPE_URL)).andExpect(status().isFound()).andReturn();
