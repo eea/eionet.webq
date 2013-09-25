@@ -2,3 +2,8 @@
 config/local.properties
 target/*
 webq2.iml
+/.checkstyle
+/.classpath
+/.project
+*.cmd
+/.settings
