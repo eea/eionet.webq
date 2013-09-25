@@ -67,6 +67,10 @@ public class CdrRequest {
      * XML file title.
      */
     private String instanceTitle;
+    /**
+     * Additional parameters passed with this request.
+     */
+    private String additionalParametersAsQueryString;
 
     public String getEnvelopeUrl() {
         return envelopeUrl;
@@ -154,5 +158,13 @@ public class CdrRequest {
 
     public void setInstanceTitle(String instanceTitle) {
         this.instanceTitle = instanceTitle;
+    }
+
+    public String getAdditionalParametersAsQueryString() {
+        return additionalParametersAsQueryString;
+    }
+
+    public void setAdditionalParametersAsQueryString(String additionalParametersAsQueryString) {
+        this.additionalParametersAsQueryString = additionalParametersAsQueryString;
     }
 }

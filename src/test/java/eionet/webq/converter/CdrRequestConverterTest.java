@@ -90,5 +90,27 @@ public class CdrRequestConverterTest {
         assertThat(parameters.getUserName(), equalTo("username"));
         assertThat(parameters.getPassword(), equalTo("password"));
     }
+
+    @Test
+    public void additionalParametersStringWillNotContainWebQParameters() throws Exception {
+        request.addParameter("instance", "instance");
+        request.addParameter("country", "ee");
+        CdrRequest parameters = cdrRequestConverter.convert(request);
+        assertThat(parameters.getAdditionalParametersAsQueryString(), equalTo("&country=ee"));
+    }
+
+    @Test
+    public void additionalParametersStringWillBePrepared() throws Exception {
+        request.addParameter("country", "ee");
+        request.addParameter("reporter", "reporter");
+        CdrRequest parameters = cdrRequestConverter.convert(request);
+        assertThat(parameters.getAdditionalParametersAsQueryString(), equalTo("&country=ee&reporter=reporter"));
+    }
+
+    @Test
+    public void additionalParametersAreEmptyIfNoSuchParameters() throws Exception {
+        CdrRequest parameters = cdrRequestConverter.convert(request);
+        assertThat(parameters.getAdditionalParametersAsQueryString(), equalTo(""));
+    }
 }
 

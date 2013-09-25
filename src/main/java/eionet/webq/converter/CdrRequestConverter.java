@@ -27,6 +27,10 @@ import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * Converts {@link javax.servlet.http.HttpServletRequest} to {@link eionet.webq.dto.CdrRequest}.
@@ -41,7 +45,8 @@ public class CdrRequestConverter implements Converter<HttpServletRequest, CdrReq
     private static final String BASIC_AUTHORIZATION_PREFIX = "Basic ";
 
     @Override
-    public CdrRequest convert(HttpServletRequest request) {
+    public CdrRequest convert(HttpServletRequest httpRequest) {
+        QueriedParametersTracker request = new QueriedParametersTracker(httpRequest);
         CdrRequest parameters = new CdrRequest();
         parameters.setEnvelopeUrl(request.getParameter("envelope"));
         parameters.setSchema(request.getParameter("schema"));
@@ -52,11 +57,20 @@ public class CdrRequestConverter implements Converter<HttpServletRequest, CdrReq
         parameters.setInstanceUrl(request.getParameter("instance"));
         parameters.setInstanceTitle(request.getParameter("instance_title"));
 
-        String authorizationHeader = request.getHeader("Authorization");
+        String authorizationHeader = httpRequest.getHeader("Authorization");
         if (hasBasicAuthorization(authorizationHeader)) {
             setAuthorizationDetails(parameters, extractCredentialsFromBasicAuthorization(authorizationHeader));
         }
+        parameters.setAdditionalParametersAsQueryString(createQueryString(request.getNotReadParametersWithValues()));
         return parameters;
+    }
+
+    private String createQueryString(Map<String, String> notReadParametersWithValues) {
+        StringBuilder builder = new StringBuilder();
+        for (Map.Entry<String, String> entry : notReadParametersWithValues.entrySet()) {
+            builder.append('&').append(entry.getKey()).append('=').append(entry.getValue());
+        }
+        return builder.toString();
     }
 
     /**
@@ -94,5 +108,29 @@ public class CdrRequestConverter implements Converter<HttpServletRequest, CdrReq
      */
     private boolean hasBasicAuthorization(String authorizationHeader) {
         return StringUtils.isNotEmpty(authorizationHeader) && authorizationHeader.startsWith(BASIC_AUTHORIZATION_PREFIX);
+    }
+
+    private static class QueriedParametersTracker {
+        private HttpServletRequest request;
+        private Collection<String> parametersRead = new ArrayList<String>();
+
+        private QueriedParametersTracker(HttpServletRequest request) {
+            this.request = request;
+        }
+
+        public String getParameter(String parameterName) {
+            parametersRead.add(parameterName);
+            return request.getParameter(parameterName);
+        }
+
+        public Map<String, String> getNotReadParametersWithValues() {
+            Map<String, String> notReadParametersWithValues = new TreeMap<String, String>();
+            for (String parameterName : request.getParameterMap().keySet()) {
+                if (!parametersRead.contains(parameterName)) {
+                    notReadParametersWithValues.put(parameterName, request.getParameter(parameterName));
+                }
+            }
+            return notReadParametersWithValues;
+        }
     }
 }
