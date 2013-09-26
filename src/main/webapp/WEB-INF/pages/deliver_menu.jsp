@@ -26,5 +26,7 @@
                 </c:forEach>
             </c:forEach>
         </c:if>
+        <br />
+        <a href="${parameters.envelopeUrl}">Back to envelope</a>
     </c:otherwise>
 </c:choose>
