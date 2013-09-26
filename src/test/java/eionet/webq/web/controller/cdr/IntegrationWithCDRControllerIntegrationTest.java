@@ -123,6 +123,10 @@ public class IntegrationWithCDRControllerIntegrationTest extends AbstractContext
 
         String fileName = "file.xml";
         int formId = saveAvailableWebFormWithSchema(XML_SCHEMA);
+        CdrRequest request = new CdrRequest();
+        request.setNewFileName(fileName);
+        request.setAdditionalParametersAsQueryString("");
+        session.setAttribute(IntegrationWithCDRController.LATEST_CDR_REQUEST, request);
 
         MvcResult mvcResult = mvc().perform(post("/cdr/edit/file").param("formId", String.valueOf(formId)).param("fileName", fileName)
                 .param("remoteFileUrl", "http://remote-file.url").session(session))

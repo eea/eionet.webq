@@ -47,6 +47,7 @@ public class CdrRequestConverterTest {
         request.addParameter("file_id", "new-file-name");
         request.addParameter("instance", "http://instance.url");
         request.addParameter("instance_title", "instance title");
+        request.setContextPath("/contextPath");
 
         CdrRequest cdrRequest = cdrRequestConverter.convert(request);
 
@@ -58,6 +59,7 @@ public class CdrRequestConverterTest {
         assertThat(cdrRequest.getNewFileName(), equalTo(request.getParameter("file_id")));
         assertThat(cdrRequest.getInstanceUrl(), equalTo(request.getParameter("instance")));
         assertThat(cdrRequest.getInstanceTitle(), equalTo(request.getParameter("instance_title")));
+        assertThat(cdrRequest.getContextPath(), equalTo(request.getContextPath()));
     }
 
     @Test

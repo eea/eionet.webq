@@ -47,6 +47,7 @@ public class CdrRequestConverter implements Converter<HttpServletRequest, CdrReq
         QueriedParametersTracker parametersTracker = new QueriedParametersTracker(httpRequest);
 
         CdrRequest parameters = new CdrRequest();
+        parameters.setContextPath(httpRequest.getContextPath());
         parameters.setEnvelopeUrl(parametersTracker.getParameter("envelope"));
         parameters.setSchema(parametersTracker.getParameter("schema"));
         parameters.setLanguage(parametersTracker.getParameter("language"));

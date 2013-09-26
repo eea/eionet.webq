@@ -38,6 +38,7 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.ui.Model;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
@@ -46,7 +47,9 @@ import java.util.Collections;
 import java.util.List;
 
 import static eionet.webq.service.CDREnvelopeService.XmlFile;
+import static eionet.webq.web.controller.cdr.IntegrationWithCDRController.WEB_FORM_PARAMETERS;
 import static org.hamcrest.core.IsEqual.equalTo;
+import static org.hamcrest.core.StringContains.containsString;
 import static org.hamcrest.core.StringStartsWith.startsWith;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
@@ -61,6 +64,7 @@ import static org.mockito.Mockito.when;
  */
 public class IntegrationWithCDRControllerTest {
     private static final String XML_SCHEMA = "schema";
+    private final MockHttpServletRequest mockRequest = new MockHttpServletRequest();
     @InjectMocks
     IntegrationWithCDRController controller;
     @Mock
@@ -72,9 +76,10 @@ public class IntegrationWithCDRControllerTest {
     @Mock
     CdrRequestConverter converter;
     @Mock
-    CdrRequest cdrRequest;
-    @Mock
     Model model;
+    @Mock
+    RedirectAttributes redirectAttributes;
+    CdrRequest cdrRequest = new CdrRequest();
 
     @Before
     public void setUp() throws Exception {
@@ -129,9 +134,7 @@ public class IntegrationWithCDRControllerTest {
         getXmlFilesWillReturnFilesAmountOf(1);
         thereWillBeWebFormsAmountOf(1);
 
-        CdrRequest menuParameters = new CdrRequest();
-        menuParameters.setNewFormCreationAllowed(true);
-        when(converter.convert(any(HttpServletRequest.class))).thenReturn(menuParameters);
+        cdrRequest.setNewFormCreationAllowed(true);
 
         assertNoRedirectOnMenuCall();
     }
@@ -142,7 +145,7 @@ public class IntegrationWithCDRControllerTest {
         thereWillBeWebFormsAmountOf(1);
         when(webFormService.findActiveWebFormById(anyInt())).thenReturn(new ProjectFile());
 
-        assertThat(controller.webQMenu(new MockHttpServletRequest(), model), startsWith("redirect:/xform/"));
+        assertThat(controller.webQMenu(mockRequest, model, redirectAttributes), startsWith("redirect:/xform/"));
     }
 
     @Test
@@ -150,24 +153,22 @@ public class IntegrationWithCDRControllerTest {
         getXmlFilesWillReturnFilesAmountOf(0);
         thereWillBeWebFormsAmountOf(1);
         when(webFormService.findActiveWebFormById(anyInt())).thenReturn(new ProjectFile());
-        CdrRequest menuParameters = new CdrRequest();
-        menuParameters.setNewFormCreationAllowed(true);
-        when(converter.convert(any(HttpServletRequest.class))).thenReturn(menuParameters);
+        cdrRequest.setNewFormCreationAllowed(true);
 
-        assertThat(controller.webQMenu(new MockHttpServletRequest(), model), startsWith("redirect:/startWebform"));
+        assertThat(controller.webQMenu(mockRequest, model, redirectAttributes), startsWith("redirect:/startWebform"));
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void webQEditThrowsExceptionIfNoXmlSchemaSpecified() throws Exception {
-        controller.webQEdit(new MockHttpServletRequest(), model);
+        controller.webQEdit(mockRequest, model);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void webQEditThrowsExceptionIfNoWebFormsFoundForXmlSchemaRequested() throws Exception {
         thereWillBeWebFormsAmountOf(0);
-        when(cdrRequest.getSchema()).thenReturn(XML_SCHEMA);
+        cdrRequest.setSchema(XML_SCHEMA);
 
-        controller.webQEdit(new MockHttpServletRequest(), model);
+        controller.webQEdit(mockRequest, model);
     }
 
     @Test
@@ -175,7 +176,7 @@ public class IntegrationWithCDRControllerTest {
         thereWillBeWebFormsAmountOf(1);
         cdrRequestWillContainXmlSchemaAndInstanceUrl();
 
-        assertThat(controller.webQEdit(new MockHttpServletRequest(), model), startsWith("redirect:/xform/"));
+        assertThat(controller.webQEdit(mockRequest, model), startsWith("redirect:/xform/"));
     }
 
     @Test
@@ -183,21 +184,41 @@ public class IntegrationWithCDRControllerTest {
         thereWillBeWebFormsAmountOf(2);
         cdrRequestWillContainXmlSchemaAndInstanceUrl();
 
-        assertThat(controller.webQEdit(new MockHttpServletRequest(), model), equalTo("deliver_menu"));
+        assertThat(controller.webQEdit(mockRequest, model), equalTo("deliver_menu"));
     }
 
     @Test
     public void webQEditWillSaveFileWithNameStrippedFromInstanceUrl() throws Exception {
         thereWillBeWebFormsAmountOf(1);
-        when(cdrRequest.getSchema()).thenReturn(XML_SCHEMA);
+        cdrRequest.setSchema(XML_SCHEMA);
         String fileName = "file.name";
-        when(cdrRequest.getInstanceUrl()).thenReturn("http://instance.url/" + fileName);
+        cdrRequest.setInstanceUrl("http://instance.url/" + fileName);
 
-        controller.webQEdit(new MockHttpServletRequest(), model);
+        controller.webQEdit(mockRequest, model);
 
         ArgumentCaptor<UserFile> userFileArgument = ArgumentCaptor.forClass(UserFile.class);
         verify(userFileService).save(userFileArgument.capture());
         assertThat(userFileArgument.getValue().getName(), equalTo(fileName));
+    }
+
+    @Test
+    public void ifNewFileNameIsSpecifiedInCdrRequestUseThatNameWhenRedirectingToNewFormCreation() throws Exception {
+        cdrRequest.setNewFileName("newName");
+        prepareRedirectToNewWebFormCase();
+
+        String redirectString = controller.webQMenu(mockRequest, model, redirectAttributes);
+
+        assertThat(redirectString, containsString("fileName=" + cdrRequest.getNewFileName()));
+    }
+
+    @Test
+    public void flashAttributeWithWebFormAdditionalParametersWillBeSetWhenRedirectingToNewForm() throws Exception {
+        prepareRedirectToNewWebFormCase();
+        cdrRequest.setAdditionalParametersAsQueryString("&additional=parameters");
+
+        controller.webQMenu(mockRequest, model, redirectAttributes);
+
+        verify(redirectAttributes).addFlashAttribute(WEB_FORM_PARAMETERS, cdrRequest.getAdditionalParametersAsQueryString());
     }
 
     @Test
@@ -206,7 +227,7 @@ public class IntegrationWithCDRControllerTest {
         thereWillBeWebFormsAmountOf(2);
         cdrRequestWillContainXmlSchemaAndInstanceUrl();
 
-        controller.webQEdit(new MockHttpServletRequest(), model);
+        controller.webQEdit(mockRequest, model);
         ArgumentCaptor<MultiValueMap> xmlFilesArgument = ArgumentCaptor.forClass(MultiValueMap.class);
         verify(model).addAttribute(eq("xmlFiles"), xmlFilesArgument.capture());
         MultiValueMap<String, XmlFile> xmlFiles = xmlFilesArgument.getValue();
@@ -217,9 +238,15 @@ public class IntegrationWithCDRControllerTest {
         assertThat(xmlFilesForSchema.get(0).getFullName(), equalTo(cdrRequest.getInstanceUrl()));
     }
 
+    private void prepareRedirectToNewWebFormCase() {
+        cdrRequest.setNewFormCreationAllowed(true);
+        thereWillBeWebFormsAmountOf(1);
+        getXmlFilesWillReturnFilesAmountOf(0);
+    }
+
     private void cdrRequestWillContainXmlSchemaAndInstanceUrl() {
-        when(cdrRequest.getSchema()).thenReturn(XML_SCHEMA);
-        when(cdrRequest.getInstanceUrl()).thenReturn("http://instance.url");
+        cdrRequest.setSchema(XML_SCHEMA);
+        cdrRequest.setInstanceUrl("http://instance.url");
     }
 
     private void thereWillBeWebFormsAmountOf(int amount) {
@@ -233,7 +260,7 @@ public class IntegrationWithCDRControllerTest {
     }
 
     private void assertNoRedirectOnMenuCall() throws FileNotAvailableException {
-        assertThat(controller.webQMenu(new MockHttpServletRequest(), model), equalTo("deliver_menu"));
+        assertThat(controller.webQMenu(mockRequest, model, redirectAttributes), equalTo("deliver_menu"));
     }
 
     private void getXmlFilesWillReturnFilesAmountOf(int amount) {

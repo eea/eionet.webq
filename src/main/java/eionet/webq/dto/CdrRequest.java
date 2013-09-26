@@ -71,6 +71,10 @@ public class CdrRequest {
      * Additional parameters passed with this request.
      */
     private String additionalParametersAsQueryString;
+    /**
+     * Request context path.
+     */
+    private String contextPath;
 
     public String getEnvelopeUrl() {
         return envelopeUrl;
@@ -166,5 +170,13 @@ public class CdrRequest {
 
     public void setAdditionalParametersAsQueryString(String additionalParametersAsQueryString) {
         this.additionalParametersAsQueryString = additionalParametersAsQueryString;
+    }
+
+    public String getContextPath() {
+        return contextPath;
+    }
+
+    public void setContextPath(String contextPath) {
+        this.contextPath = contextPath;
     }
 }
