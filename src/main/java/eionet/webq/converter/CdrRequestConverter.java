@@ -65,14 +65,6 @@ public class CdrRequestConverter implements Converter<HttpServletRequest, CdrReq
         return parameters;
     }
 
-    private String createQueryString(Map<String, String> notReadParametersWithValues) {
-        StringBuilder builder = new StringBuilder();
-        for (Map.Entry<String, String> entry : notReadParametersWithValues.entrySet()) {
-            builder.append('&').append(entry.getKey()).append('=').append(entry.getValue());
-        }
-        return builder.toString();
-    }
-
     /**
      * Set authorization details.
      *
@@ -110,19 +102,60 @@ public class CdrRequestConverter implements Converter<HttpServletRequest, CdrReq
         return StringUtils.isNotEmpty(authorizationHeader) && authorizationHeader.startsWith(BASIC_AUTHORIZATION_PREFIX);
     }
 
-    private static class QueriedParametersTracker {
+    /**
+     * Produces http request compatible query string part.
+     * E.g. &foo=bar&number=42
+     *
+     * @param notReadParametersWithValues parameters with values to be transformed to such string
+     * @return query string part
+     */
+    private String createQueryString(Map<String, String> notReadParametersWithValues) {
+        StringBuilder builder = new StringBuilder();
+        for (Map.Entry<String, String> entry : notReadParametersWithValues.entrySet()) {
+            builder.append('&').append(entry.getKey()).append('=').append(entry.getValue());
+        }
+        return builder.toString();
+    }
+
+    /**
+     * Class wraps {@link javax.servlet.http.HttpServletRequest} to keep track of parameters queried.
+     */
+    private final class QueriedParametersTracker {
+        /**
+         * Http request.
+         */
         private HttpServletRequest request;
+        /**
+         * Parameters that were queried.
+         */
         private Collection<String> parametersRead = new ArrayList<String>();
 
+        /**
+         * Constructs new instance.
+         *
+         * @param request http request to be queried for parameters.
+         */
         private QueriedParametersTracker(HttpServletRequest request) {
             this.request = request;
         }
 
+        /**
+         * Returns parameter value from wrapped {@link javax.servlet.http.HttpServletRequest}.
+         * Remembers parameter name that was queried.
+         *
+         * @param parameterName parameter name
+         * @return parameter value
+         */
         public String getParameter(String parameterName) {
             parametersRead.add(parameterName);
             return request.getParameter(parameterName);
         }
 
+        /**
+         * Returns map of parameters and values that was not queried before.
+         *
+         * @return map of parameters with values, not queried previously.
+         */
         public Map<String, String> getNotReadParametersWithValues() {
             Map<String, String> notReadParametersWithValues = new TreeMap<String, String>();
             for (String parameterName : request.getParameterMap().keySet()) {

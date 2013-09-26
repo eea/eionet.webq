@@ -152,7 +152,8 @@ public class IntegrationWithCDRController {
      * @param model model
      * @return view name
      */
-    private String deliverMenu(Collection<ProjectFile> webForms, MultiValueMap<String, XmlFile> xmlFiles, CdrRequest parameters, Model model) {
+    private String deliverMenu(Collection<ProjectFile> webForms, MultiValueMap<String, XmlFile> xmlFiles, CdrRequest parameters,
+            Model model) {
         model.addAttribute("parameters", parameters);
         model.addAttribute("xmlFiles", xmlFiles);
         model.addAttribute("availableWebForms", webForms);
