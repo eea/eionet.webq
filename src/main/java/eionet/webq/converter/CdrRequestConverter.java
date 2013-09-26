@@ -29,8 +29,6 @@ import org.springframework.stereotype.Component;
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Map;
-import java.util.TreeMap;
 
 /**
  * Converts {@link javax.servlet.http.HttpServletRequest} to {@link eionet.webq.dto.CdrRequest}.
@@ -46,22 +44,23 @@ public class CdrRequestConverter implements Converter<HttpServletRequest, CdrReq
 
     @Override
     public CdrRequest convert(HttpServletRequest httpRequest) {
-        QueriedParametersTracker request = new QueriedParametersTracker(httpRequest);
+        QueriedParametersTracker parametersTracker = new QueriedParametersTracker(httpRequest);
+
         CdrRequest parameters = new CdrRequest();
-        parameters.setEnvelopeUrl(request.getParameter("envelope"));
-        parameters.setSchema(request.getParameter("schema"));
-        parameters.setLanguage(request.getParameter("language"));
-        parameters.setJavascriptEnabled(Boolean.valueOf(request.getParameter("JavaScript")));
-        parameters.setNewFormCreationAllowed(Boolean.valueOf(request.getParameter("add")));
-        parameters.setNewFileName(request.getParameter("file_id"));
-        parameters.setInstanceUrl(request.getParameter("instance"));
-        parameters.setInstanceTitle(request.getParameter("instance_title"));
+        parameters.setEnvelopeUrl(parametersTracker.getParameter("envelope"));
+        parameters.setSchema(parametersTracker.getParameter("schema"));
+        parameters.setLanguage(parametersTracker.getParameter("language"));
+        parameters.setJavascriptEnabled(Boolean.valueOf(parametersTracker.getParameter("JavaScript")));
+        parameters.setNewFormCreationAllowed(Boolean.valueOf(parametersTracker.getParameter("add")));
+        parameters.setNewFileName(parametersTracker.getParameter("file_id"));
+        parameters.setInstanceUrl(parametersTracker.getParameter("instance"));
+        parameters.setInstanceTitle(parametersTracker.getParameter("instance_title"));
 
         String authorizationHeader = httpRequest.getHeader("Authorization");
         if (hasBasicAuthorization(authorizationHeader)) {
             setAuthorizationDetails(parameters, extractCredentialsFromBasicAuthorization(authorizationHeader));
         }
-        parameters.setAdditionalParametersAsQueryString(createQueryString(request.getNotReadParametersWithValues()));
+        parameters.setAdditionalParametersAsQueryString(createQueryStringFromParametersNotRead(parametersTracker));
         return parameters;
     }
 
@@ -106,13 +105,15 @@ public class CdrRequestConverter implements Converter<HttpServletRequest, CdrReq
      * Produces http request compatible query string part.
      * E.g. &foo=bar&number=42
      *
-     * @param notReadParametersWithValues parameters with values to be transformed to such string
+     * @param parameters holder of all parameters with queried parameters tracking
      * @return query string part
      */
-    private String createQueryString(Map<String, String> notReadParametersWithValues) {
+    private String createQueryStringFromParametersNotRead(QueriedParametersTracker parameters) {
         StringBuilder builder = new StringBuilder();
-        for (Map.Entry<String, String> entry : notReadParametersWithValues.entrySet()) {
-            builder.append('&').append(entry.getKey()).append('=').append(entry.getValue());
+        for (String entry : parameters.getAllParameterNames()) {
+            if (parameters.isNotReadParameter(entry)) {
+                builder.append('&').append(entry).append('=').append(parameters.getParameter(entry));
+            }
         }
         return builder.toString();
     }
@@ -152,18 +153,17 @@ public class CdrRequestConverter implements Converter<HttpServletRequest, CdrReq
         }
 
         /**
-         * Returns map of parameters and values that was not queried before.
+         * Check whether parameter with such name were read.
          *
-         * @return map of parameters with values, not queried previously.
+         * @param parameterName parameter name
+         * @return is not parameter read
          */
-        public Map<String, String> getNotReadParametersWithValues() {
-            Map<String, String> notReadParametersWithValues = new TreeMap<String, String>();
-            for (String parameterName : request.getParameterMap().keySet()) {
-                if (!parametersRead.contains(parameterName)) {
-                    notReadParametersWithValues.put(parameterName, request.getParameter(parameterName));
-                }
-            }
-            return notReadParametersWithValues;
+        public boolean isNotReadParameter(String parameterName) {
+            return !parametersRead.contains(parameterName);
+        }
+
+        public Collection<String> getAllParameterNames() {
+            return request.getParameterMap().keySet();
         }
     }
 }
