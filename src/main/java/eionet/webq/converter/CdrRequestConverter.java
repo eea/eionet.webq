@@ -21,7 +21,6 @@
 package eionet.webq.converter;
 
 import eionet.webq.dto.CdrRequest;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.net.util.Base64;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
@@ -29,6 +28,9 @@ import org.springframework.stereotype.Component;
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.Collection;
+
+import static org.apache.commons.lang3.StringUtils.isEmpty;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 /**
  * Converts {@link javax.servlet.http.HttpServletRequest} to {@link eionet.webq.dto.CdrRequest}.
@@ -52,7 +54,15 @@ public class CdrRequestConverter implements Converter<HttpServletRequest, CdrReq
         parameters.setSchema(parametersTracker.getParameter("schema"));
         parameters.setNewFormCreationAllowed(Boolean.valueOf(parametersTracker.getParameter("add")));
         parameters.setNewFileName(parametersTracker.getParameter("file_id"));
-        parameters.setInstanceUrl(parametersTracker.getParameter("instance"));
+        String instanceUrl = parametersTracker.getParameter("instance");
+        parameters.setInstanceUrl(instanceUrl);
+        if (isNotEmpty(instanceUrl)) {
+            int fileNameSeparatorIndex = instanceUrl.lastIndexOf("/");
+            parameters.setInstanceName(instanceUrl.substring(fileNameSeparatorIndex + 1));
+            if (isEmpty(parameters.getEnvelopeUrl())) {
+                parameters.setEnvelopeUrl(instanceUrl.substring(0, fileNameSeparatorIndex));
+            }
+        }
         parameters.setInstanceTitle(parametersTracker.getParameter("instance_title"));
 
         String authorizationHeader = httpRequest.getHeader("Authorization");
@@ -97,7 +107,7 @@ public class CdrRequestConverter implements Converter<HttpServletRequest, CdrReq
      * @return is basic authorization is present
      */
     private boolean hasBasicAuthorization(String authorizationHeader) {
-        return StringUtils.isNotEmpty(authorizationHeader) && authorizationHeader.startsWith(BASIC_AUTHORIZATION_PREFIX);
+        return isNotEmpty(authorizationHeader) && authorizationHeader.startsWith(BASIC_AUTHORIZATION_PREFIX);
     }
 
     /**

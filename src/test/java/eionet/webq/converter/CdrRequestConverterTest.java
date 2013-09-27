@@ -91,7 +91,7 @@ public class CdrRequestConverterTest {
 
     @Test
     public void additionalParametersStringWillNotContainWebQParameters() throws Exception {
-        request.addParameter("instance", "instance");
+        request.addParameter("instance", "instance.url/file.xml");
         request.addParameter("country", "ee");
         CdrRequest parameters = cdrRequestConverter.convert(request);
         assertThat(parameters.getAdditionalParametersAsQueryString(), equalTo("&country=ee"));
@@ -109,6 +109,17 @@ public class CdrRequestConverterTest {
     public void additionalParametersAreEmptyIfNoSuchParameters() throws Exception {
         CdrRequest parameters = cdrRequestConverter.convert(request);
         assertThat(parameters.getAdditionalParametersAsQueryString(), equalTo(""));
+    }
+
+    @Test
+    public void splitInstanceUrlToEnvelopeAndInstanceName() throws Exception {
+        String fileName = "file.xml";
+        String envelopeUrl = "http://instance.url";
+        request.setParameter("instance", envelopeUrl + "/" + fileName);
+        CdrRequest convert = cdrRequestConverter.convert(request);
+
+        assertThat(convert.getInstanceName(), equalTo(fileName));
+        assertThat(convert.getEnvelopeUrl(), equalTo(envelopeUrl));
     }
 }
 

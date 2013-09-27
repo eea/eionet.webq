@@ -56,6 +56,10 @@ public class CdrRequest {
      */
     private String instanceUrl;
     /**
+     * Instance name stripped off instance url.
+     */
+    private String instanceName;
+    /**
      * XML file title.
      */
     private String instanceTitle;
@@ -130,6 +134,14 @@ public class CdrRequest {
 
     public void setInstanceUrl(String instanceUrl) {
         this.instanceUrl = instanceUrl;
+    }
+
+    public String getInstanceName() {
+        return instanceName;
+    }
+
+    public void setInstanceName(String instanceName) {
+        this.instanceName = instanceName;
     }
 
     public String getInstanceTitle() {
