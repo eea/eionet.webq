@@ -32,14 +32,6 @@ public class CdrRequest {
      */
     private String schema;
     /**
-     * Language requested.
-     */
-    private String language;
-    /**
-     * Javascript is enabled  in client browser.
-     */
-    private boolean javascriptEnabled;
-    /**
      * Allow to create new form.
      */
     private boolean newFormCreationAllowed;
@@ -90,22 +82,6 @@ public class CdrRequest {
 
     public void setSchema(String schema) {
         this.schema = schema;
-    }
-
-    public String getLanguage() {
-        return language;
-    }
-
-    public void setLanguage(String language) {
-        this.language = language;
-    }
-
-    public boolean isJavascriptEnabled() {
-        return javascriptEnabled;
-    }
-
-    public void setJavascriptEnabled(boolean javascriptEnabled) {
-        this.javascriptEnabled = javascriptEnabled;
     }
 
     public boolean isNewFormCreationAllowed() {

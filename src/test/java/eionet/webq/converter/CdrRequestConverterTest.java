@@ -41,8 +41,6 @@ public class CdrRequestConverterTest {
     public void buildsCdrRequestFromHttpRequest() throws Exception {
         request.addParameter("envelope", "cdr-envelope.url");
         request.addParameter("schema", "requested-schema");
-        request.addParameter("language", "EN");
-        request.addParameter("JavaScript", "true");
         request.addParameter("add", "true");
         request.addParameter("file_id", "new-file-name");
         request.addParameter("instance", "http://instance.url");
@@ -53,8 +51,6 @@ public class CdrRequestConverterTest {
 
         assertThat(cdrRequest.getEnvelopeUrl(), equalTo(request.getParameter("envelope")));
         assertThat(cdrRequest.getSchema(), equalTo(request.getParameter("schema")));
-        assertThat(cdrRequest.getLanguage(), equalTo(request.getParameter("language")));
-        assertThat(cdrRequest.isJavascriptEnabled(), equalTo(true));
         assertThat(cdrRequest.isNewFormCreationAllowed(), equalTo(true));
         assertThat(cdrRequest.getNewFileName(), equalTo(request.getParameter("file_id")));
         assertThat(cdrRequest.getInstanceUrl(), equalTo(request.getParameter("instance")));

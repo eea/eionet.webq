@@ -50,8 +50,6 @@ public class CdrRequestConverter implements Converter<HttpServletRequest, CdrReq
         parameters.setContextPath(httpRequest.getContextPath());
         parameters.setEnvelopeUrl(parametersTracker.getParameter("envelope"));
         parameters.setSchema(parametersTracker.getParameter("schema"));
-        parameters.setLanguage(parametersTracker.getParameter("language"));
-        parameters.setJavascriptEnabled(Boolean.valueOf(parametersTracker.getParameter("JavaScript")));
         parameters.setNewFormCreationAllowed(Boolean.valueOf(parametersTracker.getParameter("add")));
         parameters.setNewFileName(parametersTracker.getParameter("file_id"));
         parameters.setInstanceUrl(parametersTracker.getParameter("instance"));
