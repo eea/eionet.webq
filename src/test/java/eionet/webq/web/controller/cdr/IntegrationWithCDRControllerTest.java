@@ -22,7 +22,6 @@ package eionet.webq.web.controller.cdr;
 
 import eionet.webq.converter.CdrRequestConverter;
 import eionet.webq.dao.orm.ProjectFile;
-import eionet.webq.dao.orm.UserFile;
 import eionet.webq.dto.CdrRequest;
 import eionet.webq.service.CDREnvelopeService;
 import eionet.webq.service.FileNotAvailableException;
@@ -185,20 +184,6 @@ public class IntegrationWithCDRControllerTest {
         cdrRequestWillContainXmlSchemaAndInstanceUrl();
 
         assertThat(controller.webQEdit(mockRequest, model), equalTo("deliver_menu"));
-    }
-
-    @Test
-    public void webQEditWillSaveFileWithNameStrippedFromInstanceUrl() throws Exception {
-        thereWillBeWebFormsAmountOf(1);
-        cdrRequest.setSchema(XML_SCHEMA);
-        String fileName = "file.name";
-        cdrRequest.setInstanceUrl("http://instance.url/" + fileName);
-
-        controller.webQEdit(mockRequest, model);
-
-        ArgumentCaptor<UserFile> userFileArgument = ArgumentCaptor.forClass(UserFile.class);
-        verify(userFileService).save(userFileArgument.capture());
-        assertThat(userFileArgument.getValue().getName(), equalTo(fileName));
     }
 
     @Test

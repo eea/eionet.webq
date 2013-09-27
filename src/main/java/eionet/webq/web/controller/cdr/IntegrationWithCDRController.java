@@ -131,7 +131,7 @@ public class IntegrationWithCDRController {
             throw new IllegalArgumentException("no web forms for '" + schema + "' schema found");
         }
         String instanceUrl = parameters.getInstanceUrl();
-        String fileName = instanceUrl.substring(instanceUrl.lastIndexOf("/") + 1);
+        String fileName = parameters.getInstanceName();
         if (webForms.size() > 1) {
             LinkedMultiValueMap<String, XmlFile> xmlFiles = new LinkedMultiValueMap<String, XmlFile>();
             xmlFiles.add(schema, new XmlFile(instanceUrl, fileName));
