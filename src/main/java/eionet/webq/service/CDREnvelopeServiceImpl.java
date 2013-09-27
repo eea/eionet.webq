@@ -20,7 +20,7 @@
  */
 package eionet.webq.service;
 
-import eionet.webq.dto.WebQMenuParameters;
+import eionet.webq.dto.CdrRequest;
 import org.apache.log4j.Logger;
 import org.apache.xmlrpc.XmlRpcException;
 import org.apache.xmlrpc.client.XmlRpcClient;
@@ -58,7 +58,7 @@ public class CDREnvelopeServiceImpl implements CDREnvelopeService {
     private String getEnvelopeXmlFilesMethod;
 
     @Override
-    public MultiValueMap<String, XmlFile> getXmlFiles(WebQMenuParameters parameters) {
+    public MultiValueMap<String, XmlFile> getXmlFiles(CdrRequest parameters) {
         try {
             Object xmlFilesMappedBySchema = xmlRpcClient.execute(buildConfig(parameters), getEnvelopeXmlFilesMethod, emptyList());
             return transformGetXmlFilesResponse(xmlFilesMappedBySchema);
@@ -82,7 +82,7 @@ public class CDREnvelopeServiceImpl implements CDREnvelopeService {
                     String xmlSchema = entry.getKey();
                     for (Object values : entry.getValue()) {
                         Object[] xmlFileData = (Object[]) values;
-                        result.add(xmlSchema, new XmlFile(xmlFileData[0].toString(), xmlFileData[1].toString(), xmlSchema));
+                        result.add(xmlSchema, new XmlFile(xmlFileData[0].toString(), xmlFileData[1].toString()));
                     }
                 }
             } catch (ClassCastException e) {
@@ -92,16 +92,17 @@ public class CDREnvelopeServiceImpl implements CDREnvelopeService {
         } else {
             LOGGER.warn("expected not null response from envelope service");
         }
+        LOGGER.info("Xml files received=" + result);
         return result;
     }
 
     /**
-     * Builds XxmlRpcClientConfig from {@link eionet.webq.dto.WebQMenuParameters}.
+     * Builds XxmlRpcClientConfig from {@link eionet.webq.dto.CdrRequest}.
      *
      * @param parameters parameters
      * @return config
      */
-    private XmlRpcClientConfig buildConfig(WebQMenuParameters parameters) {
+    private XmlRpcClientConfig buildConfig(CdrRequest parameters) {
         XmlRpcClientConfigImpl config = new XmlRpcClientConfigImpl();
         config.setServerURL(createUrlFromString(parameters.getEnvelopeUrl()));
         if (parameters.isAuthorizationSet()) {

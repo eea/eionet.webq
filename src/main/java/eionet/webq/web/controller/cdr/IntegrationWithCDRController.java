@@ -20,11 +20,10 @@
  */
 package eionet.webq.web.controller.cdr;
 
-import eionet.webq.converter.RequestToWebQMenuParameters;
+import eionet.webq.converter.CdrRequestConverter;
 import eionet.webq.dao.orm.ProjectFile;
-import eionet.webq.dao.orm.UploadedFile;
 import eionet.webq.dao.orm.UserFile;
-import eionet.webq.dto.WebQMenuParameters;
+import eionet.webq.dto.CdrRequest;
 import eionet.webq.service.CDREnvelopeService;
 import eionet.webq.service.FileNotAvailableException;
 import eionet.webq.service.UserFileService;
@@ -33,9 +32,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Arrays;
@@ -49,12 +50,19 @@ import static eionet.webq.service.CDREnvelopeService.XmlFile;
  */
 @Controller
 public class IntegrationWithCDRController {
-
     /**
-     * Converts request to WebQMenuParameters.
+     * Latest cdr request session attribute.
+     */
+    public static final String LATEST_CDR_REQUEST = "latestCdrRequest";
+    /**
+     * Web forms parameters flash attributes name.
+     */
+    public static final String WEB_FORM_PARAMETERS = "webFormParameters";
+    /**
+     * Converts request to CdrRequest.
      */
     @Autowired
-    private RequestToWebQMenuParameters converter;
+    private CdrRequestConverter converter;
     /**
      * CDR envelope service.
      */
@@ -77,27 +85,59 @@ public class IntegrationWithCDRController {
      *
      * @param request parameters of this action
      * @param model model
+     * @param redirectAttributes redirect attributes
      * @return view name
      * @throws eionet.webq.service.FileNotAvailableException if one redirect to xform remote file not found.
      */
     @RequestMapping("/WebQMenu")
-    public String menu(HttpServletRequest request, Model model) throws FileNotAvailableException {
-        WebQMenuParameters parameters = converter.convert(request);
+    public String webQMenu(HttpServletRequest request, Model model, RedirectAttributes redirectAttributes)
+            throws FileNotAvailableException {
+        CdrRequest parameters = convertAndPutResultIntoSession(request);
         MultiValueMap<String, XmlFile> xmlFiles = envelopeService.getXmlFiles(parameters);
         Collection<String> requiredSchemas =
                 StringUtils.isNotEmpty(parameters.getSchema()) ? Arrays.asList(parameters.getSchema()) : xmlFiles.keySet();
         Collection<ProjectFile> webForms = webFormService.findWebFormsForSchemas(requiredSchemas);
 
         if (hasOnlyOneFileAndWebFormForSameSchema(xmlFiles, webForms, parameters)) {
-            return redirectToEditWebForm(request, xmlFiles, webForms);
+            return redirectToEditWebForm(parameters, xmlFiles, webForms);
         }
         if (oneWebFormAndNoFilesButNewFileCreationIsAllowed(xmlFiles, webForms, parameters)) {
-            return "redirect:/startWebform?formId=" + webForms.iterator().next().getId();
+            String newFileName = parameters.getNewFileName();
+            redirectAttributes.addFlashAttribute(WEB_FORM_PARAMETERS, parameters.getAdditionalParametersAsQueryString());
+            return "redirect:/startWebform?formId=" + webForms.iterator().next().getId()
+                    + (StringUtils.isNotEmpty(newFileName) ? "&fileName=" + newFileName : "");
         }
-        model.addAttribute("parameters", parameters);
-        model.addAttribute("xmlFiles", xmlFiles);
-        model.addAttribute("availableWebForms", webForms);
-        return "deliver_menu";
+        return deliverMenu(webForms, xmlFiles, parameters, model);
+    }
+
+    /**
+     * WebQEdit request handler.
+     *
+     * @param request current request
+     * @param model model
+     * @return view name
+     * @throws FileNotAvailableException if remote file not available.
+     */
+    @RequestMapping("/WebQEdit")
+    public String webQEdit(HttpServletRequest request, Model model) throws FileNotAvailableException {
+        CdrRequest parameters = convertAndPutResultIntoSession(request);
+        String schema = parameters.getSchema();
+        if (StringUtils.isEmpty(schema)) {
+            throw new IllegalArgumentException("schema parameter is required");
+        }
+
+        Collection<ProjectFile> webForms = webFormService.findWebFormsForSchemas(Arrays.asList(schema));
+        if (webForms.isEmpty()) {
+            throw new IllegalArgumentException("no web forms for '" + schema + "' schema found");
+        }
+        String instanceUrl = parameters.getInstanceUrl();
+        String fileName = instanceUrl.substring(instanceUrl.lastIndexOf("/") + 1);
+        if (webForms.size() > 1) {
+            LinkedMultiValueMap<String, XmlFile> xmlFiles = new LinkedMultiValueMap<String, XmlFile>();
+            xmlFiles.add(schema, new XmlFile(instanceUrl, fileName));
+            return deliverMenu(webForms, xmlFiles, parameters, model);
+        }
+        return editFile(webForms.iterator().next(), fileName, instanceUrl, parameters);
     }
 
     /**
@@ -113,11 +153,45 @@ public class IntegrationWithCDRController {
     @RequestMapping("/cdr/edit/file")
     public String editWithWebForm(@RequestParam int formId, @RequestParam String fileName,
                                   @RequestParam String remoteFileUrl, HttpServletRequest request) throws FileNotAvailableException {
-        ProjectFile webForm = webFormService.findActiveWebFormById(formId);
-        UserFile userFile = new UserFile(new UploadedFile(fileName, new byte[0]), webForm.getXmlSchema());
+        CdrRequest cdrRequest = (CdrRequest) request.getSession().getAttribute(LATEST_CDR_REQUEST);
+        return editFile(webFormService.findActiveWebFormById(formId), fileName, remoteFileUrl, cdrRequest);
+    }
 
-        int fileId = userFileService.saveWithContentFromRemoteLocation(userFile, remoteFileUrl);
-        return "redirect:/xform/?formId=" + formId + "&fileId=" + fileId + "&base_uri=" + request.getContextPath();
+    /**
+     * Sets passed parameters to model attributes and returns view name.
+     *
+     * @param webForms web forms
+     * @param xmlFiles xml files
+     * @param parameters cdr parameters
+     * @param model model
+     * @return view name
+     */
+    private String deliverMenu(Collection<ProjectFile> webForms, MultiValueMap<String, XmlFile> xmlFiles, CdrRequest parameters,
+            Model model) {
+        model.addAttribute("parameters", parameters);
+        model.addAttribute("xmlFiles", xmlFiles);
+        model.addAttribute("availableWebForms", webForms);
+        return "deliver_menu";
+    }
+    /**
+     * Saves new user file to db and returns redirect url to web form edit.
+     *
+     * @param webForm web form to be used for edit.
+     * @param fileName new file name
+     * @param remoteFileUrl remote file url
+     * @param request current request
+     * @return redirect url
+     * @throws FileNotAvailableException if remote file not available
+     */
+    private String editFile(ProjectFile webForm, String fileName, String remoteFileUrl, CdrRequest request)
+            throws FileNotAvailableException {
+        UserFile userFile = new UserFile();
+        userFile.setName(fileName);
+        userFile.setXmlSchema(webForm.getXmlSchema());
+
+        int fileId = userFileService.save(userFile);
+        return "redirect:/xform/?formId=" + webForm.getId() + "&instance=" + remoteFileUrl  + "&fileId=" + fileId
+                + "&base_uri=" + request.getContextPath() + request.getAdditionalParametersAsQueryString();
     }
 
     /**
@@ -129,7 +203,7 @@ public class IntegrationWithCDRController {
      * @return true iff there are only 1 file and schema with equal xml schema
      */
     private boolean hasOnlyOneFileAndWebFormForSameSchema(MultiValueMap<String, XmlFile> xmlFiles,
-            Collection<ProjectFile> webForms, WebQMenuParameters parameters) {
+            Collection<ProjectFile> webForms, CdrRequest parameters) {
         if (webForms.size() == 1 && xmlFiles.size() == 1 && !parameters.isNewFormCreationAllowed()) {
             List<XmlFile> filesForSchema = xmlFiles.get(webForms.iterator().next().getXmlSchema());
             if (filesForSchema != null && filesForSchema.size() == 1) {
@@ -148,24 +222,36 @@ public class IntegrationWithCDRController {
      * @return true iff only one form, no files and creation of new files allowed.
      */
     private boolean oneWebFormAndNoFilesButNewFileCreationIsAllowed(MultiValueMap<String, XmlFile> xmlFiles,
-            Collection<ProjectFile> webForms, WebQMenuParameters parameters) {
+            Collection<ProjectFile> webForms, CdrRequest parameters) {
         return webForms.size() == 1 && xmlFiles.size() == 0 && parameters.isNewFormCreationAllowed();
     }
 
     /**
      * Redirects to edit form.
      *
-     * @param request current request
+     * @param request parsed cdr request
      * @param xmlFiles xml files
      * @param webForms web forms
      * @return redirect string
      * @throws FileNotAvailableException if remote file not available
      */
-    private String redirectToEditWebForm(HttpServletRequest request, MultiValueMap<String, XmlFile> xmlFiles,
+    private String redirectToEditWebForm(CdrRequest request, MultiValueMap<String, XmlFile> xmlFiles,
             Collection<ProjectFile> webForms) throws FileNotAvailableException {
         ProjectFile onlyOneAvailableForm = webForms.iterator().next();
         XmlFile onlyOneAvailableFile = xmlFiles.getFirst(onlyOneAvailableForm.getXmlSchema());
-        return editWithWebForm(onlyOneAvailableForm.getId(), onlyOneAvailableFile.getTitle(), onlyOneAvailableFile.getFullName(),
+        return editFile(onlyOneAvailableForm, onlyOneAvailableFile.getTitle(), onlyOneAvailableFile.getFullName(),
                 request);
+    }
+
+    /**
+     * Performs request conversion and sets result as a session attribute.
+     *
+     * @param request current request
+     * @return cdr request parameters
+     */
+    private CdrRequest convertAndPutResultIntoSession(HttpServletRequest request) {
+        CdrRequest cdrRequest = converter.convert(request);
+        request.getSession().setAttribute(LATEST_CDR_REQUEST, cdrRequest);
+        return cdrRequest;
     }
 }

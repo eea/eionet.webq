@@ -49,6 +49,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Collection;
 
+import static eionet.webq.web.controller.cdr.IntegrationWithCDRController.WEB_FORM_PARAMETERS;
+import static org.apache.commons.lang3.StringUtils.defaultIfEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 /**
@@ -182,20 +184,24 @@ public class PublicPageController {
      *
      * @param formId webform id
      * @param request current request
+     * @param webFormParameters web form parameters flash model attribute
      * @return redirection URL of webform with correct parameters
      * @throws FileNotAvailableException if empty instance URL is filled for selected webform, but the resource is not available.
      */
     @RequestMapping(value = "/startWebform")
-    public String startWebFormSaveFile(@RequestParam int formId, HttpServletRequest request) throws FileNotAvailableException {
+    public String startWebFormSaveFile(@RequestParam int formId, HttpServletRequest request,
+                                       @ModelAttribute(WEB_FORM_PARAMETERS) String webFormParameters)
+            throws FileNotAvailableException {
         ProjectFile webForm = webFormService.findActiveWebFormById(formId);
         String emptyInstanceUrl = webForm.getEmptyInstanceUrl();
         UserFile file = new UserFile();
-        file.setName(StringUtils.defaultIfEmpty(webForm.getNewXmlFileName(), "new_form.xml"));
+        file.setName(defaultIfEmpty(request.getParameter("fileName"), defaultIfEmpty(webForm.getNewXmlFileName(), "new_form.xml")));
         file.setXmlSchema(webForm.getXmlSchema());
         int fileId = isNotEmpty(emptyInstanceUrl)
                 ? userFileService.saveWithContentFromRemoteLocation(file, emptyInstanceUrl)
                 : userFileService.save(file);
-        return "redirect:/xform/?formId=" + webForm.getId() + "&fileId=" + fileId + "&base_uri=" + request.getContextPath();
+        return "redirect:/xform/?formId=" + webForm.getId() + "&fileId=" + fileId + "&base_uri=" + request.getContextPath()
+                + StringUtils.defaultString(webFormParameters);
     }
 
     /**

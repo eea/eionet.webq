@@ -22,7 +22,7 @@ package eionet.webq.dto;
 
 /**
  */
-public class WebQMenuParameters {
+public class CdrRequest {
     /**
      * Envelope URL.
      */
@@ -31,14 +31,6 @@ public class WebQMenuParameters {
      * Only requested schema.
      */
     private String schema;
-    /**
-     * Language requested.
-     */
-    private String language;
-    /**
-     * Javascript is enabled  in client browser.
-     */
-    private boolean javascriptEnabled;
     /**
      * Allow to create new form.
      */
@@ -59,6 +51,22 @@ public class WebQMenuParameters {
      * Authentication password.
      */
     private String password;
+    /**
+     * URL of xml file stored in CDR.
+     */
+    private String instanceUrl;
+    /**
+     * XML file title.
+     */
+    private String instanceTitle;
+    /**
+     * Additional parameters passed with this request.
+     */
+    private String additionalParametersAsQueryString;
+    /**
+     * Request context path.
+     */
+    private String contextPath;
 
     public String getEnvelopeUrl() {
         return envelopeUrl;
@@ -74,22 +82,6 @@ public class WebQMenuParameters {
 
     public void setSchema(String schema) {
         this.schema = schema;
-    }
-
-    public String getLanguage() {
-        return language;
-    }
-
-    public void setLanguage(String language) {
-        this.language = language;
-    }
-
-    public boolean isJavascriptEnabled() {
-        return javascriptEnabled;
-    }
-
-    public void setJavascriptEnabled(boolean javascriptEnabled) {
-        this.javascriptEnabled = javascriptEnabled;
     }
 
     public boolean isNewFormCreationAllowed() {
@@ -130,5 +122,37 @@ public class WebQMenuParameters {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getInstanceUrl() {
+        return instanceUrl;
+    }
+
+    public void setInstanceUrl(String instanceUrl) {
+        this.instanceUrl = instanceUrl;
+    }
+
+    public String getInstanceTitle() {
+        return instanceTitle;
+    }
+
+    public void setInstanceTitle(String instanceTitle) {
+        this.instanceTitle = instanceTitle;
+    }
+
+    public String getAdditionalParametersAsQueryString() {
+        return additionalParametersAsQueryString;
+    }
+
+    public void setAdditionalParametersAsQueryString(String additionalParametersAsQueryString) {
+        this.additionalParametersAsQueryString = additionalParametersAsQueryString;
+    }
+
+    public String getContextPath() {
+        return contextPath;
+    }
+
+    public void setContextPath(String contextPath) {
+        this.contextPath = contextPath;
     }
 }

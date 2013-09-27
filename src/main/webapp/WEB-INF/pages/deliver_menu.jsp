@@ -6,7 +6,7 @@
 </c:if>
 
 <c:choose>
-    <c:when test="${empty availableWebForms or empty xmlFiles}">
+    <c:when test="${empty availableWebForms}">
         <div class="error-msg">No documents were uploaded in this envelope that can be edited with web forms or no web forms available for this envelope!</div>
         <a href="${parameters.envelopeUrl}"title="go back to envelope">Go back to envelope</a>
     </c:when>
@@ -17,12 +17,16 @@
                 <a href="<c:url value="/startWebform?formId=${webForm.id}"/>" title="Fill new form">Fill new ${webForm.title} form</a><br />
             </c:forEach>
         </c:if>
-        <h2>Existing data files in this envelope</h2>
-        <c:forEach items="${availableWebForms}" var="webForm">
+        <c:if test="${not empty xmlFiles}">
+            <h2>Existing data files in this envelope</h2>
+            <c:forEach items="${availableWebForms}" var="webForm">
                 <c:forEach items="${xmlFiles[webForm.xmlSchema]}" var="file">
                     <c:url var="editLink" value="/cdr/edit/file?formId=${webForm.id}&fileName=${file.title}&remoteFileUrl=${file.fullName}"/>
                     <a href="${editLink}" title="Edit with Web Form">Edit ${file.title} with web form ${webForm.title}</a><br />
                 </c:forEach>
-        </c:forEach>
+            </c:forEach>
+        </c:if>
+        <br />
+        <a href="${parameters.envelopeUrl}">Back to envelope</a>
     </c:otherwise>
 </c:choose>

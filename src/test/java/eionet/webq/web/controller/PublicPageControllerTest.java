@@ -95,7 +95,7 @@ public class PublicPageControllerTest {
         byte[] testContent = "test-content".getBytes();
         when(remoteFileService.fileContent(projectFile.getEmptyInstanceUrl())).thenReturn(testContent);
 
-        publicPageController.startWebFormSaveFile(WEB_FORM_ID, new MockHttpServletRequest());
+        publicPageController.startWebFormSaveFile(WEB_FORM_ID, new MockHttpServletRequest(), null);
 
         ArgumentCaptor<UserFile> userFileArgumentCaptor = ArgumentCaptor.forClass(UserFile.class);
         verify(userFileService).save(userFileArgumentCaptor.capture());
