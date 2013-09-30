@@ -21,10 +21,15 @@
 
 package eionet.webq.dto;
 
-import java.util.Date;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.apache.commons.lang3.StringUtils.defaultString;
 
 /**
  * Object for transferring XML save result messages to XForms. The object is marshaled into XML in HTTP response.
@@ -45,6 +50,15 @@ public class XmlSaveResult {
     private static final String SUCCESS_MESSAGE = "Content saved successfully.";
     /** Message to be returned in case of error. */
     private static final String ERROR_MESSAGE = "Error on saving data! ";
+    /**
+     * Code to message mapping.
+     */
+    private static final Map<Integer, String> MESSAGES_BY_CODE = new HashMap<Integer, String>() {
+        {
+            put(0, ERROR_MESSAGE);
+            put(1, SUCCESS_MESSAGE);
+        }
+    };
 
     /**
      * No-arg default constructor required by {@link org.springframework.oxm.jaxb.Jaxb2Marshaller}.
@@ -83,6 +97,22 @@ public class XmlSaveResult {
      */
     public static XmlSaveResult valueOfError(String message) {
         return new XmlSaveResult(0, ERROR_MESSAGE.concat(" ").concat(message));
+    }
+
+    /**
+     * Creates {@link eionet.webq.dto.XmlSaveResult} from encoded response.
+     * Encoding format is code(first character, must be an integer) and message(all other characters).
+     *
+     * @param encodedResponse encoded response
+     * @return XmlSaveResult
+     */
+    public static XmlSaveResult valueOf(String encodedResponse) {
+        if (StringUtils.isEmpty(encodedResponse)) {
+            return new XmlSaveResult(0, ERROR_MESSAGE + " No response from server.");
+        }
+        int responseCode = Character.getNumericValue(encodedResponse.charAt(0));
+        return new XmlSaveResult(responseCode,
+                defaultString(MESSAGES_BY_CODE.get(responseCode), ERROR_MESSAGE) + encodedResponse.substring(1));
     }
 
     /**
