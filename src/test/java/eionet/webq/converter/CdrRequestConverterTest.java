@@ -65,6 +65,7 @@ public class CdrRequestConverterTest {
         assertFalse(parameters.isAuthorizationSet());
         assertNull(parameters.getUserName());
         assertNull(parameters.getPassword());
+        assertNull(parameters.getBasicAuthorization());
     }
 
     @Test
@@ -76,17 +77,20 @@ public class CdrRequestConverterTest {
         assertFalse(parameters.isAuthorizationSet());
         assertNull(parameters.getUserName());
         assertNull(parameters.getPassword());
+        assertNull(parameters.getBasicAuthorization());
     }
 
     @Test
     public void setUserNameAndPasswordIfAuthorizationHeaderIsBASIC() throws Exception {
-        request.addHeader("Authorization", "Basic " + new String(Base64.encodeBase64("username:password".getBytes())));
+        String authorizationInfo = "Basic " + new String(Base64.encodeBase64("username:password".getBytes()));
+        request.addHeader("Authorization", authorizationInfo);
 
         CdrRequest parameters = cdrRequestConverter.convert(request);
 
         assertTrue(parameters.isAuthorizationSet());
         assertThat(parameters.getUserName(), equalTo("username"));
         assertThat(parameters.getPassword(), equalTo("password"));
+        assertThat(parameters.getBasicAuthorization(), equalTo(authorizationInfo));
     }
 
     @Test

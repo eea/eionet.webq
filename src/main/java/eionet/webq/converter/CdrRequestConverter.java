@@ -67,7 +67,7 @@ public class CdrRequestConverter implements Converter<HttpServletRequest, CdrReq
 
         String authorizationHeader = httpRequest.getHeader("Authorization");
         if (hasBasicAuthorization(authorizationHeader)) {
-            setAuthorizationDetails(parameters, extractCredentialsFromBasicAuthorization(authorizationHeader));
+            setAuthorizationDetails(parameters, authorizationHeader);
         }
         parameters.setAdditionalParametersAsQueryString(createQueryStringFromParametersNotRead(parametersTracker));
         return parameters;
@@ -77,13 +77,15 @@ public class CdrRequestConverter implements Converter<HttpServletRequest, CdrReq
      * Set authorization details.
      *
      * @param parameters parameters.
-     * @param credentials credentials.
+     * @param authorizationHeader authorization header.
      */
-    private void setAuthorizationDetails(CdrRequest parameters, String[] credentials) {
+    private void setAuthorizationDetails(CdrRequest parameters, String authorizationHeader) {
+        String[] credentials = extractCredentialsFromBasicAuthorization(authorizationHeader);
         if (credentials.length != 2) {
             return;
         }
         parameters.setAuthorizationSet(true);
+        parameters.setBasicAuthorization(authorizationHeader);
         parameters.setUserName(credentials[0]);
         parameters.setPassword(credentials[1]);
     }

@@ -44,6 +44,10 @@ public class CdrRequest {
      */
     private boolean authorizationSet;
     /**
+     * Basic authorization information.
+     */
+    private String basicAuthorization;
+    /**
      * Authentication user name.
      */
     private String userName;
@@ -110,6 +114,14 @@ public class CdrRequest {
 
     public void setAuthorizationSet(boolean authorizationSet) {
         this.authorizationSet = authorizationSet;
+    }
+
+    public String getBasicAuthorization() {
+        return basicAuthorization;
+    }
+
+    public void setBasicAuthorization(String basicAuthorization) {
+        this.basicAuthorization = basicAuthorization;
     }
 
     public String getUserName() {
