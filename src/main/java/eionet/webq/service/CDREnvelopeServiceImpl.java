@@ -20,7 +20,9 @@
  */
 package eionet.webq.service;
 
+import eionet.webq.dao.orm.UserFile;
 import eionet.webq.dto.CdrRequest;
+import eionet.webq.dto.XmlSaveResult;
 import org.apache.log4j.Logger;
 import org.apache.xmlrpc.XmlRpcException;
 import org.apache.xmlrpc.client.XmlRpcClient;
@@ -28,9 +30,16 @@ import org.apache.xmlrpc.client.XmlRpcClientConfig;
 import org.apache.xmlrpc.client.XmlRpcClientConfigImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestOperations;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -52,10 +61,20 @@ public class CDREnvelopeServiceImpl implements CDREnvelopeService {
     @Autowired
     private XmlRpcClient xmlRpcClient;
     /**
+     * Rest client.
+     */
+    @Autowired
+    private RestOperations restOperations;
+    /**
      *  Get envelope xml files remote method name.
      */
     @Value("#{ws['cdr.envelope.get.xml.files']}")
     private String getEnvelopeXmlFilesMethod;
+    /**
+     *  Save xml files to cdr method name.
+     */
+    @Value("#{ws['cdr.save.xml']}")
+    String saveXmlFilesMethod;
 
     @Override
     public MultiValueMap<String, XmlFile> getXmlFiles(CdrRequest parameters) {
@@ -65,6 +84,48 @@ public class CDREnvelopeServiceImpl implements CDREnvelopeService {
         } catch (XmlRpcException e) {
             throw new CDREnvelopeException("Unable to call envelope XML-RPC service", e);
         }
+    }
+
+    @Override
+    @Transactional
+    public XmlSaveResult pushXmlFile(UserFile file, CdrRequest parameters) {
+        String saveXmlUrl = parameters.getEnvelopeUrl() + '/' + saveXmlFilesMethod;
+        HttpEntity<MultiValueMap<String, Object>> requestParameters = prepareXmlSaveRequestParameters(file, parameters);
+
+        ResponseEntity<String> entity = restOperations.postForEntity(saveXmlUrl, requestParameters, String.class);
+
+        String responseBody = entity.getBody();
+        if (entity.getStatusCode() != HttpStatus.OK) {
+            return XmlSaveResult.valueOfError("Service unavailable.");
+        }
+        LOGGER.info("Response headers from saveXml=" + entity.getHeaders());
+        LOGGER.info("Response from saveXml=" + responseBody);
+        return XmlSaveResult.valueOf(responseBody);
+    }
+
+    /**
+     * Prepares parameters for saveXml remote method.
+     *
+     * @param file file to be saved.
+     * @param parameters parameters from CDR
+     * @return http entity representing request
+     */
+    private HttpEntity<MultiValueMap<String, Object>> prepareXmlSaveRequestParameters(UserFile file, CdrRequest parameters) {
+        HttpHeaders authorization = new HttpHeaders();
+        if (parameters.isAuthorizationSet()) {
+            authorization.add("Authorization", parameters.getBasicAuthorization());
+        }
+
+        HttpHeaders fileHeaders = new HttpHeaders();
+        fileHeaders.setContentDispositionFormData("file", file.getName());
+        fileHeaders.setContentType(MediaType.TEXT_XML);
+
+        MultiValueMap<String, Object> request = new LinkedMultiValueMap<String, Object>();
+        request.add("file", new HttpEntity<byte[]>(file.getContent(), fileHeaders));
+        request.add("file_id", new HttpEntity<String>(file.getName()));
+        request.add("title", new HttpEntity<String>(parameters.getInstanceTitle()));
+
+        return new HttpEntity<MultiValueMap<String, Object>>(request, authorization);
     }
 
     /**
@@ -97,7 +158,7 @@ public class CDREnvelopeServiceImpl implements CDREnvelopeService {
     }
 
     /**
-     * Builds XxmlRpcClientConfig from {@link eionet.webq.dto.CdrRequest}.
+     * Builds XmlRpcClientConfig from {@link eionet.webq.dto.CdrRequest}.
      *
      * @param parameters parameters
      * @return config
