@@ -14,7 +14,7 @@
             <h2>The following web forms are available</h2>
             <ul>
             <c:forEach items="${availableWebForms}" var="webForm">
-                <li><a href="<c:url value="/startWebform?formId=${webForm.id}"/>" title="Start a new web form">Create new data file</a> with '<strong>${webForm.title}</strong>' web form</li>
+                <li><a href="<c:url value="/cdr/add/file?formId=${webForm.id}"/>" title="Start a new web form">Create new data file</a> with '<strong>${webForm.title}</strong>' web form</li>
             </c:forEach>
             </ul>
         </c:if>
