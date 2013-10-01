@@ -66,9 +66,31 @@
             <column name="created" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP"/>
             <column name="updated" type="timestamp"/>
         </createTable>
-        <createIndex tableName="project_file" indexName="project_to_file_name">
+        <createIndex unique="true" tableName="project_file" indexName="project_to_file_name">
             <column name="project_id"/>
             <column name="file_name"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="5" author="dmitrant">
+        <createTable tableName="users">
+            <column name="username" type="varchar(255)">
+                <constraints unique="true"/>
+            </column>
+            <column name="password" type="varchar(255)"/>
+            <column name="enabled" type="boolean"/>
+        </createTable>
+        <createTable tableName="authorities">
+            <column name="username" type="varchar(255)"/>
+            <column name="authority" type="varchar(255)"/>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="authorities" baseColumnNames="username"
+                                 constraintName="fk_authorities_users"
+                                 referencedTableName="users"
+                                 referencedColumnNames="username"/>
+        <createIndex tableName="authorities" indexName="ix_auth_username">
+            <column name="username"/>
+            <column name="authority"/>
         </createIndex>
     </changeSet>
 </databaseChangeLog>
