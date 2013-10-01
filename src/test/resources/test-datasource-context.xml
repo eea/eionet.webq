@@ -11,8 +11,4 @@
         <property name="username" value="xml"/>
         <property name="password" value="storage"/>
     </bean>
-
-    <jdbc:initialize-database data-source="dataSource">
-        <jdbc:script location="classpath:eionet/webq/dao/test-tables.sql"/>
-    </jdbc:initialize-database>
 </beans>
