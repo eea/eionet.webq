@@ -8,6 +8,11 @@
     <property dbms="h2" name="blob" value="blob"/>
 
     <changeSet id="1" author="dmitrant">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="user_xml"/>
+            </not>
+        </preConditions>
         <createTable tableName="user_xml">
             <column name="id" type="int" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
@@ -24,6 +29,11 @@
     </changeSet>
 
     <changeSet id="2" author="dmitrant">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="file_content"/>
+            </not>
+        </preConditions>
         <createTable tableName="file_content">
             <column name="id" type="int" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
@@ -32,6 +42,11 @@
         </createTable>
     </changeSet>
     <changeSet id="3" author="dmitrant">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="project_folder"/>
+            </not>
+        </preConditions>
         <createTable tableName="project_folder">
             <column name="id" type="int" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
@@ -45,6 +60,11 @@
     </changeSet>
 
     <changeSet id="4" author="dmitrant">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="project_file"/>
+            </not>
+        </preConditions>
         <createTable tableName="project_file">
             <column name="id" type="int" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
@@ -73,6 +93,11 @@
     </changeSet>
 
     <changeSet id="5" author="dmitrant">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="users"/>
+            </not>
+        </preConditions>
         <createTable tableName="users">
             <column name="username" type="varchar(255)">
                 <constraints unique="true"/>
@@ -80,6 +105,14 @@
             <column name="password" type="varchar(255)"/>
             <column name="enabled" type="boolean"/>
         </createTable>
+    </changeSet>
+
+    <changeSet id="6" author="dmitrant">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="authorities"/>
+            </not>
+        </preConditions>
         <createTable tableName="authorities">
             <column name="username" type="varchar(255)"/>
             <column name="authority" type="varchar(255)"/>
