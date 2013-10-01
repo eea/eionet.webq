@@ -31,4 +31,16 @@
             <column name="file_content" type="${blob}"/>
         </createTable>
     </changeSet>
+    <changeSet id="3" author="dmitrant">
+        <createTable tableName="project_folder">
+            <column name="id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="project_id" type="varchar(255)">
+                <constraints unique="true"/>
+            </column>
+            <column name="description" type="varchar(2000)"/>
+            <column name="created" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP"/>
+        </createTable>
+    </changeSet>
 </databaseChangeLog>
