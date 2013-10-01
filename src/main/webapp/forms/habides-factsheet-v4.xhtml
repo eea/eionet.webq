@@ -248,6 +248,7 @@
                 <xf:setvalue ref="instance('context')/instanceUrl" value="instance('context')/emptyInstanceUrl" if="string-length(bf:appContext('instance')) = 0"/>
                 <xf:send submission="load-instance" name="xforms-submit"/>
                 <xf:send submission="load-emptyinstance" name="xforms-submit"/>
+				<xf:setvalue ref="/derogations/@country" value="instance('countries')/data[lower-code=lower-case(bf:appContext('country'))]/code" if="string-length(/derogations/@country) = 0" />
                 <xf:refresh/>
             </xf:action>
             <xf:action ev:event="set-content-modified">
