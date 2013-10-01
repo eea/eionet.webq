@@ -20,14 +20,12 @@
  */
 package eionet.webq.web.controller.cdr;
 
-import eionet.webq.converter.CdrRequestConverter;
-import eionet.webq.dao.orm.ProjectFile;
-import eionet.webq.dao.orm.UserFile;
-import eionet.webq.dto.CdrRequest;
-import eionet.webq.service.CDREnvelopeService;
-import eionet.webq.service.FileNotAvailableException;
-import eionet.webq.service.UserFileService;
-import eionet.webq.service.WebFormService;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -38,12 +36,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import javax.servlet.http.HttpServletRequest;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-
-import static eionet.webq.service.CDREnvelopeService.XmlFile;
+import eionet.webq.converter.CdrRequestConverter;
+import eionet.webq.dao.orm.ProjectFile;
+import eionet.webq.dao.orm.UserFile;
+import eionet.webq.dto.CdrRequest;
+import eionet.webq.service.CDREnvelopeService;
+import eionet.webq.service.CDREnvelopeService.XmlFile;
+import eionet.webq.service.FileNotAvailableException;
+import eionet.webq.service.UserFileService;
+import eionet.webq.service.WebFormService;
 
 /**
  * Provides integration options with CDR.
@@ -79,7 +80,6 @@ public class IntegrationWithCDRController {
     @Autowired
     private UserFileService userFileService;
 
-
     /**
      * Deliver with WebForms.
      *
@@ -104,6 +104,9 @@ public class IntegrationWithCDRController {
         if (oneWebFormAndNoFilesButNewFileCreationIsAllowed(xmlFiles, webForms, parameters)) {
             String newFileName = parameters.getNewFileName();
             redirectAttributes.addFlashAttribute(WEB_FORM_PARAMETERS, parameters.getAdditionalParametersAsQueryString());
+            if (parameters.getEnvelopeUrl() != null) {
+                redirectAttributes.addFlashAttribute("envelope", parameters.getEnvelopeUrl());
+            }
             return "redirect:/startWebform?formId=" + webForms.iterator().next().getId()
                     + (StringUtils.isNotEmpty(newFileName) ? "&fileName=" + newFileName : "");
         }
@@ -158,6 +161,31 @@ public class IntegrationWithCDRController {
     }
 
     /**
+     * Add new envelope file with web form.
+     *
+     * @param formId web form id
+     * @param redirectAttributes redirect attributes
+     * @param request current request
+     * @return view name
+     * @throws eionet.webq.service.FileNotAvailableException if remote file not available
+     */
+    @RequestMapping("/cdr/add/file")
+    public String addWithWebForm(@RequestParam int formId, RedirectAttributes redirectAttributes,
+                                  HttpServletRequest request)
+            throws FileNotAvailableException {
+        CdrRequest cdrRequest = (CdrRequest) request.getSession().getAttribute(LATEST_CDR_REQUEST);
+
+        String newFileName = cdrRequest.getNewFileName();
+        redirectAttributes.addFlashAttribute(WEB_FORM_PARAMETERS, cdrRequest.getAdditionalParametersAsQueryString());
+        if (cdrRequest.getEnvelopeUrl() != null) {
+            redirectAttributes.addFlashAttribute("envelope", cdrRequest.getEnvelopeUrl());
+        }
+        return "redirect:/startWebform?formId=" + formId
+                + (StringUtils.isNotEmpty(newFileName) ? "&fileName=" + newFileName : "");
+
+    }
+
+    /**
      * Sets passed parameters to model attributes and returns view name.
      *
      * @param webForms web forms
@@ -173,6 +201,7 @@ public class IntegrationWithCDRController {
         model.addAttribute("availableWebForms", webForms);
         return "deliver_menu";
     }
+
     /**
      * Saves new user file to db and returns redirect url to web form edit.
      *
@@ -190,8 +219,11 @@ public class IntegrationWithCDRController {
         userFile.setXmlSchema(webForm.getXmlSchema());
 
         int fileId = userFileService.save(userFile);
-        return "redirect:/xform/?formId=" + webForm.getId() + "&instance=" + remoteFileUrl  + "&fileId=" + fileId
-                + "&base_uri=" + request.getContextPath() + request.getAdditionalParametersAsQueryString();
+        String envelopeParam = (request.getEnvelopeUrl() != null) ? "&envelope=" + request.getEnvelopeUrl() : "";
+
+        return "redirect:/xform/?formId=" + webForm.getId() + "&instance=" + remoteFileUrl + "&fileId=" + fileId
+                + "&base_uri=" + request.getContextPath() + envelopeParam
+                + request.getAdditionalParametersAsQueryString();
     }
 
     /**

@@ -25,7 +25,7 @@ package eionet.webq.service;
  */
 public interface RemoteFileService {
     /**
-     * Fetches file content from url.
+     * Fetches file content from remote url or from local file system if url starts with "file://".
      *
      * @param remoteFileUrl url
      * @return bytes of content

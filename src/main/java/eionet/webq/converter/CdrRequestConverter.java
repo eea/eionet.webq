@@ -20,14 +20,17 @@
  */
 package eionet.webq.converter;
 
-import eionet.webq.dto.CdrRequest;
+import java.util.ArrayList;
+import java.util.Collection;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.net.util.Base64;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
 
-import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
-import java.util.Collection;
+import eionet.webq.dto.CdrRequest;
 
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
@@ -64,6 +67,10 @@ public class CdrRequestConverter implements Converter<HttpServletRequest, CdrReq
             }
         }
         parameters.setInstanceTitle(parametersTracker.getParameter("instance_title"));
+
+        if (StringUtils.isEmpty(parameters.getEnvelopeUrl()) && StringUtils.isNotEmpty(parameters.getInstanceUrl())){
+            parameters.setEnvelopeUrl(StringUtils.substringBeforeLast(parameters.getInstanceUrl(), "/"));
+        }
 
         String authorizationHeader = httpRequest.getHeader("Authorization");
         if (hasBasicAuthorization(authorizationHeader)) {

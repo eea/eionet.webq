@@ -20,6 +20,12 @@
  */
 package eionet.webq.service;
 
+import static org.hamcrest.core.IsEqual.equalTo;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.when;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
@@ -29,12 +35,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestOperations;
 
-import static org.hamcrest.core.IsEqual.equalTo;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.when;
-
 public class RemoteFileServiceImplTest {
     private final byte[] FILE_CONTENT_IN_RESPONSE = "test file content".getBytes();
     @InjectMocks
@@ -42,6 +42,8 @@ public class RemoteFileServiceImplTest {
     @Mock
     RestOperations restOperations;
     private final String url = "http://file.url";
+
+    private final String localFileName = "test-localfile-content.txt";
 
     @Before
     public void setUp() throws Exception {
@@ -80,6 +82,25 @@ public class RemoteFileServiceImplTest {
         httpResponseWithBytes();
         byte[] otherContent = "some other test file content".getBytes();
         assertFalse(remoteFileService.isChecksumMatches(otherContent, url));
+    }
+
+    @Test
+    public void fetchesFileContentFromFileUri() throws Exception {
+        String localFileUrl = "file://" + this.getClass().getClassLoader().getResource(localFileName).getFile();
+        byte[] bytes = remoteFileService.fileContent(localFileUrl);
+        assertThat(bytes, equalTo(FILE_CONTENT_IN_RESPONSE));
+    }
+
+    @Test(expected = FileNotAvailableException.class)
+    public void throwsExceptionIfFileUriNotAvailable() throws Exception {
+        String localFileUrl = "file:///unknown-file.txt";
+        remoteFileService.fileContent(localFileUrl);
+    }
+
+    @Test(expected = FileNotAvailableException.class)
+    public void throwsExceptionIfFileUriIsInvalidUri() throws Exception {
+        String localFileUrl = "file://invalid-uri.txt";
+        remoteFileService.fileContent(localFileUrl);
     }
 
     private void httpResponseWithBytes() {

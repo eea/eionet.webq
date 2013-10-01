@@ -8,25 +8,28 @@
 <c:choose>
     <c:when test="${empty availableWebForms}">
         <div class="error-msg">No documents were uploaded in this envelope that can be edited with web forms or no web forms available for this envelope!</div>
-        <a href="${parameters.envelopeUrl}"title="go back to envelope">Go back to envelope</a>
     </c:when>
     <c:otherwise>
         <c:if test="${parameters.newFormCreationAllowed}">
             <h2>The following web forms are available</h2>
+            <ul>
             <c:forEach items="${availableWebForms}" var="webForm">
-                <a href="<c:url value="/startWebform?formId=${webForm.id}"/>" title="Fill new form">Fill new ${webForm.title} form</a><br />
+                <li><a href="<c:url value="/cdr/add/file?formId=${webForm.id}"/>" title="Start a new web form">Create new data file</a> with '<strong>${webForm.title}</strong>' web form</li>
             </c:forEach>
+            </ul>
         </c:if>
         <c:if test="${not empty xmlFiles}">
             <h2>Existing data files in this envelope</h2>
+            <ul>
             <c:forEach items="${availableWebForms}" var="webForm">
                 <c:forEach items="${xmlFiles[webForm.xmlSchema]}" var="file">
                     <c:url var="editLink" value="/cdr/edit/file?formId=${webForm.id}&fileName=${file.title}&remoteFileUrl=${file.fullName}"/>
-                    <a href="${editLink}" title="Edit with Web Form">Edit ${file.title} with web form ${webForm.title}</a><br />
+                    <li><a href="${editLink}" title="Edit with Web Form">Edit <strong>${file.title}</strong></a> with '${webForm.title}' web form</li>
                 </c:forEach>
             </c:forEach>
+            </ul>
         </c:if>
         <br />
-        <a href="${parameters.envelopeUrl}">Back to envelope</a>
     </c:otherwise>
 </c:choose>
+<a href="${parameters.envelopeUrl}" title="Go back to envelope page">Back to envelope</a>
