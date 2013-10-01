@@ -43,4 +43,32 @@
             <column name="created" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP"/>
         </createTable>
     </changeSet>
+
+    <changeSet id="4" author="dmitrant">
+        <createTable tableName="project_file">
+            <column name="id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="project_id" type="int"/>
+            <column name="title" type="varchar(255)"/>
+            <column name="file_name" type="varchar(255)"/>
+            <column name="file_size_in_bytes" type="int"/>
+            <column name="file_content_id" type="int"/>
+            <column name="file_type" type="varchar(255)"/>
+            <column name="remote_file_url" type="varchar(500)"/>
+            <column name="new_xml_file_name" type="varchar(255)"/>
+            <column name="empty_instance_url" type="varchar(255)"/>
+            <column name="xml_schema" type="varchar(255)"/>
+            <column name="description" type="varchar(1000)"/>
+            <column name="user_name" type="varchar(50)"/>
+            <column name="active" type="boolean"/>
+            <column name="main_form" type="boolean"/>
+            <column name="created" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP"/>
+            <column name="updated" type="timestamp"/>
+        </createTable>
+        <createIndex tableName="project_file" indexName="project_to_file_name">
+            <column name="project_id"/>
+            <column name="file_name"/>
+        </createIndex>
+    </changeSet>
 </databaseChangeLog>
