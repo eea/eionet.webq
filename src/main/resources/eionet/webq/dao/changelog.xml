@@ -26,6 +26,9 @@
             <column name="updated" type="timestamp"/>
             <column name="downloaded" type="timestamp"/>
         </createTable>
+        <modifySql dbms="mysql">
+            <append value=" ENGINE=InnoDB DEFAULT CHARSET=utf8"/>
+        </modifySql>
     </changeSet>
 
     <changeSet id="2" author="dmitrant">
@@ -40,6 +43,9 @@
             </column>
             <column name="file_content" type="${blob}"/>
         </createTable>
+        <modifySql dbms="mysql">
+            <append value=" ENGINE=InnoDB DEFAULT CHARSET=utf8"/>
+        </modifySql>
     </changeSet>
     <changeSet id="3" author="dmitrant">
         <preConditions onFail="MARK_RAN">
@@ -57,6 +63,9 @@
             <column name="description" type="varchar(2000)"/>
             <column name="created" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP"/>
         </createTable>
+        <modifySql dbms="mysql">
+            <append value=" ENGINE=InnoDB DEFAULT CHARSET=utf8"/>
+        </modifySql>
     </changeSet>
 
     <changeSet id="4" author="dmitrant">
@@ -90,6 +99,9 @@
             <column name="project_id"/>
             <column name="file_name"/>
         </createIndex>
+        <modifySql dbms="mysql">
+            <append value=" ENGINE=InnoDB DEFAULT CHARSET=utf8"/>
+        </modifySql>
     </changeSet>
 
     <changeSet id="5" author="dmitrant">
@@ -105,6 +117,9 @@
             <column name="password" type="varchar(255)"/>
             <column name="enabled" type="boolean"/>
         </createTable>
+        <modifySql dbms="mysql">
+            <append value=" ENGINE=InnoDB DEFAULT CHARSET=utf8"/>
+        </modifySql>
     </changeSet>
 
     <changeSet id="6" author="dmitrant">
@@ -125,6 +140,9 @@
             <column name="username"/>
             <column name="authority"/>
         </createIndex>
+        <modifySql dbms="mysql">
+            <append value=" ENGINE=InnoDB DEFAULT CHARSET=utf8"/>
+        </modifySql>
     </changeSet>
 
     <changeSet id="7" author="dmitrant">
