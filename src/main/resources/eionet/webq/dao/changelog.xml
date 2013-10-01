@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd">
+    <property dbms="mysql" name="blob" value="mediumblob"/>
+    <property dbms="h2" name="blob" value="blob"/>
+
+    <changeSet id="1" author="dmitrant">
+        <createTable tableName="user_xml">
+            <column name="id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="user_id" type="varchar(100)"/>
+            <column name="file_name" type="varchar(255)"/>
+            <column name="file_size_in_bytes" type="int"/>
+            <column name="file_content_id" type="int"/>
+            <column name="xml_schema" type="varchar(255)"/>
+            <column name="created" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP"/>
+            <column name="updated" type="timestamp"/>
+            <column name="downloaded" type="timestamp"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="2" author="dmitrant">
+        <createTable tableName="file_content">
+            <column name="id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="file_content" type="${blob}"/>
+        </createTable>
+    </changeSet>
+</databaseChangeLog>

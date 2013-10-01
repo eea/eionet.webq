@@ -49,6 +49,13 @@
             <version>${mysql.version}</version>
         </dependency>
 
+        <!--Liquibase-->
+        <dependency>
+            <groupId>org.liquibase</groupId>
+            <artifactId>liquibase-core</artifactId>
+            <version>3.0.5</version>
+        </dependency>
+
         <!-- Spring 3 dependencies -->
         <dependency>
             <groupId>org.springframework</groupId>
