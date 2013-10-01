@@ -66,6 +66,11 @@ public class UserFile {
     @Column(name = "xml_schema")
     private String xmlSchema;
     /**
+     * Is this file origin is CDR?
+     */
+    @Column(name = "cdr_file")
+    private boolean fromCdr;
+    /**
      * File upload date.
      */
     @Temporal(TemporalType.TIMESTAMP)
@@ -162,6 +167,14 @@ public class UserFile {
 
     public void setXmlSchema(String xmlSchema) {
         this.xmlSchema = xmlSchema;
+    }
+
+    public boolean isFromCdr() {
+        return fromCdr;
+    }
+
+    public void setFromCdr(boolean fromCdr) {
+        this.fromCdr = fromCdr;
     }
 
     public Date getCreated() {

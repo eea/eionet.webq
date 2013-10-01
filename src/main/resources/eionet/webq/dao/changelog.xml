@@ -126,4 +126,10 @@
             <column name="authority"/>
         </createIndex>
     </changeSet>
+
+    <changeSet id="7" author="dmitrant">
+        <addColumn tableName="user_xml">
+            <column name="cdr_file" type="boolean" defaultValueBoolean="false"/>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>
