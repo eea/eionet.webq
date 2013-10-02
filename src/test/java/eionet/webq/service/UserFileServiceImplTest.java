@@ -23,6 +23,7 @@ package eionet.webq.service;
 
 import eionet.webq.dao.UserFileDownload;
 import eionet.webq.dao.UserFileStorage;
+import eionet.webq.dao.orm.ProjectFile;
 import eionet.webq.dao.orm.UserFile;
 import org.junit.After;
 import org.junit.Before;
@@ -40,6 +41,7 @@ import java.util.Collection;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -123,14 +125,42 @@ public class UserFileServiceImplTest {
     }
 
     @Test
-    public void allowToFetchFileContentFromExternalUrl() throws Exception {
+    public void allowToSaveFileBasedOnWebForm() throws Exception {
         String url = "external-file.url";
+        ProjectFile webForm = new ProjectFile();
+        webForm.setEmptyInstanceUrl(url);
         byte[] fileContent = "remote-file-content".getBytes();
         when(remoteFileService.fileContent(url)).thenReturn(fileContent);
-        service.saveWithContentFromRemoteLocation(new UserFile(), url);
+        service.saveBasedOnWebForm(new UserFile(), webForm);
 
         ArgumentCaptor<UserFile> userFileArgument = ArgumentCaptor.forClass(UserFile.class);
         verify(storage).save(userFileArgument.capture(), anyString());
         assertThat(userFileArgument.getValue().getContent(), equalTo(fileContent));
+    }
+
+    @Test
+    public void whenSavingBasedOnWebFormSetFileNameFromWebFormIfItIsNotSet() throws Exception {
+        ProjectFile webForm = new ProjectFile();
+        webForm.setNewXmlFileName("new file name");
+        UserFile userFile = new UserFile();
+        service.saveBasedOnWebForm(userFile, webForm);
+
+        verify(storage).save(eq(userFile), anyString());
+        assertThat(userFile.getName(), equalTo(webForm.getNewXmlFileName()));
+    }
+
+    @Test
+    public void whenSavingBasedOnWebFormSetFileContentFromRemoteLocationIfPresent() throws Exception {
+        byte[] fileContent = "file-content".getBytes();
+
+        ProjectFile webForm = new ProjectFile();
+        webForm.setEmptyInstanceUrl("empty.instance");
+        UserFile userFile = new UserFile();
+        when(remoteFileService.fileContent(anyString())).thenReturn(fileContent);
+        service.saveBasedOnWebForm(userFile, webForm);
+
+        assertThat(userFile.getContent(), equalTo(fileContent));
+        verify(remoteFileService).fileContent(webForm.getEmptyInstanceUrl());
+        verify(storage).save(eq(userFile), anyString());
     }
 }

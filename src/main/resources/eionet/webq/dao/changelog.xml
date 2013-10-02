@@ -148,6 +148,9 @@
     <changeSet id="7" author="dmitrant">
         <addColumn tableName="user_xml">
             <column name="cdr_file" type="boolean" defaultValueBoolean="false"/>
+            <column name="envelope" type="varchar(255)"/>
+            <column name="authorization" type="varchar(255)"/>
+            <column name="instance_title" type="varchar(255)"/>
         </addColumn>
     </changeSet>
 </databaseChangeLog>

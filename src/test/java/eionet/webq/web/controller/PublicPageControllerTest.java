@@ -27,7 +27,6 @@ import eionet.webq.service.UserFileService;
 import eionet.webq.service.WebFormService;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -36,6 +35,8 @@ import org.springframework.mock.web.MockHttpServletResponse;
 
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -61,18 +62,11 @@ public class PublicPageControllerTest {
     @Test
     public void savesNewUserFileToStorageAndRedirectsToWebForm() throws Exception {
         ProjectFile projectFile = new ProjectFile();
-        projectFile.setNewXmlFileName("test_file.xml");
-        projectFile.setXmlSchema("xml-schema");
-        UserFile userToSave = saveFileAndGetParameterFromServiceCall(projectFile);
+        when(webFormService.findActiveWebFormById(WEB_FORM_ID)).thenReturn(projectFile);
 
-        assertThat(userToSave.getXmlSchema(), equalTo(projectFile.getXmlSchema()));
-        assertThat(userToSave.getName(), equalTo(projectFile.getNewXmlFileName()));
-    }
+        publicPageController.startWebFormSaveFile(WEB_FORM_ID, new MockHttpServletRequest());
 
-    @Test
-    public void ifNewFileNameNotSetUseDefault() throws Exception {
-        UserFile userFile = saveFileAndGetParameterFromServiceCall(new ProjectFile());
-        assertThat(userFile.getName(), equalTo("new_form.xml"));
+        verify(userFileService).saveBasedOnWebForm(any(UserFile.class), eq(projectFile));
     }
 
     @Test
@@ -90,15 +84,4 @@ public class PublicPageControllerTest {
         assertThat(response.getContentAsByteArray(), equalTo(testContent));
     }
 
-    private UserFile saveFileAndGetParameterFromServiceCall(ProjectFile projectFile) throws Exception{
-        when(webFormService.findActiveWebFormById(WEB_FORM_ID)).thenReturn(projectFile);
-        byte[] testContent = "test-content".getBytes();
-        when(remoteFileService.fileContent(projectFile.getEmptyInstanceUrl())).thenReturn(testContent);
-
-        publicPageController.startWebFormSaveFile(WEB_FORM_ID, new MockHttpServletRequest(), null);
-
-        ArgumentCaptor<UserFile> userFileArgumentCaptor = ArgumentCaptor.forClass(UserFile.class);
-        verify(userFileService).save(userFileArgumentCaptor.capture());
-        return userFileArgumentCaptor.getValue();
-    }
 }

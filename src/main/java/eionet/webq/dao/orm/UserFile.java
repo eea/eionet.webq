@@ -71,6 +71,22 @@ public class UserFile {
     @Column(name = "cdr_file")
     private boolean fromCdr;
     /**
+     * Cdr envelope URL.
+     */
+    @Column
+    private String envelope;
+    /**
+     * Cdr authorization.
+     */
+    @Column
+    private String authorization;
+    /**
+     * File title.
+     */
+    @Column(name = "instance_title")
+    private String title;
+
+    /**
      * File upload date.
      */
     @Temporal(TemporalType.TIMESTAMP)
@@ -175,6 +191,30 @@ public class UserFile {
 
     public void setFromCdr(boolean fromCdr) {
         this.fromCdr = fromCdr;
+    }
+
+    public String getEnvelope() {
+        return envelope;
+    }
+
+    public void setEnvelope(String envelope) {
+        this.envelope = envelope;
+    }
+
+    public String getAuthorization() {
+        return authorization;
+    }
+
+    public void setAuthorization(String authorization) {
+        this.authorization = authorization;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
     }
 
     public Date getCreated() {

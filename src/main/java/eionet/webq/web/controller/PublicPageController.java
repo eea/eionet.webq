@@ -29,7 +29,6 @@ import eionet.webq.service.FileNotAvailableException;
 import eionet.webq.service.UserFileService;
 import eionet.webq.service.WebFormService;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
@@ -49,9 +48,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Collection;
 
-import static eionet.webq.web.controller.cdr.IntegrationWithCDRController.WEB_FORM_PARAMETERS;
-import static org.apache.commons.lang3.StringUtils.defaultIfEmpty;
-import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 /**
  * Base controller for front page actions.
@@ -184,24 +180,14 @@ public class PublicPageController {
      *
      * @param formId webform id
      * @param request current request
-     * @param webFormParameters web form parameters flash model attribute
      * @return redirection URL of webform with correct parameters
      * @throws FileNotAvailableException if empty instance URL is filled for selected webform, but the resource is not available.
      */
     @RequestMapping(value = "/startWebform")
-    public String startWebFormSaveFile(@RequestParam int formId, HttpServletRequest request,
-                                       @ModelAttribute(WEB_FORM_PARAMETERS) String webFormParameters)
+    public String startWebFormSaveFile(@RequestParam int formId, HttpServletRequest request)
             throws FileNotAvailableException {
-        ProjectFile webForm = webFormService.findActiveWebFormById(formId);
-        String emptyInstanceUrl = webForm.getEmptyInstanceUrl();
-        UserFile file = new UserFile();
-        file.setName(defaultIfEmpty(request.getParameter("fileName"), defaultIfEmpty(webForm.getNewXmlFileName(), "new_form.xml")));
-        file.setXmlSchema(webForm.getXmlSchema());
-        int fileId = isNotEmpty(emptyInstanceUrl)
-                ? userFileService.saveWithContentFromRemoteLocation(file, emptyInstanceUrl)
-                : userFileService.save(file);
-        return "redirect:/xform/?formId=" + webForm.getId() + "&fileId=" + fileId + "&base_uri=" + request.getContextPath()
-                + StringUtils.defaultString(webFormParameters);
+        int fileId = userFileService.saveBasedOnWebForm(new UserFile(), webFormService.findActiveWebFormById(formId));
+        return "redirect:/xform/?formId=" + formId + "&fileId=" + fileId + "&base_uri=" + request.getContextPath();
     }
 
     /**
