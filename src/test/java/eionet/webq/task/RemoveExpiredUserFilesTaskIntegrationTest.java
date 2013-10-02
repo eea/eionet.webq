@@ -34,6 +34,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.util.Date;
 
@@ -69,14 +70,37 @@ public class RemoveExpiredUserFilesTaskIntegrationTest {
 
     @Test
     public void removeFileIfItIsExpired() throws Exception {
-        Date expired = DateUtils.addSeconds(DateUtils.addHours(new Date(), -task.getExpirationHours()), -1);
-        factory.getCurrentSession().createQuery("UPDATE UserFile SET created=:created")
-                .setTimestamp("created", new Timestamp(expired.getTime())).executeUpdate();
+        setFileAsExpired();
 
         assertThat(userFileService.allUploadedFiles().size(), equalTo(1));
 
         task.removeExpiredUserFiles();
 
         assertThat(userFileService.allUploadedFiles().size(), equalTo(0));
+    }
+
+    @Test
+    public void whenRemovingFileContentIsAlsoRemoved() throws Exception {
+        setFileAsExpired();
+
+        assertThat(userFileService.allUploadedFiles().size(), equalTo(1));
+        assertThat(getFileContentRowsCount(), equalTo(1));
+
+        task.removeExpiredUserFiles();
+
+        assertThat(userFileService.allUploadedFiles().size(), equalTo(0));
+        assertThat(getFileContentRowsCount(), equalTo(0));
+    }
+
+    private int getFileContentRowsCount() {
+        BigInteger count = (BigInteger) factory.getCurrentSession()
+                .createSQLQuery("select count(*) from file_content").uniqueResult();
+        return count.intValue();
+    }
+
+    private void setFileAsExpired() {
+        Date expired = DateUtils.addSeconds(DateUtils.addHours(new Date(), -task.getExpirationHours()), -1);
+        factory.getCurrentSession().createQuery("UPDATE UserFile SET created=:created")
+                .setTimestamp("created", new Timestamp(expired.getTime())).executeUpdate();
     }
 }

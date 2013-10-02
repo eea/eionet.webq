@@ -21,9 +21,11 @@
 package eionet.webq.task;
 
 import org.apache.commons.lang3.time.DateUtils;
-import org.hibernate.Query;
+import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.criterion.Criterion;
+import org.hibernate.criterion.SimpleExpression;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -37,7 +39,6 @@ import java.util.Properties;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -49,7 +50,7 @@ public class RemoveExpiredUserFilesTaskTest {
     @Mock
     private Session session;
     @Mock
-    private Query query;
+    private Criteria criteria;
     @Mock
     private Properties properties;
     @InjectMocks
@@ -61,18 +62,19 @@ public class RemoveExpiredUserFilesTaskTest {
         MockitoAnnotations.initMocks(this);
         when(properties.getProperty("user.file.expiration.hours")).thenReturn(Integer.toString(expirationTimeInHours));
         when(factory.getCurrentSession()).thenReturn(session);
-        when(session.createQuery(anyString())).thenReturn(query);
-        when(query.setTimestamp(anyString(), any(Timestamp.class))).thenReturn(query);
+        when(session.createCriteria(any(Class.class))).thenReturn(criteria);
+        when(criteria.add(any(Criterion.class))).thenReturn(criteria);
     }
 
     @Test
     public void performsRemovalBasedOnConfiguredProperties() throws Exception {
         removeExpiredUserFilesTask.removeExpiredUserFiles();
 
-        ArgumentCaptor<Date> dateCaptor = ArgumentCaptor.forClass(Date.class);
-        verify(query).setTimestamp(anyString(), dateCaptor.capture());
+        ArgumentCaptor<SimpleExpression> criterionCaptor = ArgumentCaptor.forClass(SimpleExpression.class);
+        verify(criteria).add(criterionCaptor.capture());
 
         Date expectedDate = DateUtils.addHours(new Date(), -expirationTimeInHours);
-        assertEquals(expectedDate.getTime(), dateCaptor.getValue().getTime(), 1000);
+        Timestamp date = (Timestamp) criterionCaptor.getValue().getValue();
+        assertEquals(expectedDate.getTime(), date.getTime(), 1000);
     }
 }

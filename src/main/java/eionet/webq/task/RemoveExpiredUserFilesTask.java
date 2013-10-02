@@ -20,16 +20,21 @@
  */
 package eionet.webq.task;
 
+import eionet.webq.dao.orm.UserFile;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.log4j.Logger;
+import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.criterion.Restrictions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
 import java.util.Date;
+import java.util.List;
 import java.util.Properties;
 
 /**
@@ -57,13 +62,19 @@ public class RemoveExpiredUserFilesTask {
      * Perform removal task.
      */
     @Scheduled(cron = "0 0 0 * * *")
+    @Transactional
     public void removeExpiredUserFiles() {
         Integer hoursAgo = getExpirationHours();
         Date allowedDate = DateUtils.addHours(new Date(), -hoursAgo);
         LOGGER.info("Removing user files created before " + allowedDate + "(in storage more than " + hoursAgo + " hours). ");
 
-        int rowsAffected = factory.getCurrentSession().createQuery("DELETE FROM UserFile WHERE created < :allowedDate")
-                .setTimestamp("allowedDate", new Timestamp(allowedDate.getTime())).executeUpdate();
+        Session currentSession = factory.getCurrentSession();
+        List rowsAffected = currentSession.createCriteria(UserFile.class)
+                .add(Restrictions.le("created", new Timestamp(allowedDate.getTime())))
+                .list();
+        for (Object row : rowsAffected) {
+            currentSession.delete(row);
+        }
 
         LOGGER.info("Removal successful. Removed " + rowsAffected + " files.");
     }
