@@ -259,7 +259,8 @@ public class UserFile {
 
     @Override
     public String toString() {
-        return "UserFile{" + "id=" + id + ", file=" + file + ", xmlSchema='" + xmlSchema + '\''
-                + ", created=" + created + ", updated=" + updated + '}';
+        return "UserFile{" + "id=" + id + ", userId='" + userId + '\'' + ", file=" + file + ", xmlSchema='" + xmlSchema + '\''
+                + ", fromCdr=" + fromCdr + ", envelope='" + envelope + '\'' + ", title='" + title + '\'' + ", created=" + created
+                + ", updated=" + updated + ", downloaded=" + downloaded + ", availableConversions=" + availableConversions + '}';
     }
 }

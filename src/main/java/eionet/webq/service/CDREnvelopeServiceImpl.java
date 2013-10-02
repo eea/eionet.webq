@@ -23,6 +23,7 @@ package eionet.webq.service;
 import eionet.webq.dao.orm.UserFile;
 import eionet.webq.dto.CdrRequest;
 import eionet.webq.dto.XmlSaveResult;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.xmlrpc.XmlRpcException;
 import org.apache.xmlrpc.client.XmlRpcClient;
@@ -88,9 +89,13 @@ public class CDREnvelopeServiceImpl implements CDREnvelopeService {
 
     @Override
     @Transactional
-    public XmlSaveResult pushXmlFile(UserFile file, CdrRequest parameters) {
-        String saveXmlUrl = parameters.getEnvelopeUrl() + '/' + saveXmlFilesMethod;
-        HttpEntity<MultiValueMap<String, Object>> requestParameters = prepareXmlSaveRequestParameters(file, parameters);
+    public XmlSaveResult pushXmlFile(UserFile file) {
+        if (!file.isFromCdr()) {
+            LOGGER.error("File is not belong to cdr. " + file);
+            throw new IllegalArgumentException("Provided file is not belong to CDR!");
+        }
+        String saveXmlUrl = file.getEnvelope() + '/' + saveXmlFilesMethod;
+        HttpEntity<MultiValueMap<String, Object>> requestParameters = prepareXmlSaveRequestParameters(file);
 
         ResponseEntity<String> entity = restOperations.postForEntity(saveXmlUrl, requestParameters, String.class);
 
@@ -107,13 +112,13 @@ public class CDREnvelopeServiceImpl implements CDREnvelopeService {
      * Prepares parameters for saveXml remote method.
      *
      * @param file file to be saved.
-     * @param parameters parameters from CDR
      * @return http entity representing request
      */
-    private HttpEntity<MultiValueMap<String, Object>> prepareXmlSaveRequestParameters(UserFile file, CdrRequest parameters) {
+    private HttpEntity<MultiValueMap<String, Object>> prepareXmlSaveRequestParameters(UserFile file) {
         HttpHeaders authorization = new HttpHeaders();
-        if (parameters.isAuthorizationSet()) {
-            authorization.add("Authorization", parameters.getBasicAuthorization());
+        String authorizationInfo = file.getAuthorization();
+        if (StringUtils.isNotEmpty(authorizationInfo)) {
+            authorization.add("Authorization", authorizationInfo);
         }
 
         HttpHeaders fileHeaders = new HttpHeaders();
@@ -123,7 +128,7 @@ public class CDREnvelopeServiceImpl implements CDREnvelopeService {
         MultiValueMap<String, Object> request = new LinkedMultiValueMap<String, Object>();
         request.add("file", new HttpEntity<byte[]>(file.getContent(), fileHeaders));
         request.add("file_id", new HttpEntity<String>(file.getName()));
-        request.add("title", new HttpEntity<String>(parameters.getInstanceTitle()));
+        request.add("title", new HttpEntity<String>(StringUtils.defaultString(file.getTitle())));
 
         return new HttpEntity<MultiValueMap<String, Object>>(request, authorization);
     }

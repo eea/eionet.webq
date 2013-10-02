@@ -135,7 +135,7 @@ public class CDREnvelopeServiceImplTest {
 
     @Test(expected = CDREnvelopeException.class)
     public void throwsExceptionWhenUnexpectedResponseFormat() throws Exception {
-        whenGetXmlFilesRequest().thenReturn(singletonMap("schema", new Object[] {Collections.emptyList()}));
+        whenGetXmlFilesRequest().thenReturn(singletonMap("schema", new Object[]{Collections.emptyList()}));
 
         cdrEnvelopeService.getXmlFiles(parametersWithUrl);
     }
@@ -144,9 +144,12 @@ public class CDREnvelopeServiceImplTest {
     public void onSaveXmlUseEnvelopeUrlWithRemoteMethodName() throws Exception {
         restOperationWillReturnResponseStringAndStatus(HttpStatus.OK);
         cdrEnvelopeService.saveXmlFilesMethod = "save";
-        cdrEnvelopeService.pushXmlFile(new UserFile(), parametersWithUrl);
 
-        verify(restOperations).postForEntity(eq(parametersWithUrl.getEnvelopeUrl() + "/save"), anyObject(), any(Class.class));
+        UserFile file = fileFromCdr();
+        file.setEnvelope(parametersWithUrl.getEnvelopeUrl());
+        cdrEnvelopeService.pushXmlFile(file);
+
+        verify(restOperations).postForEntity(eq(file.getEnvelope() + "/save"), anyObject(), any(Class.class));
     }
 
     @SuppressWarnings("unchecked")
@@ -155,9 +158,12 @@ public class CDREnvelopeServiceImplTest {
         restOperationWillReturnResponseStringAndStatus(HttpStatus.OK);
         byte[] content = "file-content".getBytes();
         String fileName = "file.name";
-        parametersWithUrl.setAuthorizationSet(true);
-        parametersWithUrl.setBasicAuthorization("Basic 123");
-        cdrEnvelopeService.pushXmlFile(new UserFile(new UploadedFile(fileName, content), ""), parametersWithUrl);
+
+        UserFile file = new UserFile(new UploadedFile(fileName, content), "");
+        file.setFromCdr(true);
+        file.setAuthorization("Basic 123");
+
+        cdrEnvelopeService.pushXmlFile(file);
 
         ArgumentCaptor<Object> requestCaptor = ArgumentCaptor.forClass(Object.class);
         verify(restOperations).postForEntity(anyString(), requestCaptor.capture(), any(Class.class));
@@ -176,7 +182,7 @@ public class CDREnvelopeServiceImplTest {
     public void saveXmlWillReturnXmlSaveResult() throws Exception {
         restOperationWillReturnResponseStringAndStatus(HttpStatus.OK);
 
-        XmlSaveResult xmlSaveResult = cdrEnvelopeService.pushXmlFile(new UserFile(), parametersWithUrl);
+        XmlSaveResult xmlSaveResult = cdrEnvelopeService.pushXmlFile(fileFromCdr());
 
         assertNotNull(xmlSaveResult);
         assertThat(xmlSaveResult.getCode(), equalTo(1));
@@ -186,7 +192,7 @@ public class CDREnvelopeServiceImplTest {
     public void ifResponseStatusIsNotHttpOkReturnResultWithError() throws Exception {
         restOperationWillReturnResponseStringAndStatus(HttpStatus.BAD_REQUEST);
 
-        XmlSaveResult xmlSaveResult = cdrEnvelopeService.pushXmlFile(new UserFile(), parametersWithUrl);
+        XmlSaveResult xmlSaveResult = cdrEnvelopeService.pushXmlFile(fileFromCdr());
 
         assertThat(xmlSaveResult.getCode(), equalTo(0));
     }
@@ -194,6 +200,12 @@ public class CDREnvelopeServiceImplTest {
     @Test(expected = CDREnvelopeException.class)
     public void throwsExceptionWhenUrlIsMalformed() throws Exception {
         cdrEnvelopeService.getXmlFiles(createWebQMenuParameters("malformed-url"));
+    }
+
+    private UserFile fileFromCdr() {
+        UserFile userFile = new UserFile();
+        userFile.setFromCdr(true);
+        return userFile;
     }
 
     private void restOperationWillReturnResponseStringAndStatus(HttpStatus status) {

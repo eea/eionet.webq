@@ -22,6 +22,7 @@ package eionet.webq.web.controller;
 
 import eionet.webq.dao.orm.ProjectFile;
 import eionet.webq.dao.orm.UserFile;
+import eionet.webq.service.CDREnvelopeService;
 import eionet.webq.service.RemoteFileService;
 import eionet.webq.service.UserFileService;
 import eionet.webq.service.WebFormService;
@@ -53,6 +54,8 @@ public class PublicPageControllerTest {
     private PublicPageController publicPageController = new PublicPageController();
     @Mock
     private RemoteFileService remoteFileService;
+    @Mock
+    private CDREnvelopeService envelopeService;
 
     @Before
     public void setUp() throws Exception {
@@ -67,6 +70,21 @@ public class PublicPageControllerTest {
         publicPageController.startWebFormSaveFile(WEB_FORM_ID, new MockHttpServletRequest());
 
         verify(userFileService).saveBasedOnWebForm(any(UserFile.class), eq(projectFile));
+    }
+
+    @Test
+    public void ifFileIsFromCdrSaveItToEnvelope() throws Exception {
+        UserFile userFile = new UserFile();
+        userFile.setId(1);
+        userFile.setFromCdr(true);
+        when(userFileService.getById(userFile.getId())).thenReturn(userFile);
+
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        request.setContent("request-content".getBytes());
+
+        publicPageController.saveXml(userFile.getId(), request);
+
+        verify(envelopeService).pushXmlFile(any(UserFile.class));
     }
 
     @Test

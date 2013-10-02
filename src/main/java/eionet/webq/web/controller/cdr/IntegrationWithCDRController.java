@@ -223,10 +223,9 @@ public class IntegrationWithCDRController {
      */
     private String editFile(ProjectFile webForm, String fileName, String remoteFileUrl, CdrRequest request)
             throws FileNotAvailableException {
-        UserFile userFile = new UserFile();
+        UserFile userFile = userFileBasedOn(request);
         userFile.setName(fileName);
         userFile.setXmlSchema(webForm.getXmlSchema());
-        userFile.setFromCdr(true);
 
         int fileId = userFileService.save(userFile);
         String envelopeParam = (request.getEnvelopeUrl() != null) ? "&envelope=" + request.getEnvelopeUrl() : "";

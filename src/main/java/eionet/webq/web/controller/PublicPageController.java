@@ -24,6 +24,7 @@ import eionet.webq.dao.orm.ProjectFile;
 import eionet.webq.dao.orm.UserFile;
 import eionet.webq.dto.UploadForm;
 import eionet.webq.dto.XmlSaveResult;
+import eionet.webq.service.CDREnvelopeService;
 import eionet.webq.service.ConversionService;
 import eionet.webq.service.FileNotAvailableException;
 import eionet.webq.service.UserFileService;
@@ -73,6 +74,11 @@ public class PublicPageController {
      */
     @Autowired
     private WebFormService webFormService;
+    /**
+     * Cdr envelope service.
+     */
+    @Autowired
+    private CDREnvelopeService envelopeService;
 
     /**
      * Action to be performed on http GET method and path '/'.
@@ -158,15 +164,17 @@ public class PublicPageController {
     @ResponseBody
     @Transactional
     public XmlSaveResult saveXml(@RequestParam int fileId, HttpServletRequest request) {
-        XmlSaveResult saveResult = null;
+        UserFile file = userFileService.getById(fileId);
+        XmlSaveResult saveResult = XmlSaveResult.valueOfSuccess();
         InputStream input = null;
         try {
             input = request.getInputStream();
             byte[] fileContent = IOUtils.toByteArray(input);
-            UserFile file = userFileService.getById(fileId);
             file.setContent(fileContent);
+            if (file.isFromCdr()) {
+                return envelopeService.pushXmlFile(file);
+            }
             userFileService.updateContent(file);
-            saveResult = XmlSaveResult.valueOfSuccess();
         } catch (Exception e) {
             saveResult = XmlSaveResult.valueOfError(e.toString());
         } finally {

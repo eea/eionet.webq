@@ -40,10 +40,9 @@ public interface CDREnvelopeService {
      * Allows to push xml file content to cdr.
      *
      * @param file user file
-     * @param parameters cdr parameters
      * @return save result
      */
-    XmlSaveResult pushXmlFile(UserFile file, CdrRequest parameters);
+    XmlSaveResult pushXmlFile(UserFile file);
 
     /**
      * Envelope service xml file data.
