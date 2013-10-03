@@ -19,7 +19,32 @@
         <link rel="stylesheet" type="text/css" href="http://www.eionet.europa.eu/styles/eionet2007/handheld.css" media="handheld" />
         <link rel="stylesheet" type="text/css" href="http://www.eionet.europa.eu/styles/eionet2007/screen.css" media="screen" title="Eionet 2007 style" />
         <link rel="stylesheet" type="text/css" href="../bfResources/scripts/dojox/highlight/resources/highlight.css" />
-
+        <link href="http://code.jquery.com/ui/1.10.3/themes/start/jquery-ui.min.css" rel="stylesheet" type="text/css"/>
+        <script type="text/javascript" src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
+        <script type="text/javascript" src="http://code.jquery.com/ui/1.10.3/jquery-ui.min.js"></script>
+        <script type="text/javascript">
+            $($.ajax({
+                url: "http://localhost:8080/webq2/download/project/my-project/file/species_lookup.xml",
+                type: "xml",
+                method: "GET",
+                success: function(xmlDocument) {
+                    var mainGroups = $("helpers main_groups main_group", xmlDocument)
+                            .map(function () {
+                                var text = $(this).text();
+                                return {id: text, value: text}
+                            }).get();
+                    var mainGroupsField = $(".main_groups:input");
+                    mainGroupsField.autocomplete({
+                                source: mainGroups,
+                                minLength: 0,
+                                select: function(event, ui) {
+                                    mainGroupsField.text(ui.item.id);
+                                }
+                            }
+                    );
+                }
+            }));
+        </script>
         <style type="text/css">
             .bold{
                 font-weight: bold;
@@ -547,7 +572,10 @@
 						</xf:trigger>
 
    		<!-- ##################################         add species        ############################################-->
-
+                        <div class="ui-widget">
+                            <label for="main_groups">Main group</label>
+                            <input id="main_groups" class="main_groups" />
+                        </div>
 					<bfc:dialog id="speciesDialog">
 						<xf:label>Add species</xf:label>
 						<xf:group appearance="bf:verticalTable">
