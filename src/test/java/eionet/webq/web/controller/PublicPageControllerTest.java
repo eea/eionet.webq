@@ -74,17 +74,43 @@ public class PublicPageControllerTest {
 
     @Test
     public void ifFileIsFromCdrSaveItToEnvelope() throws Exception {
-        UserFile userFile = new UserFile();
-        userFile.setId(1);
-        userFile.setFromCdr(true);
-        when(userFileService.getById(userFile.getId())).thenReturn(userFile);
+        UserFile userFile = userFileServiceWillReturnUserFileFromCdr();
 
-        MockHttpServletRequest request = new MockHttpServletRequest();
-        request.setContent("request-content".getBytes());
+        publicPageController.saveXml(userFile.getId(), requestWillHaveContent());
+
+        verify(envelopeService).pushXmlFile(any(UserFile.class));
+    }
+
+    @Test
+    public void onXmlSave_IfFileIsFromCdrAndRequestHasRestrictedParameterSetToTrue_SetUserFileRestrictionParametersToTrue() throws Exception {
+        UserFile userFile = userFileServiceWillReturnUserFileFromCdr();
+        MockHttpServletRequest request = requestWillHaveContent();
+        request.setParameter("restricted", "true");
 
         publicPageController.saveXml(userFile.getId(), request);
 
-        verify(envelopeService).pushXmlFile(any(UserFile.class));
+        assertThat(userFile.isApplyRestriction(), equalTo(true));
+        assertThat(userFile.isRestricted(), equalTo(true));
+    }
+
+    @Test
+    public void onXmlSave_IfFileIsFromCdrAndRestrictedAttributeNotSet_UserFileRestrictionParametersWillBeSetToFalse() throws Exception {
+        UserFile userFile = userFileServiceWillReturnUserFileFromCdr();
+        publicPageController.saveXml(userFile.getId(), requestWillHaveContent());
+
+        assertThat(userFile.isApplyRestriction(), equalTo(false));
+        assertThat(userFile.isRestricted(), equalTo(false));
+    }
+
+    @Test
+    public void onXmlSave_IfFileIsFromCdrAndRestrictedAttributeSetToFalse_UserFileApplyRestrictionWillBeTrueButRestrictedWillBeSetToFalse() throws Exception {
+        UserFile userFile = userFileServiceWillReturnUserFileFromCdr();
+        MockHttpServletRequest request = requestWillHaveContent();
+        request.setParameter("restricted", "false");
+        publicPageController.saveXml(userFile.getId(), request);
+
+        assertThat(userFile.isApplyRestriction(), equalTo(true));
+        assertThat(userFile.isRestricted(), equalTo(false));
     }
 
     @Test
@@ -102,4 +128,17 @@ public class PublicPageControllerTest {
         assertThat(response.getContentAsByteArray(), equalTo(testContent));
     }
 
+    private UserFile userFileServiceWillReturnUserFileFromCdr() {
+        UserFile userFile = new UserFile();
+        userFile.setId(1);
+        userFile.setFromCdr(true);
+        when(userFileService.getById(userFile.getId())).thenReturn(userFile);
+        return userFile;
+    }
+
+    private MockHttpServletRequest requestWillHaveContent() {
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        request.setContent("request-content".getBytes());
+        return request;
+    }
 }

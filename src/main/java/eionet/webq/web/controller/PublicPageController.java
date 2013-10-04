@@ -30,6 +30,7 @@ import eionet.webq.service.FileNotAvailableException;
 import eionet.webq.service.UserFileService;
 import eionet.webq.service.WebFormService;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
@@ -172,6 +173,9 @@ public class PublicPageController {
             byte[] fileContent = IOUtils.toByteArray(input);
             file.setContent(fileContent);
             if (file.isFromCdr()) {
+                String restricted = request.getParameter("restricted");
+                file.setApplyRestriction(StringUtils.isNotEmpty(restricted));
+                file.setRestricted(Boolean.valueOf(restricted));
                 return envelopeService.pushXmlFile(file);
             }
             userFileService.updateContent(file);
