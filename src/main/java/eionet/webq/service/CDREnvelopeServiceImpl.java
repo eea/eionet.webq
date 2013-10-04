@@ -76,6 +76,11 @@ public class CDREnvelopeServiceImpl implements CDREnvelopeService {
      */
     @Value("#{ws['cdr.save.xml']}")
     String saveXmlFilesMethod;
+    /**
+     * Conversion service.
+     */
+    @Autowired
+    private ConversionService conversionService;
 
     @Override
     public MultiValueMap<String, XmlFile> getXmlFiles(CdrRequest parameters) {
@@ -126,7 +131,11 @@ public class CDREnvelopeServiceImpl implements CDREnvelopeService {
         fileHeaders.setContentType(MediaType.TEXT_XML);
 
         MultiValueMap<String, Object> request = new LinkedMultiValueMap<String, Object>();
-        request.add("file", new HttpEntity<byte[]>(file.getContent(), fileHeaders));
+        byte[] content = file.getContent();
+        if (StringUtils.isNotEmpty(file.getConversionId())) {
+            content = conversionService.convert(file, Integer.valueOf(file.getConversionId())).getBody();
+        }
+        request.add("file", new HttpEntity<byte[]>(content, fileHeaders));
         request.add("file_id", new HttpEntity<String>(file.getName()));
         request.add("title", new HttpEntity<String>(StringUtils.defaultString(file.getTitle())));
         if (file.isApplyRestriction()) {

@@ -176,6 +176,7 @@ public class PublicPageController {
                 String restricted = request.getParameter("restricted");
                 file.setApplyRestriction(StringUtils.isNotEmpty(restricted));
                 file.setRestricted(Boolean.valueOf(restricted));
+                file.setConversionId(request.getParameter("xsl"));
                 return envelopeService.pushXmlFile(file);
             }
             userFileService.updateContent(file);

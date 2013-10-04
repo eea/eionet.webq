@@ -91,6 +91,11 @@ public class UserFile {
     @Transient
     private boolean restricted;
     /**
+     * Xsl transformation required for this file.
+     */
+    @Transient
+    private String conversionId;
+    /**
      * File title.
      */
     @Column(name = "instance_title")
@@ -233,6 +238,14 @@ public class UserFile {
 
     public void setRestricted(boolean restricted) {
         this.restricted = restricted;
+    }
+
+    public String getConversionId() {
+        return conversionId;
+    }
+
+    public void setConversionId(String conversionId) {
+        this.conversionId = conversionId;
     }
 
     public String getTitle() {

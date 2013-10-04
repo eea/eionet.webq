@@ -76,6 +76,8 @@ public class CDREnvelopeServiceImplTest {
     private XmlRpcClient xmlRpcClient;
     @Mock
     private RestOperations restOperations;
+    @Mock
+    private ConversionService conversionService;
 
     @Before
     public void setUp() throws Exception {
@@ -237,6 +239,21 @@ public class CDREnvelopeServiceImplTest {
 
         assertNull(request.getBody().getFirst("applyRestriction"));
         assertNull(request.getBody().getFirst("restricted"));
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void onPrepareXmlSaveParameters_IfConversionParameterSpecified_ConvertFileContent() throws Exception {
+        UserFile file = new UserFile();
+        file.setContent("file-content".getBytes());
+        file.setConversionId("1");
+        byte[] xslTransformedContent = "xsl-transformed".getBytes();
+        when(conversionService.convert(file, 1)).thenReturn(new ResponseEntity<byte[]>(xslTransformedContent, HttpStatus.OK));
+
+        HttpEntity<MultiValueMap<String, Object>> request = cdrEnvelopeService.prepareXmlSaveRequestParameters(file);
+
+        HttpEntity<byte[]> requestContent = (HttpEntity<byte[]>) request.getBody().getFirst("file");
+        assertThat(requestContent.getBody(), equalTo(xslTransformedContent));
     }
 
     private UserFile fileFromCdr() {
