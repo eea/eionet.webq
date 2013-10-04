@@ -81,6 +81,16 @@ public class UserFile {
     @Column
     private String authorization;
     /**
+     * Whether restriction should be applied on this file.
+     */
+    @Transient
+    private boolean applyRestriction;
+    /**
+     * Whether file is with restricted access.
+     */
+    @Transient
+    private boolean restricted;
+    /**
      * File title.
      */
     @Column(name = "instance_title")
@@ -207,6 +217,22 @@ public class UserFile {
 
     public void setAuthorization(String authorization) {
         this.authorization = authorization;
+    }
+
+    public boolean isApplyRestriction() {
+        return applyRestriction;
+    }
+
+    public void setApplyRestriction(boolean applyRestriction) {
+        this.applyRestriction = applyRestriction;
+    }
+
+    public boolean isRestricted() {
+        return restricted;
+    }
+
+    public void setRestricted(boolean restricted) {
+        this.restricted = restricted;
     }
 
     public String getTitle() {
