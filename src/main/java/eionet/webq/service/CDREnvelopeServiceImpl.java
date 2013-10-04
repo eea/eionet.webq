@@ -114,7 +114,7 @@ public class CDREnvelopeServiceImpl implements CDREnvelopeService {
      * @param file file to be saved.
      * @return http entity representing request
      */
-    private HttpEntity<MultiValueMap<String, Object>> prepareXmlSaveRequestParameters(UserFile file) {
+    HttpEntity<MultiValueMap<String, Object>> prepareXmlSaveRequestParameters(UserFile file) {
         HttpHeaders authorization = new HttpHeaders();
         String authorizationInfo = file.getAuthorization();
         if (StringUtils.isNotEmpty(authorizationInfo)) {
@@ -129,6 +129,10 @@ public class CDREnvelopeServiceImpl implements CDREnvelopeService {
         request.add("file", new HttpEntity<byte[]>(file.getContent(), fileHeaders));
         request.add("file_id", new HttpEntity<String>(file.getName()));
         request.add("title", new HttpEntity<String>(StringUtils.defaultString(file.getTitle())));
+        if (file.isApplyRestriction()) {
+            request.add("applyRestriction", new HttpEntity<String>("1"));
+            request.add("restricted", new HttpEntity<String>(file.isRestricted() ? "1" : "0"));
+        }
 
         return new HttpEntity<MultiValueMap<String, Object>>(request, authorization);
     }

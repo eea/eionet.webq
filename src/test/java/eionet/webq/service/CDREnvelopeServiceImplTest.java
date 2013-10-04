@@ -53,6 +53,7 @@ import static eionet.webq.service.CDREnvelopeService.XmlFile;
 import static java.util.Collections.singletonMap;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
@@ -200,6 +201,42 @@ public class CDREnvelopeServiceImplTest {
     @Test(expected = CDREnvelopeException.class)
     public void throwsExceptionWhenUrlIsMalformed() throws Exception {
         cdrEnvelopeService.getXmlFiles(createWebQMenuParameters("malformed-url"));
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void onPrepareXmlSaveParameters_IfFileRestrictedParametersSetToTrue_AddRestrictionParametersForCdr() throws Exception {
+        UserFile file = new UserFile();
+        file.setApplyRestriction(true);
+        file.setRestricted(true);
+        HttpEntity<MultiValueMap<String, Object>> request = cdrEnvelopeService.prepareXmlSaveRequestParameters(file);
+
+        HttpEntity<String> restricted = (HttpEntity<String>) request.getBody().getFirst("restricted");
+        assertThat(restricted.getBody(), equalTo("1"));
+        HttpEntity<String> applyRestriction = (HttpEntity<String>) request.getBody().getFirst("applyRestriction");
+        assertThat(applyRestriction.getBody(), equalTo("1"));
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void onPrepareXmlSaveParameters_IfRestrictedSetToFalse_ApplyRestrictionWillBeTrueRestrictedWillBeFalse() throws Exception {
+        UserFile file = new UserFile();
+        file.setApplyRestriction(true);
+        file.setRestricted(false);
+        HttpEntity<MultiValueMap<String, Object>> request = cdrEnvelopeService.prepareXmlSaveRequestParameters(file);
+
+        HttpEntity<String> restricted = (HttpEntity<String>) request.getBody().getFirst("restricted");
+        assertThat(restricted.getBody(), equalTo("0"));
+        HttpEntity<String> applyRestriction = (HttpEntity<String>) request.getBody().getFirst("applyRestriction");
+        assertThat(applyRestriction.getBody(), equalTo("1"));
+    }
+
+    @Test
+    public void onPrepareSaveXmlParameters_IfApplyRestrictionsSetToFalse_NoRestrictionParametersWillBeSet() throws Exception {
+        HttpEntity<MultiValueMap<String, Object>> request = cdrEnvelopeService.prepareXmlSaveRequestParameters(new UserFile());
+
+        assertNull(request.getBody().getFirst("applyRestriction"));
+        assertNull(request.getBody().getFirst("restricted"));
     }
 
     private UserFile fileFromCdr() {
