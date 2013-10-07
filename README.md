@@ -4,7 +4,7 @@ Eionet WebQuestionnaires 2
 Introduction
 ------------
 The system lets anonymous users to create and edit XML files by using webforms. 
-The webforms are implemented in XForms language and they are maintained in the system.
+The webforms are implemented in the XForms language and they are maintained in the system.
 
 Main Features
 -------------
