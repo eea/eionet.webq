@@ -21,6 +21,7 @@
 package eionet.webq.converter;
 
 import eionet.webq.dto.CdrRequest;
+import eionet.webq.web.interceptor.CdrAuthorizationInterceptor;
 import org.apache.commons.net.util.Base64;
 import org.junit.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -82,7 +83,7 @@ public class CdrRequestConverterTest {
 
     @Test
     public void setUserNameAndPasswordIfAuthorizationHeaderIsBASIC() throws Exception {
-        String authorizationInfo = "Basic " + new String(Base64.encodeBase64("username:password".getBytes()));
+        String authorizationInfo = getBasicAuthHeader();
         request.addHeader("Authorization", authorizationInfo);
 
         CdrRequest parameters = cdrRequestConverter.convert(request);
@@ -124,6 +125,20 @@ public class CdrRequestConverterTest {
 
         assertThat(convert.getInstanceName(), equalTo(fileName));
         assertThat(convert.getEnvelopeUrl(), equalTo(envelopeUrl));
+    }
+
+    @Test
+    public void ifAuthenticationAgainstCdrUnsuccessful_DoNotSetAuthenticationInfo() throws Exception {
+        request.setAttribute(CdrAuthorizationInterceptor.AUTHORIZATION_FAILED_ATTRIBUTE, "not null attribute");
+        request.addHeader("Authorization", getBasicAuthHeader());
+        CdrRequest convert = cdrRequestConverter.convert(request);
+
+        assertFalse(convert.isAuthorizationSet());
+        assertNull(convert.getBasicAuthorization());
+    }
+
+    private String getBasicAuthHeader() {
+        return "Basic " + new String(Base64.encodeBase64("username:password".getBytes()));
     }
 }
 

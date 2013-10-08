@@ -34,10 +34,15 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestOperations;
 
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
+import static eionet.webq.web.interceptor.CdrAuthorizationInterceptor.ALLOWED_AUTHORIZATION_FAILURES_COUNT;
+import static eionet.webq.web.interceptor.CdrAuthorizationInterceptor.AUTHORIZATION_FAILED_ATTRIBUTE;
+import static eionet.webq.web.interceptor.CdrAuthorizationInterceptor.AUTHORIZATION_TRY_COUNT;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.hamcrest.core.StringContains.containsString;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
@@ -53,6 +58,9 @@ public class CdrAuthorizationInterceptorTest {
     private CdrAuthorizationInterceptor interceptor;
     @Mock
     private RestOperations restOperations;
+    @Mock
+    private HttpSession session;
+
     private final String loginUrl = "login";
 
     @Before
@@ -72,7 +80,7 @@ public class CdrAuthorizationInterceptorTest {
 
     @Test
     public void whenQueryForUrlThroughInterceptor_ifAuthorizationNotEmptyAndResponseCodeIsFound_AllowToProceed() throws Exception {
-        MockHttpServletRequest request = authenticationHeaderWillNotBeEmpty();
+        MockHttpServletRequest request = requestWithNonEmptyAuthHeader();
         when(restOperations.postForEntity(anyString(), anyObject(), any(Class.class))).thenReturn(
                 new ResponseEntity(HttpStatus.FOUND));
 
@@ -81,7 +89,7 @@ public class CdrAuthorizationInterceptorTest {
 
     @Test
     public void whenQueryForUrlThroughInterceptor_extractUrlFromBaseUriRequestParameter() throws Exception {
-        MockHttpServletRequest request = authenticationHeaderWillNotBeEmpty();
+        MockHttpServletRequest request = requestWithNonEmptyAuthHeader();
         String expectedValue = "http://cdr.eu";
         request.setParameter("base_uri", expectedValue);
         assertUrlIsExtracted(request, "http://cdr.eu");
@@ -89,7 +97,7 @@ public class CdrAuthorizationInterceptorTest {
 
     @Test
     public void whenQueryForUrlThroughInterceptor_extractUrlFromEnvelopeRequestParameter() throws Exception {
-        MockHttpServletRequest request = authenticationHeaderWillNotBeEmpty();
+        MockHttpServletRequest request = requestWithNonEmptyAuthHeader();
         String expectedValue = "http://cdr.eu";
         request.setParameter("envelope", expectedValue + "/envelope");
         assertUrlIsExtracted(request, "http://cdr.eu");
@@ -97,7 +105,7 @@ public class CdrAuthorizationInterceptorTest {
 
     @Test
     public void whenQueryForUrlThroughInterceptor_extractUrlFromInstanceRequestParameter() throws Exception {
-        MockHttpServletRequest request = authenticationHeaderWillNotBeEmpty();
+        MockHttpServletRequest request = requestWithNonEmptyAuthHeader();
         String expectedValue = "http://cdr.eu";
         request.setParameter("instance", expectedValue + "/instance");
         assertUrlIsExtracted(request, "http://cdr.eu");
@@ -105,15 +113,57 @@ public class CdrAuthorizationInterceptorTest {
 
     @Test
     public void whenQueryForUrlThroughInterceptor_IfResponseCodeExceptionThrown_CommenceBasicAuthorization() throws Exception {
-        MockHttpServletRequest request = authenticationHeaderWillNotBeEmpty();
-        when(restOperations.postForEntity(anyString(), anyObject(), any(Class.class)))
-                .thenThrow(new HttpClientErrorException(HttpStatus.UNAUTHORIZED));
+        restClientWillThrowException();
 
         MockHttpServletResponse response = new MockHttpServletResponse();
-        boolean proceed = interceptor.preHandle(request, response, null);
+        boolean proceed = interceptor.preHandle(requestWithNonEmptyAuthHeader(), response, null);
 
         assertFalse(proceed);
         assertThatResponseIsBasicAuthorizationCommence(response);
+    }
+
+    @Test
+    public void whenQueryForUrlThroughInterceptor_IfLoginAttemptIsUnsuccessful_FailedAuthAttemptsCountIs1() throws Exception {
+        restClientWillThrowException();
+
+        assertFalse(interceptor.preHandle(requestWithNonEmptyAuthHeader(), new MockHttpServletResponse(), null));
+
+        verify(session).setAttribute(AUTHORIZATION_TRY_COUNT, 1);
+    }
+
+    @Test
+    public void whenQueryForUrlThroughInterceptor_IfThereWas1UnsuccessfulLoginAttemptAndThereIsAnotherFailedAttempt_FailedAttemptsCountIs2() throws Exception {
+        when(session.getAttribute(AUTHORIZATION_TRY_COUNT)).thenReturn(1);
+        restClientWillThrowException();
+
+        assertFalse(interceptor.preHandle(requestWithNonEmptyAuthHeader(), new MockHttpServletResponse(), null));
+
+        verify(session).setAttribute(AUTHORIZATION_TRY_COUNT, 2);
+    }
+
+    @Test
+    public void whenQueryForUrlThroughInterceptor_IfTUnsuccessfulLoginAttemptEqualsToAllowedFailsCount_AllowRequestToProceed() throws Exception {
+        when(session.getAttribute(AUTHORIZATION_TRY_COUNT)).thenReturn(ALLOWED_AUTHORIZATION_FAILURES_COUNT);
+        restClientWillThrowException();
+
+        assertTrue(interceptor.preHandle(requestWithNonEmptyAuthHeader(), new MockHttpServletResponse(), null));
+    }
+
+    @Test
+    public void whenQueryForUrlThroughInterceptor_IfAllowsToProceedByFailedAttemptsCount_SetRequestAttributeAndResetCounter() throws Exception {
+        when(session.getAttribute(AUTHORIZATION_TRY_COUNT)).thenReturn(ALLOWED_AUTHORIZATION_FAILURES_COUNT);
+        restClientWillThrowException();
+
+        MockHttpServletRequest request = requestWithNonEmptyAuthHeader();
+
+        assertTrue(interceptor.preHandle(request, new MockHttpServletResponse(), null));
+        assertNotNull(request.getAttribute(AUTHORIZATION_FAILED_ATTRIBUTE));
+        verify(session).removeAttribute(AUTHORIZATION_TRY_COUNT);
+    }
+
+    private void restClientWillThrowException() {
+        when(restOperations.postForEntity(anyString(), anyObject(), any(Class.class)))
+                .thenThrow(new HttpClientErrorException(HttpStatus.UNAUTHORIZED));
     }
 
     private void assertUrlIsExtracted(MockHttpServletRequest request, String expectedValue) throws Exception {
@@ -128,7 +178,7 @@ public class CdrAuthorizationInterceptorTest {
         assertThat(urlCaptor.getValue(), containsString(expectedValue));
     }
 
-    private MockHttpServletRequest authenticationHeaderWillNotBeEmpty() {
+    private MockHttpServletRequest requestWithNonEmptyAuthHeader() {
         MockHttpServletRequest request = new MockHttpServletRequest();
         request.addHeader("Authorization", "Basic 1jkahsd==");
         return request;
