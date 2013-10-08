@@ -21,6 +21,7 @@
 package eionet.webq.converter;
 
 import eionet.webq.dto.CdrRequest;
+import eionet.webq.web.interceptor.CdrAuthorizationInterceptor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.net.util.Base64;
 import org.springframework.core.convert.converter.Converter;
@@ -71,7 +72,7 @@ public class CdrRequestConverter implements Converter<HttpServletRequest, CdrReq
         }
 
         String authorizationHeader = httpRequest.getHeader("Authorization");
-        if (hasBasicAuthorization(authorizationHeader)) {
+        if (authorizationAgainstCdrSucceed(httpRequest) && hasBasicAuthorization(authorizationHeader)) {
             setAuthorizationDetails(parameters, authorizationHeader);
         }
         parameters.setAdditionalParametersAsQueryString(createQueryStringFromParametersNotRead(parametersTracker));
@@ -132,6 +133,17 @@ public class CdrRequestConverter implements Converter<HttpServletRequest, CdrReq
             }
         }
         return builder.toString();
+    }
+
+    /**
+     * Check whether authorization against CDR succeed.
+     *
+     * @param request http request
+     * @return is authorization succeed
+     */
+    private boolean authorizationAgainstCdrSucceed(HttpServletRequest request) {
+        Object attribute = request.getAttribute(CdrAuthorizationInterceptor.AUTHORIZATION_FAILED_ATTRIBUTE);
+        return attribute == null;
     }
 
     /**
