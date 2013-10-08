@@ -19,8 +19,29 @@
         <link rel="stylesheet" type="text/css" href="http://www.eionet.europa.eu/styles/eionet2007/handheld.css" media="handheld" />
         <link rel="stylesheet" type="text/css" href="http://www.eionet.europa.eu/styles/eionet2007/screen.css" media="screen" title="Eionet 2007 style" />
         <link rel="stylesheet" type="text/css" href="../bfResources/scripts/dojox/highlight/resources/highlight.css" />
-
+        <link href="http://code.jquery.com/ui/1.10.3/themes/start/jquery-ui.min.css" rel="stylesheet" type="text/css"/>
+        <script type="text/javascript" src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
+        <script type="text/javascript" src="http://code.jquery.com/ui/1.10.3/jquery-ui.min.js"></script>
+        <script type="text/javascript">
+            $($.ajax({
+                url: "http://localhost:8080/webq2/download/project/my-project/file/species_lookup.xml",
+                type: "xml",
+                method: "GET",
+                success: function(xmlDocument) {
+                    $(".specie_select input").autocomplete({
+                        source: $("species specie", xmlDocument)
+                                .map(function () {
+                                    return {value: $(this).find("specname").text()};
+                                }).get(),
+                        minLength: 0
+                    });
+                }
+            }));
+        </script>
         <style type="text/css">
+            .ui-autocomplete {
+                z-index: 1000 !important;
+            }
             .bold{
                 font-weight: bold;
                 padding-right:5px;
@@ -560,10 +581,37 @@
                             <xf:label> Add species </xf:label>
                             <bfc:show dialog="speciesDialog" ev:event="DOMActivate"/>
                         </xf:trigger>
-
-           <!-- ##################################         add species        ############################################-->
-
                     <bfc:dialog id="speciesDialog">
+                        <xf:label>Add species</xf:label>
+                        <xf:group appearance="bf:verticalTable">
+                            <xf:output value="''"/>
+                            <xf:input class="wide-inp specie_select" bind="b-species-freetext-value"><xf:label>Species as free text</xf:label></xf:input>
+                        </xf:group>
+                        <xf:group>
+                            <div class="section-buttons">
+                                <xf:trigger>
+                                    <xf:label> Add </xf:label>
+                                    <xf:insert at="last()" position="after" nodeset="/derogations/derogation[index('rDerogList')]/species"
+                                        if="count(/derogations/derogation[index('rDerogList')]/species)&gt;1 or /derogations/derogation[index('rDerogList')]/species[1] != '' and
+                                        (string-length(instance('context')/speciesFreetextValue) &gt; 0)"/>
+                                    <xf:setvalue ref="/derogations/derogation[index('rDerogList')]/species[index('rSpecies')]" value="instance('context')/speciesFreetextValue" if="string-length(instance('context')/*[name()=concat('selSpecies-',instance('context')/activeDirective)]) = 0 and string-length(instance('context')/speciesFreetextValue) > 0"/>
+                                    <xf:setvalue ref="/derogations/derogation[index('rDerogList')]/species[index('rSpecies')]" value="instance('context')/*[name()=concat('selSpecies-',instance('context')/activeDirective)]" if="string-length(instance('context')/*[name()=concat('selSpecies-',instance('context')/activeDirective)]) > 0 "/>
+                                    <xf:setvalue ref="instance('context')/speciesFreetextValue" value="''" />
+                                    <bfc:hide dialog="speciesDialog" ev:event="DOMActivate"></bfc:hide>
+                                </xf:trigger>
+                                <xf:trigger>
+                                    <xf:label>Cancel</xf:label>
+                                    <bfc:hide dialog="speciesDialog" ev:event="DOMActivate"></bfc:hide>
+                                </xf:trigger>
+                            </div>
+                        </xf:group>
+                    </bfc:dialog>
+                </xf:group>
+                    <xf:group appearance="compact">
+                        <xf:label>Geography</xf:label>
+                        <xf:input ref="location" class="wide-inp"><xf:label>Location</xf:label></xf:input>
+
+                    <bfc:dialog id="speciesDialog2">
                         <xf:label>Add species</xf:label>
                         <xf:group appearance="bf:verticalTable">
                     <!--
