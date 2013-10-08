@@ -37,12 +37,14 @@ import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.net.MalformedURLException;
 import java.net.URL;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 
 /**
+ * Intercepts calls to pages for CDR integration.
  */
 @Component
 public class CdrAuthorizationInterceptor extends HandlerInterceptorAdapter {
@@ -59,6 +61,22 @@ public class CdrAuthorizationInterceptor extends HandlerInterceptorAdapter {
      */
     private static final boolean STOP_REQUEST_PROPAGATION = false;
     /**
+     * Session attribute name for counting unsuccessful authorization counts.
+     */
+    static final String AUTHORIZATION_TRY_COUNT = "authorization-try-count";
+    /**
+     * Session attribute name for counting unsuccessful authorization counts.
+     */
+    static final Integer ALLOWED_AUTHORIZATION_FAILURES_COUNT = 3;
+    /**
+     * Authorization header name.
+     */
+    private static final String AUTHORIZATION_HEADER = "Authorization";
+    /**
+     * Authorization failed attribute.
+     */
+    public static final String AUTHORIZATION_FAILED_ATTRIBUTE = CdrAuthorizationInterceptor.class.getName();
+    /**
      * Rest operations.
      */
     @Autowired
@@ -68,20 +86,24 @@ public class CdrAuthorizationInterceptor extends HandlerInterceptorAdapter {
      */
     @Value("#{ws['cdr.login']}")
     private String cdrLoginMethod;
+    /**
+     * Current session.
+     */
+    @Autowired
+    private HttpSession session;
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        String authorization = request.getHeader("Authorization");
+        String authorization = request.getHeader(AUTHORIZATION_HEADER);
         if (StringUtils.isNotEmpty(authorization)) {
             HttpHeaders headers = new HttpHeaders();
-            headers.add("Authorization", authorization);
+            headers.add(AUTHORIZATION_HEADER, authorization);
             try {
                 ResponseEntity<String> loginResponse
                         = restOperations.postForEntity(extractCdrUrl(request) + "/" + cdrLoginMethod,
                         new HttpEntity<Object>(headers), String.class);
-                if (loginResponse.getStatusCode() == HttpStatus.FOUND) {
-                    return PROCEED;
-                }
+                LOGGER.info("Response code received from CDR authorization " + loginResponse.getStatusCode());
+                return PROCEED;
             } catch (HttpStatusCodeException e) {
                 if (e.getStatusCode() != HttpStatus.UNAUTHORIZED) {
                     LOGGER.warn("Authorization against CDR failed with unexpected HTTP status code", e);
@@ -89,9 +111,24 @@ public class CdrAuthorizationInterceptor extends HandlerInterceptorAdapter {
             }
         }
 
+        if (isFailureCountsEqualsToAllowedFailuresCount()) {
+            request.setAttribute(AUTHORIZATION_FAILED_ATTRIBUTE, AUTHORIZATION_FAILED_ATTRIBUTE);
+            session.removeAttribute(AUTHORIZATION_TRY_COUNT);
+            return PROCEED;
+        }
+
+        increaseFailedAuthorizationsCount();
         new BasicAuthenticationEntryPoint().commence(request, response,
                 new BadCredentialsException("credentials are empty or wrong!"));
         return STOP_REQUEST_PROPAGATION;
+    }
+
+    public void setCdrLoginMethod(String cdrLoginMethod) {
+        this.cdrLoginMethod = cdrLoginMethod;
+    }
+
+    private boolean isFailureCountsEqualsToAllowedFailuresCount() {
+        return ALLOWED_AUTHORIZATION_FAILURES_COUNT.equals(session.getAttribute(AUTHORIZATION_TRY_COUNT));
     }
 
     /**
@@ -122,7 +159,11 @@ public class CdrAuthorizationInterceptor extends HandlerInterceptorAdapter {
         }
     }
 
-    public void setCdrLoginMethod(String cdrLoginMethod) {
-        this.cdrLoginMethod = cdrLoginMethod;
+    /**
+     * Increase failed authorizations count.
+     */
+    private void increaseFailedAuthorizationsCount() {
+        Integer failedAttempts = (Integer) session.getAttribute(AUTHORIZATION_TRY_COUNT);
+        session.setAttribute(AUTHORIZATION_TRY_COUNT, failedAttempts != null ? failedAttempts + 1 : 1);
     }
 }
