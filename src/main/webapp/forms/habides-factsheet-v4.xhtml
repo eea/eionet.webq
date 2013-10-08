@@ -28,41 +28,7 @@
                 type: "xml",
                 method: "GET",
                 success: function(xmlDocument) {
-                    var mainGroups = $("helpers main_groups main_group", xmlDocument)
-                            .map(function () {
-                                var text = $(this).text();
-                                return {id: text, value: text}
-                            }).get();
-                    function middleGroupByMainGroup(mainGroup) {
-                        return $("helpers middle_groups middle_group[main_group=" + mainGroup + "]", xmlDocument)
-                                .map(function () {
-                                    var text = $(this).text();
-                                    return {id: text, value: text};
-                                }).get();
-                    }
-                    var mainGroupsField = $(".main_groups:input");
-                    mainGroupsField.autocomplete({
-                                source: mainGroups,
-                                minLength: 0,
-                                select: function(event, ui) {
-                                    if (ui.item) {
-                                        mainGroupsField.text(ui.item.id);
-                                        var middleGroupsField = $(".middle_groups").show();
-                                        middleGroupsField.autocomplete({
-                                            minLength: 0,
-                                            source: middleGroupByMainGroup(ui.item.id),
-                                            select: function(event, ui) {
-                                                console.log(ui.item);
-                                                middleGroupsField.text(ui.item.id);
-                                            }
-                                        });
-                                    }
-                                }
-                            }
-                    );
-
-                    var specieInput = $(".specie_select");
-                    specieInput.autocomplete({
+                    $(".specie_select input").autocomplete({
                         source: $("species specie", xmlDocument)
                                 .map(function () {
                                     return {value: $(this).find("specname").text()};
@@ -73,6 +39,9 @@
             }));
         </script>
         <style type="text/css">
+            .ui-autocomplete {
+                z-index: 1000 !important;
+            }
             .bold{
                 font-weight: bold;
                 padding-right:5px;
@@ -338,7 +307,6 @@
         </xf:model>
 		<xf:model id="lookups-model">
 			<!-- Lookups-->
-			<xf:instance xmlns="" id="species" src="http://webqdev.eionet.europa.eu/xml/habides_species_lookup.xml"/>
 			<!--
 			<xf:instance xmlns="" id="bioregions" src="xml/habides_bioregions_lookup.xml" />
 			<xf:instance xmlns="" id="activities" src="xml/habides_activities_lookup.xml"/>
@@ -346,32 +314,6 @@
 			<xf:instance xmlns="" id="reasons" src="xml/habides_reasons_lookup.xml"/>
 			<xf:instance xmlns="" id="countries" src="xml/habides_country_lookup.xml" />
 			-->
-<!-- species  -->
-				<!--f:bind id="b-lowergr-label" nodeset="instance('context')/lowerGroupLabel" calculate="if(instance('directives')/directive[@id= instance('default')/derogation[index('rDerogList')]/@directive]/@type='habitats','Lower group','Family species')"/-->
-				<xf:bind id="b-maingroup" nodeset="instance('species')/helpers/main_groups/main_group">
-					<xf:bind id="b-maingroup-name" nodeset="."/>
-				</xf:bind>
-				
-<!--
-				<xf:bind id="b-middlegroup" nodeset="instance('species')/helpers/middle_groups/middle_group[@main_group=instance('context')/selMainGroup]">
-					<xf:bind id="b-middlegroup-name" nodeset="."/>
-				</xf:bind>
-
-				<xf:bind id="b-lowergroup-habitats" nodeset="instance('species')/helpers/lower_groups[@type = 'habitats']/lower_group[@middle_group=instance('context')/selMiddleGroup]">
-					<xf:bind id="b-lowergroup-name-habitats" nodeset="."/>
-				</xf:bind>
-
-				<xf:bind id="b-lowergroup-birds" nodeset="instance('species')/helpers/lower_groups[@type = 'birds']/lower_group[@middle_group=instance('context')/selMiddleGroup]">
-					<xf:bind id="b-lowergroup-name-birds" nodeset="."/>
-				</xf:bind>
-
-				<xf:bind id="b-species-list-habitats" nodeset="instance('species')/species[@type = 'habitats']/specie[lower_group=instance('context')/selLowerGroup-habitats]">
-					<xf:bind id="b-species-name-habitats" nodeset="specname"/>
-				</xf:bind>
-				<xf:bind id="b-species-list-birds" nodeset="instance('species')/species[@type = 'birds']/specie[lower_group=instance('context')/selLowerGroup-birds]">
-					<xf:bind id="b-species-name-birds" nodeset="specname"/>
-				</xf:bind>
--->
 		</xf:model>
     </head>
     <body class="fullscreen tundra">
@@ -599,68 +541,11 @@
 						</xf:trigger>
 
    		<!-- ##################################         add species        ############################################-->
-                        <div class="main-groups-widget">
-                            <label for="main_groups">Main group</label>
-                            <input id="main_groups" class="main_groups" />
-                        </div>
-                        <div class="middle-groups-widget">
-                            <label for="middle_groups">Middle group</label>
-                            <input id="middle_groups" style="display: none;" class="middle_groups" />
-                        </div>
-
-                        <div class="free-search-widget">
-                            <label for="specie_select">Select specie</label>
-                            <input id="specie_select" class="specie_select" />
-                        </div>
 					<bfc:dialog id="speciesDialog">
 						<xf:label>Add species</xf:label>
 						<xf:group appearance="bf:verticalTable">
-					<!--
-								<xf:select1 ref="instance('context')/selMainGroup" appearance="minimal">
-								<xf:label>Main group</xf:label>
-								<xf:itemset bind="b-maingroup">
-									<xf:label bind="b-maingroup-name" />
-									<xf:value bind="b-maingroup-name" />
-								</xf:itemset>
-							</xf:select1>
-					<xf:select1 ref="instance('context')/selMiddleGroup" appearance="minimal">
-						<xf:label>Middle group</xf:label>
-						<xf:itemset bind="b-middlegroup">
-							<xf:label bind="b-middlegroup-name" />
-							<xf:value bind="b-middlegroup-name" />
-						</xf:itemset>
-					</xf:select1>
-					<xf:select1 ref="instance('context')/selLowerGroup-birds" appearance="minimal">
-						<xf:label>Family species</xf:label>
-						<xf:itemset bind="b-lowergroup-birds">
-							<xf:label bind="b-lowergroup-name-birds" />
-							<xf:value bind="b-lowergroup-name-birds" />
-						</xf:itemset>
-					</xf:select1>
-					<xf:select1 ref="instance('context')/selSpecies-birds" appearance="minimal">
-						<xf:label>Species name</xf:label>
-						<xf:itemset bind="b-species-list-birds">
-							<xf:label bind="b-species-name-birds" />
-							<xf:value bind="b-species-name-birds" />
-						</xf:itemset>
-					</xf:select1>
-					<xf:select1 ref="instance('context')/selLowerGroup-habitats" appearance="minimal">
-						<xf:label>Lower group</xf:label>
-						<xf:itemset bind="b-lowergroup-habitats">
-							<xf:label bind="b-lowergroup-name-habitats" />
-							<xf:value bind="b-lowergroup-name-habitats" />
-						</xf:itemset>
-					</xf:select1>
-					<xf:select1 ref="instance('context')/selSpecies-habitats" appearance="minimal">
-						<xf:label>Species name</xf:label>
-						<xf:itemset bind="b-species-list-habitats">
-							<xf:label bind="b-species-name-habitats" />
-							<xf:value bind="b-species-name-habitats" />
-						</xf:itemset>
-					</xf:select1>
-					-->
 							<xf:output value="''"/>
-							<xf:input class="wide-inp" bind="b-species-freetext-value"><xf:label>Species as free text</xf:label></xf:input>
+							<xf:input class="wide-inp specie_select" bind="b-species-freetext-value"><xf:label>Species as free text</xf:label></xf:input>
 						</xf:group>
 						<xf:group>
 							<div class="section-buttons">
