@@ -2,8 +2,6 @@
 <script type="text/javascript" src="<c:url value="/js/jquery-1.10.2.min.js"/>"></script>
 
 <script type="text/javascript">
-
-
     function getSelectedFileValue() {
         return $('#selectFile').val();
     }
@@ -27,23 +25,29 @@
         }
     }
 
-    $(showWarningIfNotAllFilesDownloaded);
-
     function showStartWebformArea() {
         $("#startWebformArea").show();
         $("#uploadXmlArea").hide();
     }
+
     function showUploadXmlArea() {
         $("#startWebformArea").hide();
         $("#uploadXmlArea").show();
     }
+    function hideFilesTableIfNoFilesPresent() {
+        if (!$("tr.user_file").length) {
+            $("div.files").hide();
+        }
+    }
 
     var init = function() {
+        hideFilesTableIfNoFilesPresent();
         $("#startWebformArea").hide();
         $("#uploadXmlArea").hide();
+        showWarningIfNotAllFilesDownloaded();
     };
 
-    $(document).ready(init);
+    $(init);
 
 </script>
 <style type="text/css">
