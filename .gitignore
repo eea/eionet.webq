@@ -1,6 +1,7 @@
 .idea/*
 config/local.properties
-target/*
+# target/ will match a directory target and paths underneath it, but not a regular file
+target/
 webq2.iml
 /.checkstyle
 /.classpath
