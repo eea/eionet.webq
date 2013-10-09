@@ -20,10 +20,27 @@
  */
 package eionet.webq.service;
 
-import eionet.webq.dao.orm.UploadedFile;
-import eionet.webq.dao.orm.UserFile;
-import eionet.webq.dto.CdrRequest;
-import eionet.webq.dto.XmlSaveResult;
+import static java.util.Collections.singletonMap;
+import static org.hamcrest.core.IsEqual.equalTo;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyList;
+import static org.mockito.Matchers.anyObject;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.apache.xmlrpc.XmlRpcException;
 import org.apache.xmlrpc.client.XmlRpcClient;
 import org.apache.xmlrpc.client.XmlRpcClientConfig;
@@ -42,27 +59,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestOperations;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import static eionet.webq.service.CDREnvelopeService.XmlFile;
-import static java.util.Collections.singletonMap;
-import static org.hamcrest.core.IsEqual.equalTo;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyList;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import eionet.webq.dao.orm.UploadedFile;
+import eionet.webq.dao.orm.UserFile;
+import eionet.webq.dto.CdrRequest;
+import eionet.webq.dto.XmlSaveResult;
+import eionet.webq.service.CDREnvelopeService.XmlFile;
 
 
 /**
@@ -248,7 +249,7 @@ public class CDREnvelopeServiceImplTest {
         file.setContent("file-content".getBytes());
         file.setConversionId("1");
         byte[] xslTransformedContent = "xsl-transformed".getBytes();
-        when(conversionService.convert(file, 1)).thenReturn(new ResponseEntity<byte[]>(xslTransformedContent, HttpStatus.OK));
+        when(conversionService.convert(file, "1")).thenReturn(new ResponseEntity<byte[]>(xslTransformedContent, HttpStatus.OK));
 
         HttpEntity<MultiValueMap<String, Object>> request = cdrEnvelopeService.prepareXmlSaveRequestParameters(file);
 
@@ -285,5 +286,5 @@ public class CDREnvelopeServiceImplTest {
         cdrRequest.setPassword(password);
         return cdrRequest;
     }
-    
+
 }

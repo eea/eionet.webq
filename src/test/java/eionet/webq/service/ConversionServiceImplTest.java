@@ -20,11 +20,20 @@
  */
 package eionet.webq.service;
 
-import configuration.ApplicationTestContextWithMockSession;
-import eionet.webq.dao.orm.UploadedFile;
-import eionet.webq.dao.orm.UserFile;
-import eionet.webq.dto.Conversion;
-import eionet.webq.dto.ListConversionResponse;
+import static org.hamcrest.core.IsEqual.equalTo;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -41,21 +50,13 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestOperations;
+
 import util.CacheCleaner;
-
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-
-import static org.hamcrest.core.IsEqual.equalTo;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import configuration.ApplicationTestContextWithMockSession;
+import eionet.webq.dao.orm.UploadedFile;
+import eionet.webq.dao.orm.UserFile;
+import eionet.webq.dto.Conversion;
+import eionet.webq.dto.ListConversionResponse;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {ApplicationTestContextWithMockSession.class})
@@ -111,23 +112,42 @@ public class ConversionServiceImplTest {
                 .thenReturn(new ResponseEntity<byte[]>("response".getBytes(), HttpStatus.OK));
         UserFile userFile = new UserFile();
         userFile.setContent(testContent);
-        conversionService.convert(userFile, 1);
+        conversionService.convert(userFile, convertId);
 
         ArgumentCaptor<MultiValueMap> postParameters = ArgumentCaptor.forClass(MultiValueMap.class);
         verify(restOperations).postForEntity(anyString(), postParameters.capture(), eq(byte[].class));
 
-        assertPostParametersAreCorrect(((MultiValueMap<String, Object>)postParameters.getValue()), testContent, convertId);
+        assertPostParametersAreCorrect((postParameters.getValue()), testContent, Integer.toString(convertId));
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void convertRequestShouldContainRequiredStringConversionIdAttribute() throws Exception {
+        final byte[] testContent = "test content".getBytes();
+        final String convertId = "conversion.xsl";
+
+        when(restOperations.postForEntity(anyString(), any(), eq(byte[].class)))
+                .thenReturn(new ResponseEntity<byte[]>("response".getBytes(), HttpStatus.OK));
+        UserFile userFile = new UserFile();
+        userFile.setContent(testContent);
+        conversionService.convert(userFile, convertId);
+
+        ArgumentCaptor<MultiValueMap> postParameters = ArgumentCaptor.forClass(MultiValueMap.class);
+        verify(restOperations).postForEntity(anyString(), postParameters.capture(), eq(byte[].class));
+
+        assertPostParametersAreCorrect((postParameters.getValue()), testContent, convertId);
     }
 
     @Test(expected = RuntimeException.class)
     public void throwsExceptionIfRetrievedAnswerFromConversionWasNotOk() throws Exception {
-        when(restOperations.postForEntity(anyString(), any(), eq(byte[].class))).thenReturn(new ResponseEntity<byte[]>(HttpStatus.BAD_REQUEST));
+        when(restOperations.postForEntity(anyString(), any(), eq(byte[].class))).thenReturn(
+                new ResponseEntity<byte[]>(HttpStatus.BAD_REQUEST));
 
         conversionService.convert(new UserFile(new UploadedFile("file", "file-content".getBytes()), "xml-schema"), 1);
     }
 
     @SuppressWarnings("unchecked")
-    private void assertPostParametersAreCorrect(MultiValueMap<String, Object> postParameters, byte[] content, int convertId) {
+    private void assertPostParametersAreCorrect(MultiValueMap<String, Object> postParameters, byte[] content, String convertId) {
         for (List<Object> objects : postParameters.values()) {
             assertThat(objects.size(), equalTo(1));
         }
@@ -140,7 +160,7 @@ public class ConversionServiceImplTest {
         assertContentTypeAndContentDispositionSetForConvertFileParameter(convertFile);
 
         HttpEntity<String> convertIdParameter = (HttpEntity<String>) singleValues.get("convert_id");
-        assertThat(convertIdParameter.getBody(), equalTo(Integer.toString(convertId)));
+        assertThat(convertIdParameter.getBody(), equalTo(convertId));
     }
 
     private void assertContentTypeAndContentDispositionSetForConvertFileParameter(HttpEntity<byte[]> convertFile) {

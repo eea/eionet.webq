@@ -20,9 +20,12 @@
  */
 package eionet.webq.service;
 
-import eionet.webq.dao.orm.UserFile;
-import eionet.webq.dto.CdrRequest;
-import eionet.webq.dto.XmlSaveResult;
+import static java.util.Collections.emptyList;
+
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Map;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.xmlrpc.XmlRpcException;
@@ -42,11 +45,9 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestOperations;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.Map;
-
-import static java.util.Collections.emptyList;
+import eionet.webq.dao.orm.UserFile;
+import eionet.webq.dto.CdrRequest;
+import eionet.webq.dto.XmlSaveResult;
 
 /**
  */
@@ -133,7 +134,7 @@ public class CDREnvelopeServiceImpl implements CDREnvelopeService {
         MultiValueMap<String, Object> request = new LinkedMultiValueMap<String, Object>();
         byte[] content = file.getContent();
         if (StringUtils.isNotEmpty(file.getConversionId())) {
-            content = conversionService.convert(file, Integer.valueOf(file.getConversionId())).getBody();
+            content = conversionService.convert(file, file.getConversionId()).getBody();
         }
         request.add("file", new HttpEntity<byte[]>(content, fileHeaders));
         request.add("file_id", new HttpEntity<String>(file.getName()));
