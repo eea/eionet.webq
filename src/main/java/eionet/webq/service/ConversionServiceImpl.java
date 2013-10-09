@@ -20,9 +20,8 @@
  */
 package eionet.webq.service;
 
-import eionet.webq.dao.orm.UserFile;
-import eionet.webq.dto.Conversion;
-import eionet.webq.dto.ListConversionResponse;
+import java.util.List;
+
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -37,7 +36,9 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestOperations;
 
-import java.util.List;
+import eionet.webq.dao.orm.UserFile;
+import eionet.webq.dto.Conversion;
+import eionet.webq.dto.ListConversionResponse;
 
 /**
  * Conversion service implementation.
@@ -81,9 +82,14 @@ public class ConversionServiceImpl implements ConversionService {
 
     @Override
     public ResponseEntity<byte[]> convert(UserFile fileContent, int conversionId) {
+        return convert(fileContent, Integer.toString(conversionId));
+    }
+
+    @Override
+    public ResponseEntity<byte[]> convert(UserFile fileContent, String conversionId) {
         MultiValueMap<String, Object> request = new LinkedMultiValueMap<String, Object>();
         request.add(convertPushFileParameter, createFileHttpEntity(fileContent));
-        request.add(convertPushIdParameter, new HttpEntity<String>(Integer.toString(conversionId)));
+        request.add(convertPushIdParameter, new HttpEntity<String>(conversionId));
 
         ResponseEntity<byte[]> entity = restOperations.postForEntity(apiCallTo(convertPush), request, byte[].class);
         LOGGER.info("Response from conversion service for file=" + fileContent.getName() + ", conversionId=" + conversionId
@@ -103,8 +109,7 @@ public class ConversionServiceImpl implements ConversionService {
     /**
      * Creates and sets required headers for file push.
      *
-     * @param fileContent
-     *            file content and name
+     * @param fileContent file content and name
      * @return new {@link HttpEntity} with required headers and body set
      */
     private HttpEntity<byte[]> createFileHttpEntity(UserFile fileContent) {

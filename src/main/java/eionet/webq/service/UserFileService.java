@@ -20,6 +20,7 @@
  */
 package eionet.webq.service;
 
+import eionet.webq.dao.orm.ProjectFile;
 import eionet.webq.dao.orm.UserFile;
 
 import java.util.Collection;
@@ -40,11 +41,11 @@ public interface UserFileService {
      * Save data from uploaded file to storage.
      *
      * @param file uploaded file to be saved to storagena
-     * @param url url from which file content will be loaded
+     * @param webForm web form
      * @return auto generated id of inserted record
      * @throws eionet.webq.service.FileNotAvailableException if remote file not available
      */
-    int saveWithContentFromRemoteLocation(UserFile file, String url) throws FileNotAvailableException;
+    int saveBasedOnWebForm(UserFile file, ProjectFile webForm) throws FileNotAvailableException;
 
     /**
      * Fetches uploaded file from storage by specified id. User access to this file must be checked. Only

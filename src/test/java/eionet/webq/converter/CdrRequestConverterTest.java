@@ -21,6 +21,7 @@
 package eionet.webq.converter;
 
 import eionet.webq.dto.CdrRequest;
+import eionet.webq.web.interceptor.CdrAuthorizationInterceptor;
 import org.apache.commons.net.util.Base64;
 import org.junit.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -65,6 +66,7 @@ public class CdrRequestConverterTest {
         assertFalse(parameters.isAuthorizationSet());
         assertNull(parameters.getUserName());
         assertNull(parameters.getPassword());
+        assertNull(parameters.getBasicAuthorization());
     }
 
     @Test
@@ -76,22 +78,25 @@ public class CdrRequestConverterTest {
         assertFalse(parameters.isAuthorizationSet());
         assertNull(parameters.getUserName());
         assertNull(parameters.getPassword());
+        assertNull(parameters.getBasicAuthorization());
     }
 
     @Test
     public void setUserNameAndPasswordIfAuthorizationHeaderIsBASIC() throws Exception {
-        request.addHeader("Authorization", "Basic " + new String(Base64.encodeBase64("username:password".getBytes())));
+        String authorizationInfo = getBasicAuthHeader();
+        request.addHeader("Authorization", authorizationInfo);
 
         CdrRequest parameters = cdrRequestConverter.convert(request);
 
         assertTrue(parameters.isAuthorizationSet());
         assertThat(parameters.getUserName(), equalTo("username"));
         assertThat(parameters.getPassword(), equalTo("password"));
+        assertThat(parameters.getBasicAuthorization(), equalTo(authorizationInfo));
     }
 
     @Test
     public void additionalParametersStringWillNotContainWebQParameters() throws Exception {
-        request.addParameter("instance", "instance");
+        request.addParameter("instance", "instance.url/file.xml");
         request.addParameter("country", "ee");
         CdrRequest parameters = cdrRequestConverter.convert(request);
         assertThat(parameters.getAdditionalParametersAsQueryString(), equalTo("&country=ee"));
@@ -109,6 +114,31 @@ public class CdrRequestConverterTest {
     public void additionalParametersAreEmptyIfNoSuchParameters() throws Exception {
         CdrRequest parameters = cdrRequestConverter.convert(request);
         assertThat(parameters.getAdditionalParametersAsQueryString(), equalTo(""));
+    }
+
+    @Test
+    public void splitInstanceUrlToEnvelopeAndInstanceName() throws Exception {
+        String fileName = "file.xml";
+        String envelopeUrl = "http://instance.url";
+        request.setParameter("instance", envelopeUrl + "/" + fileName);
+        CdrRequest convert = cdrRequestConverter.convert(request);
+
+        assertThat(convert.getInstanceName(), equalTo(fileName));
+        assertThat(convert.getEnvelopeUrl(), equalTo(envelopeUrl));
+    }
+
+    @Test
+    public void ifAuthenticationAgainstCdrUnsuccessful_DoNotSetAuthenticationInfo() throws Exception {
+        request.setAttribute(CdrAuthorizationInterceptor.AUTHORIZATION_FAILED_ATTRIBUTE, "not null attribute");
+        request.addHeader("Authorization", getBasicAuthHeader());
+        CdrRequest convert = cdrRequestConverter.convert(request);
+
+        assertFalse(convert.isAuthorizationSet());
+        assertNull(convert.getBasicAuthorization());
+    }
+
+    private String getBasicAuthHeader() {
+        return "Basic " + new String(Base64.encodeBase64("username:password".getBytes()));
     }
 }
 

@@ -20,7 +20,9 @@
  */
 package eionet.webq.service;
 
+import eionet.webq.dao.orm.UserFile;
 import eionet.webq.dto.CdrRequest;
+import eionet.webq.dto.XmlSaveResult;
 import org.springframework.util.MultiValueMap;
 
 /**
@@ -33,6 +35,14 @@ public interface CDREnvelopeService {
      * @return xml files grouped by xml schema
      */
     MultiValueMap<String, XmlFile> getXmlFiles(CdrRequest parameters);
+
+    /**
+     * Allows to push xml file content to cdr.
+     *
+     * @param file user file
+     * @return save result
+     */
+    XmlSaveResult pushXmlFile(UserFile file);
 
     /**
      * Envelope service xml file data.

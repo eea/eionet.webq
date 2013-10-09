@@ -22,6 +22,7 @@ package eionet.webq.service;
 
 import eionet.webq.dao.UserFileDownload;
 import eionet.webq.dao.UserFileStorage;
+import eionet.webq.dao.orm.ProjectFile;
 import eionet.webq.dao.orm.UserFile;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +31,9 @@ import org.springframework.stereotype.Service;
 import javax.servlet.http.HttpSession;
 import java.util.Arrays;
 import java.util.Collection;
+
+import static org.apache.commons.lang3.StringUtils.defaultIfEmpty;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 /**
  * {@link UserFileService} implementation.
@@ -74,9 +78,13 @@ public class UserFileServiceImpl implements UserFileService {
     }
 
     @Override
-    public int saveWithContentFromRemoteLocation(UserFile file, String url) throws FileNotAvailableException {
-        file.setContent(remoteFileService.fileContent(url));
-        return save(file);
+    public int saveBasedOnWebForm(UserFile file, ProjectFile webForm) throws FileNotAvailableException {
+        String emptyInstanceUrl = webForm.getEmptyInstanceUrl();
+        file.setName(defaultIfEmpty(file.getName(), defaultIfEmpty(webForm.getNewXmlFileName(), "new_form.xml")));
+        file.setXmlSchema(webForm.getXmlSchema());
+        return isNotEmpty(emptyInstanceUrl)
+                ? saveWithContentFromRemoteLocation(file, emptyInstanceUrl)
+                : save(file);
     }
 
     @Override
@@ -114,6 +122,17 @@ public class UserFileServiceImpl implements UserFileService {
         storage.remove(userId, fileIds);
     }
 
+    /**
+     * Set file content from remote location and saves it.
+     * @param file file
+     * @param url file content remote location
+     * @return file id in storage
+     * @throws FileNotAvailableException if file not available from remote location
+     */
+    private int saveWithContentFromRemoteLocation(UserFile file, String url) throws FileNotAvailableException {
+        file.setContent(remoteFileService.fileContent(url));
+        return save(file);
+    }
     /**
      * Provides current http session id.
      *

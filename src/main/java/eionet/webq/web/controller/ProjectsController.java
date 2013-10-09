@@ -284,7 +284,7 @@ public class ProjectsController {
     @Transactional
     public String updateFileContent(@PathVariable String projectFolderId, @PathVariable int fileId, Model model) {
         ProjectEntry project = projectService.getByProjectId(projectFolderId);
-        ProjectFile file = projectFileService.getById(fileId); //TODO no  file content here
+        ProjectFile file = projectFileService.getById(fileId);
         try {
             projectFileService.updateContent(fileId, remoteFileService.fileContent(file.getRemoteFileUrl()), project);
         } catch (FileNotAvailableException e) {

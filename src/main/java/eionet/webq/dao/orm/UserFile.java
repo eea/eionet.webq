@@ -66,6 +66,42 @@ public class UserFile {
     @Column(name = "xml_schema")
     private String xmlSchema;
     /**
+     * Is this file origin is CDR?
+     */
+    @Column(name = "cdr_file")
+    private boolean fromCdr;
+    /**
+     * Cdr envelope URL.
+     */
+    @Column
+    private String envelope;
+    /**
+     * Cdr authorization.
+     */
+    @Column
+    private String authorization;
+    /**
+     * Whether restriction should be applied on this file.
+     */
+    @Transient
+    private boolean applyRestriction;
+    /**
+     * Whether file is with restricted access.
+     */
+    @Transient
+    private boolean restricted;
+    /**
+     * Xsl transformation required for this file.
+     */
+    @Transient
+    private String conversionId;
+    /**
+     * File title.
+     */
+    @Column(name = "instance_title")
+    private String title;
+
+    /**
      * File upload date.
      */
     @Temporal(TemporalType.TIMESTAMP)
@@ -164,6 +200,62 @@ public class UserFile {
         this.xmlSchema = xmlSchema;
     }
 
+    public boolean isFromCdr() {
+        return fromCdr;
+    }
+
+    public void setFromCdr(boolean fromCdr) {
+        this.fromCdr = fromCdr;
+    }
+
+    public String getEnvelope() {
+        return envelope;
+    }
+
+    public void setEnvelope(String envelope) {
+        this.envelope = envelope;
+    }
+
+    public String getAuthorization() {
+        return authorization;
+    }
+
+    public void setAuthorization(String authorization) {
+        this.authorization = authorization;
+    }
+
+    public boolean isApplyRestriction() {
+        return applyRestriction;
+    }
+
+    public void setApplyRestriction(boolean applyRestriction) {
+        this.applyRestriction = applyRestriction;
+    }
+
+    public boolean isRestricted() {
+        return restricted;
+    }
+
+    public void setRestricted(boolean restricted) {
+        this.restricted = restricted;
+    }
+
+    public String getConversionId() {
+        return conversionId;
+    }
+
+    public void setConversionId(String conversionId) {
+        this.conversionId = conversionId;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
     public Date getCreated() {
         return created;
     }
@@ -206,7 +298,8 @@ public class UserFile {
 
     @Override
     public String toString() {
-        return "UserFile{" + "id=" + id + ", file=" + file + ", xmlSchema='" + xmlSchema + '\''
-                + ", created=" + created + ", updated=" + updated + '}';
+        return "UserFile{" + "id=" + id + ", userId='" + userId + '\'' + ", file=" + file + ", xmlSchema='" + xmlSchema + '\''
+                + ", fromCdr=" + fromCdr + ", envelope='" + envelope + '\'' + ", title='" + title + '\'' + ", created=" + created
+                + ", updated=" + updated + ", downloaded=" + downloaded + ", availableConversions=" + availableConversions + '}';
     }
 }

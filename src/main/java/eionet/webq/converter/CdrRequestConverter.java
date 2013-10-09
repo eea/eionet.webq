@@ -20,17 +20,19 @@
  */
 package eionet.webq.converter;
 
-import java.util.ArrayList;
-import java.util.Collection;
-
-import javax.servlet.http.HttpServletRequest;
-
+import eionet.webq.dto.CdrRequest;
+import eionet.webq.web.interceptor.CdrAuthorizationInterceptor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.net.util.Base64;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
 
-import eionet.webq.dto.CdrRequest;
+import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
+import java.util.Collection;
+
+import static org.apache.commons.lang3.StringUtils.isEmpty;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 /**
  * Converts {@link javax.servlet.http.HttpServletRequest} to {@link eionet.webq.dto.CdrRequest}.
@@ -54,16 +56,24 @@ public class CdrRequestConverter implements Converter<HttpServletRequest, CdrReq
         parameters.setSchema(parametersTracker.getParameter("schema"));
         parameters.setNewFormCreationAllowed(Boolean.valueOf(parametersTracker.getParameter("add")));
         parameters.setNewFileName(parametersTracker.getParameter("file_id"));
-        parameters.setInstanceUrl(parametersTracker.getParameter("instance"));
+        String instanceUrl = parametersTracker.getParameter("instance");
+        parameters.setInstanceUrl(instanceUrl);
+        if (isNotEmpty(instanceUrl)) {
+            int fileNameSeparatorIndex = instanceUrl.lastIndexOf("/");
+            parameters.setInstanceName(instanceUrl.substring(fileNameSeparatorIndex + 1));
+            if (isEmpty(parameters.getEnvelopeUrl())) {
+                parameters.setEnvelopeUrl(instanceUrl.substring(0, fileNameSeparatorIndex));
+            }
+        }
         parameters.setInstanceTitle(parametersTracker.getParameter("instance_title"));
 
-        if (StringUtils.isEmpty(parameters.getEnvelopeUrl()) && StringUtils.isNotEmpty(parameters.getInstanceUrl())){
+        if (StringUtils.isEmpty(parameters.getEnvelopeUrl()) && StringUtils.isNotEmpty(parameters.getInstanceUrl())) {
             parameters.setEnvelopeUrl(StringUtils.substringBeforeLast(parameters.getInstanceUrl(), "/"));
         }
 
         String authorizationHeader = httpRequest.getHeader("Authorization");
-        if (hasBasicAuthorization(authorizationHeader)) {
-            setAuthorizationDetails(parameters, extractCredentialsFromBasicAuthorization(authorizationHeader));
+        if (authorizationAgainstCdrSucceed(httpRequest) && hasBasicAuthorization(authorizationHeader)) {
+            setAuthorizationDetails(parameters, authorizationHeader);
         }
         parameters.setAdditionalParametersAsQueryString(createQueryStringFromParametersNotRead(parametersTracker));
         return parameters;
@@ -73,13 +83,15 @@ public class CdrRequestConverter implements Converter<HttpServletRequest, CdrReq
      * Set authorization details.
      *
      * @param parameters parameters.
-     * @param credentials credentials.
+     * @param authorizationHeader authorization header.
      */
-    private void setAuthorizationDetails(CdrRequest parameters, String[] credentials) {
+    private void setAuthorizationDetails(CdrRequest parameters, String authorizationHeader) {
+        String[] credentials = extractCredentialsFromBasicAuthorization(authorizationHeader);
         if (credentials.length != 2) {
             return;
         }
         parameters.setAuthorizationSet(true);
+        parameters.setBasicAuthorization(authorizationHeader);
         parameters.setUserName(credentials[0]);
         parameters.setPassword(credentials[1]);
     }
@@ -103,7 +115,7 @@ public class CdrRequestConverter implements Converter<HttpServletRequest, CdrReq
      * @return is basic authorization is present
      */
     private boolean hasBasicAuthorization(String authorizationHeader) {
-        return StringUtils.isNotEmpty(authorizationHeader) && authorizationHeader.startsWith(BASIC_AUTHORIZATION_PREFIX);
+        return isNotEmpty(authorizationHeader) && authorizationHeader.startsWith(BASIC_AUTHORIZATION_PREFIX);
     }
 
     /**
@@ -121,6 +133,17 @@ public class CdrRequestConverter implements Converter<HttpServletRequest, CdrReq
             }
         }
         return builder.toString();
+    }
+
+    /**
+     * Check whether authorization against CDR succeed.
+     *
+     * @param request http request
+     * @return is authorization succeed
+     */
+    private boolean authorizationAgainstCdrSucceed(HttpServletRequest request) {
+        Object attribute = request.getAttribute(CdrAuthorizationInterceptor.AUTHORIZATION_FAILED_ATTRIBUTE);
+        return attribute == null;
     }
 
     /**

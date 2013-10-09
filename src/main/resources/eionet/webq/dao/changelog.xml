@@ -26,6 +26,9 @@
             <column name="updated" type="timestamp"/>
             <column name="downloaded" type="timestamp"/>
         </createTable>
+        <modifySql dbms="mysql">
+            <append value=" ENGINE=InnoDB DEFAULT CHARSET=utf8"/>
+        </modifySql>
     </changeSet>
 
     <changeSet id="2" author="dmitrant">
@@ -40,7 +43,11 @@
             </column>
             <column name="file_content" type="${blob}"/>
         </createTable>
+        <modifySql dbms="mysql">
+            <append value=" ENGINE=InnoDB DEFAULT CHARSET=utf8"/>
+        </modifySql>
     </changeSet>
+
     <changeSet id="3" author="dmitrant">
         <preConditions onFail="MARK_RAN">
             <not>
@@ -57,6 +64,9 @@
             <column name="description" type="varchar(2000)"/>
             <column name="created" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP"/>
         </createTable>
+        <modifySql dbms="mysql">
+            <append value=" ENGINE=InnoDB DEFAULT CHARSET=utf8"/>
+        </modifySql>
     </changeSet>
 
     <changeSet id="4" author="dmitrant">
@@ -86,13 +96,22 @@
             <column name="created" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP"/>
             <column name="updated" type="timestamp"/>
         </createTable>
-        <createIndex unique="true" tableName="project_file" indexName="project_to_file_name">
+        <modifySql dbms="mysql">
+            <append value=" ENGINE=InnoDB DEFAULT CHARSET=utf8"/>
+        </modifySql>
+    </changeSet>
+    <changeSet id="5" author="kasperen">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists tableName="project_file" indexName="ix_project_to_file_name_file" columnNames="project_id,file_name"/>
+            </not>
+        </preConditions>
+        <createIndex unique="true" tableName="project_file" indexName="ix_project_to_file_name">
             <column name="project_id"/>
             <column name="file_name"/>
         </createIndex>
     </changeSet>
-
-    <changeSet id="5" author="dmitrant">
+    <changeSet id="6" author="dmitrant">
         <preConditions onFail="MARK_RAN">
             <not>
                 <tableExists tableName="users"/>
@@ -105,9 +124,12 @@
             <column name="password" type="varchar(255)"/>
             <column name="enabled" type="boolean"/>
         </createTable>
+        <modifySql dbms="mysql">
+            <append value=" ENGINE=InnoDB DEFAULT CHARSET=utf8"/>
+        </modifySql>
     </changeSet>
 
-    <changeSet id="6" author="dmitrant">
+    <changeSet id="7" author="dmitrant">
         <preConditions onFail="MARK_RAN">
             <not>
                 <tableExists tableName="authorities"/>
@@ -117,13 +139,49 @@
             <column name="username" type="varchar(255)"/>
             <column name="authority" type="varchar(255)"/>
         </createTable>
+        <modifySql dbms="mysql">
+            <append value=" ENGINE=InnoDB DEFAULT CHARSET=utf8"/>
+        </modifySql>
+    </changeSet>
+
+    <changeSet id="8" author="kasperen">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyTableName="authorities" foreignKeyName="fk_authorities_users"/>
+            </not>
+        </preConditions>
         <addForeignKeyConstraint baseTableName="authorities" baseColumnNames="username"
                                  constraintName="fk_authorities_users"
                                  referencedTableName="users"
                                  referencedColumnNames="username"/>
+    </changeSet>
+
+    <changeSet id="9" author="kasperen">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists tableName="authorities" indexName="ix_auth_username"/>
+            </not>
+        </preConditions>
         <createIndex tableName="authorities" indexName="ix_auth_username">
             <column name="username"/>
             <column name="authority"/>
         </createIndex>
+    </changeSet>
+
+    <changeSet id="10" author="dmitrant">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="user_xml" columnName="cdr_file"/>
+                <columnExists tableName="user_xml" columnName="envelope"/>
+                <columnExists tableName="user_xml" columnName="authorization"/>
+                <columnExists tableName="user_xml" columnName="instance_title"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="user_xml">
+            <column name="cdr_file" type="boolean" defaultValueBoolean="false"/>
+            <column name="envelope" type="varchar(255)"/>
+            <column name="authorization" type="varchar(255)"/>
+            <column name="instance_title" type="varchar(255)"/>
+        </addColumn>
     </changeSet>
 </databaseChangeLog>

@@ -44,6 +44,10 @@ public class CdrRequest {
      */
     private boolean authorizationSet;
     /**
+     * Basic authorization information.
+     */
+    private String basicAuthorization;
+    /**
      * Authentication user name.
      */
     private String userName;
@@ -55,6 +59,10 @@ public class CdrRequest {
      * URL of xml file stored in CDR.
      */
     private String instanceUrl;
+    /**
+     * Instance name stripped off instance url.
+     */
+    private String instanceName;
     /**
      * XML file title.
      */
@@ -108,6 +116,14 @@ public class CdrRequest {
         this.authorizationSet = authorizationSet;
     }
 
+    public String getBasicAuthorization() {
+        return basicAuthorization;
+    }
+
+    public void setBasicAuthorization(String basicAuthorization) {
+        this.basicAuthorization = basicAuthorization;
+    }
+
     public String getUserName() {
         return userName;
     }
@@ -130,6 +146,14 @@ public class CdrRequest {
 
     public void setInstanceUrl(String instanceUrl) {
         this.instanceUrl = instanceUrl;
+    }
+
+    public String getInstanceName() {
+        return instanceName;
+    }
+
+    public void setInstanceName(String instanceName) {
+        this.instanceName = instanceName;
     }
 
     public String getInstanceTitle() {

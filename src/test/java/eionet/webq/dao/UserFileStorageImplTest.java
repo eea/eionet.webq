@@ -64,6 +64,7 @@ public class UserFileStorageImplTest {
     public void savesRequiredFields() throws Exception {
         UserFile userFile =
                 new UserFile(new UploadedFile("name", "test_content".getBytes()), "xmlSchema");
+        userFile.setFromCdr(true);
 
         storage.save(userFile, userId);
 
@@ -74,6 +75,7 @@ public class UserFileStorageImplTest {
         assertThat(fileContentFromDb.getContent(), equalTo(userFile.getContent()));
         assertThat(fileFromDb.getSizeInBytes(), equalTo(userFile.getSizeInBytes()));
         assertThat(fileFromDb.getXmlSchema(), equalTo(userFile.getXmlSchema()));
+        assertThat(fileFromDb.isFromCdr(), equalTo(userFile.isFromCdr()));
         assertNotNull(fileFromDb.getCreated());
         assertNotNull(fileFromDb.getUpdated());
     }
