@@ -20,6 +20,15 @@
  */
 package eionet.webq.web.interceptor;
 
+import static org.apache.commons.lang3.StringUtils.defaultString;
+
+import java.net.MalformedURLException;
+import java.net.URL;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,14 +41,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestOperations;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-import java.net.MalformedURLException;
-import java.net.URL;
-
-import static org.apache.commons.lang3.StringUtils.defaultString;
 
 /**
  * Intercepts calls to pages for CDR integration.
@@ -116,8 +117,8 @@ public class CdrAuthorizationInterceptor extends HandlerInterceptorAdapter {
         }
 
         increaseFailedAuthorizationsCount();
-        response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
         response.addHeader("WWW-Authenticate", "Basic realm=\"Please login to use webforms.\"");
+        response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
         return STOP_REQUEST_PROPAGATION;
     }
 
