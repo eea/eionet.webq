@@ -24,7 +24,7 @@
         <script type="text/javascript" src="http://code.jquery.com/ui/1.10.3/jquery-ui.min.js"></script>
         <script type="text/javascript">
             $($.ajax({
-                url: "http://localhost:8080/webq2/download/project/my-project/file/species_lookup.xml",
+                url: "/webq2/download/project/habides/file/habides_species_lookup.xml",
                 type: "xml",
                 method: "GET",
                 success: function(xmlDocument) {
@@ -129,18 +129,18 @@
                 <derogations/>
             </xf:instance>
             <!-- ##########            SUBMISSIONS          ############ -->
-            <xf:submission id="load-instance" method="GET" replace="instance" resource="{ instance('context')/instanceUrl }" instance="default">
+            <xf:submission id="load-instance" method="GET" replace="instance" resource="{ instance('context')/instanceUrl }" instance="default" validate="false()">
                 <xf:action ev:event="xforms-submit-done"/>
                 <xf:action ev:event="xforms-submit-error">
-                    <xf:message>An error occurred when loading instance data!</xf:message>
+                    <xf:message level="modal">An error occurred when loading instance data!</xf:message>
                 </xf:action>
             </xf:submission>
-            <xf:submission id="load-emptyinstance" method="GET" replace="instance" resource="{ instance('context')/emptyInstanceUrl }" instance="emptyinstance"/>
+            <xf:submission id="load-emptyinstance" method="GET" replace="instance" resource="{ instance('context')/emptyInstanceUrl }" instance="emptyinstance" validate="false()"/>
 
             <!--submission for saving XML -->
-            <xf:submission id="savexml" action="{$base_uri}/saveXml?fileId={$fileId}" method="post" replace="instance" encoding="UTF-8" instance="saveresult" validate="false">
+            <xf:submission id="savexml" action="{$base_uri}/saveXml?fileId={$fileId}" method="post" replace="instance" encoding="UTF-8" instance="saveresult" validate="false()">
                 <!--
-                <xf:message ev:event="xforms-submit-done" ref="instance('context')/save_message"/>
+                <xf:message level="modal" ev:event="xforms-submit-done" ref="instance('context')/save_message"/>
                 -->
                 <xf:dispatch targetid="main-model" name="reset-content-modified" ev:event="xforms-submit-done" />
 
@@ -148,7 +148,7 @@
                     <xf:setvalue ref="instance('saveresult')/code" value="0"/>
                     <xf:setvalue ref="instance('saveresult')/message" value="'Error on saving data!'"/>
                     <xf:setvalue ref="instance('saveresult')/timestamp" value="current-dateTime()"/>
-                    <xf:message>Error on saving data!</xf:message>
+                    <xf:message level="modal">Error on saving data!</xf:message>
 
                 </xf:action>
             </xf:submission>
@@ -241,7 +241,7 @@
                 </data>
             </xf:instance>
             <xf:bind id="b-user" nodeset="instance('context')/user" required="true()"/>
-            <xf:bind nodeset="instance('context')/trigger-switch" readonly="false"/>
+            <xf:bind nodeset="instance('context')/trigger-switch" readonly="false()"/>
 
             <!-- ##########           HELPER   BINDINGS          ############-->
             <xf:bind id="b-derogation-tblempty" nodeset="instance('context')/tblDerogEmpty" relevant="count(instance('default')/derogation)=1 and  string-length(instance('default')/derogation[1]/@directive)=0"/>
@@ -567,6 +567,8 @@
                     </xf:group>
                     </xf:group>
 
+            <!-- ##################################         add species        ############################################-->
+
                     <xf:group appearance="compact">
                         <xf:label>Species</xf:label>
                         <xf:repeat appearance="compact" id="rSpecies" nodeset="species" class="datatable">
@@ -607,80 +609,7 @@
                         </xf:group>
                     </bfc:dialog>
                 </xf:group>
-                    <xf:group appearance="compact">
-                        <xf:label>Geography</xf:label>
-                        <xf:input ref="location" class="wide-inp"><xf:label>Location</xf:label></xf:input>
 
-                    <bfc:dialog id="speciesDialog2">
-                        <xf:label>Add species</xf:label>
-                        <xf:group appearance="bf:verticalTable">
-                    <!--
-                                <xf:select1 ref="instance('context')/selMainGroup" appearance="minimal">
-                                <xf:label>Main group</xf:label>
-                                <xf:itemset bind="b-maingroup">
-                                    <xf:label bind="b-maingroup-name" />
-                                    <xf:value bind="b-maingroup-name" />
-                                </xf:itemset>
-                            </xf:select1>
-                    <xf:select1 ref="instance('context')/selMiddleGroup" appearance="minimal">
-                        <xf:label>Middle group</xf:label>
-                        <xf:itemset bind="b-middlegroup">
-                            <xf:label bind="b-middlegroup-name" />
-                            <xf:value bind="b-middlegroup-name" />
-                        </xf:itemset>
-                    </xf:select1>
-                    <xf:select1 ref="instance('context')/selLowerGroup-birds" appearance="minimal">
-                        <xf:label>Family species</xf:label>
-                        <xf:itemset bind="b-lowergroup-birds">
-                            <xf:label bind="b-lowergroup-name-birds" />
-                            <xf:value bind="b-lowergroup-name-birds" />
-                        </xf:itemset>
-                    </xf:select1>
-                    <xf:select1 ref="instance('context')/selSpecies-birds" appearance="minimal">
-                        <xf:label>Species name</xf:label>
-                        <xf:itemset bind="b-species-list-birds">
-                            <xf:label bind="b-species-name-birds" />
-                            <xf:value bind="b-species-name-birds" />
-                        </xf:itemset>
-                    </xf:select1>
-                    <xf:select1 ref="instance('context')/selLowerGroup-habitats" appearance="minimal">
-                        <xf:label>Lower group</xf:label>
-                        <xf:itemset bind="b-lowergroup-habitats">
-                            <xf:label bind="b-lowergroup-name-habitats" />
-                            <xf:value bind="b-lowergroup-name-habitats" />
-                        </xf:itemset>
-                    </xf:select1>
-                    <xf:select1 ref="instance('context')/selSpecies-habitats" appearance="minimal">
-                        <xf:label>Species name</xf:label>
-                        <xf:itemset bind="b-species-list-habitats">
-                            <xf:label bind="b-species-name-habitats" />
-                            <xf:value bind="b-species-name-habitats" />
-                        </xf:itemset>
-                    </xf:select1>
-                    -->
-                            <xf:output value="''"/>
-                            <xf:input class="wide-inp" bind="b-species-freetext-value"><xf:label>Species as free text</xf:label></xf:input>
-                        </xf:group>
-                        <xf:group>
-                            <div class="section-buttons">
-                                <xf:trigger>
-                                    <xf:label> Add </xf:label>
-                                    <xf:insert at="last()" position="after" nodeset="/derogations/derogation[index('rDerogList')]/species"
-                                        if="count(/derogations/derogation[index('rDerogList')]/species)&gt;1 or /derogations/derogation[index('rDerogList')]/species[1] != '' and
-                                        (string-length(instance('context')/speciesFreetextValue) &gt; 0)"/>
-                                    <xf:setvalue ref="/derogations/derogation[index('rDerogList')]/species[index('rSpecies')]" value="instance('context')/speciesFreetextValue" if="string-length(instance('context')/*[name()=concat('selSpecies-',instance('context')/activeDirective)]) = 0 and string-length(instance('context')/speciesFreetextValue) > 0"/>
-                                    <xf:setvalue ref="/derogations/derogation[index('rDerogList')]/species[index('rSpecies')]" value="instance('context')/*[name()=concat('selSpecies-',instance('context')/activeDirective)]" if="string-length(instance('context')/*[name()=concat('selSpecies-',instance('context')/activeDirective)]) > 0 "/>
-                                    <xf:setvalue ref="instance('context')/speciesFreetextValue" value="''" />
-                                    <bfc:hide dialog="speciesDialog" ev:event="DOMActivate"></bfc:hide>
-                                </xf:trigger>
-                                <xf:trigger>
-                                    <xf:label>Cancel</xf:label>
-                                    <bfc:hide dialog="speciesDialog" ev:event="DOMActivate"></bfc:hide>
-                                </xf:trigger>
-                            </div>
-                        </xf:group>
-                    </bfc:dialog>
-                </xf:group>
                 <xf:group appearance="compact">
                         <xf:label>Justification for derogation (if species in unfavourable conservation status)</xf:label>
 
@@ -740,11 +669,6 @@
                 <xf:group appearance="compact">
                         <xf:label>Reason for Granting License</xf:label>
                 </xf:group>
-                <xf:group appearance="compact">
-                        <xf:label>Geography</xf:label>
-                        <xf:input ref="location" class="wide-inp"><xf:label>Location</xf:label></xf:input>
-
-                    </xf:group>
                 </xf:group>
                 <div class="section-buttons">
                 <xf:trigger id="t-case-list">
