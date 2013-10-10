@@ -22,6 +22,8 @@ package eionet.webq.web.service;
 
 import eionet.webq.dao.orm.ProjectFile;
 import eionet.webq.service.WebFormService;
+import org.apache.xmlrpc.client.XmlRpcClient;
+import org.apache.xmlrpc.client.XmlRpcClientConfigImpl;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -31,13 +33,17 @@ import org.mockito.MockitoAnnotations;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyCollectionOf;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 /**
@@ -47,11 +53,14 @@ public class AvailableFormsServiceTest {
     private AvailableFormsService availableFormsService;
     @Mock
     private WebFormService webFormService;
+    @Mock
+    private XmlRpcClient xmlRpcClient;
     private ProjectFile file1 = webFormWithXmlSchemaAndName("1");
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
+        availableFormsService.webQ1Url = "file://webq1.eu";
     }
 
     @Test
@@ -103,6 +112,24 @@ public class AvailableFormsServiceTest {
 
         assertThat(xForms.size(), equalTo(1));
         assertThat(xForms.get(file1.getXmlSchema()), equalTo(file1.getFileName()));
+    }
+
+    @Test
+    public void whenGetXFrom_ifNoFormsFound_askFormsFromWebQ1() throws Exception {
+        when(webFormService.findWebFormsForSchemas(anyCollectionOf(String.class)))
+                .thenReturn(Collections.<ProjectFile>emptyList());
+
+        availableFormsService.getXForm(null);
+
+        verify(xmlRpcClient).execute(any(XmlRpcClientConfigImpl.class), anyString(), any(Object[].class));
+    }
+
+    @Test
+    public void whenGetXForm_ifWebFormsFound_doNotAskWebQ1() throws Exception {
+        when(webFormService.findWebFormsForSchemas(anyCollectionOf(String.class)))
+                .thenReturn(Arrays.asList(file1));
+
+        verifyNoMoreInteractions(xmlRpcClient);
     }
 
     private ProjectFile webFormWithXmlSchemaAndName(String fileName) {

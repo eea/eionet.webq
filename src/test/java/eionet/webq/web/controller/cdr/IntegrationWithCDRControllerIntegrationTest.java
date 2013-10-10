@@ -31,9 +31,12 @@ import eionet.webq.web.AbstractContextControllerTests;
 import org.apache.xmlrpc.XmlRpcException;
 import org.apache.xmlrpc.client.XmlRpcClient;
 import org.apache.xmlrpc.client.XmlRpcClientConfig;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockHttpSession;
@@ -51,6 +54,7 @@ import java.util.regex.Pattern;
 import static eionet.webq.service.CDREnvelopeService.XmlFile;
 import static java.util.Collections.singletonMap;
 import static org.hamcrest.core.IsEqual.equalTo;
+import static org.hamcrest.core.StringContains.containsString;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
@@ -59,6 +63,7 @@ import static org.mockito.Matchers.anyList;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
@@ -75,18 +80,29 @@ public class IntegrationWithCDRControllerIntegrationTest extends AbstractContext
     private RestOperations restOperations;
     @Autowired
     private UserFileStorage userFileStorage;
+    @Value("#{ws['webq1.url']}")
+    private String webQFallBackUrl;
 
     private static final String ENVELOPE_URL = "http://cdr.envelope.eu";
     private static final String XML_SCHEMA = "cdr-specific-schema";
 
+    @Before
+    public void setUp() throws Exception {
+        Mockito.reset(xmlRpcClient);
+    }
+
     @Test
     public void menuReturnsViewName() throws Exception {
+        saveAvailableWebFormWithSchema(XML_SCHEMA);
+
         requestWebQMenu().andExpect(view().name("deliver_menu"));
     }
 
     @SuppressWarnings("unchecked")
     @Test
     public void expectXmlFilesSetForMenu() throws Exception {
+        saveAvailableWebFormWithSchema(XML_SCHEMA);
+        saveAvailableWebFormWithSchema(XML_SCHEMA);
         rpcClientWillReturnFileForSchema(XML_SCHEMA);
 
         MultiValueMap<String, XmlFile> files = (MultiValueMap<String, XmlFile>) requestToWebQMenuAndGetModelAttribute("xmlFiles");
@@ -97,6 +113,7 @@ public class IntegrationWithCDRControllerIntegrationTest extends AbstractContext
 
     @Test
     public void parametersAreAccessibleViaModelForMenu() throws Exception {
+        saveAvailableWebFormWithSchema(XML_SCHEMA);
         CdrRequest parameters = (CdrRequest) requestToWebQMenuAndGetModelAttribute("parameters");
 
         assertThat(parameters.getEnvelopeUrl(), equalTo(ENVELOPE_URL));
@@ -149,6 +166,20 @@ public class IntegrationWithCDRControllerIntegrationTest extends AbstractContext
                 mvc().perform(post("/WebQMenu").param("envelope", ENVELOPE_URL)).andExpect(status().isFound()).andReturn();
 
         assertTrue(mvcResult.getResponse().getRedirectedUrl().startsWith("/xform"));
+    }
+
+    @Test
+    public void webQMenu_ifNoWebFormsAvailable_SendRedirectToWebQ1() throws Exception {
+        mvc().perform(post("/WebQMenu").param("envelope", ENVELOPE_URL))
+                .andExpect(status().is(HttpStatus.MOVED_PERMANENTLY.value()))
+                .andExpect(header().string("Location", containsString(webQFallBackUrl)));
+    }
+
+    @Test
+    public void webQEdit_IfNoWebFormsAvailable_SendRedirectToWebQ1() throws Exception {
+        mvc().perform(post("/WebQEdit"))
+                .andExpect(status().is(HttpStatus.MOVED_PERMANENTLY.value()))
+                .andExpect(header().string("Location", containsString(webQFallBackUrl)));
     }
 
     private int saveAvailableWebFormWithSchema(String xmlSchema) {

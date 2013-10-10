@@ -22,11 +22,17 @@ package eionet.webq.web.service;
 
 import eionet.webq.dao.orm.ProjectFile;
 import eionet.webq.service.WebFormService;
+import org.apache.xmlrpc.XmlRpcException;
+import org.apache.xmlrpc.client.XmlRpcClient;
+import org.apache.xmlrpc.client.XmlRpcClientConfigImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.context.support.SpringBeanAutowiringSupport;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -40,17 +46,41 @@ public class AvailableFormsService extends SpringBeanAutowiringSupport {
      */
     @Autowired
     WebFormService webFormService;
-
+    /**
+     * Xml-Rpc client for querying previous version of WebQ.
+     */
+    @Autowired
+    XmlRpcClient xmlRpcClient;
+    /**
+     * Fallback url if no schemas found.
+     */
+    @Value("#{ws['webq1.rpc.url']}")
+    String webQ1Url;
+    /**
+     *
+     */
+    @Value("#{ws['webq1.get.xform']}")
+    String webQ1GetXForm;
     /**
      * XML-RPC method for querying web forms availability.
      * Expected that xmlSchemas array should contain strings.
      *
      * @param xmlSchemas xmlSchema array
      * @return map of xml schema to XForm file name
+     * @throws java.net.MalformedURLException if webQ1 URL is malformed.
+     * @throws org.apache.xmlrpc.XmlRpcException if exception during call to webQ1
      * @see org.apache.xmlrpc.webserver.XmlRpcServlet
      */
-    public Map<String, String> getXForm(Object[] xmlSchemas) {
-        return transformToSchemaFileNameMap(webFormService.findWebFormsForSchemas(xmlSchemasToList(xmlSchemas)));
+    @SuppressWarnings("unchecked")
+    public Map<String, String> getXForm(Object[] xmlSchemas) throws MalformedURLException, XmlRpcException {
+        Map<String, String> files =
+                transformToSchemaFileNameMap(webFormService.findWebFormsForSchemas(xmlSchemasToList(xmlSchemas)));
+        if (files.isEmpty()) {
+            XmlRpcClientConfigImpl config = new XmlRpcClientConfigImpl();
+            config.setServerURL(new URL(webQ1Url));
+            return (Map<String, String>) xmlRpcClient.execute(config, webQ1GetXForm, new Object[] {xmlSchemas});
+        }
+        return files;
     }
 
     /**
