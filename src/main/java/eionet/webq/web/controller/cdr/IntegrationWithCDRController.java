@@ -31,14 +31,19 @@ import eionet.webq.service.UserFileService;
 import eionet.webq.service.WebFormService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -72,6 +77,11 @@ public class IntegrationWithCDRController {
      */
     @Autowired
     private UserFileService userFileService;
+    /**
+     * WebQ1 URL.
+     */
+    @Value("#{ws['webq1.url']}")
+    String webQFallBackUrl;
 
     /**
      * Deliver with WebForms.
@@ -89,7 +99,9 @@ public class IntegrationWithCDRController {
         Collection<String> requiredSchemas =
                 StringUtils.isNotEmpty(parameters.getSchema()) ? Arrays.asList(parameters.getSchema()) : xmlFiles.keySet();
         Collection<ProjectFile> webForms = webFormService.findWebFormsForSchemas(requiredSchemas);
-
+        if (webForms.isEmpty()) {
+            throw new IllegalArgumentException("no web forms available.");
+        }
         if (hasOnlyOneFileAndWebFormForSameSchema(xmlFiles, webForms, parameters)) {
             return redirectToEditWebForm(parameters, xmlFiles, webForms);
         }
@@ -127,6 +139,19 @@ public class IntegrationWithCDRController {
             return deliverMenu(webForms, xmlFiles, parameters, model);
         }
         return editFile(webForms.iterator().next(), fileName, instanceUrl, parameters);
+    }
+
+    /**
+     * IllegalArgumentException handler for this class.
+     * If request parameters cannot be handled by this application, redirect to webQ1.
+     *
+     * @param request current request
+     * @param response http response
+     */
+    @ExceptionHandler(IllegalArgumentException.class)
+    @ResponseStatus(HttpStatus.MOVED_PERMANENTLY)
+    public void redirectToWebQ(HttpServletRequest request, HttpServletResponse response) {
+        response.addHeader("Location", webQFallBackUrl + request.getServletPath() + '?' + request.getQueryString());
     }
 
     /**

@@ -35,6 +35,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.ui.Model;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -85,16 +86,17 @@ public class IntegrationWithCDRControllerTest {
     @Test
     public void noRedirectFromMenuIfFilesAmountIsZero() throws Exception {
         getXmlFilesWillReturnFilesAmountOf(0);
+        thereWillBeWebFormsAmountOf(1);
 
         assertNoRedirectOnMenuCall();
     }
 
-    @Test
-    public void noRedirectIfWebFormsAmountIsZero() throws Exception {
+    @Test(expected = IllegalArgumentException.class)
+    public void throwsExceptionIfWebFormsAmountIsZero() throws Exception {
         getXmlFilesWillReturnFilesAmountOf(1);
         when(webFormService.findWebFormsForSchemas(anyCollectionOf(String.class))).thenReturn(Collections.<ProjectFile>emptyList());
 
-        assertNoRedirectOnMenuCall();
+        controller.webQMenu(mockRequest, model);
     }
 
     @Test
@@ -219,6 +221,19 @@ public class IntegrationWithCDRControllerTest {
         List<XmlFile> xmlFilesForSchema = xmlFiles.get(XML_SCHEMA);
         assertThat(xmlFilesForSchema.size(), equalTo(1));
         assertThat(xmlFilesForSchema.get(0).getFullName(), equalTo(cdrRequest.getInstanceUrl()));
+    }
+
+    @Test
+    public void exceptionHandlerRedirectsToWebQ1WithRequestQueryString() throws Exception {
+        String queryString = "param1=value1&param2=value2";
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        request.setQueryString(queryString);
+
+        MockHttpServletResponse response = new MockHttpServletResponse();
+        controller.webQFallBackUrl = "webQ.url";
+        controller.redirectToWebQ(request, response);
+
+        assertThat(response.getHeader("Location"), equalTo(controller.webQFallBackUrl + "?" + queryString));
     }
 
     private void prepareRedirectToNewWebFormCase() {
