@@ -546,12 +546,12 @@
                         <xf:output class="semi-wide-inp" ref="@userIdentity"><xf:label>User Identity</xf:label></xf:output>
                         <xf:input class="semi-wide-inp" ref="@user_derogation_ref"><xf:label>User defined reference</xf:label></xf:input>
                         <xf:input class="semi-wide-inp" ref="licensingAuthority"><xf:label>Licensing authority</xf:label></xf:input>
-                        <xf:input ref="licenseValidFrom">
+                        <xf:input ref="licenseValidFrom" appearance="bf:iso8601" data-bf-params="date:'dd/MM/yyyy'">
                             <xf:label>License valid from</xf:label>
                             <xf:hint>Select the date when the license was valid from.</xf:hint>
                             <xf:alert>Required field. "Valid from" should be before "Valid until"</xf:alert>
                         </xf:input>
-                        <xf:input ref="licenseValidUntil">
+                        <xf:input ref="licenseValidUntil" appearance="bf:iso8601" data-bf-params="date:'dd/MM/yyyy'">
                             <xf:label>License valid until</xf:label>
                             <xf:hint>Select the date until the license is valid.</xf:hint>
                             <xf:alert>Required field. "Valid until" should be after "Valid from"</xf:alert>
