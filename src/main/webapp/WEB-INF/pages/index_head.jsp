@@ -27,13 +27,8 @@
 
     function showStartWebformArea() {
         $("#startWebformArea").show();
-        $("#uploadXmlArea").hide();
     }
 
-    function showUploadXmlArea() {
-        $("#startWebformArea").hide();
-        $("#uploadXmlArea").show();
-    }
     function hideFilesTableIfNoFilesPresent() {
         if (!$("tr.user_file").length) {
             $("div.files").hide();
@@ -41,9 +36,14 @@
     }
 
     var init = function() {
+        $("#uploadButton").click(function () {
+            $("#startWebformArea").hide();
+            $("#userFile").click().change(function () {
+                $("#newFileSubmit").click();
+            });
+        });
         hideFilesTableIfNoFilesPresent();
         $("#startWebformArea").hide();
-        $("#uploadXmlArea").hide();
         showWarningIfNotAllFilesDownloaded();
     };
 
@@ -62,14 +62,17 @@
         float: left;
         width: 100%;
     }
-    .container legend{
+    .container legend {
         font-weight:bold;
     }
-    .files{
+    .files {
         padding-top:1em;
         clear:both;
     }
-    .action{
+    .action {
         margin-bottom:0.5em;
+    }
+    .hidden {
+        display: none;
     }
 </style>
