@@ -4,12 +4,16 @@
 <%@ taglib prefix="s" uri="http://www.springframework.org/tags" %>
 
 <h1>Web Questionnaires</h1>
-<p>The system lets you create and edit XML files by using webforms.
+<p>This tool helps gather data for reporting obligations, using web questionnaires predefined by the EEA.<br />
+Data entries are gathered in a session file(in XML format).<br />
+You can:
 <ul>
-    <li>By selecting "Start a new webform" your are able to fill in your data on empty webform and the XML file is created automatically. </li>
-    <li>If you already have an XML file that you want to edit, then select "Upload XML file". Appropriate actions will be available if your XML file conforms to any of the webform stored in the system.</li>
-</ul></p>
-<p><strong>After editing your file do not forget to download it!</strong> The files are stored in the system temporarily and they will be deleted if your session expires or if you close your web browser.</p>
+    <li>start a new session, or</li>
+    <li>upload a file from a previous session to edit it.</li>
+</ul>
+</p>
+<p>Do not forget to save your file on your computer, and to do that often!<br />
+    The data will disappear if the session expires or if you close your browser.</p>
 
 <p><input type="button" value="Start a new webform" onclick="showStartWebformArea()"/> or <input type="button" id="uploadButton" value="Upload session file"/></p>
 <div class="container">
@@ -20,7 +24,7 @@
         <fieldset>
             <legend>Start a new web form</legend>
             <p>
-                <label for="selectFile">1. Select the web form</label>
+                <label for="selectFile">Select web form:</label>
                 <select id="selectFile" name="selectFile" title="Select new webform">
                     <c:forEach var="form" items="${allWebForms}">
                         <option value="<c:url value="/startWebform?formId=${form.id}"/>">${form.title}</option>
