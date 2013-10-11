@@ -11,7 +11,7 @@
 </ul></p>
 <p><strong>After editing your file do not forget to download it!</strong> The files are stored in the system temporarily and they will be deleted if your session expires or if you close your web browser.</p>
 
-<p><input type="button" value="Start a new webform" onclick="showStartWebformArea()"/> or <input type="button" value="Upload XML file" onclick="showUploadXmlArea()"/></p>
+<p><input type="button" value="Start a new webform" onclick="showStartWebformArea()"/> or <input type="button" id="uploadButton" value="Upload session file"/></p>
 <div class="container">
     <c:url var="uploadUrl" value="/uploadXml"/>
     <f:form modelAttribute="uploadForm" action="${uploadUrl}" method="POST" enctype="multipart/form-data">
@@ -32,21 +32,10 @@
             </p>
         </fieldset>
         </div>
-    <div class="col2" id="uploadXmlArea">
-        <fieldset>
-            <legend>Upload XML file</legend>
-
-            <p>
-                <label for="userFile">1. Select the file from My Computer</label>
-                <f:input id="userFile" type="file" path="userFile"/>
-            </p>
-
-            <p>
-                2. <input type="submit" value="Upload"/> XML file and edit it on web form
-            </p>
-
-        </fieldset>
-    </div>
+        <div class="col2" id="uploadXmlArea">
+            <f:input id="userFile" class="hidden" type="file" path="userFile"/>
+            <input id="newFileSubmit" class="hidden" type="submit" value="Upload"/>
+        </div>
     </f:form>
 </div>
 <c:if test="${not empty uploadedFiles}">
