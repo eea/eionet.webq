@@ -38,6 +38,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestOperations;
@@ -50,20 +51,25 @@ import java.util.List;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.fileUpload;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @Transactional
 public class PublicPageControllerIntegrationTest extends AbstractContextControllerTests {
+    private final String XML_SCHEMA = "xml-schema";
     private final String FILE_CONTENT_STRING = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
-            + "<foo xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:noNamespaceSchemaLocation=\"bar\" />";
+            + "<foo xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\""
+            + " xsi:noNamespaceSchemaLocation=\""+ XML_SCHEMA + "\" />";
     private final byte[] FILE_CONTENT = FILE_CONTENT_STRING.getBytes();
 
     @Autowired
@@ -84,6 +90,15 @@ public class PublicPageControllerIntegrationTest extends AbstractContextControll
     public void successfulUploadProducesMessage() throws Exception {
         MockMultipartFile file = createMockMultipartFile("orig");
         uploadFile(file).andExpect(model().attribute("message", "File 'orig' uploaded successfully"));
+    }
+
+    @Test
+    public void whenUploadingFile_ifThereIsOnlyOneFormAvailableForThisFile_redirectToThisForm() throws Exception {
+        saveActiveWebForm();
+        MvcResult result = mvc().perform(fileUpload("/uploadXml").file(createMockMultipartFile("file.name")).session(mockHttpSession))
+                .andExpect(status().isFound()).andReturn();
+        String viewName = result.getModelAndView().getViewName();
+        assertTrue(viewName.matches("redirect:/xform/\\?formId=\\d+&fileId=\\d+&instance=.*&base_uri=.*"));
     }
 
     @Test
@@ -147,16 +162,7 @@ public class PublicPageControllerIntegrationTest extends AbstractContextControll
 
     @Test
     public void activeWebFormsMustBeAccessibleInModel() throws Exception {
-        ProjectEntry project = new ProjectEntry();
-        final ProjectFile testFile = new ProjectFile();
-        testFile.setActive(true);
-        testFile.setMainForm(true);
-        testFile.setXmlSchema("xml-schema");
-        testFile.setTitle("test-title");
-        testFile.setFileType(ProjectFileType.WEBFORM);
-        testFile.setUserName("test-user");
-
-        projectFileService.saveOrUpdate(testFile, project);
+        final ProjectFile testFile = saveActiveWebForm();
 
         requestIndexPage().andExpect(model().attribute("allWebForms", new BaseMatcher<Collection<ProjectFile>>() {
             @Override
@@ -171,6 +177,20 @@ public class PublicPageControllerIntegrationTest extends AbstractContextControll
                 description.appendText("Expected 1 element with id greater than 0 and title=" + testFile.getTitle());
             }
         }));
+    }
+
+    private ProjectFile saveActiveWebForm() {
+        ProjectEntry project = new ProjectEntry();
+        final ProjectFile testFile = new ProjectFile();
+        testFile.setActive(true);
+        testFile.setMainForm(true);
+        testFile.setXmlSchema(XML_SCHEMA);
+        testFile.setTitle("test-title");
+        testFile.setFileType(ProjectFileType.WEBFORM);
+        testFile.setUserName("test-user");
+
+        projectFileService.saveOrUpdate(testFile, project);
+        return testFile;
     }
 
     @Test

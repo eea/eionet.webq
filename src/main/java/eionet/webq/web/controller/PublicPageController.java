@@ -48,6 +48,7 @@ import javax.validation.Valid;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Arrays;
 import java.util.Collection;
 
 
@@ -126,13 +127,23 @@ public class PublicPageController {
      *            {@link org.springframework.web.multipart.MultipartFile}
      * @param result binding result, contains validation errors
      * @param model holder for model attributes
+     * @param request http request
      * @return view name
      */
     @RequestMapping(value = "/uploadXml", method = RequestMethod.POST)
-    public String upload(@Valid @ModelAttribute UploadForm uploadForm, BindingResult result, Model model) {
+    public String upload(@Valid @ModelAttribute UploadForm uploadForm, BindingResult result, Model model,
+            HttpServletRequest request) {
         if (!result.hasErrors()) {
             UserFile file = uploadForm.getUserFile();
-            userFileService.save(file);
+            int fileId = userFileService.save(file);
+            Collection<ProjectFile> availableWebForms = webFormService.findWebFormsForSchemas(Arrays.asList(file.getXmlSchema()));
+            if (availableWebForms.size() == 1) {
+                int formId = availableWebForms.iterator().next().getId();
+                String contextPath = request.getContextPath();
+                String downloadUrl = contextPath + "/download/user_file?fileId=" + fileId;
+                return "redirect:/xform/?formId=" + formId + "&fileId=" + fileId + "&instance=" + downloadUrl
+                        + "&base_uri=" + contextPath;
+            }
             model.addAttribute("message", "File '" + file.getName() + "' uploaded successfully");
         }
         return welcome(model);
