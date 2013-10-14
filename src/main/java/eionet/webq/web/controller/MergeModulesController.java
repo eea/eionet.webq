@@ -57,9 +57,10 @@ public class MergeModulesController {
      * @param model model
      * @return view name
      */
+    @RequestMapping(value = "/module/add")
     public String addModule(Model model) {
         model.addAttribute("newMergeModule", new MergeModule());
-        return "";
+        return "add_merge_module";
     }
 
     /**
