@@ -195,7 +195,9 @@
             <column name="id" type="int" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
-            <column name="name" type="varchar(50)"/>
+            <column name="name" type="varchar(50)">
+                <constraints unique="true"/>
+            </column>
             <column name="title" type="varchar(255)"/>
             <column name="file_name" type="varchar(255)"/>
             <column name="file_size_in_bytes" type="int"/>
