@@ -20,8 +20,9 @@
  */
 package eionet.webq.service;
 
-import java.util.List;
-
+import eionet.webq.dao.orm.UserFile;
+import eionet.webq.dto.Conversion;
+import eionet.webq.dto.ListConversionResponse;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -36,9 +37,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestOperations;
 
-import eionet.webq.dao.orm.UserFile;
-import eionet.webq.dto.Conversion;
-import eionet.webq.dto.ListConversionResponse;
+import java.util.List;
 
 /**
  * Conversion service implementation.
@@ -79,11 +78,6 @@ public class ConversionServiceImpl implements ConversionService {
      */
     @Value("#{ws['convert.push.conversion.id.parameter']}")
     private String convertPushIdParameter;
-
-    @Override
-    public ResponseEntity<byte[]> convert(UserFile fileContent, int conversionId) {
-        return convert(fileContent, Integer.toString(conversionId));
-    }
 
     @Override
     public ResponseEntity<byte[]> convert(UserFile fileContent, String conversionId) {

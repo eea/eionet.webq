@@ -102,13 +102,13 @@ public class FileDownloadController {
     /**
      * Performs conversion of specified {@link eionet.webq.dao.orm.UserFile} to specific format.
      * Format is defined by conversionId.
-     * @param fileId file id, which will be loaded and converted
+     * @param fileId file id or xsl name, which will be used to convert file
      * @param conversionId id of conversion to be used
      * @param response object where conversion result will be written
      */
     @RequestMapping("/convert")
     @Transactional
-    public void convertXmlFile(@RequestParam int fileId, @RequestParam int conversionId, HttpServletResponse response) {
+    public void convertXmlFile(@RequestParam int fileId, @RequestParam String conversionId, HttpServletResponse response) {
         UserFile fileContent = userFileService.getById(fileId);
         ResponseEntity<byte[]> convert = conversionService.convert(fileContent, conversionId);
         HttpHeaders headers = convert.getHeaders();
