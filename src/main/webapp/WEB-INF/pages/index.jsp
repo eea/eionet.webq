@@ -3,8 +3,8 @@
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib prefix="s" uri="http://www.springframework.org/tags" %>
 
-<h1>Web Questionnaires</h1>
-<p>This tool helps gather data for reporting obligations, using web questionnaires predefined by the EEA.<br />
+<h1>Web questionnaires</h1>
+<p>This tool helps you gather data for reporting obligations, using web questionnaires predefined by the EEA.<br />
 Data entries are gathered in a session file(in XML format).<br />
 You can:
 <ul>
@@ -12,17 +12,15 @@ You can:
     <li>upload a file from a previous session to edit it.</li>
 </ul>
 </p>
-<p>Do not forget to save your file on your computer, and to do that often!<br />
-    The data will disappear if the session expires or if you close your browser.</p>
+<p>Do not forget to save your file on your computer, and to do that often! The data will disappear if the session expires or if you close your browser.</p>
 
-<p><input type="button" value="Start a new webform" onclick="showStartWebformArea()"/> or <input type="button" id="uploadButton" value="Upload session file"/></p>
+<p><input type="button" value="Start new session" onclick="showStartWebformArea()"/> or <input type="button" id="uploadButton" value="Upload session file"/></p>
 <div class="container">
     <c:url var="uploadUrl" value="/uploadXml"/>
     <f:form modelAttribute="uploadForm" action="${uploadUrl}" method="POST" enctype="multipart/form-data">
         <f:errors path="*" element="div" cssClass="error-msg"/>
         <div class="col1" id="startWebformArea">
         <fieldset>
-            <legend>Start a new web form</legend>
             <p>
                 <label for="selectFile">Select web form:</label>
                 <select id="selectFile" name="selectFile" title="Select new webform">
@@ -32,7 +30,7 @@ You can:
                 </select>
             </p>
             <p>
-                2. <input type="button" value="Start" onclick="window.location=getSelectedFileValue()"/> to open the web form
+                <input type="button" value="Start" onclick="window.location=getSelectedFileValue()"/>
             </p>
         </fieldset>
         </div>
@@ -44,7 +42,7 @@ You can:
 </div>
 <c:if test="${not empty uploadedFiles}">
 <div class="files">
-    <h2>My XML files</h2>
+    <h2>My session files</h2>
         <div hidden="hidden" class="important-msg" id="not-downloaded-files-present"><strong>Note</strong><p>Please download your modified files!</p></div>
         <form method="post" action="<c:url value="/remove/files"/>">
         <table class="datatable" style="width:100%">
