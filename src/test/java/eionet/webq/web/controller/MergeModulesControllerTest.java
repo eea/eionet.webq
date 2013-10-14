@@ -28,10 +28,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 
 import java.util.Collections;
 import java.util.List;
 
+import static org.hamcrest.core.IsEqual.equalTo;
+import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
@@ -46,6 +49,8 @@ public class MergeModulesControllerTest {
     private MergeModules modulesStorage;
     @Mock
     private Model model;
+    @Mock
+    private BindingResult bindingResult;
 
     @Before
     public void setUp() throws Exception {
@@ -72,7 +77,16 @@ public class MergeModulesControllerTest {
     @Test
     public void whenNewSavingModule_writeDataToStorage() throws Exception {
         MergeModule module = new MergeModule();
-        controller.save(module);
+        controller.save(module, bindingResult, model);
+
         verify(modulesStorage).save(module);
+    }
+
+    @Test
+    public void whenSaving_ifBindingResultHasErrors_returnBackToAddPage() throws Exception {
+        when(bindingResult.hasErrors()).thenReturn(true);
+        String viewName = controller.save(new MergeModule(), bindingResult, model);
+
+        assertThat(viewName, equalTo("add_merge_module"));
     }
 }

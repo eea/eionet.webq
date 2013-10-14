@@ -25,6 +25,8 @@ import eionet.webq.dao.orm.MergeModule;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
@@ -64,13 +66,20 @@ public class MergeModulesController {
     }
 
     /**
-     * Saves module to db.
+     * Saves merge module to storage.
      *
-     * @param module module to save
-     * @return view name
+     * @param newMergeModel module.
+     * @param bindingResult result of newMergeModel binding
+     * @param model model
+     * @return view name.
      */
-    public String save(MergeModule module) {
-        mergeModulesStorage.save(module);
-        return "";
+    @RequestMapping(value = "/module/save", method = RequestMethod.POST)
+    public String save(@ModelAttribute MergeModule newMergeModel, BindingResult bindingResult, Model model) {
+        if (bindingResult.hasErrors()) {
+            return "add_merge_module";
+        }
+        mergeModulesStorage.save(newMergeModel);
+        model.addAttribute("message", "New module successfully saved!");
+        return "merge_modules";
     }
 }

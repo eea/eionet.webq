@@ -87,4 +87,12 @@ public class MergeModulesTest {
         assertThat(it.next().getXmlSchema(), equalTo(xmlSchema1.getXmlSchema()));
         assertThat(it.next().getXmlSchema(), equalTo(xmlSchema2.getXmlSchema()));
     }
+
+    @Test
+    public void listsAllAvailableModules() throws Exception {
+        mergeModules.save(new MergeModule());
+        mergeModules.save(new MergeModule());
+
+        assertThat(mergeModules.findAll().size(), equalTo(2));
+    }
 }

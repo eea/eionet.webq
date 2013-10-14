@@ -24,6 +24,7 @@ import eionet.webq.dao.orm.MergeModule;
 import org.springframework.stereotype.Repository;
 
 import java.util.Collection;
+import java.util.List;
 
 /**
  * {@link eionet.webq.dao.MergeModules} implementation.
@@ -31,9 +32,10 @@ import java.util.Collection;
 @Repository
 public class MergeModulesImpl extends AbstractDao<MergeModule> implements MergeModules {
 
+    @SuppressWarnings("unchecked")
     @Override
     public Collection<MergeModule> findAll() {
-        return null;
+        return (List<MergeModule>) getCriteria().list();
     }
 
     @Override

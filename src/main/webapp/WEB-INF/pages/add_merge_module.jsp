@@ -2,7 +2,7 @@
 <%@ taglib prefix="f" uri="http://www.springframework.org/tags/form" %>
 
 <h1>Save merge module</h1>
-<f:form modelAttribute="newMergeModule" action="save" method="post">
+<f:form modelAttribute="newMergeModule" action="save" method="post" enctype="multipart/form-data">
     <f:errors path="*" element="div" cssClass="error-msg"/>
     <table class="datatable">
         <tr>
@@ -21,14 +21,14 @@
                 <f:input id="title" path="title" size="35"/>
             </td>
         </tr>
-        <tr>
-            <th scope="row">
-                <label for="xmlSchemas">Xml schemas</label>
-            </th>
-            <td>
-                <f:input id="xmlSchemas" path="xmlSchemas"/>
-            </td>
-        </tr>
+        <%--<tr>--%>
+            <%--<th scope="row">--%>
+                <%--<label for="xmlSchemas">Xml schemas</label>--%>
+            <%--</th>--%>
+            <%--<td>--%>
+                <%--<f:input id="xmlSchemas" path="xmlSchemas"/>--%>
+            <%--</td>--%>
+        <%--</tr>--%>
         <tr>
             <th scope="row">
                 <label for="xslFile">Xsl file</label>
