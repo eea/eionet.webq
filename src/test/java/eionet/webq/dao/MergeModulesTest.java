@@ -29,7 +29,6 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
 import java.util.Iterator;
@@ -73,7 +72,6 @@ public class MergeModulesTest {
     }
 
     @Test
-    @Transactional
     public void allowToAddMultipleXmlSchemas() throws Exception {
         MergeModuleXmlSchema xmlSchema1 = new MergeModuleXmlSchema();
         xmlSchema1.setXmlSchema("xml-schema-1");

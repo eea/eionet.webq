@@ -59,7 +59,7 @@
     <ul>
         <li><a href="<c:url value="/"/>">My xml files</a></li>
         <c:if test="${developerOrAdmin}">
-            <li><a href="<c:url value="/merge"/>">Merging modules</a></li>
+            <li><a href="<c:url value="/merge/modules"/>">Merging modules</a></li>
             <li><a href="<c:url value="/projects/"/>">Webform projects</a></li>
         </c:if>
         <c:if test="${isAdmin}">

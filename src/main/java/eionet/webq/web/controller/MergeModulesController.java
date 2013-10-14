@@ -26,6 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 
 /**
  */
@@ -44,9 +45,10 @@ public class MergeModulesController {
      * @param model model
      * @return view name
      */
+    @RequestMapping(value = "/modules", method = RequestMethod.GET)
     public String listMergeModules(Model model) {
         model.addAttribute("allMergeModules", mergeModulesStorage.findAll());
-        return "";
+        return "merge_modules";
     }
 
     /**
