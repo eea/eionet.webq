@@ -30,10 +30,10 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement(name = "conversion")
 public class Conversion {
     /**
-     * Conversion id.
+     * Conversion id or xsl name.
      */
     @XmlElement(name = "convert_id")
-    private int id;
+    private String id;
     /**
      * Conversion output type.
      */
@@ -60,7 +60,7 @@ public class Conversion {
     @XmlElement(name = "description")
     private String description;
 
-    public int getId() {
+    public String getId() {
         return id;
     }
 

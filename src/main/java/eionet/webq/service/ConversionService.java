@@ -20,26 +20,16 @@
  */
 package eionet.webq.service;
 
-import java.util.List;
-
-import org.springframework.http.ResponseEntity;
-
 import eionet.webq.dao.orm.UserFile;
 import eionet.webq.dto.Conversion;
+import org.springframework.http.ResponseEntity;
+
+import java.util.List;
 
 /**
  * Service provides conversion information for xml schemas.
  */
 public interface ConversionService {
-    /**
-     * Convert xml to specified format using numeric conversion ID.
-     *
-     * @param fileContent file content and name
-     * @param conversionId conversion id for this file
-     * @return conversion result as string
-     */
-    ResponseEntity<byte[]> convert(UserFile fileContent, int conversionId);
-
     /**
      * Convert xml to specified format using XSL file name as conversion ID.
      *
