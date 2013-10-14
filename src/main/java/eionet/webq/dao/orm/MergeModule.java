@@ -21,6 +21,7 @@
 package eionet.webq.dao.orm;
 
 import org.hibernate.annotations.Generated;
+import org.hibernate.validator.constraints.Length;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -49,10 +50,12 @@ public class MergeModule {
     /**
      * Short unique name.
      */
+    @Length(max = 50)
     private String name;
     /**
      * Display title.
      */
+    @Length(max = 255)
     private String title;
     /**
      * Xml schemas this merge module can handle.
