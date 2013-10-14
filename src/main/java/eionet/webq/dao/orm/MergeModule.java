@@ -22,12 +22,15 @@ package eionet.webq.dao.orm;
 
 import org.hibernate.annotations.Generated;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToMany;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import java.util.Date;
@@ -54,7 +57,9 @@ public class MergeModule {
     /**
      * Xml schemas this merge module can handle.
      */
-    private transient List<String> xmlSchemas;
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinColumn(name = "merge_module_id")
+    private List<MergeModuleXmlSchema> xmlSchemas;
     /**
      * Xsl file to perform merging.
      */
@@ -101,11 +106,11 @@ public class MergeModule {
         this.title = title;
     }
 
-    public List<String> getXmlSchemas() {
+    public List<MergeModuleXmlSchema> getXmlSchemas() {
         return xmlSchemas;
     }
 
-    public void setXmlSchemas(List<String> xmlSchemas) {
+    public void setXmlSchemas(List<MergeModuleXmlSchema> xmlSchemas) {
         this.xmlSchemas = xmlSchemas;
     }
 

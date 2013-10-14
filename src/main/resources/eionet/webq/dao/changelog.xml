@@ -186,6 +186,11 @@
     </changeSet>
 
     <changeSet id="11" author="dmitrant">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="merge_module"/>
+            </not>
+        </preConditions>
         <createTable tableName="merge_module">
             <column name="id" type="int" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
@@ -198,6 +203,21 @@
             <column name="user_name" type="varchar(50)"/>
             <column name="created" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP"/>
             <column name="updated" type="timestamp"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="12" author="dmitrant">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="merge_module_xml_schema"/>
+            </not>
+        </preConditions>
+        <createTable tableName="merge_module_xml_schema">
+            <column name="id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="merge_module_id" type="int"/>
+            <column name="xml_schema" type="varchar(255)"/>
         </createTable>
     </changeSet>
 </databaseChangeLog>
