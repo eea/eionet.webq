@@ -190,6 +190,14 @@
             <column name="id" type="int" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
+            <column name="name" type="varchar(50)"/>
+            <column name="title" type="varchar(255)"/>
+            <column name="file_name" type="varchar(255)"/>
+            <column name="file_size_in_bytes" type="int"/>
+            <column name="file_content_id" type="int"/>
+            <column name="user_name" type="varchar(50)"/>
+            <column name="created" type="timestamp" defaultValueComputed="CURRENT_TIMESTAMP"/>
+            <column name="updated" type="timestamp"/>
         </createTable>
     </changeSet>
 </databaseChangeLog>

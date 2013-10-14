@@ -38,7 +38,8 @@ public class MergeModulesImpl extends AbstractDao<MergeModule> implements MergeM
 
     @Override
     public int save(MergeModule module) {
-        return (Integer) getCurrentSession().save(module);
+        getCurrentSession().save(module);
+        return module.getId();
     }
 
     @Override
