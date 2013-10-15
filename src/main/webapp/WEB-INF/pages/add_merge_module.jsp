@@ -21,14 +21,14 @@
                 <f:input id="title" path="title" size="35"/>
             </td>
         </tr>
-        <%--<tr>--%>
-            <%--<th scope="row">--%>
-                <%--<label for="xmlSchemas">Xml schemas</label>--%>
-            <%--</th>--%>
-            <%--<td>--%>
-                <%--<f:input id="xmlSchemas" path="xmlSchemas"/>--%>
-            <%--</td>--%>
-        <%--</tr>--%>
+        <tr>
+            <th scope="row">
+                <label for="xmlSchemas">Xml schemas</label>
+            </th>
+            <td>
+                <f:input id="xmlSchemas" path="xmlSchemas[0].xmlSchema"/>
+            </td>
+        </tr>
         <tr>
             <th scope="row">
                 <label for="xslFile">Xsl file</label>

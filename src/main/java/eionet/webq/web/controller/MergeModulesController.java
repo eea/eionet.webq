@@ -80,6 +80,6 @@ public class MergeModulesController {
         }
         mergeModulesStorage.save(newMergeModel);
         model.addAttribute("message", "New module successfully saved!");
-        return "merge_modules";
+        return listMergeModules(model);
     }
 }
