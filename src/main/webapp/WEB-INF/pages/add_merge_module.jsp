@@ -25,8 +25,14 @@
             <th scope="row">
                 <label for="xmlSchemas">Xml schemas</label>
             </th>
+            <td id="xmlSchemas">
+                <f:input cssStyle="display: block" path="xmlSchemas[0].xmlSchema"/>
+            </td>
+        </tr>
+        <tr>
+            <th></th>
             <td>
-                <f:input id="xmlSchemas" path="xmlSchemas[0].xmlSchema"/>
+                <input id="addXmlSchema" type="button" value="Add xml schema field"/>
             </td>
         </tr>
         <tr>

@@ -25,7 +25,7 @@
             <tr>
                 <td><a href="<c:url value="/merge/module/${module.name}/view"/>">${module.title}</a></td>
                 <td><c:forEach items="${module.xmlSchemas}" var="xmlSchema">
-                        ${xmlSchema} <br />
+                        ${xmlSchema.xmlSchema} <br />
                     </c:forEach>
                 </td>
                 <td>${module.userName}</td>
