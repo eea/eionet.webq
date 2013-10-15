@@ -50,4 +50,11 @@ public interface MergeModules {
      * @return merge module
      */
     MergeModule findById(int id);
+
+    /**
+     * Removes Merge modules by id.
+     *
+     * @param ids ids or modules to remove
+     */
+    void remove(int... ids);
 }

@@ -116,4 +116,16 @@ public class MergeModulesTest {
 
         assertThat(mergeModules.findAll().size(), equalTo(1));
     }
+
+    @Test
+    public void removesMergeModulesByIds() throws Exception {
+        int id1 = mergeModules.save(new MergeModule());
+        int id2 = mergeModules.save(new MergeModule());
+
+        assertThat(mergeModules.findAll().size(), equalTo(2));
+
+        mergeModules.remove(id1, id2);
+
+        assertThat(mergeModules.findAll().size(), equalTo(0));
+    }
 }

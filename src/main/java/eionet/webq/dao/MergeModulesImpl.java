@@ -21,6 +21,7 @@
 package eionet.webq.dao;
 
 import eionet.webq.dao.orm.MergeModule;
+import org.hibernate.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.Collection;
@@ -49,6 +50,14 @@ public class MergeModulesImpl extends AbstractDao<MergeModule> implements MergeM
     @Override
     public MergeModule findById(int id) {
         return (MergeModule) getCurrentSession().byId(getDtoClass()).load(id);
+    }
+
+    @Override
+    public void remove(int... ids) {
+        Query query = getCurrentSession().createQuery("DELETE FROM MergeModule WHERE id = :id");
+        for (int id : ids) {
+            query.setInteger("id", id).executeUpdate();
+        }
     }
 
     @Override

@@ -29,6 +29,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 
 /**
  */
@@ -80,6 +81,19 @@ public class MergeModulesController {
         }
         mergeModulesStorage.save(newMergeModel);
         model.addAttribute("message", "New module successfully saved!");
+        return listMergeModules(model);
+    }
+
+    /**
+     * Removes modules by specified ids.
+     *
+     * @param modulesToRemove ids of modules
+     * @param model model
+     */
+    @RequestMapping("/modules/remove")
+    public String remove(@RequestParam int[] modulesToRemove, Model model) {
+        mergeModulesStorage.remove(modulesToRemove);
+        model.addAttribute("message", "Selected modules successfully removed.");
         return listMergeModules(model);
     }
 }

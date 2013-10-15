@@ -89,4 +89,12 @@ public class MergeModulesControllerTest {
 
         assertThat(viewName, equalTo("add_merge_module"));
     }
+
+    @Test
+    public void removesModulesById() throws Exception {
+        int[] modulesToRemove = {1, 2, 3};
+        controller.remove(modulesToRemove, model);
+
+        verify(modulesStorage).remove(modulesToRemove);
+    }
 }
