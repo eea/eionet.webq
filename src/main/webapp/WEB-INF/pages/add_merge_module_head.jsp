@@ -10,9 +10,10 @@
             var schemasSize = allSchemas.length;
             var newInput = lastElement.clone();
 
+            newInput.val("")
+                    .removeAttr("id")
+                    .attr("name", newInput.attr("name").replace(schemasSize - 1, schemasSize));
             lastElement.after(newInput);
-            newInput.attr("name", newInput.attr("name").replace(schemasSize - 1, schemasSize))
-                    .removeAttr("id");
         });
     });
 </script>
