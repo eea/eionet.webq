@@ -24,6 +24,9 @@ import configuration.ApplicationTestContextWithMockSession;
 import eionet.webq.dao.orm.MergeModule;
 import eionet.webq.dao.orm.MergeModuleXmlSchema;
 import eionet.webq.dao.orm.UploadedFile;
+import org.hibernate.FlushMode;
+import org.hibernate.SessionFactory;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,7 +49,14 @@ public class MergeModulesTest {
 
     @Autowired
     private MergeModules mergeModules;
+    @Autowired
+    private SessionFactory sessionFactory;
     private MergeModule moduleToSave = new MergeModule();
+
+    @Before
+    public void before() throws Exception {
+        sessionFactory.getCurrentSession().setFlushMode(FlushMode.ALWAYS);
+    }
 
     @Test
     public void savesMergeModuleToStorage() throws Exception {
@@ -96,5 +106,14 @@ public class MergeModulesTest {
         mergeModules.save(new MergeModule());
 
         assertThat(mergeModules.findAll().size(), equalTo(2));
+    }
+
+    @Test
+    public void whenLoadingAllModules_distinctRootEntity() throws Exception {
+        MergeModule module = new MergeModule();
+        module.setXmlSchemas(Arrays.asList(new MergeModuleXmlSchema(), new MergeModuleXmlSchema()));
+        mergeModules.save(module);
+
+        assertThat(mergeModules.findAll().size(), equalTo(1));
     }
 }

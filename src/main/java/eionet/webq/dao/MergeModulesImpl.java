@@ -26,6 +26,8 @@ import org.springframework.stereotype.Repository;
 import java.util.Collection;
 import java.util.List;
 
+import static org.hibernate.criterion.CriteriaSpecification.DISTINCT_ROOT_ENTITY;
+
 /**
  * {@link eionet.webq.dao.MergeModules} implementation.
  */
@@ -35,7 +37,7 @@ public class MergeModulesImpl extends AbstractDao<MergeModule> implements MergeM
     @SuppressWarnings("unchecked")
     @Override
     public Collection<MergeModule> findAll() {
-        return (List<MergeModule>) getCriteria().list();
+        return (List<MergeModule>) getCriteria().setResultTransformer(DISTINCT_ROOT_ENTITY).list();
     }
 
     @Override
