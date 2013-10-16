@@ -104,6 +104,7 @@ public class MergeModulesController {
      *
      * @param modulesToRemove ids of modules
      * @param model model
+     * @return view name
      */
     @RequestMapping("/modules/remove")
     public String remove(@RequestParam int[] modulesToRemove, Model model) {

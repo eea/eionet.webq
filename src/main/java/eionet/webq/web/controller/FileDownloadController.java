@@ -20,6 +20,8 @@
  */
 package eionet.webq.web.controller;
 
+import eionet.webq.dao.MergeModules;
+import eionet.webq.dao.orm.MergeModule;
 import eionet.webq.dao.orm.ProjectFile;
 import eionet.webq.dao.orm.UserFile;
 import eionet.webq.service.ConversionService;
@@ -69,6 +71,11 @@ public class FileDownloadController {
      */
     @Autowired
     private ConversionService conversionService;
+    /**
+     * File conversion service.
+     */
+    @Autowired
+    private MergeModules mergeModules;
 
     /**
      * Download uploaded file action.
@@ -97,6 +104,20 @@ public class FileDownloadController {
         ProjectFile projectFile = projectFileService.fileContentBy(fileName, projectService.getByProjectId(projectId));
         addXmlFileHeaders(response, encodeAsUrl(fileName));
         writeToResponse(response, projectFile.getFileContent());
+    }
+
+    /**
+     * Allows to download merge module file.
+     *
+     * @param moduleName module name.
+     * @param response http response to write file
+     */
+    @RequestMapping("/merge/file/{moduleName:.*}")
+    @Transactional
+    public void downloadMergeFile(@PathVariable String moduleName, HttpServletResponse response) {
+        MergeModule module = mergeModules.findByName(moduleName);
+        addXmlFileHeaders(response, encodeAsUrl(module.getXslFile().getName()));
+        writeToResponse(response, module.getXslFile().getContent().getFileContent());
     }
 
     /**

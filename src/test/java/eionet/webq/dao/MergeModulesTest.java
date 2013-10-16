@@ -26,6 +26,7 @@ import eionet.webq.dao.orm.MergeModuleXmlSchema;
 import eionet.webq.dao.orm.UploadedFile;
 import org.hibernate.FlushMode;
 import org.hibernate.SessionFactory;
+import org.hibernate.exception.ConstraintViolationException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -127,5 +128,26 @@ public class MergeModulesTest {
         mergeModules.remove(id1, id2);
 
         assertThat(mergeModules.findAll().size(), equalTo(0));
+    }
+
+    @Test(expected = ConstraintViolationException.class)
+    public void modelNameMustBeUnique() throws Exception {
+        mergeModules.save(moduleWithName("uniqueName"));
+        mergeModules.save(moduleWithName("uniqueName"));
+    }
+
+    @Test
+    public void findsMergeModuleByItsUniqueName() throws Exception {
+        MergeModule module = moduleWithName("uniqueModuleName");
+        int id = mergeModules.save(module);
+        mergeModules.save(moduleWithName("someOtherUniqueModuleName"));
+
+        assertThat(mergeModules.findByName(module.getName()).getId(), equalTo(id));
+    }
+
+    private MergeModule moduleWithName(String uniqueModuleName) {
+        MergeModule module = new MergeModule();
+        module.setName(uniqueModuleName);
+        return module;
     }
 }

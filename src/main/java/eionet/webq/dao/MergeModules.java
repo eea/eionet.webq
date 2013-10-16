@@ -57,4 +57,13 @@ public interface MergeModules {
      * @param ids ids or modules to remove
      */
     void remove(int... ids);
+
+    /**
+     * Finds {@link eionet.webq.dao.orm.MergeModule} by its name.
+     * Assumed that module name is unique across all modules.
+     *
+     * @param moduleName module name.
+     * @return merge module.
+     */
+    MergeModule findByName(String moduleName);
 }

@@ -87,7 +87,7 @@ public class MergeModulesControllerTest {
         when(bindingResult.hasErrors()).thenReturn(true);
         String viewName = controller.save(new MergeModule(), bindingResult, model);
 
-        assertThat(viewName, equalTo("add_merge_module"));
+        assertThat(viewName, equalTo("add_edit_merge_module"));
     }
 
     @Test

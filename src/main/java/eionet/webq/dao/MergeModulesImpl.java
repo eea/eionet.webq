@@ -22,6 +22,7 @@ package eionet.webq.dao;
 
 import eionet.webq.dao.orm.MergeModule;
 import org.hibernate.Query;
+import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 
 import java.util.Collection;
@@ -58,6 +59,11 @@ public class MergeModulesImpl extends AbstractDao<MergeModule> implements MergeM
         for (int id : ids) {
             query.setInteger("id", id).executeUpdate();
         }
+    }
+
+    @Override
+    public MergeModule findByName(String moduleName) {
+        return (MergeModule) getCriteria().add(Restrictions.eq("name", moduleName)).uniqueResult();
     }
 
     @Override
