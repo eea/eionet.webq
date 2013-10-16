@@ -32,6 +32,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import javax.validation.Valid;
+
 /**
  */
 @Controller
@@ -61,7 +63,7 @@ public class MergeModulesController {
      * @param model model
      * @return view name
      */
-    @RequestMapping(value = "/module/add")
+    @RequestMapping("/module/add")
     public String addModule(Model model) {
         model.addAttribute("mergeModule", new MergeModule());
         return "add_edit_merge_module";
@@ -76,12 +78,17 @@ public class MergeModulesController {
      * @return view name.
      */
     @RequestMapping(value = "/module/save", method = RequestMethod.POST)
-    public String save(@ModelAttribute MergeModule mergeModule, BindingResult bindingResult, Model model) {
+    public String save(@Valid @ModelAttribute MergeModule mergeModule, BindingResult bindingResult, Model model) {
         if (bindingResult.hasErrors()) {
             return "add_edit_merge_module";
         }
-        mergeModulesStorage.save(mergeModule);
-        model.addAttribute("message", "New module successfully saved!");
+        if (mergeModule.getId() > 0) {
+            mergeModulesStorage.update(mergeModule);
+        } else {
+            mergeModulesStorage.save(mergeModule);
+        }
+
+        model.addAttribute("message", "Module \'" + mergeModule.getName() + "\' successfully created/updated.");
         return listMergeModules(model);
     }
 
@@ -92,7 +99,7 @@ public class MergeModulesController {
      * @param model model
      * @return view name
      */
-    @RequestMapping(value = "/module/edit/{id}")
+    @RequestMapping("/module/edit/{id}")
     public String edit(@PathVariable int id, Model model) {
         MergeModule module = mergeModulesStorage.findById(id);
         model.addAttribute("mergeModule", module);

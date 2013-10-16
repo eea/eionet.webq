@@ -24,6 +24,7 @@ import eionet.webq.dao.orm.MergeModule;
 import org.hibernate.Query;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
 import java.util.List;
@@ -34,6 +35,7 @@ import static org.hibernate.criterion.CriteriaSpecification.DISTINCT_ROOT_ENTITY
  * {@link eionet.webq.dao.MergeModules} implementation.
  */
 @Repository
+@Transactional
 public class MergeModulesImpl extends AbstractDao<MergeModule> implements MergeModules {
 
     @SuppressWarnings("unchecked")

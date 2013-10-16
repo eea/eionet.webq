@@ -4,7 +4,8 @@
 <%@ taglib prefix="s" uri="http://www.springframework.org/tags" %>
 
 <h1>Save merge module</h1>
-<f:form modelAttribute="mergeModule" action="save" method="post" enctype="multipart/form-data">
+<c:url value="/merge/module/save" var="actionUrl"/>
+<f:form modelAttribute="mergeModule" action="${actionUrl}" method="post" enctype="multipart/form-data">
     <f:errors path="*" element="div" cssClass="error-msg"/>
     <table class="datatable">
         <tr>

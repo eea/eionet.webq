@@ -75,7 +75,7 @@ public class MergeModulesControllerTest {
     }
 
     @Test
-    public void whenNewSavingModule_writeDataToStorage() throws Exception {
+    public void whenSavingModule_andIdNotSet_performSaveToStorage() throws Exception {
         MergeModule module = new MergeModule();
         controller.save(module, bindingResult, model);
 
@@ -96,5 +96,14 @@ public class MergeModulesControllerTest {
         controller.remove(modulesToRemove, model);
 
         verify(modulesStorage).remove(modulesToRemove);
+    }
+
+    @Test
+    public void whenSavingModule_ifIdSetToValueGreaterThanZero_performUpdateInStorage() throws Exception {
+        MergeModule mergeModule = new MergeModule();
+        mergeModule.setId(1);
+        String viewName = controller.save(mergeModule, bindingResult, model);
+        verify(modulesStorage).update(mergeModule);
+        assertThat(viewName, equalTo("merge_modules"));
     }
 }
