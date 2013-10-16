@@ -41,6 +41,7 @@ import java.util.List;
 
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -180,6 +181,32 @@ public class MergeModulesTest {
         assertThat(moduleById.getXmlSchemas().iterator().next().getXmlSchema(), equalTo(newSchema));
         assertThat(moduleById.getXslFile().getName(), equalTo(newXslFileName));
         assertThat(moduleById.getXslFile().getContent().getFileContent(), equalTo(xslFileContent));
+    }
+
+    @Test
+    public void whenUpdatingModule_ifContentIsNotSet_DoNotWipeIt() throws Exception {
+        byte[] initialContent = "xsl-file-content".getBytes();
+        MergeModule module = new MergeModule();
+        module.setXslFile(new UploadedFile("file.xsl", initialContent));
+        int id = mergeModules.save(module);
+
+        MergeModule updateModule = new MergeModule();
+        updateModule.setId(id);
+        updateModule.setXslFile(new UploadedFile());
+        mergeModules.update(updateModule);
+
+        assertThat(mergeModules.findById(id).getXslFile().getContent().getFileContent(), equalTo(initialContent));
+    }
+
+    @Test
+    public void afterUpdate_updatedTimestampIsSet() throws Exception {
+        int id = mergeModules.save(new MergeModule());
+        MergeModule moduleToUpdate = mergeModules.findById(id);
+        assertNull(moduleToUpdate.getUpdated());
+
+        mergeModules.update(moduleToUpdate);
+
+        assertNotNull(mergeModules.findById(id).getUpdated());
     }
 
     private MergeModule moduleWithName(String uniqueModuleName) {

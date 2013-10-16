@@ -27,6 +27,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 
 import static org.hibernate.criterion.CriteriaSpecification.DISTINCT_ROOT_ENTITY;
@@ -70,6 +71,24 @@ public class MergeModulesImpl extends AbstractDao<MergeModule> implements MergeM
 
     @Override
     public void update(MergeModule module) {
+        if (module.getXslFile() == null || module.getXslFile().getSizeInBytes() == 0) {
+            MergeModule moduleFromStorage = findById(module.getId());
+            moduleFromStorage.setName(module.getName());
+            moduleFromStorage.setXmlSchemas(module.getXmlSchemas());
+            moduleFromStorage.setTitle(module.getTitle());
+            setUpdatedAndUpdate(moduleFromStorage);
+        } else {
+            setUpdatedAndUpdate(module);
+        }
+    }
+
+    /**
+     * Sets updated date and performs update to storage.
+     *
+     * @param module module to update
+     */
+    private void setUpdatedAndUpdate(MergeModule module) {
+        module.setUpdated(new Date());
         getCurrentSession().update(module);
     }
 
