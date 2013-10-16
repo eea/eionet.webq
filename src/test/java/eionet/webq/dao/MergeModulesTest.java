@@ -145,6 +145,43 @@ public class MergeModulesTest {
         assertThat(mergeModules.findByName(module.getName()).getId(), equalTo(id));
     }
 
+    @Test
+    public void editAllowsToChangeAllAvailableFields() throws Exception {
+        MergeModule module = new MergeModule();
+        module.setName("nameToEdit");
+        module.setUserName("username");
+        module.setTitle("titleToEdit");
+        MergeModuleXmlSchema mergeModuleXmlSchema = new MergeModuleXmlSchema();
+        mergeModuleXmlSchema.setXmlSchema("schemaToDrop");
+        module.setXmlSchemas(Arrays.asList(mergeModuleXmlSchema));
+        module.setXslFile(new UploadedFile("file.name", "content-to-update".getBytes()));
+
+        int id = mergeModules.save(module);
+
+        String newName = "newName";
+        String newTitle = "newTitle";
+        String newSchema = "newSchema";
+        String newXslFileName = "newXslFileName";
+        byte[] xslFileContent = "new-xsl-content".getBytes();
+        MergeModuleXmlSchema newXmlSchema = new MergeModuleXmlSchema();
+        newXmlSchema.setXmlSchema(newSchema);
+
+        module.setTitle(newTitle);
+        module.setName(newName);
+        module.setXmlSchemas(Arrays.asList(newXmlSchema));
+        module.setXslFile(new UploadedFile(newXslFileName, xslFileContent));
+
+        mergeModules.update(module);
+
+        MergeModule moduleById = mergeModules.findById(id);
+        assertThat(moduleById.getName(), equalTo(newName));
+        assertThat(moduleById.getTitle(), equalTo(newTitle));
+        assertThat(moduleById.getXmlSchemas().size(), equalTo(1));
+        assertThat(moduleById.getXmlSchemas().iterator().next().getXmlSchema(), equalTo(newSchema));
+        assertThat(moduleById.getXslFile().getName(), equalTo(newXslFileName));
+        assertThat(moduleById.getXslFile().getContent().getFileContent(), equalTo(xslFileContent));
+    }
+
     private MergeModule moduleWithName(String uniqueModuleName) {
         MergeModule module = new MergeModule();
         module.setName(uniqueModuleName);

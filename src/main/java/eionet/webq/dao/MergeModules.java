@@ -66,4 +66,6 @@ public interface MergeModules {
      * @return merge module.
      */
     MergeModule findByName(String moduleName);
+
+    void update(MergeModule module);
 }

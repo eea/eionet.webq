@@ -67,6 +67,11 @@ public class MergeModulesImpl extends AbstractDao<MergeModule> implements MergeM
     }
 
     @Override
+    public void update(MergeModule module) {
+        getCurrentSession().update(module);
+    }
+
+    @Override
     Class<MergeModule> getDtoClass() {
         return MergeModule.class;
     }
