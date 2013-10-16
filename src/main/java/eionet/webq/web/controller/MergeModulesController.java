@@ -27,6 +27,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -62,26 +63,40 @@ public class MergeModulesController {
      */
     @RequestMapping(value = "/module/add")
     public String addModule(Model model) {
-        model.addAttribute("newMergeModule", new MergeModule());
-        return "add_merge_module";
+        model.addAttribute("mergeModule", new MergeModule());
+        return "add_edit_merge_module";
     }
 
     /**
      * Saves merge module to storage.
      *
-     * @param newMergeModel module.
-     * @param bindingResult result of newMergeModel binding
+     * @param mergeModule module.
+     * @param bindingResult result of mergeModule binding
      * @param model model
      * @return view name.
      */
     @RequestMapping(value = "/module/save", method = RequestMethod.POST)
-    public String save(@ModelAttribute MergeModule newMergeModel, BindingResult bindingResult, Model model) {
+    public String save(@ModelAttribute MergeModule mergeModule, BindingResult bindingResult, Model model) {
         if (bindingResult.hasErrors()) {
-            return "add_merge_module";
+            return "add_edit_merge_module";
         }
-        mergeModulesStorage.save(newMergeModel);
+        mergeModulesStorage.save(mergeModule);
         model.addAttribute("message", "New module successfully saved!");
         return listMergeModules(model);
+    }
+
+    /**
+     * Shows edit view.
+     *
+     * @param id module to edit
+     * @param model model
+     * @return view name
+     */
+    @RequestMapping(value = "/module/edit/{id}")
+    public String edit(@PathVariable int id, Model model) {
+        MergeModule module = mergeModulesStorage.findById(id);
+        model.addAttribute("mergeModule", module);
+        return "add_edit_merge_module";
     }
 
     /**

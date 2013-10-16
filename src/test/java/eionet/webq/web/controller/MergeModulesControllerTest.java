@@ -71,7 +71,7 @@ public class MergeModulesControllerTest {
     @Test
     public void whenAddingNewModule_emptyModuleShouldBeAddedToModel() throws Exception {
         controller.addModule(model);
-        verify(model).addAttribute(eq("newMergeModule"), any(MergeModule.class));
+        verify(model).addAttribute(eq("mergeModule"), any(MergeModule.class));
     }
 
     @Test
