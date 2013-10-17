@@ -71,7 +71,7 @@ public class ProjectFoldersImpl extends AbstractDao<ProjectEntry> implements Pro
     }
 
     @Override
-    Class<ProjectEntry> getDtoClass() {
+    Class<ProjectEntry> getEntityClass() {
         return ProjectEntry.class;
     }
 }

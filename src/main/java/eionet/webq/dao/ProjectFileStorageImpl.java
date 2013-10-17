@@ -52,7 +52,7 @@ public class ProjectFileStorageImpl extends AbstractDao<ProjectFile> implements 
 
     @Override
     public ProjectFile findById(int id) {
-        return (ProjectFile) getCurrentSession().byId(getDtoClass()).load(id);
+        return (ProjectFile) getCurrentSession().byId(getEntityClass()).load(id);
     }
 
     @Override
@@ -99,7 +99,7 @@ public class ProjectFileStorageImpl extends AbstractDao<ProjectFile> implements 
     }
 
     @Override
-    Class<ProjectFile> getDtoClass() {
+    Class<ProjectFile> getEntityClass() {
         return ProjectFile.class;
     }
 

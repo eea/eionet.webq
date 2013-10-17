@@ -23,10 +23,12 @@ package eionet.webq.dao;
 import configuration.ApplicationTestContextWithMockSession;
 import eionet.webq.dao.orm.UploadedFile;
 import eionet.webq.dao.orm.UserFile;
+import org.hibernate.FlushMode;
 import org.hibernate.LazyInitializationException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +40,7 @@ import javax.validation.ConstraintViolationException;
 import java.util.Collection;
 import java.util.Iterator;
 
+import static eionet.webq.dao.FileContentUtil.getFileContentRowsCount;
 import static junit.framework.TestCase.assertNotNull;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertThat;
@@ -54,6 +57,11 @@ public class UserFileStorageImplTest {
     SessionFactory sessionFactory;
     private String userId = userId();
     private String otherUserId = "other" + userId;
+
+    @Before
+    public void setUp() throws Exception {
+        sessionFactory.getCurrentSession().setFlushMode(FlushMode.ALWAYS);
+    }
 
     @Test
     public void saveUploadedFileToStorageWithoutException() {
@@ -251,6 +259,16 @@ public class UserFileStorageImplTest {
         storage.update(userFile, userFile.getUserId());
 
         assertNotNull(storage.findFile(userFile.getId(), userId).getUpdated());
+    }
+
+    @Test
+    public void uploadedFileRemovedWithUserFileRemoval() throws Exception {
+        UserFile userFile = saveAndGetBackSavedFileForDefaultUser();
+        assertThat(getFileContentRowsCount(sessionFactory), equalTo(1));
+
+        storage.remove(userId, userFile.getId());
+
+        assertThat(getFileContentRowsCount(sessionFactory), equalTo(0));
     }
 
     private UserFile saveAndGetBackSavedFileForDefaultUser() {

@@ -53,7 +53,7 @@ public class MergeModulesImpl extends AbstractDao<MergeModule> implements MergeM
 
     @Override
     public MergeModule findById(int id) {
-        return (MergeModule) getCurrentSession().byId(getDtoClass()).load(id);
+        return (MergeModule) getCurrentSession().byId(getEntityClass()).load(id);
     }
 
     @Override
@@ -93,7 +93,7 @@ public class MergeModulesImpl extends AbstractDao<MergeModule> implements MergeM
     }
 
     @Override
-    Class<MergeModule> getDtoClass() {
+    Class<MergeModule> getEntityClass() {
         return MergeModule.class;
     }
 }
