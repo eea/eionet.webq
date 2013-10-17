@@ -4,16 +4,34 @@
 
 <script type="text/javascript">
     $(function() {
-        $("#addXmlSchema").click(function () {
-            var allSchemas = $("#xmlSchemas input");
-            var lastElement = allSchemas.last();
-            var schemasSize = allSchemas.length;
-            var newInput = lastElement.clone();
+        function findAllSchemas() {
+            return $('#xmlSchemas').find('input');
+        }
 
-            newInput.val("")
+        function createNameWithIndex(i) {
+            return "xmlSchemas[" + i + "].xmlSchema";
+        }
+
+        $("#addXmlSchema").click(function () {
+            var allSchemas = findAllSchemas();
+            var lastElement = allSchemas.last().parent("div");
+            var newElement = lastElement.clone(true);
+
+            newElement.children("input").val("")
                     .removeAttr("id")
-                    .attr("name", newInput.attr("name").replace(schemasSize - 1, schemasSize));
-            lastElement.after(newInput);
+                    .attr("name", createNameWithIndex(allSchemas.length));
+            lastElement.after(newElement);
+        });
+
+        $(".removeSchema").click(function() {
+            $(this).parent("div").remove();
+        });
+
+        $("form#saveModule").submit(function() {
+            findAllSchemas().each(function (i, elem) {
+                $(elem).attr("name", createNameWithIndex(i))
+                        .removeAttr("id");
+            });
         });
     });
 </script>

@@ -5,7 +5,7 @@
 
 <h1>Save merge module</h1>
 <c:url value="/merge/module/save" var="actionUrl"/>
-<f:form modelAttribute="mergeModule" action="${actionUrl}" method="post" enctype="multipart/form-data">
+<f:form id="saveModule" modelAttribute="mergeModule" action="${actionUrl}" method="post" enctype="multipart/form-data">
     <f:errors path="*" element="div" cssClass="error-msg"/>
     <table class="datatable">
         <tr>
@@ -29,13 +29,20 @@
                 <label for="xmlSchemas">Xml schemas</label>
             </th>
             <td id="xmlSchemas">
+                <c:url value="/images/delete.gif" var="imageLink"/>
+                <c:set var="removeLink"
+                       value="<a class=\"removeSchema\" href=\"#\"><img alt=\"Remove schema\" title=\"Remove schema\" src=\"${imageLink}\"></a>"/>
                 <c:choose>
                     <c:when test="${empty mergeModule.xmlSchemas}">
-                        <f:input cssStyle="display: block" path="xmlSchemas[0].xmlSchema"/>
+                        <div style="display: block;">
+                            <f:input path="xmlSchemas[0].xmlSchema"/> ${removeLink}
+                        </div>
                     </c:when>
                     <c:otherwise>
                         <c:forEach varStatus="status" items="${mergeModule.xmlSchemas}">
-                            <f:input cssStyle="display: block" path="xmlSchemas[${status.index}].xmlSchema"/>
+                                <div style="display: block;">
+                                    <f:input path="xmlSchemas[${status.index}].xmlSchema"/> ${removeLink}
+                                </div>
                         </c:forEach>
                     </c:otherwise>
                 </c:choose>

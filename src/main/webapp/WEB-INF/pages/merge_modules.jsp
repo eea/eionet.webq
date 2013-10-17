@@ -26,9 +26,10 @@
             <c:forEach items="${allMergeModules}" var="module">
                 <tr>
                     <td><input type="checkbox" value="${module.id}" name="modulesToRemove"></td>
-                    <td><a href="<c:url value="/merge/module/edit/${module.id}"/>">${module.title}</a></td>
-                    <td><c:forEach items="${module.xmlSchemas}" var="xmlSchema">
-                            ${xmlSchema.xmlSchema} <br />
+                    <td><a href="<c:url value="/merge/module/edit/${module.id}"/>"><c:out value="${module.title}" escapeXml="true"/></a></td>
+                    <td>
+                        <c:forEach items="${module.xmlSchemas}" var="xmlSchema">
+                            <c:out value="${xmlSchema.xmlSchema}" escapeXml="true"/> <br />
                         </c:forEach>
                     </td>
                     <td>${module.userName}</td>
