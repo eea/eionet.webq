@@ -33,6 +33,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.validation.Valid;
+import java.security.Principal;
 
 /**
  */
@@ -75,13 +76,16 @@ public class MergeModulesController {
      * @param mergeModule module.
      * @param bindingResult result of mergeModule binding
      * @param model model
+     * @param principal user principal
      * @return view name.
      */
     @RequestMapping(value = "/module/save", method = RequestMethod.POST)
-    public String save(@Valid @ModelAttribute MergeModule mergeModule, BindingResult bindingResult, Model model) {
+    public String save(@Valid @ModelAttribute MergeModule mergeModule, BindingResult bindingResult, Model model,
+                       Principal principal) {
         if (bindingResult.hasErrors()) {
             return "add_edit_merge_module";
         }
+        mergeModule.setUserName(principal.getName());
         if (mergeModule.getId() > 0) {
             mergeModulesStorage.update(mergeModule);
         } else {

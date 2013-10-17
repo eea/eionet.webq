@@ -30,6 +30,7 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 
+import java.security.Principal;
 import java.util.Collections;
 import java.util.List;
 
@@ -51,6 +52,8 @@ public class MergeModulesControllerTest {
     private Model model;
     @Mock
     private BindingResult bindingResult;
+    @Mock
+    private Principal principal;
 
     @Before
     public void setUp() throws Exception {
@@ -77,7 +80,7 @@ public class MergeModulesControllerTest {
     @Test
     public void whenSavingModule_andIdNotSet_performSaveToStorage() throws Exception {
         MergeModule module = new MergeModule();
-        controller.save(module, bindingResult, model);
+        controller.save(module, bindingResult, model, principal);
 
         verify(modulesStorage).save(module);
     }
@@ -85,7 +88,7 @@ public class MergeModulesControllerTest {
     @Test
     public void whenSaving_ifBindingResultHasErrors_returnBackToAddPage() throws Exception {
         when(bindingResult.hasErrors()).thenReturn(true);
-        String viewName = controller.save(new MergeModule(), bindingResult, model);
+        String viewName = controller.save(new MergeModule(), bindingResult, model, principal);
 
         assertThat(viewName, equalTo("add_edit_merge_module"));
     }
@@ -102,8 +105,19 @@ public class MergeModulesControllerTest {
     public void whenSavingModule_ifIdSetToValueGreaterThanZero_performUpdateInStorage() throws Exception {
         MergeModule mergeModule = new MergeModule();
         mergeModule.setId(1);
-        String viewName = controller.save(mergeModule, bindingResult, model);
+        String viewName = controller.save(mergeModule, bindingResult, model, principal);
         verify(modulesStorage).update(mergeModule);
         assertThat(viewName, equalTo("merge_modules"));
+    }
+
+    @Test
+    public void onAnySave_updateUserName() throws Exception {
+        String expectedUserName = "expectedUserPrincipalName";
+        when(principal.getName()).thenReturn(expectedUserName);
+
+        MergeModule mergeModule = new MergeModule();
+        controller.save(mergeModule, bindingResult, model, principal);
+
+        assertThat(mergeModule.getUserName(), equalTo(expectedUserName));
     }
 }
