@@ -12,6 +12,16 @@
             return "xmlSchemas[" + i + "].xmlSchema";
         }
 
+        function toggleRemovalLink() {
+            var allSchemasLenghth = findAllSchemas().length;
+            if (allSchemasLenghth == 1) {
+                $("a.removeSchema").hide();
+            }
+            if (allSchemasLenghth == 2) {
+                $('a.removeSchema').show();
+            }
+        }
+
         $("#addXmlSchema").click(function () {
             var allSchemas = findAllSchemas();
             var lastElement = allSchemas.last().parent("div");
@@ -21,10 +31,12 @@
                     .removeAttr("id")
                     .attr("name", createNameWithIndex(allSchemas.length));
             lastElement.after(newElement);
+            toggleRemovalLink();
         });
 
-        $(".removeSchema").click(function() {
+        $("a.removeSchema").click(function() {
             $(this).parent("div").remove();
+            toggleRemovalLink();
         });
 
         $("form#saveModule").submit(function() {
@@ -33,5 +45,7 @@
                         .removeAttr("id");
             });
         });
+
+        toggleRemovalLink();
     });
 </script>
