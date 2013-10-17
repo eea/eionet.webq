@@ -67,5 +67,10 @@ public interface MergeModules {
      */
     MergeModule findByName(String moduleName);
 
+    /**
+     * Updates merge module.
+     *
+     * @param module module to update.
+     */
     void update(MergeModule module);
 }
