@@ -26,6 +26,7 @@ import eionet.webq.dao.orm.ProjectFile;
 import eionet.webq.dao.orm.ProjectFileType;
 import eionet.webq.dao.orm.UploadedFile;
 import eionet.webq.dao.orm.util.ProjectFileInfo;
+import org.hibernate.FlushMode;
 import org.hibernate.LazyInitializationException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -41,6 +42,7 @@ import javax.validation.ConstraintViolationException;
 import java.util.Collection;
 import java.util.Iterator;
 
+import static eionet.webq.dao.FileContentUtil.getFileContentRowsCount;
 import static eionet.webq.dao.orm.ProjectFileType.FILE;
 import static eionet.webq.dao.orm.ProjectFileType.WEBFORM;
 import static org.hamcrest.core.IsEqual.equalTo;
@@ -71,6 +73,7 @@ public class ProjectFileStorageImplTest {
         defaultProjectFile.setFileName("UniqueName");
         projectFileStorage.save(defaultProjectFile, testProjectEntry(2));
         currentSession = sessionFactory.getCurrentSession();
+        sessionFactory.getCurrentSession().setFlushMode(FlushMode.ALWAYS);
     }
 
     @Test
@@ -283,6 +286,15 @@ public class ProjectFileStorageImplTest {
         assertThat(file.getFileContent(), equalTo(testFileForUpload.getFileContent()));
     }
 
+    @Test
+    public void removingProjectFileWillAlsoRemoveUploadedFile() throws Exception {
+        assertThat(getFileContentRowsCount(sessionFactory), equalTo(1));
+
+        projectFileStorage.remove(testProjectEntry(defaultProjectFile.getProjectId()), defaultProjectFile.getId());
+
+        assertThat(getFileContentRowsCount(sessionFactory), equalTo(0));
+    }
+
     private void assertFieldsEquals(ProjectFile before, ProjectFile after) {
         assertThat(after.getTitle(), equalTo(before.getTitle()));
         assertThat(after.getXmlSchema(), equalTo(before.getXmlSchema()));
@@ -328,9 +340,5 @@ public class ProjectFileStorageImplTest {
         ProjectFile projectFile = projectFileWithoutTypeSet();
         projectFile.setFileType(type);
         return projectFile;
-    }
-
-    private ProjectFile getPreparedProjectFile() {
-        return projectFileStorage.findById(1);
     }
 }
