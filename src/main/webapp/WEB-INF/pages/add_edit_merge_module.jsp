@@ -54,7 +54,7 @@
                 <input id="addXmlSchema" type="button" value="Add xml schema field"/>
             </td>
         </tr>
-        <c:if test="${not empty mergeModule.xslFile.content}">
+        <c:if test="${mergeModule.xslFile.sizeInBytes gt 0}">
             <tr>
                 <th scope="row">Current file</th>
                 <td>
