@@ -20,16 +20,18 @@
  */
 package eionet.webq.dao.orm.util;
 
+import eionet.webq.dao.orm.MergeModule;
 import eionet.webq.dao.orm.ProjectFile;
+import eionet.webq.dao.orm.UploadedFile;
 
 /**
- * Utility methods for {@link ProjectFile}.
+ * Utility methods for WebQ files, e.g. {@link ProjectFile}.
  */
-public final class ProjectFileInfo {
+public final class WebQFileInfo {
     /**
      * No instantiation.
      */
-    private ProjectFileInfo() {
+    private WebQFileInfo() {
     }
 
     /**
@@ -43,12 +45,22 @@ public final class ProjectFileInfo {
     }
 
     /**
+     * Check whether this file is new.
+     *
+     * @param module file to be checked
+     * @return is new
+     */
+    public static boolean isNew(MergeModule module) {
+        return module.getId() == 0;
+    }
+
+    /**
      * Check whether this file has empty content.
      *
      * @param file file to be checked
      * @return is empty
      */
-    public static boolean fileIsEmpty(ProjectFile file) {
-        return file.getFileSizeInBytes() == 0;
+    public static boolean fileIsEmpty(UploadedFile file) {
+        return file == null || file.getSizeInBytes() == 0;
     }
 }

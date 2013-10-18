@@ -88,6 +88,14 @@ public class MergeModulesControllerTest {
     }
 
     @Test
+    public void whenSavingModule_andIdNotSetAndFileIsEmpty_showErrorMessage() throws Exception {
+        MergeModule module = new MergeModule();
+        controller.save(module, bindingResult, model, principal);
+
+        verify(bindingResult).rejectValue(eq("xslFile"), anyString());
+    }
+
+    @Test
     public void whenSaving_ifBindingResultHasErrors_returnBackToAddPage() throws Exception {
         when(bindingResult.hasErrors()).thenReturn(true);
         String viewName = controller.save(new MergeModule(), bindingResult, model, principal);

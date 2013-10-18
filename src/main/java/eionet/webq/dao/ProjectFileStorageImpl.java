@@ -23,7 +23,7 @@ package eionet.webq.dao;
 import eionet.webq.dao.orm.ProjectEntry;
 import eionet.webq.dao.orm.ProjectFile;
 import eionet.webq.dao.orm.ProjectFileType;
-import eionet.webq.dao.orm.util.ProjectFileInfo;
+import eionet.webq.dao.orm.util.WebQFileInfo;
 import org.apache.commons.lang3.ArrayUtils;
 import org.hibernate.Session;
 import org.hibernate.criterion.Criterion;
@@ -61,7 +61,7 @@ public class ProjectFileStorageImpl extends AbstractDao<ProjectFile> implements 
     @Override
     public void update(final ProjectFile projectFile, ProjectEntry projectEntry) {
         if (projectFile.getProjectId() == projectEntry.getId()) {
-            if (ProjectFileInfo.fileIsEmpty(projectFile)) {
+            if (WebQFileInfo.fileIsEmpty(projectFile.getFile())) {
                 updateWithoutChangingContent(projectFile);
             } else {
                 fullUpdate(projectFile);

@@ -52,7 +52,7 @@ public class MergeModule {
     /**
      * Short unique name.
      */
-    @Length(max = 50)
+    @Length(min = 1, max = 50)
     @Pattern(regexp = "[A-Za-z0-9-\\._~]*")
     private String name;
     /**

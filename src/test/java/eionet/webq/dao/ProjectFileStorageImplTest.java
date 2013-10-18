@@ -25,7 +25,7 @@ import eionet.webq.dao.orm.ProjectEntry;
 import eionet.webq.dao.orm.ProjectFile;
 import eionet.webq.dao.orm.ProjectFileType;
 import eionet.webq.dao.orm.UploadedFile;
-import eionet.webq.dao.orm.util.ProjectFileInfo;
+import eionet.webq.dao.orm.util.WebQFileInfo;
 import org.hibernate.FlushMode;
 import org.hibernate.LazyInitializationException;
 import org.hibernate.Session;
@@ -176,7 +176,7 @@ public class ProjectFileStorageImplTest {
 
         currentSession.refresh(defaultProjectFile);
 
-        assertFalse(ProjectFileInfo.fileIsEmpty(defaultProjectFile));
+        assertFalse(WebQFileInfo.fileIsEmpty(defaultProjectFile.getFile()));
         assertNotNull(defaultProjectFile.getFileContent());
     }
 

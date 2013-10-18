@@ -27,31 +27,31 @@ import org.junit.Test;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-public class ProjectFileInfoTest {
+public class WebQFileInfoTest {
 
     @Test
     public void fileIsNewIfIdIsZero() throws Exception {
-        assertTrue(ProjectFileInfo.isNew(new ProjectFile()));
+        assertTrue(WebQFileInfo.isNew(new ProjectFile()));
     }
 
     @Test
     public void fileExistIfIdIsGreaterThanZero() throws Exception {
         ProjectFile file = new ProjectFile();
         file.setId(1);
-        assertFalse(ProjectFileInfo.isNew(file));
+        assertFalse(WebQFileInfo.isNew(file));
     }
 
     @Test
     public void fileIsEmptyIfItsSizeIsZero() throws Exception {
         ProjectFile file = new ProjectFile();
         file.setFile(new UploadedFile(null, new byte[0]));
-        assertTrue(ProjectFileInfo.fileIsEmpty(file));
+        assertTrue(WebQFileInfo.fileIsEmpty(file.getFile()));
     }
 
     @Test
     public void fileIsNotEmpty() throws Exception {
         ProjectFile file = new ProjectFile();
         file.setFile(new UploadedFile(null, new byte[1]));
-        assertFalse(ProjectFileInfo.fileIsEmpty(file));
+        assertFalse(WebQFileInfo.fileIsEmpty(file.getFile()));
     }
 }

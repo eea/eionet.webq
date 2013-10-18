@@ -22,6 +22,7 @@ package eionet.webq.web.controller;
 
 import eionet.webq.dao.MergeModules;
 import eionet.webq.dao.orm.MergeModule;
+import eionet.webq.dao.orm.util.WebQFileInfo;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -41,6 +42,10 @@ import java.security.Principal;
 @Controller
 @RequestMapping("/merge")
 public class MergeModulesController {
+    /**
+     * Edit view name.
+     */
+    public static final String ADD_EDIT_MERGE_MODULE_VIEW = "add_edit_merge_module";
     /**
      * Merge modules storage.
      */
@@ -68,7 +73,7 @@ public class MergeModulesController {
     @RequestMapping("/module/add")
     public String addModule(Model model) {
         model.addAttribute("mergeModule", new MergeModule());
-        return "add_edit_merge_module";
+        return ADD_EDIT_MERGE_MODULE_VIEW;
     }
 
     /**
@@ -83,19 +88,23 @@ public class MergeModulesController {
     @RequestMapping(value = "/module/save", method = RequestMethod.POST)
     public String save(@Valid @ModelAttribute MergeModule mergeModule, BindingResult bindingResult, Model model,
                        Principal principal) {
+        boolean isSave = WebQFileInfo.isNew(mergeModule);
+        if (isSave && WebQFileInfo.fileIsEmpty(mergeModule.getXslFile())) {
+            bindingResult.rejectValue("xslFile", "mergeFile.empty.on.save");
+        }
         if (bindingResult.hasErrors()) {
-            return "add_edit_merge_module";
+            return ADD_EDIT_MERGE_MODULE_VIEW;
         }
         mergeModule.setUserName(principal.getName());
         try {
-            if (mergeModule.getId() > 0) {
-                mergeModulesStorage.update(mergeModule);
-            } else {
+            if (isSave) {
                 mergeModulesStorage.save(mergeModule);
+            } else {
+                mergeModulesStorage.update(mergeModule);
             }
         } catch (ConstraintViolationException e) {
             bindingResult.rejectValue("name", "merge.module.duplicate.name");
-            return "add_edit_merge_module";
+            return ADD_EDIT_MERGE_MODULE_VIEW;
         }
 
         model.addAttribute("message", "Module \'" + mergeModule.getName() + "\' successfully created/updated.");
@@ -113,7 +122,7 @@ public class MergeModulesController {
     public String edit(@PathVariable int id, Model model) {
         MergeModule module = mergeModulesStorage.findById(id);
         model.addAttribute("mergeModule", module);
-        return "add_edit_merge_module";
+        return ADD_EDIT_MERGE_MODULE_VIEW;
     }
 
     /**
@@ -124,7 +133,7 @@ public class MergeModulesController {
      * @return view name
      */
     @RequestMapping("/modules/remove")
-    public String remove(@RequestParam int[] modulesToRemove, Model model) {
+    public String remove(@RequestParam(required = false) int[] modulesToRemove, Model model) {
         mergeModulesStorage.remove(modulesToRemove);
         model.addAttribute("message", "Selected modules successfully removed.");
         return listMergeModules(model);
