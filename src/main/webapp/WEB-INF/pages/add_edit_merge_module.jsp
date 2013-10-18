@@ -35,13 +35,13 @@
                 <c:choose>
                     <c:when test="${empty mergeModule.xmlSchemas}">
                         <div style="display: block;">
-                            <f:input path="xmlSchemas[0].xmlSchema"/> ${removeLink}
+                            <f:input size="50" path="xmlSchemas[0].xmlSchema"/> ${removeLink}
                         </div>
                     </c:when>
                     <c:otherwise>
                         <c:forEach varStatus="status" items="${mergeModule.xmlSchemas}">
                                 <div style="display: block;">
-                                    <f:input path="xmlSchemas[${status.index}].xmlSchema"/> ${removeLink}
+                                    <f:input size="50" path="xmlSchemas[${status.index}].xmlSchema"/> ${removeLink}
                                 </div>
                         </c:forEach>
                     </c:otherwise>
