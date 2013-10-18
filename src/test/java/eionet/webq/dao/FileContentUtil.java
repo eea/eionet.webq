@@ -39,8 +39,16 @@ public class FileContentUtil {
      * @return rows count
      */
     public static int getFileContentRowsCount(SessionFactory factory) {
+        return countRows(factory, "file_content");
+    }
+
+    public static int getXmlSchemaRowsCount(SessionFactory factory) {
+        return countRows(factory, "merge_module_xml_schema");
+    }
+
+    private static int countRows(SessionFactory factory, String tableName) {
         BigInteger count = (BigInteger) factory.getCurrentSession()
-                .createSQLQuery("select count(*) from file_content").uniqueResult();
+                .createSQLQuery("select count(*) from " + tableName).uniqueResult();
         return count.intValue();
     }
 }

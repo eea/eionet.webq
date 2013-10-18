@@ -39,6 +39,8 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
+import static eionet.webq.dao.FileContentUtil.getFileContentRowsCount;
+import static eionet.webq.dao.FileContentUtil.getXmlSchemaRowsCount;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -207,6 +209,31 @@ public class MergeModulesTest {
         mergeModules.update(moduleToUpdate);
 
         assertNotNull(mergeModules.findById(id).getUpdated());
+    }
+
+    @Test
+    public void onDeleteAlsoRemovesUploadedFiles() throws Exception {
+        MergeModule module = new MergeModule();
+        module.setXslFile(new UploadedFile("file.name", "xsl-file-content".getBytes()));
+        int id = mergeModules.save(module);
+
+        assertThat(getFileContentRowsCount(sessionFactory), equalTo(1));
+
+        mergeModules.remove(id);
+        assertThat(getFileContentRowsCount(sessionFactory), equalTo(0));
+    }
+
+    @Test
+    public void onDeleteAlsoRemovesXmlSchemas() throws Exception {
+        MergeModule module = new MergeModule();
+        module.setXmlSchemas(Arrays.asList(new MergeModuleXmlSchema(), new MergeModuleXmlSchema()));
+        int id = mergeModules.save(module);
+
+        assertThat(getXmlSchemaRowsCount(sessionFactory), equalTo(2));
+
+        mergeModules.remove(id);
+
+        assertThat(getXmlSchemaRowsCount(sessionFactory), equalTo(0));
     }
 
     private MergeModule moduleWithName(String uniqueModuleName) {

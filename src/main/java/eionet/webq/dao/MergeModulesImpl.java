@@ -21,7 +21,7 @@
 package eionet.webq.dao;
 
 import eionet.webq.dao.orm.MergeModule;
-import org.hibernate.Query;
+import org.apache.commons.lang3.ArrayUtils;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -58,10 +58,7 @@ public class MergeModulesImpl extends AbstractDao<MergeModule> implements MergeM
 
     @Override
     public void remove(int... ids) {
-        Query query = getCurrentSession().createQuery("DELETE FROM MergeModule WHERE id = :id");
-        for (int id : ids) {
-            query.setInteger("id", id).executeUpdate();
-        }
+        removeByCriterion(Restrictions.in("id", ArrayUtils.toObject(ids)));
     }
 
     @Override
