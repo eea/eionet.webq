@@ -22,6 +22,7 @@ package eionet.webq.web.controller;
 
 import eionet.webq.dao.MergeModules;
 import eionet.webq.dao.orm.MergeModule;
+import org.hibernate.exception.ConstraintViolationException;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
@@ -37,6 +38,7 @@ import java.util.List;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -119,5 +121,15 @@ public class MergeModulesControllerTest {
         controller.save(mergeModule, bindingResult, model, principal);
 
         assertThat(mergeModule.getUserName(), equalTo(expectedUserName));
+    }
+
+    @Test
+    public void whenSaving_ifConstraintViolationExceptionOccurs_showErrorMessage() throws Exception {
+        MergeModule mergeModule = new MergeModule();
+        when(modulesStorage.save(mergeModule)).thenThrow(new ConstraintViolationException("Name must be unique", null, null));
+
+        controller.save(mergeModule, bindingResult, model, principal);
+
+        verify(bindingResult).rejectValue(eq("name"), anyString());
     }
 }

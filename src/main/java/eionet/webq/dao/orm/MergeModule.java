@@ -35,6 +35,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.validation.constraints.Pattern;
 import java.util.Date;
 import java.util.List;
 
@@ -52,6 +53,7 @@ public class MergeModule {
      * Short unique name.
      */
     @Length(max = 50)
+    @Pattern(regexp = "[A-Za-z0-9-\\._~]*")
     private String name;
     /**
      * Display title.

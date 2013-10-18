@@ -22,6 +22,7 @@ package eionet.webq.web.controller;
 
 import eionet.webq.dao.MergeModules;
 import eionet.webq.dao.orm.MergeModule;
+import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -86,10 +87,15 @@ public class MergeModulesController {
             return "add_edit_merge_module";
         }
         mergeModule.setUserName(principal.getName());
-        if (mergeModule.getId() > 0) {
-            mergeModulesStorage.update(mergeModule);
-        } else {
-            mergeModulesStorage.save(mergeModule);
+        try {
+            if (mergeModule.getId() > 0) {
+                mergeModulesStorage.update(mergeModule);
+            } else {
+                mergeModulesStorage.save(mergeModule);
+            }
+        } catch (ConstraintViolationException e) {
+            bindingResult.rejectValue("name", "merge.module.duplicate.name");
+            return "add_edit_merge_module";
         }
 
         model.addAttribute("message", "Module \'" + mergeModule.getName() + "\' successfully created/updated.");
