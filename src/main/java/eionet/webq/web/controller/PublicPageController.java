@@ -134,17 +134,23 @@ public class PublicPageController {
     public String upload(@Valid @ModelAttribute UploadForm uploadForm, BindingResult result, Model model,
             HttpServletRequest request) {
         if (!result.hasErrors()) {
-            UserFile file = uploadForm.getUserFile();
-            int fileId = userFileService.save(file);
-            Collection<ProjectFile> availableWebForms = webFormService.findWebFormsForSchemas(Arrays.asList(file.getXmlSchema()));
-            if (availableWebForms.size() == 1) {
-                int formId = availableWebForms.iterator().next().getId();
-                String contextPath = request.getContextPath();
-                String downloadUrl = contextPath + "/download/user_file?fileId=" + fileId;
-                return "redirect:/xform/?formId=" + formId + "&fileId=" + fileId + "&instance=" + downloadUrl
-                        + "&base_uri=" + contextPath;
+            Collection<UserFile> files = uploadForm.getUserFile();
+            for (UserFile userFile : files) {
+                userFileService.save(userFile);
             }
-            model.addAttribute("message", "File '" + file.getName() + "' uploaded successfully");
+            if (files.size() == 1) {
+                UserFile file = files.iterator().next();
+                int fileId = file.getId();
+                Collection<ProjectFile> availableWebForms = webFormService.findWebFormsForSchemas(Arrays.asList(file.getXmlSchema()));
+                if (availableWebForms.size() == 1) {
+                    int formId = availableWebForms.iterator().next().getId();
+                    String contextPath = request.getContextPath();
+                    String downloadUrl = contextPath + "/download/user_file?fileId=" + fileId;
+                    return "redirect:/xform/?formId=" + formId + "&fileId=" + fileId + "&instance=" + downloadUrl
+                            + "&base_uri=" + contextPath;
+                }
+                model.addAttribute("message", "File '" + file.getName() + "' uploaded successfully");
+            }
         }
         return welcome(model);
     }

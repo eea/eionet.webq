@@ -219,6 +219,14 @@
             <version>${slf4j.version}</version>
         </dependency>
 
+        <!--Zip files operations-->
+        <dependency>
+            <groupId>org.zeroturnaround</groupId>
+            <artifactId>zt-zip</artifactId>
+            <version>1.6</version>
+            <type>jar</type>
+        </dependency>
+
         <!-- Test -->
         <dependency>
             <groupId>org.springframework</groupId>

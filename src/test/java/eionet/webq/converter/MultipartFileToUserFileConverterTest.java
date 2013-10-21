@@ -49,7 +49,7 @@ public class MultipartFileToUserFileConverterTest {
         byte[] fileContent = xmlWithRootElementAttributes(rootAttributesDeclaration);
         MultipartFile xmlFileUpload = createMultipartFile(fileContent);
 
-        UserFile xmlFile = fileConverter.convert(xmlFileUpload);
+        UserFile xmlFile = fileConverter.convert(xmlFileUpload).iterator().next();
 
         assertThat(xmlFile.getName(), equalTo(originalFilename));
         assertThat(xmlFile.getContent(), equalTo(fileContent));
@@ -60,7 +60,8 @@ public class MultipartFileToUserFileConverterTest {
     @Test
     public void setXmlSchemaToNullIfUnableToRead() {
         UserFile result =
-                fileConverter.convert(createMultipartFile(xmlWithRootElementAttributes(noNamespaceSchemaAttribute("foo"))));
+                fileConverter.convert(createMultipartFile(xmlWithRootElementAttributes(noNamespaceSchemaAttribute("foo"))))
+                .iterator().next();
         assertNull(result.getXmlSchema());
     }
 
@@ -70,7 +71,7 @@ public class MultipartFileToUserFileConverterTest {
         String schemaLocation = "testSchema";
         UserFile result =
                 fileConverter.convert(createMultipartFile(xmlWithRootElementAttributes(rootAttributesDeclaration(schemaAttribute(
-                        namespace, schemaLocation)))));
+                        namespace, schemaLocation))))).iterator().next();
 
         assertThat(result.getXmlSchema(), equalTo(namespace + " " + schemaLocation));
     }
@@ -78,7 +79,8 @@ public class MultipartFileToUserFileConverterTest {
     @Test
     public void setsContentTypeFromMultipartFile() throws Exception {
         String expectedContentType = MediaType.APPLICATION_OCTET_STREAM_VALUE;
-        UserFile result = fileConverter.convert(createMultipartFile(expectedContentType, "attachment-content".getBytes()));
+        UserFile result = fileConverter.convert(createMultipartFile(expectedContentType, "attachment-content".getBytes()))
+                .iterator().next();
         assertThat(result.getContentType(), equalTo(expectedContentType));
     }
 

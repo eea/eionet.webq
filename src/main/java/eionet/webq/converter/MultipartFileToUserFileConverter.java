@@ -28,13 +28,16 @@ import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Arrays;
+import java.util.Collection;
+
 /**
  * Performs converting from {@link MultipartFile} to {@link eionet.webq.dao.orm.UserFile}.
  *
  * @see Converter
  */
 @Component
-public class MultipartFileToUserFileConverter implements Converter<MultipartFile, UserFile> {
+public class MultipartFileToUserFileConverter implements Converter<MultipartFile, Collection<UserFile>> {
     /**
      * Logger for this class.
      */
@@ -51,9 +54,9 @@ public class MultipartFileToUserFileConverter implements Converter<MultipartFile
     private XmlSchemaExtractor xmlSchemaExtractor;
 
     @Override
-    public UserFile convert(MultipartFile multipartFile) {
+    public Collection<UserFile> convert(MultipartFile multipartFile) {
         UploadedFile uploadedFile = toUploadedFileConverter.convert(multipartFile);
         LOGGER.info("Converting " + uploadedFile);
-        return new UserFile(uploadedFile, xmlSchemaExtractor.extractXmlSchema(uploadedFile.getContent().getFileContent()));
+        return Arrays.asList(new UserFile(uploadedFile, xmlSchemaExtractor.extractXmlSchema(uploadedFile.getContent().getFileContent())));
     }
 }
