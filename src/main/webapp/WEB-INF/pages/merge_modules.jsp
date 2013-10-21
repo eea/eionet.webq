@@ -18,7 +18,6 @@
                 <th>Title</th>
                 <th>Supported XML schemas</th>
                 <th>Username</th>
-                <th>Created</th>
                 <th>Updated</th>
             </tr>
             </thead>
@@ -33,8 +32,7 @@
                         </c:forEach>
                     </td>
                     <td>${module.userName}</td>
-                    <td><fmt:formatDate pattern="dd MMM yyyy" value="${module.created}" /></td>
-                    <td><fmt:formatDate pattern="dd MMM yyyy" value="${module.updated}" /></td>
+                    <td><fmt:formatDate pattern="dd MMM yyyy HH:mm:ss" value="${module.updated}" /></td>
                 </tr>
             </c:forEach>
             </tbody>

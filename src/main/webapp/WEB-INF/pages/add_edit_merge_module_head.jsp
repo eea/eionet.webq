@@ -13,11 +13,11 @@
         }
 
         function toggleRemovalLink() {
-            var allSchemasLenghth = findAllSchemas().length;
-            if (allSchemasLenghth == 1) {
+            var allSchemasLength = findAllSchemas().length;
+            if (allSchemasLength == 1) {
                 $("a.removeSchema").hide();
             }
-            if (allSchemasLenghth == 2) {
+            if (allSchemasLength == 2) {
                 $('a.removeSchema').show();
             }
         }

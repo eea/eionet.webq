@@ -63,18 +63,22 @@
                 </td>
             </tr>
             <tr>
-                <th scope="row">Modified</th>
-                <td>
-                    <fmt:formatDate pattern="dd MMM yyyy HH:mm:ss" value="${mergeModule.updated}"/>
-                </td>
-            </tr>
-            <tr>
                 <th scope="row">Size</th>
                 <td>
                         ${humanReadableFileSize} (${mergeModule.xslFile.sizeInBytes} bytes)
                 </td>
             </tr>
+            <tr>
+                <th scope="row">Modified</th>
+                <td>
+                    <fmt:formatDate pattern="dd MMM yyyy HH:mm:ss" value="${mergeModule.updated}"/>
+                </td>
+            </tr>
         </c:if>
+        <tr>
+            <th scope="row">Created</th>
+            <td><fmt:formatDate pattern="dd MMM yyyy HH:mm:ss" value="${mergeModule.created}" /></td>
+        </tr>
         <tr>
             <th scope="row">
                 <label for="xslFile">Xsl file</label>
