@@ -42,10 +42,9 @@ public class FileDownloadControllerIntegrationTest extends AbstractContextContro
         MergeModule module = new MergeModule();
         UploadedFile xslFile = new UploadedFile("merge.xsl", "merge-file-content".getBytes());
         module.setXslFile(xslFile);
-        module.setName("mergeModuleName");
         modules.save(module);
 
-        request(MockMvcRequestBuilders.get("/download/merge/file/" + module.getName()))
+        request(MockMvcRequestBuilders.get("/download/merge/file/" + xslFile.getName()))
                 .andExpect(MockMvcResultMatchers.content().bytes(xslFile.getContent().getFileContent()));
     }
 }

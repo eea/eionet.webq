@@ -35,7 +35,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-import javax.validation.constraints.Pattern;
 import java.util.Date;
 import java.util.List;
 
@@ -49,12 +48,6 @@ public class MergeModule {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
-    /**
-     * Short unique name.
-     */
-    @Length(min = 1, max = 50)
-    @Pattern(regexp = "[A-Za-z0-9-\\._~]*")
-    private String name;
     /**
      * Display title.
      */
@@ -94,14 +87,6 @@ public class MergeModule {
 
     public void setId(int id) {
         this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public String getTitle() {

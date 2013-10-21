@@ -107,7 +107,7 @@ public class MergeModulesController {
             return ADD_EDIT_MERGE_MODULE_VIEW;
         }
 
-        model.addAttribute("message", "Module \'" + mergeModule.getName() + "\' successfully created/updated.");
+        model.addAttribute("message", "Module successfully created/updated.");
         return listMergeModules(model);
     }
 

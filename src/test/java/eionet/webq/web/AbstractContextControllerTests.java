@@ -96,8 +96,9 @@ public abstract class AbstractContextControllerTests {
                 (BeanPropertyBindingResult) result.getModelAndView().getModelMap()
                         .get(bindingResultPropertyNameInModel());
 
-        assertThat(bindingResult.getFieldErrorCount(), equalTo(size));
-        return bindingResult.getFieldErrors();
+        List<FieldError> fieldErrors = bindingResult.getFieldErrors();
+        assertThat("Field errors=" + fieldErrors, bindingResult.getFieldErrorCount(), equalTo(size));
+        return fieldErrors;
     }
     
     protected String bindingResultPropertyNameInModel() {

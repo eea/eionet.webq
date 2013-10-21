@@ -115,7 +115,7 @@ public class FileDownloadController {
     @RequestMapping("/merge/file/{moduleName:.*}")
     @Transactional
     public void downloadMergeFile(@PathVariable String moduleName, HttpServletResponse response) {
-        MergeModule module = mergeModules.findByName(moduleName);
+        MergeModule module = mergeModules.findByFileName(moduleName);
         addXmlFileHeaders(response, encodeAsUrl(module.getXslFile().getName()));
         writeToResponse(response, module.getXslFile().getContent().getFileContent());
     }

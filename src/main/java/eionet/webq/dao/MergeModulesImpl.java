@@ -62,15 +62,14 @@ public class MergeModulesImpl extends AbstractDao<MergeModule> implements MergeM
     }
 
     @Override
-    public MergeModule findByName(String moduleName) {
-        return (MergeModule) getCriteria().add(Restrictions.eq("name", moduleName)).uniqueResult();
+    public MergeModule findByFileName(String moduleName) {
+        return (MergeModule) getCriteria().add(Restrictions.eq("xslFile.name", moduleName)).uniqueResult();
     }
 
     @Override
     public void update(MergeModule module) {
         if (module.getXslFile() == null || module.getXslFile().getSizeInBytes() == 0) {
             MergeModule moduleFromStorage = findById(module.getId());
-            moduleFromStorage.setName(module.getName());
             moduleFromStorage.setXmlSchemas(module.getXmlSchemas());
             moduleFromStorage.setTitle(module.getTitle());
             setUpdatedAndUpdate(moduleFromStorage);
