@@ -3,7 +3,7 @@
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib prefix="s" uri="http://www.springframework.org/tags" %>
 
-<h1>Save merge module</h1>
+<h1>Save merging module</h1>
 <c:url value="/merge/module/save" var="actionUrl"/>
 <f:form id="saveModule" modelAttribute="mergeModule" action="${actionUrl}" method="post" enctype="multipart/form-data">
     <f:errors path="*" element="div" cssClass="error-msg"/>
@@ -26,7 +26,7 @@
         </tr>
         <tr>
             <th scope="row">
-                <label for="xmlSchemas">Xml schemas</label>
+                <label for="xmlSchemas">XML Schemas</label>
             </th>
             <td id="xmlSchemas">
                 <c:url value="/images/delete.gif" var="imageLink"/>
@@ -51,7 +51,7 @@
         <tr>
             <th></th>
             <td>
-                <input id="addXmlSchema" type="button" value="Add xml schema field"/>
+                <input id="addXmlSchema" type="button" value="Add another XML Schema"/>
             </td>
         </tr>
         <c:if test="${mergeModule.xslFile.sizeInBytes gt 0}">
@@ -77,7 +77,7 @@
         </c:if>
         <tr>
             <th scope="row">
-                <label for="xslFile">Xsl file</label>
+                <label for="xslFile">XSL file</label>
             </th>
             <td>
                 <f:input type="file" id="xslFile" path="xslFile"/>
