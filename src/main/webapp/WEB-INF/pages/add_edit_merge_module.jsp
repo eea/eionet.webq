@@ -10,14 +10,6 @@
     <table class="datatable">
         <tr>
             <th scope="row">
-                <label for="name">Module name</label>
-            </th>
-            <td>
-                <f:input id="name" path="name" type="text"/>
-            </td>
-        </tr>
-        <tr>
-            <th scope="row">
                 <label for="title">Module title</label>
             </th>
             <td>
@@ -59,7 +51,7 @@
                 <th scope="row">Current file</th>
                 <td>
                     <s:eval expression="T(org.apache.commons.io.FileUtils).byteCountToDisplaySize(mergeModule.xslFile.sizeInBytes)" var="humanReadableFileSize"/>
-                    <a href="<c:url value="/download/merge/file/${mergeModule.name}"/>">${mergeModule.xslFile.name}</a>
+                    <a href="<c:url value="/download/merge/file/${mergeModule.xslFile.name}"/>">${mergeModule.xslFile.name}</a>
                 </td>
             </tr>
             <tr>
@@ -69,16 +61,18 @@
                 </td>
             </tr>
             <tr>
+                <th scope="row">Created</th>
+                <td>
+                    <fmt:formatDate pattern="dd MMM yyyy HH:mm:ss" value="${mergeModule.created}" />
+                </td>
+            </tr>
+            <tr>
                 <th scope="row">Modified</th>
                 <td>
                     <fmt:formatDate pattern="dd MMM yyyy HH:mm:ss" value="${mergeModule.updated}"/>
                 </td>
             </tr>
         </c:if>
-        <tr>
-            <th scope="row">Created</th>
-            <td><fmt:formatDate pattern="dd MMM yyyy HH:mm:ss" value="${mergeModule.created}" /></td>
-        </tr>
         <tr>
             <th scope="row">
                 <label for="xslFile">Xsl file</label>

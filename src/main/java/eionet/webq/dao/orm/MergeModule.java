@@ -35,6 +35,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.validation.Valid;
 import java.util.Date;
 import java.util.List;
 
@@ -58,6 +59,7 @@ public class MergeModule {
      */
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinColumn(name = "merge_module_id")
+    @Valid
     private List<MergeModuleXmlSchema> xmlSchemas;
     /**
      * Xsl file to perform merging.
