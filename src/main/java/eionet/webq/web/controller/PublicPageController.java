@@ -123,7 +123,7 @@ public class PublicPageController {
     /**
      * Upload action. If there is only one form available for this file, redirect to this form.
      *
-     * @param uploadForm represents form used in UI, {@link UploadForm#userFile} will be converted from
+     * @param uploadForm represents form used in UI, {@link UploadForm#userFiles} will be converted from
      *            {@link org.springframework.web.multipart.MultipartFile}
      * @param result binding result, contains validation errors
      * @param model holder for model attributes
@@ -140,9 +140,9 @@ public class PublicPageController {
             }
             if (files.size() == 1) {
                 UserFile file = files.iterator().next();
-                int fileId = file.getId();
                 Collection<ProjectFile> availableWebForms = webFormService.findWebFormsForSchemas(Arrays.asList(file.getXmlSchema()));
                 if (availableWebForms.size() == 1) {
+                    int fileId = file.getId();
                     int formId = availableWebForms.iterator().next().getId();
                     String contextPath = request.getContextPath();
                     String downloadUrl = contextPath + "/download/user_file?fileId=" + fileId;
