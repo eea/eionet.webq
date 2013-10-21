@@ -22,6 +22,7 @@ package eionet.webq.converter;
 
 import configuration.ApplicationTestContextWithMockSession;
 import eionet.webq.dao.orm.UserFile;
+import eionet.webq.dao.orm.util.UserFileInfo;
 import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -36,6 +37,7 @@ import java.io.File;
 import java.util.Collection;
 import java.util.Iterator;
 
+import static eionet.webq.converter.MultipartFileToUserFileConverter.ZIP_ATTACHMENT_MEDIA_TYPE;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
@@ -47,6 +49,7 @@ public class MultipartFileToUserFileConverterTest {
     private MultipartFileToUserFileConverter fileConverter;
     private final String originalFilename = "file.xml";
     private static final String TEST_XML_FILES_ZIP = "src/test/resources/xml_files.zip";
+    private static final String BROKEN_TEST_XML_FILE_ZIP = "src/test/resources/broken_xml.zip";
 
     @Test
     public void convertToUploadedFile() throws Exception {
@@ -94,13 +97,24 @@ public class MultipartFileToUserFileConverterTest {
     public void whenConvertingMultipartFile_ifAttachmentTypeIsZipFile_unpackAllFiles() throws Exception {
         String expectedXmlSchema = "http://biodiversity.eionet.europa.eu/schemas/bernconvention/derogations.xsd";
         Collection<UserFile> files =
-                fileConverter.convert(createMultipartFile(MultipartFileToUserFileConverter.ZIP_ATTACHMENT_MEDIA_TYPE,
+                fileConverter.convert(createMultipartFile(ZIP_ATTACHMENT_MEDIA_TYPE,
                         FileUtils.readFileToByteArray(new File(TEST_XML_FILES_ZIP))));
 
         assertThat(files.size(), equalTo(2));
         Iterator<UserFile> it = files.iterator();
         assertThat(it.next().getXmlSchema(), equalTo(expectedXmlSchema));
         assertThat(it.next().getXmlSchema(), equalTo(expectedXmlSchema));
+    }
+
+    @Test
+    public void whenConvertingMultipartFile_ifAttachmentTypeIsZipFileAndFilesAreCorrupt_setDummyXmlSchema() throws Exception {
+        Collection<UserFile> files =
+                fileConverter.convert(createMultipartFile(ZIP_ATTACHMENT_MEDIA_TYPE,
+                        FileUtils.readFileToByteArray(new File(BROKEN_TEST_XML_FILE_ZIP))));
+
+        assertThat(files.size(), equalTo(1));
+        Iterator<UserFile> it = files.iterator();
+        assertThat(it.next().getXmlSchema(), equalTo(UserFileInfo.DUMMY_XML_SCHEMA));
     }
 
     private String noNamespaceSchemaAttribute(String schemaLocation) {

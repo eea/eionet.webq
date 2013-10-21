@@ -40,6 +40,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.zip.ZipEntry;
 
+import static eionet.webq.dao.orm.util.UserFileInfo.DUMMY_XML_SCHEMA;
+import static org.apache.commons.lang3.StringUtils.defaultString;
+
 /**
  * Performs converting from {@link MultipartFile} to {@link eionet.webq.dao.orm.UserFile}.
  *
@@ -90,8 +93,8 @@ public class MultipartFileToUserFileConverter implements Converter<MultipartFile
             public void process(InputStream inputStream, ZipEntry zipEntry) throws IOException {
                 if (!zipEntry.isDirectory()) {
                     byte[] content = IOUtils.toByteArray(inputStream);
-                    userFiles.add(new UserFile(new UploadedFile(zipEntry.getName(), content), xmlSchemaExtractor
-                            .extractXmlSchema(content)));
+                    String xmlSchema = defaultString(xmlSchemaExtractor.extractXmlSchema(content), DUMMY_XML_SCHEMA);
+                    userFiles.add(new UserFile(new UploadedFile(zipEntry.getName(), content), xmlSchema));
                 }
             }
         });

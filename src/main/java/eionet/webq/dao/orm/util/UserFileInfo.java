@@ -29,6 +29,12 @@ import java.util.Date;
  */
 public final class UserFileInfo {
     /**
+     * Default dummy XML schema for files extracted from zip file.
+     * It should not match any conversion or web form xml schema.
+     */
+    public static final String DUMMY_XML_SCHEMA = "IGNORE_THIS_FILE";
+
+    /**
      * Do not instantiate.
      */
     private UserFileInfo() {
