@@ -1,11 +1,11 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 
-<h1>Merge modules</h1>
+<h1>Merging modules</h1>
 <div id="drop-operations">
     <h2>Operations</h2>
     <ul>
-        <li><span><a title="Add module" href="<c:url value="/merge/module/add"/>">Add merge module</a></span></li>
+        <li><span><a title="Add module" href="<c:url value="/merge/module/add"/>">Add merging module</a></span></li>
     </ul>
 </div>
 
@@ -16,7 +16,7 @@
             <tr>
                 <th></th>
                 <th>Title</th>
-                <th>Supported XML schemas</th>
+                <th>Supported XML Schemas</th>
                 <th>Username</th>
                 <th>Updated</th>
             </tr>
