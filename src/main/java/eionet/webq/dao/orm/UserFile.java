@@ -60,7 +60,7 @@ public class UserFile {
     private UploadedFile file = new UploadedFile();
     /**
      * Xml schema name extracted during conversion.
-     * @see eionet.webq.converter.MultipartFileConverter
+     * @see eionet.webq.converter.MultipartFileToUserFileConverter
      */
     @NotEmpty
     @Column(name = "xml_schema")
@@ -190,6 +190,10 @@ public class UserFile {
 
     public long getSizeInBytes() {
         return file.getSizeInBytes();
+    }
+
+    public String getContentType() {
+        return file.getContentType();
     }
 
     public String getXmlSchema() {

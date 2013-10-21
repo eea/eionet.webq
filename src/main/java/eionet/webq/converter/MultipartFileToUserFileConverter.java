@@ -25,6 +25,7 @@ import eionet.webq.dao.orm.UserFile;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.converter.Converter;
+import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
@@ -32,11 +33,12 @@ import org.springframework.web.multipart.MultipartFile;
  *
  * @see Converter
  */
-public class MultipartFileConverter implements Converter<MultipartFile, UserFile> {
+@Component
+public class MultipartFileToUserFileConverter implements Converter<MultipartFile, UserFile> {
     /**
      * Logger for this class.
      */
-    private static final Logger LOGGER = Logger.getLogger(MultipartFileConverter.class);
+    private static final Logger LOGGER = Logger.getLogger(MultipartFileToUserFileConverter.class);
     /**
      * Converter to {@link UploadedFile}.
      */

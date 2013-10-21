@@ -37,9 +37,9 @@ import static org.junit.Assert.assertThat;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {ApplicationTestContextWithMockSession.class})
-public class MultipartFileConverterTest {
+public class MultipartFileToUserFileConverterTest {
     @Autowired
-    private MultipartFileConverter fileConverter;
+    private MultipartFileToUserFileConverter fileConverter;
     private final String originalFilename = "file.xml";
 
     @Test
@@ -75,6 +75,13 @@ public class MultipartFileConverterTest {
         assertThat(result.getXmlSchema(), equalTo(namespace + " " + schemaLocation));
     }
 
+    @Test
+    public void setsContentTypeFromMultipartFile() throws Exception {
+        String expectedContentType = MediaType.APPLICATION_OCTET_STREAM_VALUE;
+        UserFile result = fileConverter.convert(createMultipartFile(expectedContentType, "attachment-content".getBytes()));
+        assertThat(result.getContentType(), equalTo(expectedContentType));
+    }
+
     private String noNamespaceSchemaAttribute(String schemaLocation) {
         return "xsi:noNamespaceSchemaLocation=\"" + schemaLocation + "\"";
     }
@@ -88,7 +95,11 @@ public class MultipartFileConverterTest {
     }
 
     private MultipartFile createMultipartFile(byte[] content) {
-        return new MockMultipartFile("xmlFileUpload", originalFilename, MediaType.APPLICATION_XML_VALUE, content);
+        return createMultipartFile(MediaType.APPLICATION_XML_VALUE, content) ;
+    }
+    
+    private MultipartFile createMultipartFile(String contentType, byte[] content) {
+        return new MockMultipartFile("xmlFileUpload", originalFilename, contentType, content);
     }
 
     private byte[] xmlWithRootElementAttributes(String rootAttributesDeclaration) {

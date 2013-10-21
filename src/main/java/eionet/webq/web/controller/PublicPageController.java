@@ -121,7 +121,7 @@ public class PublicPageController {
     }
 
     /**
-     * Upload action.
+     * Upload action. If there is only one form available for this file, redirect to this form.
      *
      * @param uploadForm represents form used in UI, {@link UploadForm#userFile} will be converted from
      *            {@link org.springframework.web.multipart.MultipartFile}

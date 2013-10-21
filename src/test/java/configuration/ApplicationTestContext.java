@@ -1,6 +1,5 @@
 package configuration;
 
-import eionet.webq.converter.MultipartFileConverter;
 import org.apache.xmlrpc.client.XmlRpcClient;
 import org.mockito.Mockito;
 import org.springframework.context.annotation.Bean;
@@ -50,12 +49,6 @@ public class ApplicationTestContext {
     @Bean
     public CommonsMultipartResolver multipartResolver() {
         return new CommonsMultipartResolver();
-    }
-
-    @Bean
-    @Lazy
-    public MultipartFileConverter converterBean() {
-        return new MultipartFileConverter();
     }
 
     @Bean
