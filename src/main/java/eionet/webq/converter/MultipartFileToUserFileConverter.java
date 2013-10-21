@@ -22,14 +22,23 @@ package eionet.webq.converter;
 
 import eionet.webq.dao.orm.UploadedFile;
 import eionet.webq.dao.orm.UserFile;
+import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
+import org.zeroturnaround.zip.ZipEntryCallback;
+import org.zeroturnaround.zip.ZipUtil;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
+import java.util.zip.ZipEntry;
 
 /**
  * Performs converting from {@link MultipartFile} to {@link eionet.webq.dao.orm.UserFile}.
@@ -42,6 +51,10 @@ public class MultipartFileToUserFileConverter implements Converter<MultipartFile
      * Logger for this class.
      */
     private static final Logger LOGGER = Logger.getLogger(MultipartFileToUserFileConverter.class);
+    /**
+     * Zip file media type.
+     */
+    public static final String ZIP_ATTACHMENT_MEDIA_TYPE = "application/zip";
     /**
      * Converter to {@link UploadedFile}.
      */
@@ -56,7 +69,32 @@ public class MultipartFileToUserFileConverter implements Converter<MultipartFile
     @Override
     public Collection<UserFile> convert(MultipartFile multipartFile) {
         UploadedFile uploadedFile = toUploadedFileConverter.convert(multipartFile);
+        //TODO zip extension check?
+        if (ZIP_ATTACHMENT_MEDIA_TYPE.equals(uploadedFile.getContentType())) {
+            return extractFromZip(uploadedFile);
+        }
         LOGGER.info("Converting " + uploadedFile);
         return Arrays.asList(new UserFile(uploadedFile, xmlSchemaExtractor.extractXmlSchema(uploadedFile.getContent().getFileContent())));
+    }
+
+    /**
+     * Extract files from zip archive, not recursive.
+     *
+     * @param uploadedFile uploaded zip file
+     * @return collection of zip files.
+     */
+    private Collection<UserFile> extractFromZip(UploadedFile uploadedFile) {
+        final List<UserFile> userFiles = new ArrayList<UserFile>();
+        ZipUtil.iterate(new ByteArrayInputStream(uploadedFile.getContent().getFileContent()), new ZipEntryCallback() {
+            @Override
+            public void process(InputStream inputStream, ZipEntry zipEntry) throws IOException {
+                if (!zipEntry.isDirectory()) {
+                    byte[] content = IOUtils.toByteArray(inputStream);
+                    userFiles.add(new UserFile(new UploadedFile(zipEntry.getName(), content), xmlSchemaExtractor
+                            .extractXmlSchema(content)));
+                }
+            }
+        });
+        return userFiles;
     }
 }

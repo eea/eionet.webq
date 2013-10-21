@@ -22,6 +22,7 @@ package eionet.webq.converter;
 
 import configuration.ApplicationTestContextWithMockSession;
 import eionet.webq.dao.orm.UserFile;
+import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +31,10 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.io.File;
+import java.util.Collection;
+import java.util.Iterator;
 
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertNull;
@@ -41,6 +46,7 @@ public class MultipartFileToUserFileConverterTest {
     @Autowired
     private MultipartFileToUserFileConverter fileConverter;
     private final String originalFilename = "file.xml";
+    private static final String TEST_XML_FILES_ZIP = "src/test/resources/xml_files.zip";
 
     @Test
     public void convertToUploadedFile() throws Exception {
@@ -82,6 +88,19 @@ public class MultipartFileToUserFileConverterTest {
         UserFile result = fileConverter.convert(createMultipartFile(expectedContentType, "attachment-content".getBytes()))
                 .iterator().next();
         assertThat(result.getContentType(), equalTo(expectedContentType));
+    }
+
+    @Test
+    public void whenConvertingMultipartFile_ifAttachmentTypeIsZipFile_unpackAllFiles() throws Exception {
+        String expectedXmlSchema = "http://biodiversity.eionet.europa.eu/schemas/bernconvention/derogations.xsd";
+        Collection<UserFile> files =
+                fileConverter.convert(createMultipartFile(MultipartFileToUserFileConverter.ZIP_ATTACHMENT_MEDIA_TYPE,
+                        FileUtils.readFileToByteArray(new File(TEST_XML_FILES_ZIP))));
+
+        assertThat(files.size(), equalTo(2));
+        Iterator<UserFile> it = files.iterator();
+        assertThat(it.next().getXmlSchema(), equalTo(expectedXmlSchema));
+        assertThat(it.next().getXmlSchema(), equalTo(expectedXmlSchema));
     }
 
     private String noNamespaceSchemaAttribute(String schemaLocation) {
