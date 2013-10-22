@@ -22,6 +22,7 @@ package eionet.webq.dao.orm;
 
 import org.hibernate.annotations.Generated;
 import org.hibernate.validator.constraints.Length;
+import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -60,6 +61,7 @@ public class MergeModule {
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinColumn(name = "merge_module_id")
     @Valid
+    @NotEmpty
     private List<MergeModuleXmlSchema> xmlSchemas;
     /**
      * Xsl file to perform merging.

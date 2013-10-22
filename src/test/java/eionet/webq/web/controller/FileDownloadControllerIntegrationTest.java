@@ -22,6 +22,7 @@ package eionet.webq.web.controller;
 
 import eionet.webq.dao.MergeModules;
 import eionet.webq.dao.orm.MergeModule;
+import eionet.webq.dao.orm.MergeModuleXmlSchema;
 import eionet.webq.dao.orm.UploadedFile;
 import eionet.webq.web.AbstractContextControllerTests;
 import org.junit.Test;
@@ -32,6 +33,8 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Arrays;
+
 @RunWith(SpringJUnit4ClassRunner.class)
 @Transactional
 public class FileDownloadControllerIntegrationTest extends AbstractContextControllerTests {
@@ -40,6 +43,7 @@ public class FileDownloadControllerIntegrationTest extends AbstractContextContro
     @Test
     public void allowsToDownloadMergeFiles() throws Exception {
         MergeModule module = new MergeModule();
+        module.setXmlSchemas(Arrays.asList(new MergeModuleXmlSchema("http://xml.schema")));
         UploadedFile xslFile = new UploadedFile("merge.xsl", "merge-file-content".getBytes());
         module.setXslFile(xslFile);
         modules.save(module);

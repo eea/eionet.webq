@@ -55,7 +55,7 @@ public class MergeModulesTest {
     private MergeModules mergeModules;
     @Autowired
     private SessionFactory sessionFactory;
-    private MergeModule moduleToSave = new MergeModule();
+    private MergeModule moduleToSave = validMergeModule();
 
     @Before
     public void before() throws Exception {
@@ -87,10 +87,8 @@ public class MergeModulesTest {
 
     @Test
     public void allowToAddMultipleXmlSchemas() throws Exception {
-        MergeModuleXmlSchema xmlSchema1 = new MergeModuleXmlSchema();
-        xmlSchema1.setXmlSchema("http://xml-schema-1");
-        MergeModuleXmlSchema xmlSchema2 = new MergeModuleXmlSchema();
-        xmlSchema1.setXmlSchema("http://xml-schema-2");
+        MergeModuleXmlSchema xmlSchema1 = new MergeModuleXmlSchema("http://xml-schema-1");
+        MergeModuleXmlSchema xmlSchema2 = new MergeModuleXmlSchema("http://xml-schema-2");
         moduleToSave.setXmlSchemas(Arrays.asList(xmlSchema1, xmlSchema2));
 
         int id = mergeModules.save(moduleToSave);
@@ -115,10 +113,47 @@ public class MergeModulesTest {
         mergeModules.save(module);
     }
 
+    @Test(expected = javax.validation.ConstraintViolationException.class)
+    public void xslSchemaPrefixMisspelled() throws Exception {
+        MergeModule module = new MergeModule();
+        module.setXslFile(new UploadedFile("file.xsl", "xsl-file-content".getBytes()));
+        MergeModuleXmlSchema schema1 = new MergeModuleXmlSchema();
+        schema1.setXmlSchema("http:/only.one.forward.slash");
+        module.setXmlSchemas(Arrays.asList(schema1));
+
+        mergeModules.save(module);
+    }
+
+    @Test(expected = javax.validation.ConstraintViolationException.class)
+    public void xmlSchemaDoesNotHaveRequiredPrefix() throws Exception {
+        MergeModule module = moduleWithFileName("file.xsl");
+        MergeModuleXmlSchema mergeModuleXmlSchema = new MergeModuleXmlSchema();
+        mergeModuleXmlSchema.setXmlSchema("some.schema.without.http.prefix");
+        module.setXmlSchemas(Arrays.asList(mergeModuleXmlSchema));
+
+        mergeModules.save(module);
+    }
+
+    @Test(expected = javax.validation.ConstraintViolationException.class)
+    public void xmlSchemaShouldNotBeEmpty() throws Exception {
+        MergeModule module = moduleWithFileName("file.xsl");
+        module.setXmlSchemas(Arrays.asList(new MergeModuleXmlSchema()));
+
+        mergeModules.save(module);
+    }
+
+    @Test(expected = javax.validation.ConstraintViolationException.class)
+    public void shouldHaveAtLeastOneXmlSchema() throws Exception {
+        MergeModule module = new MergeModule();
+        module.setXslFile(new UploadedFile("file.xsl", "content".getBytes()));
+
+        mergeModules.save(module);
+    }
+
     @Test
     public void listsAllAvailableModules() throws Exception {
-        mergeModules.save(new MergeModule());
-        mergeModules.save(new MergeModule());
+        mergeModules.save(validMergeModule());
+        mergeModules.save(validMergeModule());
 
         assertThat(mergeModules.findAll().size(), equalTo(2));
     }
@@ -126,7 +161,7 @@ public class MergeModulesTest {
     @Test
     public void whenLoadingAllModules_distinctRootEntity() throws Exception {
         MergeModule module = new MergeModule();
-        module.setXmlSchemas(Arrays.asList(new MergeModuleXmlSchema(), new MergeModuleXmlSchema()));
+        module.setXmlSchemas(Arrays.asList(new MergeModuleXmlSchema("http://one"), new MergeModuleXmlSchema("http://two")));
         mergeModules.save(module);
 
         assertThat(mergeModules.findAll().size(), equalTo(1));
@@ -134,8 +169,8 @@ public class MergeModulesTest {
 
     @Test
     public void removesMergeModulesByIds() throws Exception {
-        int id1 = mergeModules.save(new MergeModule());
-        int id2 = mergeModules.save(new MergeModule());
+        int id1 = mergeModules.save(validMergeModule());
+        int id2 = mergeModules.save(validMergeModule());
 
         assertThat(mergeModules.findAll().size(), equalTo(2));
 
@@ -194,7 +229,7 @@ public class MergeModulesTest {
     @Test
     public void whenUpdatingModule_ifContentIsNotSet_DoNotWipeIt() throws Exception {
         byte[] initialContent = "xsl-file-content".getBytes();
-        MergeModule module = new MergeModule();
+        MergeModule module = validMergeModule();
         module.setXslFile(new UploadedFile("file.xsl", initialContent));
         int id = mergeModules.save(module);
 
@@ -208,7 +243,7 @@ public class MergeModulesTest {
 
     @Test
     public void afterUpdate_updatedTimestampIsSet() throws Exception {
-        int id = mergeModules.save(new MergeModule());
+        int id = mergeModules.save(moduleToSave);
         MergeModule moduleToUpdate = mergeModules.findById(id);
         assertNull(moduleToUpdate.getUpdated());
 
@@ -219,9 +254,8 @@ public class MergeModulesTest {
 
     @Test
     public void onDeleteAlsoRemovesUploadedFiles() throws Exception {
-        MergeModule module = new MergeModule();
-        module.setXslFile(new UploadedFile("file.name", "xsl-file-content".getBytes()));
-        int id = mergeModules.save(module);
+        moduleToSave.setXslFile(new UploadedFile("file.name", "xsl-file-content".getBytes()));
+        int id = mergeModules.save(moduleToSave);
 
         assertThat(getFileContentRowsCount(sessionFactory), equalTo(1));
 
@@ -231,9 +265,8 @@ public class MergeModulesTest {
 
     @Test
     public void onDeleteAlsoRemovesXmlSchemas() throws Exception {
-        MergeModule module = new MergeModule();
-        module.setXmlSchemas(Arrays.asList(new MergeModuleXmlSchema(), new MergeModuleXmlSchema()));
-        int id = mergeModules.save(module);
+        moduleToSave.setXmlSchemas(Arrays.asList(new MergeModuleXmlSchema("http://one"), new MergeModuleXmlSchema("http://two")));
+        int id = mergeModules.save(moduleToSave);
 
         assertThat(getXmlSchemaRowsCount(sessionFactory), equalTo(2));
 
@@ -243,10 +276,16 @@ public class MergeModulesTest {
     }
 
     private MergeModule moduleWithFileName(String uniqueModuleName) {
-        MergeModule module = new MergeModule();
+        MergeModule module = validMergeModule();
         UploadedFile xslFile = new UploadedFile();
         xslFile.setName(uniqueModuleName);
         module.setXslFile(xslFile);
+        return module;
+    }
+
+    private MergeModule validMergeModule() {
+        MergeModule module = new MergeModule();
+        module.setXmlSchemas(Arrays.asList(new MergeModuleXmlSchema("http://xml.schema")));
         return module;
     }
 }

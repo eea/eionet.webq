@@ -24,6 +24,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 
 /**
@@ -40,7 +41,23 @@ public class MergeModuleXmlSchema {
      * Xml schema.
      */
     @Pattern(regexp = "^((http://)|(https://)).*")
+    @NotNull
     private String xmlSchema;
+
+    /**
+     * Empty constructor for reflection.
+     */
+    public MergeModuleXmlSchema() {
+    }
+
+    /**
+     * Shorthand for xml schema creation.
+     *
+     * @param xmlSchema xml schema.
+     */
+    public MergeModuleXmlSchema(String xmlSchema) {
+        this.xmlSchema = xmlSchema;
+    }
 
     public int getId() {
         return id;
