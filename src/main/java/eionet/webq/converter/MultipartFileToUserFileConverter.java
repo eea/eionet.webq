@@ -77,7 +77,8 @@ public class MultipartFileToUserFileConverter implements Converter<MultipartFile
             return extractFromZip(uploadedFile);
         }
         LOGGER.info("Converting " + uploadedFile);
-        return Arrays.asList(new UserFile(uploadedFile, xmlSchemaExtractor.extractXmlSchema(uploadedFile.getContent().getFileContent())));
+        return Arrays.asList(new UserFile(uploadedFile, xmlSchemaExtractor.extractXmlSchema(uploadedFile.getContent()
+                .getFileContent())));
     }
 
     /**

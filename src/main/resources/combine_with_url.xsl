@@ -1,7 +1,5 @@
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
     <xsl:output indent="yes"/>
-    <xsl:param name="secondFileId"/>
-
 
     <xsl:template match="/">
         <derogations xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -14,7 +12,7 @@
             </xsl:attribute>
 
             <xsl:copy-of select="derogations/derogation"/>
-            <xsl:copy-of select="document($secondFileId)/derogations/derogation"/>
+            <xsl:copy-of select="document('current_document')/derogations/derogation"/>
         </derogations>
     </xsl:template>
 </xsl:stylesheet>

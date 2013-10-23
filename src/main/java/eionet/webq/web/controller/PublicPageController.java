@@ -140,7 +140,8 @@ public class PublicPageController {
             }
             if (files.size() == 1) {
                 UserFile file = files.iterator().next();
-                Collection<ProjectFile> availableWebForms = webFormService.findWebFormsForSchemas(Arrays.asList(file.getXmlSchema()));
+                Collection<ProjectFile> availableWebForms =
+                        webFormService.findWebFormsForSchemas(Arrays.asList(file.getXmlSchema()));
                 if (availableWebForms.size() == 1) {
                     int fileId = file.getId();
                     int formId = availableWebForms.iterator().next().getId();
