@@ -41,9 +41,21 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
+import javax.xml.transform.Source;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.URIResolver;
+import javax.xml.transform.stream.StreamResult;
+import javax.xml.transform.stream.StreamSource;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Queue;
 
 /**
  * Spring controller for WebQ file download.
@@ -118,6 +130,59 @@ public class FileDownloadController {
         MergeModule module = mergeModules.findByFileName(moduleName);
         addXmlFileHeaders(response, encodeAsUrl(module.getXslFile().getName()));
         writeToResponse(response, module.getXslFile().getContent().getFileContent());
+    }
+
+    /**
+     * Merge selected files.
+     *
+     * @param selectedUserFile list of selected files ids
+     * @param mergeModule module used for merge
+     * @param response http response
+     * @throws TransformerException if transformation fails.
+     * @throws IOException if content operations fail.
+     */
+    @RequestMapping("/merge/files")
+    @Transactional
+    public void mergeFiles(@RequestParam(required = false) List<Integer> selectedUserFile,
+                           @RequestParam int mergeModule, HttpServletResponse response) throws TransformerException, IOException {
+        if (selectedUserFile != null) {
+            if (selectedUserFile.size() == 0) {
+                return;
+            }
+            if (selectedUserFile.size() == 1) {
+                downloadUserFile(selectedUserFile.get(0), response);
+                return;
+            }
+
+            TransformerFactory transformerFactory = TransformerFactory.newInstance();
+            byte[] mergeModuleContent = mergeModules.findById(mergeModule).getXslFile().getContent().getFileContent();
+            Transformer transformer = transformerFactory.newTransformer(new StreamSource(new ByteArrayInputStream(mergeModuleContent)));
+            transformer.setURIResolver(new URIResolver() {
+                @Override
+                public Source resolve(String href, String base) throws TransformerException {
+                    try {
+                        int fileId = Integer.parseInt(href);
+                        return new StreamSource(new ByteArrayInputStream(userFileService.getById(fileId).getContent()));
+                    } catch (NumberFormatException e) {
+                        return null;
+                    }
+                }
+            });
+
+            Queue<Integer> ids = new LinkedList<Integer>(selectedUserFile);
+            UserFile first = userFileService.getById(ids.poll());
+            byte[] result = first.getContent();
+
+            for (Integer id : ids) {
+                transformer.setParameter("secondFileId", id);
+                ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+                transformer.transform(new StreamSource(new ByteArrayInputStream(result)), new StreamResult(byteArrayOutputStream));
+                result = byteArrayOutputStream.toByteArray();
+            }
+
+            addXmlFileHeaders(response, encodeAsUrl("merged_files.xml"));
+            writeToResponse(response, result);
+        }
     }
 
     /**

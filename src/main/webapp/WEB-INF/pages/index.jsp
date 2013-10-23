@@ -46,7 +46,7 @@ You can:
 <div class="files">
     <h2>My XML files</h2>
         <div hidden="hidden" class="important-msg" id="not-downloaded-files-present"><strong>Note</strong><p>Please download your modified files!</p></div>
-        <form method="post" action="<c:url value="/remove/files"/>">
+        <form id="actionForm" method="post" action="<c:url value="/remove/files"/>">
         <table class="datatable" style="width:100%">
             <thead>
             <tr>
@@ -131,6 +131,8 @@ You can:
             </tbody>
         </table>
         <input type="submit" value="Delete selected files"/>
+        <input type="text" hidden="hidden" value="4" name="mergeModule"/>
+        <input type="button" id="mergeButton" value="Merge selected files"/>
         </form>
 </div>
 </c:if>

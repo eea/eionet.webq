@@ -45,6 +45,11 @@
         hideFilesTableIfNoFilesPresent();
         $("#startWebformArea").hide();
         showWarningIfNotAllFilesDownloaded();
+        $("#mergeButton").click(function () {
+            var actionForm = $("form#actionForm");
+            actionForm.attr("action", "<c:url value="/download/merge/files"/>");
+            actionForm.submit();
+        });
     };
 
     $(init);
