@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans version="3.2">
+    <bean name="file1Bean1">
+        <class>Class1</class>
+    </bean>
+    <bean name="file1Bean2">
+        <class>Class2</class>
+    </bean>
+</beans>
