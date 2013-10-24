@@ -48,8 +48,8 @@ public class MultipartFileToUserFileConverterTest {
     @Autowired
     private MultipartFileToUserFileConverter fileConverter;
     private final String originalFilename = "file.xml";
-    private static final String TEST_XML_FILES_ZIP = "src/test/resources/xml_files.zip";
-    private static final String BROKEN_TEST_XML_FILE_ZIP = "src/test/resources/broken_xml.zip";
+    private static final String TEST_XML_FILES_ZIP = "src/test/resources/merge/xml_files.zip";
+    private static final String BROKEN_TEST_XML_FILE_ZIP = "src/test/resources/merge/broken_xml.zip";
 
     @Test
     public void convertToUploadedFile() throws Exception {
