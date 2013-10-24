@@ -34,8 +34,10 @@ import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.List;
 
 import static org.custommonkey.xmlunit.XMLAssert.assertXMLEqual;
+import static org.custommonkey.xmlunit.XMLAssert.assertXpathEvaluatesTo;
 
 public class UserFileMergeServiceImplTest {
     private UserFileMergeService service = new UserFileMergeServiceImpl();
@@ -47,8 +49,8 @@ public class UserFileMergeServiceImplTest {
     @BeforeClass
     public static void setUp() throws Exception {
         XMLUnit.setIgnoreWhitespace(true);
-        file1 = createUserFileFromFile("file1.xml");
-        file2 = createUserFileFromFile("file2.xml");
+        file1 = createUserFileFromFile(1, "file1.xml");
+        file2 = createUserFileFromFile(2, "file2.xml");
         expectedResult = readBytesFromFile("2_files_merge_result.xml");
         testMergeModule = new MergeModule();
         testMergeModule.setXslFile(new UploadedFile("merge_file", readBytesFromFile("test_merge.xsl")));
@@ -62,13 +64,44 @@ public class UserFileMergeServiceImplTest {
     @Test
     public void shouldMerge2FilesUsingMergeModule() throws Exception {
         byte[] mergeResult = service.mergeFiles(Arrays.asList(file1, file2), testMergeModule);
-        assertXMLEqual(new InputSource(new ByteArrayInputStream(expectedResult)),
-                new InputSource(new ByteArrayInputStream(mergeResult)));
+        assertXMLEqual(createSource(expectedResult),
+                createSource(mergeResult));
     }
 
+    @Test
+    public void shouldMerge4FilesUsingMergeModule() throws Exception {
+        List<UserFile> fourUserFiles = Arrays.asList(file1,
+                file2,
+                createUserFileFromFile(3, "file3.xml", file1.getContent()),
+                createUserFileFromFile(4, "file4.xml", file2.getContent()));
 
-    private static UserFile createUserFileFromFile(String fileName) throws IOException {
-        return new UserFile(new UploadedFile(fileName, readBytesFromFile(fileName)), "http://xmlSchema");
+        byte[] mergeResult = service.mergeFiles(fourUserFiles, testMergeModule);
+
+        assertXpathEvaluatesTo("2", "count(beans/bean[@name='file1Bean1'])", createSource(mergeResult));
+        assertXpathEvaluatesTo("2", "count(beans/bean[@name='file1Bean2'])", createSource(mergeResult));
+        assertXpathEvaluatesTo("2", "count(beans/bean[@name='file2Bean1'])", createSource(mergeResult));
+        assertXpathEvaluatesTo("2", "count(beans/bean[@name='file2Bean2'])", createSource(mergeResult));
+    }
+
+    @Test
+    public void ifMerging1File_returnFileContent() throws Exception {
+        byte[] mergeResult = service.mergeFiles(Arrays.asList(file1), testMergeModule);
+        assertXMLEqual(createSource(file1.getContent()),
+                createSource(mergeResult));
+    }
+
+    private InputSource createSource(byte[] bytes) {
+        return new InputSource(new ByteArrayInputStream(bytes));
+    }
+
+    private static UserFile createUserFileFromFile(int id, String fileName) throws IOException {
+        return createUserFileFromFile(id, fileName, readBytesFromFile(fileName));
+    }
+
+    private static UserFile createUserFileFromFile(int id, String fileName, byte[] content) throws IOException {
+        UserFile file = new UserFile(new UploadedFile(fileName, content), "http://xmlSchema");
+        file.setId(id);
+        return file;
     }
 
     private static byte[] readBytesFromFile(String fileName) throws IOException {

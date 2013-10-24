@@ -48,6 +48,10 @@ public class UserFileMergeServiceImpl implements UserFileMergeService {
      * This class logger.
      */
     private static final Logger LOGGER = Logger.getLogger(UserFileMergeServiceImpl.class);
+    /**
+     * File prefix for using in xsl document() to create unique url.
+     */
+    private static final String NEXT_FILE_PREFIX = "next_file_";
 
     @Override
     public byte[] mergeFiles(Collection<UserFile> filesToMerge, MergeModule module) throws TransformerException {
@@ -62,6 +66,8 @@ public class UserFileMergeServiceImpl implements UserFileMergeService {
 
         for (UserFile file : resolver) {
             LOGGER.info("Transforming using file=" + file);
+
+            transformer.setParameter("secondFile", NEXT_FILE_PREFIX + file.getId());
             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
             transformer.transform(new StreamSource(new ByteArrayInputStream(result)), new StreamResult(byteArrayOutputStream));
             result = byteArrayOutputStream.toByteArray();
@@ -95,7 +101,7 @@ public class UserFileMergeServiceImpl implements UserFileMergeService {
      * which provides access to second user file while transforming first.
      * User file is accessible if requested href is equals to special parameter.
      */
-    private static final class UserFileProvider implements URIResolver, Iterable<UserFile> {
+    static final class UserFileProvider implements URIResolver, Iterable<UserFile> {
         /**
          * User files queue.
          */
@@ -115,7 +121,7 @@ public class UserFileMergeServiceImpl implements UserFileMergeService {
 
         @Override
         public Source resolve(String href, String base) throws TransformerException {
-            if ("current_document".equalsIgnoreCase(href)) {
+            if (href.startsWith(NEXT_FILE_PREFIX)) {
                 return new StreamSource(new ByteArrayInputStream(current.getContent()));
             }
             return null;
