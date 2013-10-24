@@ -72,13 +72,22 @@ public class MultipartFileToUserFileConverter implements Converter<MultipartFile
     @Override
     public Collection<UserFile> convert(MultipartFile multipartFile) {
         UploadedFile uploadedFile = toUploadedFileConverter.convert(multipartFile);
-        //TODO zip extension check?
-        if (ZIP_ATTACHMENT_MEDIA_TYPE.equals(uploadedFile.getContentType())) {
+        if (isZipArchive(uploadedFile)) {
             return extractFromZip(uploadedFile);
         }
         LOGGER.info("Converting " + uploadedFile);
         return Arrays.asList(new UserFile(uploadedFile, xmlSchemaExtractor.extractXmlSchema(uploadedFile.getContent()
                 .getFileContent())));
+    }
+
+    /**
+     * Check whether provided uploaded file is zip archive.
+     *
+     * @param uploadedFile uploaded file
+     * @return file is zip archive.
+     */
+    private boolean isZipArchive(UploadedFile uploadedFile) {
+        return ZIP_ATTACHMENT_MEDIA_TYPE.equals(uploadedFile.getContentType()) || uploadedFile.getName().endsWith(".zip");
     }
 
     /**
@@ -88,6 +97,7 @@ public class MultipartFileToUserFileConverter implements Converter<MultipartFile
      * @return collection of zip files.
      */
     private Collection<UserFile> extractFromZip(UploadedFile uploadedFile) {
+        LOGGER.info("Start extraction from zip file with name=" + uploadedFile.getName());
         final List<UserFile> userFiles = new ArrayList<UserFile>();
         ZipUtil.iterate(new ByteArrayInputStream(uploadedFile.getContent().getFileContent()), new ZipEntryCallback() {
             @Override
@@ -99,6 +109,7 @@ public class MultipartFileToUserFileConverter implements Converter<MultipartFile
                 }
             }
         });
+        LOGGER.info("Extracted " + userFiles.size() + " from zip archive.");
         return userFiles;
     }
 }

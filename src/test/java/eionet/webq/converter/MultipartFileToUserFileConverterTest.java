@@ -95,15 +95,21 @@ public class MultipartFileToUserFileConverterTest {
 
     @Test
     public void whenConvertingMultipartFile_ifAttachmentTypeIsZipFile_unpackAllFiles() throws Exception {
-        String expectedXmlSchema = "http://biodiversity.eionet.europa.eu/schemas/bernconvention/derogations.xsd";
         Collection<UserFile> files =
                 fileConverter.convert(createMultipartFile(ZIP_ATTACHMENT_MEDIA_TYPE,
                         FileUtils.readFileToByteArray(new File(TEST_XML_FILES_ZIP))));
 
-        assertThat(files.size(), equalTo(2));
-        Iterator<UserFile> it = files.iterator();
-        assertThat(it.next().getXmlSchema(), equalTo(expectedXmlSchema));
-        assertThat(it.next().getXmlSchema(), equalTo(expectedXmlSchema));
+        verifyContentExtractedFromTestZipFile(files);
+    }
+
+    @Test
+    public void whenConvertingMultipartFile_ifAttachmentFileNameExtensionIsZip_unpackAllFiles() throws Exception {
+        Collection<UserFile> files =
+                fileConverter.convert(new MockMultipartFile("xmlFileUpload", "file.zip",
+                        "some-other-zip-attachment-content-type",
+                        FileUtils.readFileToByteArray(new File(TEST_XML_FILES_ZIP))));
+
+        verifyContentExtractedFromTestZipFile(files);
     }
 
     @Test
@@ -115,6 +121,15 @@ public class MultipartFileToUserFileConverterTest {
         assertThat(files.size(), equalTo(1));
         Iterator<UserFile> it = files.iterator();
         assertThat(it.next().getXmlSchema(), equalTo(UserFileInfo.DUMMY_XML_SCHEMA));
+    }
+
+    private void verifyContentExtractedFromTestZipFile(Collection<UserFile> files) {
+        String expectedXmlSchema = "http://biodiversity.eionet.europa.eu/schemas/bernconvention/derogations.xsd";
+
+        assertThat(files.size(), equalTo(2));
+        Iterator<UserFile> it = files.iterator();
+        assertThat(it.next().getXmlSchema(), equalTo(expectedXmlSchema));
+        assertThat(it.next().getXmlSchema(), equalTo(expectedXmlSchema));
     }
 
     private String noNamespaceSchemaAttribute(String schemaLocation) {
