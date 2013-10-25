@@ -73,4 +73,12 @@ public interface MergeModules {
      * @param module module to update.
      */
     void update(MergeModule module);
+
+    /**
+     * Allows to find merge module by xml schema.
+     *
+     * @param xmlSchema xml schema.
+     * @return merge modules found.
+     */
+    Collection<MergeModule> findByXmlSchema(String xmlSchema);
 }

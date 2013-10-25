@@ -36,6 +36,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
@@ -273,6 +274,18 @@ public class MergeModulesTest {
         mergeModules.remove(id);
 
         assertThat(getXmlSchemaRowsCount(sessionFactory), equalTo(0));
+    }
+
+    @Test
+    public void shouldFindMergeModuleBySchema() throws Exception {
+        String schemaToFind = "http://schema1";
+        moduleToSave.setXmlSchemas(Arrays.asList(new MergeModuleXmlSchema(schemaToFind),
+                new MergeModuleXmlSchema("http://schema2")));
+        int id = mergeModules.save(moduleToSave);
+
+        Collection<MergeModule> byXmlSchema = mergeModules.findByXmlSchema(schemaToFind);
+        assertThat(byXmlSchema.size(), equalTo(1));
+        assertThat(byXmlSchema.iterator().next().getId(), equalTo(id));
     }
 
     private MergeModule moduleWithFileName(String uniqueModuleName) {

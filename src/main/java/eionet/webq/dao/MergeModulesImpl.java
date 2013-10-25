@@ -78,6 +78,15 @@ public class MergeModulesImpl extends AbstractDao<MergeModule> implements MergeM
         }
     }
 
+    @Override
+    @SuppressWarnings("unchecked")
+    public Collection<MergeModule> findByXmlSchema(String xmlSchema) {
+        return (List<MergeModule>) getCriteria()
+                .createAlias("xmlSchemas", "xs")
+                .add(Restrictions.eq("xs.xmlSchema", xmlSchema))
+                .setResultTransformer(DISTINCT_ROOT_ENTITY).list();
+    }
+
     /**
      * Sets updated date and performs update to storage.
      *

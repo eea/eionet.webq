@@ -20,6 +20,9 @@
  */
 package eionet.webq.web.controller;
 
+import com.google.common.base.Function;
+import com.google.common.collect.Collections2;
+import com.google.common.collect.ImmutableSet;
 import eionet.webq.dao.MergeModules;
 import eionet.webq.dao.orm.MergeModule;
 import eionet.webq.dao.orm.ProjectFile;
@@ -46,7 +49,7 @@ import javax.xml.transform.TransformerException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -130,35 +133,48 @@ public class FileDownloadController {
     }
 
     /**
-     * Merge selected files.
+     * Merge selected user files.
      *
-     * @param selectedUserFile list of selected files ids
-     * @param mergeModule module used for merge
+     * @param selectedUserFile ids of user files
      * @param response http response
-     * @throws TransformerException if transformation fails.
+     * @throws TransformerException if transformation fails
      * @throws IOException if content operations fail.
      */
     @RequestMapping("/merge/files")
     @Transactional
-    public void mergeFiles(@RequestParam(required = false) List<Integer> selectedUserFile,
-                           @RequestParam int mergeModule, HttpServletResponse response) throws TransformerException, IOException {
-        if (selectedUserFile != null && !selectedUserFile.isEmpty()) {
-            if (selectedUserFile.size() == 1) {
-                downloadUserFile(selectedUserFile.get(0), response);
+    public void mergeFiles(@RequestParam(required = false) List<Integer> selectedUserFile, HttpServletResponse response)
+            throws TransformerException, IOException {
+        if (selectedUserFile == null || selectedUserFile.isEmpty()) {
+            throw new IllegalArgumentException("No files selected");
+        }
+        if (selectedUserFile.size() == 1) {
+            downloadUserFile(selectedUserFile.get(0), response);
+            return;
+        }
+
+        Collection<UserFile> userFiles = Collections2.transform(selectedUserFile, new Function<Integer, UserFile>() {
+            @Override
+            public UserFile apply(Integer id) {
+                return userFileService.getById(id);
+            }
+        });
+
+        Collection<String> xmlSchemas = ImmutableSet.copyOf(Collections2.transform(userFiles, new Function<UserFile, String>() {
+            @Override
+            public String apply(UserFile userFile) {
+                return userFile.getXmlSchema();
+            }
+        }));
+
+        if (xmlSchemas.size() == 1) {
+            Collection<MergeModule> mergeModulesFound = mergeModules.findByXmlSchema(xmlSchemas.iterator().next());
+            if (mergeModulesFound.size() == 1) {
+                mergeFiles(userFiles, mergeModulesFound.iterator().next(), response);
                 return;
             }
-
-            ArrayList<UserFile> userFiles = new ArrayList<UserFile>();
-            for (Integer id : selectedUserFile) {
-                userFiles.add(userFileService.getById(id));
-            }
-            //TODO if user files contains null -> fail
-
-            byte[] mergeResult = mergeService.mergeFiles(userFiles, mergeModules.findById(mergeModule));
-
-            addXmlFileHeaders(response, encodeAsUrl("merged_files.xml"));
-            writeToResponse(response, mergeResult);
         }
+        //TODO: handle multiple schemas/modules cases
+        throw new IllegalStateException("More than one XML schema found. Merge failed.");
     }
 
     /**
@@ -177,6 +193,23 @@ public class FileDownloadController {
         setContentType(response, headers.getContentType());
         setContentDisposition(response, headers.getFirst("Content-Disposition"));
         writeToResponse(response, convert.getBody());
+    }
+
+    /**
+     * Merge selected files.
+     *
+     * @param userFiles list of selected files ids
+     * @param mergeModule module used for merge
+     * @param response http response
+     * @throws TransformerException if transformation fails.
+     * @throws IOException if content operations fail.
+     */
+    private void mergeFiles(Collection<UserFile> userFiles,
+                            MergeModule mergeModule, HttpServletResponse response) throws TransformerException, IOException {
+        byte[] mergeResult = mergeService.mergeFiles(userFiles, mergeModule);
+
+        addXmlFileHeaders(response, encodeAsUrl("merged_files.xml"));
+        writeToResponse(response, mergeResult);
     }
 
     /**
