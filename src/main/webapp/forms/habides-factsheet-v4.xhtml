@@ -10,14 +10,12 @@
         <meta http-equiv="pragma" content="no-cache" />
         <meta http-equiv="cache-control" content="no-cache" />
         <meta http-equiv="expires" content="-1" />
-        <meta name="Publisher" content="EEA, The European Environment Agency" />
 
         <meta name="author" content="enriko at tripledev.ee"/>
         <meta name="description" content="XForms for HaBiDeS (Habitats and Birds Directive Derogation System)"/>
 
-        <link rel="stylesheet" type="text/css" href="http://www.eionet.europa.eu/styles/eionet2007/print.css" media="print" />
-        <link rel="stylesheet" type="text/css" href="http://www.eionet.europa.eu/styles/eionet2007/handheld.css" media="handheld" />
-        <link rel="stylesheet" type="text/css" href="http://www.eionet.europa.eu/styles/eionet2007/screen.css" media="screen" title="Eionet 2007 style" />
+        <!--  EIONET styles come from XSLT. -->
+
         <link rel="stylesheet" type="text/css" href="../bfResources/scripts/dojox/highlight/resources/highlight.css" />
         <link href="http://code.jquery.com/ui/1.10.3/themes/start/jquery-ui.min.css" rel="stylesheet" type="text/css"/>
         <script type="text/javascript" src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
@@ -166,28 +164,21 @@
             <xf:bind id="b-saveresult-message-err" nodeset="instance('context')/save_message_err" relevant="instance('saveresult')/code = 0" calculate="../save_message"/>
 
             <!-- ##########            DEFAULT instance BINDINGS          ############-->
-                <!--xf:bind id="b-lang" nodeset="/derogations/@xml:lang" required="true()"/-->
+            <!--xf:bind id="b-lang" nodeset="/derogations/@xml:lang" required="true()"/-->
             <xf:bind id="b-country" nodeset="/derogations/@country" required="true()"/>
-            <xf:bind id="b-derogation" nodeset="derogation">
-                <xf:bind nodeset="@derogation_reference"/>
-                <!--xf:bind id="b-user_derog_ref" nodeset="derogation/@user_derogation_ref"/-->
-
-                <xf:bind id="b-directive" nodeset="@directive" required="true()"/>
-                <xf:bind id="b-licensingAuthority" nodeset="licensingAuthority" required="true()"/>
-                <xf:bind id="b-validFrom" type="xs:date" nodeset="licenseValidFrom" required="true()" constraint="string-length(.)=0 or string-length(../licenseValidUntil)=0 or number(replace(., '-', '')) - number(replace(../licenseValidUntil, '-', '')) &lt; 0"/>
-                <xf:bind id="b-validUntil" type="xs:date" nodeset="licenseValidUntil" required="true()" constraint="string-length(.)=0 or string-length(../licenseValidUntil)=0 or  number(replace(., '-', '')) - number(replace(../licenseValidFrom, '-', '')) &gt; 0"/>
-                <xf:bind id="b-sensitive" type="xs:boolean" nodeset="sensitive"/>
-                <xf:bind id="b-numberOfLicenses" nodeset="numberOfLicenses" constraint="string-length(.)=0 or number(.) &gt; 0"/>
-                <xf:bind id="b-alternativesAssessed" nodeset="alternativesAssessed" required="true()"/>
-                <xf:bind id="b-Justification-for-derogation-textarea" nodeset="derogationJustification"/>
-                 <xf:bind id="b-bioRegion" nodeset="bioRegions/bioRegion"/>
-                 <xf:bind id="b-bioRegion-code" nodeset="bioRegions/@code"/>
-                 <xf:bind id="b-region" nodeset="regions/region"/>
-                 <xf:bind id="b-regions-code" nodeset="regions/@code"/>
-                 <xf:bind id="b-location" nodeset="location"/>
-
-
-            </xf:bind>
+            <xf:bind id="b-directive" nodeset="derogation/@directive" required="true()"/>
+            <xf:bind id="b-licensingAuthority" nodeset="derogation/licensingAuthority" required="true()"/>
+            <xf:bind id="b-validFrom" type="xs:date" nodeset="derogation/licenseValidFrom" required="true()" constraint="string-length(.)=0 or string-length(../licenseValidUntil)=0 or number(replace(., '-', '')) - number(replace(../licenseValidUntil, '-', '')) &lt; 0"/>
+            <xf:bind id="b-validUntil" type="xs:date" nodeset="derogation/licenseValidUntil" required="true()" constraint="string-length(.)=0 or string-length(../licenseValidUntil)=0 or  number(replace(., '-', '')) - number(replace(../licenseValidFrom, '-', '')) &gt; 0"/>
+            <xf:bind id="b-sensitive" type="xs:boolean" nodeset="derogation/sensitive"/>
+            <xf:bind id="b-numberOfLicenses" nodeset="derogation/numberOfLicenses" constraint="string-length(.)=0 or number(.) &gt; 0"/>
+            <xf:bind id="b-alternativesAssessed" nodeset="derogation/alternativesAssessed" required="true()"/>
+            <xf:bind id="b-Justification-for-derogation-textarea" nodeset="derogation/derogationJustification"/>
+            <xf:bind id="b-bioRegion" nodeset="derogation/bioRegions/bioRegion"/>
+            <xf:bind id="b-bioRegion-code" nodeset="derogation/bioRegions/@code"/>
+            <xf:bind id="b-region" nodeset="derogation/regions/region"/>
+            <xf:bind id="b-regions-code" nodeset="derogation/regions/@code"/>
+            <xf:bind id="b-location" nodeset="instance('default')/derogation/location"/>
 
             <!-- ##########       CONTEXT  INSTANCE         ############-->
             <!-- CONTEXT parameters instance and bindings eg. webq-lang, envelope, ... -->
@@ -358,7 +349,7 @@
 -->
         </xf:model>
     </head>
-    <body class="fullscreen tundra">
+    <body class="fullscreen">
         <div id="workarea">
         <!-- ##################################            FORM HEADER            ############################################-->
         <h1>Habitats and Birds Derogations</h1>
@@ -535,7 +526,7 @@
                         <xf:toggle case="case-list"></xf:toggle>
                     </xf:trigger>
                 </div>
-                <xf:group id="gDerogEdit" ref="instance('default')/derogation[index('rDerogList')]">
+                <xf:group id="gDerogEdit" nodeset="instance('default')/derogation[index('rDerogList')]">
                     <xf:dispatch targetid="main-model" name="set-content-modified" ev:event="xforms-value-changed" />
                     <xf:group appearance="compact">
                         <xf:label>Derogation</xf:label>
@@ -652,7 +643,7 @@
                 </xf:group>
                  <xf:group appearance="compact">
                         <xf:label>Location</xf:label>
-                         <xf:input ref="b-location"></xf:input>
+                         <xf:input ref="location"></xf:input>
                 </xf:group>
                  <xf:group appearance="compact">
                         <xf:label>Alternatives assessed</xf:label>

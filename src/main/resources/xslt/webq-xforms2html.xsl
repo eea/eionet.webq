@@ -14,6 +14,15 @@
     <!-- Include all betterFORM XSLs -->
     <xsl:import href="xhtml.xsl"/>
 
+    <!-- ### this parameter is used when the Adapter wants to specify the CSS to use ### -->
+    <xsl:param name="webq-css" select="''"/>
+    <!-- ### this variable is used when deciding whether to use http or https protocel when loading resources ### -->
+    <xsl:variable name="webq-protocol">
+        <xsl:choose>
+            <xsl:when test="starts-with($baseURI, 'https')"><xsl:value-of select="'https'"/></xsl:when>
+            <xsl:otherwise><xsl:value-of select="'http'"/></xsl:otherwise>
+        </xsl:choose>
+    </xsl:variable>
 
     <!-- Overwrite betterForm InputDateAndTime template to change the default date pattern. -->
     <xsl:template name="InputDateAndTime">
@@ -108,5 +117,114 @@
 
     </xsl:template>
 
+    <!--  Overwrite BF template for displaying custom styles from "getEionetCss" template. -->
+    <xsl:template name="getLinkAndStyle">
+        <xsl:call-template name="getEionetCss"/><xsl:text>
+</xsl:text><xsl:for-each select="link">
+            <xsl:element name="{local-name()}">
+                <xsl:copy-of select="@*" />
+            </xsl:element>
+        </xsl:for-each><xsl:text>
+</xsl:text>
 
+    </xsl:template>
+    <!-- Add EIONET css links to webform -->
+    <xsl:template name="getEionetCss">
+
+        <meta name="Publisher" content="EEA, The European Environment Agency" />
+        <xsl:choose>
+            <!-- if the 'css-file' parameter has been set this takes precedence -->
+            <xsl:when test="string-length($webq-css) > 0">
+                <link rel="stylesheet" type="text/css" href="{$webq-css}" media="screen"/>
+            </xsl:when>
+            <xsl:otherwise>
+                <link type="text/css" rel="stylesheet" media="screen" href="{$webq-protocol}://www.eionet.europa.eu/styles/eionet2007/screen.css" title="Eionet 2007 style" />
+            </xsl:otherwise>
+        </xsl:choose>
+        <!-- EIONET 2007 styles -->
+        <link rel="stylesheet" type="text/css" href="http://www.eionet.europa.eu/styles/eionet2007/print.css" media="print" />
+        <link rel="stylesheet" type="text/css" href="http://www.eionet.europa.eu/styles/eionet2007/handheld.css" media="handheld" />
+        <style type="text/css">
+            #bfLoading{
+                top:200px;
+            }
+            #betterformMessageToaster{
+                top:200px;
+            }
+        </style>
+    </xsl:template>
+
+    <xsl:template match="div[@id='workarea']">
+        <xsl:variable name="cdr_url">
+            <xsl:choose>
+                <xsl:when test="contains($baseURI , '.eu/webq/')"><xsl:value-of select="substring-before($baseURI , '/webq/')"/></xsl:when>
+                <!--
+                <xsl:when test="string-length($webq-cdr_url) &gt; 0">
+                    <xsl:value-of select="$webq-cdr_url"/>
+                </xsl:when>
+                -->
+                <xsl:otherwise><xsl:value-of select="$baseURI"/></xsl:otherwise>
+            </xsl:choose>
+        </xsl:variable>
+        <xsl:variable name="cdr_name">
+            <xsl:choose>
+                <xsl:when test="contains($baseURI , 'bdr.')">BDR</xsl:when>
+                <xsl:when test="contains($baseURI , 'cdrtest.')">CDRTEST</xsl:when>
+                <xsl:when test="contains($baseURI , 'cdr.')">CDR</xsl:when>
+                <!--
+                <xsl:when test="string-length($webq-cdr_name) &gt; 0">
+                    <xsl:value-of select="$webq-cdr_name"/>
+                </xsl:when>
+                -->
+                <xsl:otherwise>WebQ</xsl:otherwise>
+            </xsl:choose>
+        </xsl:variable>
+        <div id="container">
+            <div id="toolribbon">
+                <div id="lefttools">
+                    <a id="eealink" href="http://www.eea.europa.eu/">EEA</a>
+                    <a id="ewlink" href="http://www.ewindows.eu.org/">EnviroWindows</a>
+                </div>
+                <div id="righttools">
+                    <!-- FIXME is logout link needed?
+                    <span>
+                        <a id="logoutlink">
+                            <xsl:attribute name="href">WebQServlet?mode=logout&amp;logoutUrl=<xsl:value-of select="$baseURI"/>../loggedout</xsl:attribute>
+                            Logout</a>
+                    </span>
+                    -->
+                    <a id="printlink" title="Print this page" href="javascript:this.print();"><span>Print</span></a>
+                </div>
+            </div> <!-- toolribbon -->
+
+            <div id="pagehead">
+                <a href="/" accesskey="1"><img src="/images/eea-print-logo.gif" alt="Logo" id="logo" /></a>
+                <div id="networktitle">Eionet</div>
+                <div id="sitetitle">European Environment Information and Observation Network</div>
+                <div id="sitetagline">Web questionnaires</div>
+            </div>  <!-- page head -->
+
+            <div id="menuribbon"></div>
+
+            <div class="breadcrumbtrail">
+                <div class="breadcrumbhead">You are here:</div>
+                <div class="breadcrumbitem eionetaccronym"><a href="http://www.eionet.europa.eu/">Eionet</a></div>
+                <div class="breadcrumbitem">
+                    <xsl:element name="a">
+                        <xsl:attribute name="href"><xsl:value-of select="$cdr_url"/></xsl:attribute>
+                        <xsl:value-of select="$cdr_name"/>
+                    </xsl:element>
+                </div>
+                <div class="breadcrumbitemlast">WebForm</div>
+                <div class="breadcrumbtail"></div>
+            </div>
+            <div id="workarea">
+            <xsl:apply-templates/>
+            </div>
+        </div> <!-- container -->
+        <div id="pagefoot">
+            <p><a href="http://www.eea.europa.eu/"><b>European Environment Agency</b></a>
+            <br/>Kgs. Nytorv 6, DK-1050 Copenhagen K, Denmark - Phone: +45 3336 7100</p>
+        </div>
+    </xsl:template>
 </xsl:stylesheet>
