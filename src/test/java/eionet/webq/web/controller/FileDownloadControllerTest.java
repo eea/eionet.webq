@@ -62,16 +62,16 @@ public class FileDownloadControllerTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void whenMergingUserFiles_IfFileIdsListIsNull_throwsException() throws Exception {
-        controller.mergeFiles(null, new MockHttpServletResponse());
+        controller.mergeFiles(null, null, new MockHttpServletResponse());
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void whenMergingUserFiles_IfFileIdsListIsEmpty_throwsException() throws Exception {
-        controller.mergeFiles(Collections.<Integer>emptyList(), new MockHttpServletResponse());
+        controller.mergeFiles(Collections.<Integer>emptyList(), null, new MockHttpServletResponse());
     }
 
     @Test
-    public void whenMergingFiles_ifThereIsOnlyOneSchemaAndOneMergeModule_performMergeAndReturnFileToUser() throws Exception {
+    public void whenMergingFiles_ifThereIsOnlyOneMergeModule_performMergeAndReturnFileToUser() throws Exception {
         UserFile userFile = new UserFile(new UploadedFile(), "schema");
         MergeModule mergeModule = new MergeModule();
         byte[] mergeResult = "merge-result".getBytes();
@@ -82,7 +82,7 @@ public class FileDownloadControllerTest {
                 .thenReturn(mergeResult);
         MockHttpServletResponse response = new MockHttpServletResponse();
 
-        controller.mergeFiles(Arrays.asList(1,2), response);
+        controller.mergeFiles(Arrays.asList(1,2), null, response);
 
         verify(userFileMergeService).mergeFiles(anyCollectionOf(UserFile.class), eq(mergeModule));
         assertThat(response.getContentAsByteArray(), equalTo(mergeResult));
@@ -95,13 +95,13 @@ public class FileDownloadControllerTest {
         MockHttpServletResponse response = new MockHttpServletResponse();
         doNothing().when(controller).downloadUserFile(fileId, response);
 
-        controller.mergeFiles(Arrays.asList(fileId), response);
+        controller.mergeFiles(Arrays.asList(fileId), null, response);
 
         verify(controller).downloadUserFile(fileId, response);
         verifyNoMoreInteractions(userFileMergeService, mergeModules, userFileService);
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test(expected = FileDownloadController.MergeModuleChoiceRequiredException.class)
     public void whenMergingFiles_ifMoreThanOneXmlSchemaFound_throwsException() throws Exception {
         UserFile userFile1 = new UserFile();
         UserFile userFile2 = new UserFile();
@@ -110,6 +110,22 @@ public class FileDownloadControllerTest {
         userFile2.setXmlSchema("schema2");
 
         when(userFileService.getById(anyInt())).thenReturn(userFile1, userFile2);
-        controller.mergeFiles(Arrays.asList(1, 2), new MockHttpServletResponse());
+        controller.mergeFiles(Arrays.asList(1, 2), null, new MockHttpServletResponse());
+    }
+
+    @Test
+    public void whenMergingFiles_ifMergeModuleSpecified_useItToMergeFiles() throws Exception {
+        int mergeModuleId = 5;
+        MergeModule mergeModule = new MergeModule();
+
+        when(userFileService.getById(anyInt())).thenReturn(new UserFile(), new UserFile());
+        when(mergeModules.findById(mergeModuleId)).thenReturn(mergeModule);
+        when(userFileMergeService.mergeFiles(anyCollectionOf(UserFile.class), eq(mergeModule)))
+                .thenReturn("merge-result".getBytes());
+
+        controller.mergeFiles(Arrays.asList(1, 2), mergeModuleId, new MockHttpServletResponse());
+
+        verify(mergeModules).findById(mergeModuleId);
+        verify(userFileMergeService).mergeFiles(anyCollectionOf(UserFile.class), eq(mergeModule));
     }
 }

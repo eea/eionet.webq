@@ -39,9 +39,11 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
@@ -50,7 +52,10 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Spring controller for WebQ file download.
@@ -136,13 +141,15 @@ public class FileDownloadController {
      * Merge selected user files.
      *
      * @param selectedUserFile ids of user files
+     * @param mergeModule module required to merge files.
      * @param response http response
      * @throws TransformerException if transformation fails
      * @throws IOException if content operations fail.
      */
     @RequestMapping("/merge/files")
     @Transactional
-    public void mergeFiles(@RequestParam(required = false) List<Integer> selectedUserFile, HttpServletResponse response)
+    public void mergeFiles(@RequestParam(required = false) List<Integer> selectedUserFile,
+                           @RequestParam(required = false) Integer mergeModule, HttpServletResponse response)
             throws TransformerException, IOException {
         if (selectedUserFile == null || selectedUserFile.isEmpty()) {
             throw new IllegalArgumentException("No files selected");
@@ -159,22 +166,45 @@ public class FileDownloadController {
             }
         });
 
-        Collection<String> xmlSchemas = ImmutableSet.copyOf(Collections2.transform(userFiles, new Function<UserFile, String>() {
+        if (mergeModule != null) {
+            MergeModule module = mergeModules.findById(mergeModule);
+            mergeFiles(userFiles, module, response);
+            return;
+        }
+
+        Set<String> xmlSchemas = ImmutableSet.copyOf(Collections2.transform(userFiles, new Function<UserFile, String>() {
             @Override
             public String apply(UserFile userFile) {
                 return userFile.getXmlSchema();
             }
         }));
 
-        if (xmlSchemas.size() == 1) {
-            Collection<MergeModule> mergeModulesFound = mergeModules.findByXmlSchema(xmlSchemas.iterator().next());
-            if (mergeModulesFound.size() == 1) {
-                mergeFiles(userFiles, mergeModulesFound.iterator().next(), response);
-                return;
-            }
+        Collection<MergeModule> mergeModulesFound = mergeModules.findByXmlSchema(xmlSchemas.iterator().next());
+        if (mergeModulesFound.size() == 1) {
+            mergeFiles(userFiles, mergeModulesFound.iterator().next(), response);
+            return;
         }
+
         //TODO: handle multiple schemas/modules cases
-        throw new IllegalStateException("More than one XML schema found. Merge failed.");
+        throw new MergeModuleChoiceRequiredException(userFiles, mergeModulesFound);
+    }
+
+    /**
+     * Handler for case where automatic merge could not be performed.
+     * Such cases are:
+     * <ul>
+     *     <li>Multiple modules found</li>
+     *     <li>No modules found</li>
+     * </ul>
+     * @param e custom exception, holding modules and selected files
+     * @return model and view
+     */
+    @ExceptionHandler(MergeModuleChoiceRequiredException.class)
+    public ModelAndView mergeSelect(MergeModuleChoiceRequiredException e) {
+        Map<String, Object> model = new HashMap<String, Object>();
+        model.put("mergeModules", e.getMergeModules());
+        model.put("userFiles", e.getUserFiles());
+        return new ModelAndView("merge_options", model);
     }
 
     /**
@@ -278,6 +308,38 @@ public class FileDownloadController {
             throw new RuntimeException("Unable to write response", e);
         } finally {
             IOUtils.closeQuietly(output);
+        }
+    }
+
+    /**
+     * Exception indicating that merge module choice is required.
+     */
+    public class MergeModuleChoiceRequiredException extends RuntimeException {
+        /**
+         * Selected user files.
+         */
+        private Collection<UserFile> userFiles;
+        /**
+         * Available merge modules.
+         */
+        private Collection<MergeModule> mergeModules;
+
+        /**
+         * Initializes this object with user files and modules.
+         * @param userFiles user files
+         * @param mergeModules merge modules
+         */
+        public MergeModuleChoiceRequiredException(Collection<UserFile> userFiles, Collection<MergeModule> mergeModules) {
+            this.userFiles = userFiles;
+            this.mergeModules = mergeModules;
+        }
+
+        public Collection<UserFile> getUserFiles() {
+            return userFiles;
+        }
+
+        public Collection<MergeModule> getMergeModules() {
+            return mergeModules;
         }
     }
 }
