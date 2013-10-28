@@ -131,7 +131,6 @@ You can:
             </tbody>
         </table>
         <input type="submit" value="Delete selected files"/>
-        <input type="text" hidden="hidden" value="4" name="mergeModule"/>
         <input type="button" id="mergeButton" value="Merge selected files"/>
         </form>
 </div>
