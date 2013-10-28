@@ -134,8 +134,10 @@ public class MergeModulesController {
      */
     @RequestMapping("/modules/remove")
     public String remove(@RequestParam(required = false) int[] modulesToRemove, Model model) {
-        mergeModulesStorage.remove(modulesToRemove);
-        model.addAttribute("message", "Selected modules successfully removed.");
+        if (modulesToRemove != null) {
+            mergeModulesStorage.remove(modulesToRemove);
+            model.addAttribute("message", "Selected modules successfully removed.");
+        }
         return listMergeModules(model);
     }
 }
