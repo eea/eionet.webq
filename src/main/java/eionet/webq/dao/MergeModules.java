@@ -77,8 +77,9 @@ public interface MergeModules {
     /**
      * Allows to find merge module by xml schema.
      *
-     * @param xmlSchema xml schema.
+     *
+     * @param xmlSchemas xml schema.
      * @return merge modules found.
      */
-    Collection<MergeModule> findByXmlSchema(String xmlSchema);
+    Collection<MergeModule> findByXmlSchemas(Collection<String> xmlSchemas);
 }

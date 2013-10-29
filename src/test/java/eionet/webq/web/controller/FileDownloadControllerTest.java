@@ -77,7 +77,7 @@ public class FileDownloadControllerTest {
         byte[] mergeResult = "merge-result".getBytes();
 
         when(userFileService.getById(anyInt())).thenReturn(userFile, userFile);
-        when(mergeModules.findByXmlSchema(userFile.getXmlSchema())).thenReturn(Arrays.asList(mergeModule));
+        when(mergeModules.findByXmlSchemas(anyCollectionOf(String.class))).thenReturn(Arrays.asList(mergeModule));
         when(userFileMergeService.mergeFiles(anyCollectionOf(UserFile.class), eq(mergeModule)))
                 .thenReturn(mergeResult);
         MockHttpServletResponse response = new MockHttpServletResponse();

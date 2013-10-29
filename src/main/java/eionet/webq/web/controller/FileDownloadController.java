@@ -179,13 +179,12 @@ public class FileDownloadController {
             }
         }));
 
-        Collection<MergeModule> mergeModulesFound = mergeModules.findByXmlSchema(xmlSchemas.iterator().next());
+        Collection<MergeModule> mergeModulesFound = mergeModules.findByXmlSchemas(xmlSchemas);
         if (mergeModulesFound.size() == 1) {
             mergeFiles(userFiles, mergeModulesFound.iterator().next(), response);
             return;
         }
 
-        //TODO: handle multiple schemas/modules cases
         throw new MergeModuleChoiceRequiredException(userFiles, mergeModulesFound);
     }
 

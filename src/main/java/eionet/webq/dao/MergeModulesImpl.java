@@ -80,10 +80,10 @@ public class MergeModulesImpl extends AbstractDao<MergeModule> implements MergeM
 
     @Override
     @SuppressWarnings("unchecked")
-    public Collection<MergeModule> findByXmlSchema(String xmlSchema) {
+    public Collection<MergeModule> findByXmlSchemas(Collection<String> xmlSchemas) {
         return (List<MergeModule>) getCriteria()
                 .createAlias("xmlSchemas", "xs")
-                .add(Restrictions.eq("xs.xmlSchema", xmlSchema))
+                .add(Restrictions.in("xs.xmlSchema", xmlSchemas))
                 .setResultTransformer(DISTINCT_ROOT_ENTITY).list();
     }
 

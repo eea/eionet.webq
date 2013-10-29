@@ -283,9 +283,41 @@ public class MergeModulesTest {
                 new MergeModuleXmlSchema("http://schema2")));
         int id = mergeModules.save(moduleToSave);
 
-        Collection<MergeModule> byXmlSchema = mergeModules.findByXmlSchema(schemaToFind);
+        Collection<MergeModule> byXmlSchema = mergeModules.findByXmlSchemas(Arrays.asList(schemaToFind));
         assertThat(byXmlSchema.size(), equalTo(1));
         assertThat(byXmlSchema.iterator().next().getId(), equalTo(id));
+    }
+
+    @Test
+    public void shouldFindDistinctMergeModuleByMultipleXmlSchemas() throws Exception {
+        String schemaToFind1 = "http://schema1";
+        String schemaToFind2 = "http://schema2";
+        moduleToSave.setXmlSchemas(Arrays.asList(new MergeModuleXmlSchema(schemaToFind1),
+                new MergeModuleXmlSchema("http://schema2")));
+        int id = mergeModules.save(moduleToSave);
+
+        Collection<MergeModule> byXmlSchema = mergeModules.findByXmlSchemas(Arrays.asList(schemaToFind1, schemaToFind2));
+        assertThat(byXmlSchema.size(), equalTo(1));
+        assertThat(byXmlSchema.iterator().next().getId(), equalTo(id));
+    }
+
+    @Test
+    public void shouldFindMergeModulesByMultipleXmlSchemas() throws Exception {
+        String schemaToFind1 = "http://schema1";
+        String schemaToFind2 = "http://schema2";
+        moduleToSave.setXmlSchemas(Arrays.asList(new MergeModuleXmlSchema(schemaToFind1)));
+        int id1 = mergeModules.save(moduleToSave);
+
+        MergeModule mergeModule = new MergeModule();
+        mergeModule.setXmlSchemas(Arrays.asList(new MergeModuleXmlSchema(schemaToFind2)));
+        int id2 = mergeModules.save(mergeModule);
+
+        Collection<MergeModule> byXmlSchema = mergeModules.findByXmlSchemas(Arrays.asList(schemaToFind1, schemaToFind2));
+
+        assertThat(byXmlSchema.size(), equalTo(2));
+        Iterator<MergeModule> it = byXmlSchema.iterator();
+        assertThat(it.next().getId(), equalTo(id1));
+        assertThat(it.next().getId(), equalTo(id2));
     }
 
     private MergeModule moduleWithFileName(String uniqueModuleName) {
