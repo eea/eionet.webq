@@ -39,7 +39,7 @@ public class UploadForm {
         return userFiles;
     }
 
-    public void setUserFile(Collection<UserFile> files) {
+    public void setUserFiles(Collection<UserFile> files) {
         this.userFiles = files;
     }
 }

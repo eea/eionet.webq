@@ -143,7 +143,7 @@ public class PublicPageControllerTest {
         UploadForm uploadForm = new UploadForm();
         UserFile file1 = new UserFile(new UploadedFile("file1", "file1-content".getBytes()), "xmlSchema");
         UserFile file2 = new UserFile(new UploadedFile("file2", "file2-content".getBytes()), "xmlSchema");
-        uploadForm.setUserFile(Arrays.asList(file1, file2));
+        uploadForm.setUserFiles(Arrays.asList(file1, file2));
 
         publicPageController.upload(uploadForm, bindingResult, model);
 

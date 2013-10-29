@@ -50,7 +50,7 @@ public abstract class AbstractContextControllerTests {
     }
 
     protected MockMultipartFile createMockMultipartFile(String fileName, byte[] content) {
-        return new MockMultipartFile("userFile", fileName, MediaType.APPLICATION_XML_VALUE, content);
+        return new MockMultipartFile("userFiles", fileName, MediaType.APPLICATION_XML_VALUE, content);
     }
 
     protected ResultActions uploadFile(MockMultipartFile file) throws Exception {

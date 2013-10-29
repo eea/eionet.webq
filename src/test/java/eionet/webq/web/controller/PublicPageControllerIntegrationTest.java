@@ -40,6 +40,7 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestOperations;
 
@@ -90,6 +91,13 @@ public class PublicPageControllerIntegrationTest extends AbstractContextControll
     public void successfulUploadProducesMessage() throws Exception {
         MockMultipartFile file = createMockMultipartFile("orig");
         uploadFile(file).andExpect(model().attribute("message", "File 'orig' uploaded successfully"));
+    }
+
+    @Test
+    public void whenHitCoordinatorPage_markSessionAsUsedByCoordinator() throws Exception {
+        request(get("/coordinator"))
+                .andExpect(MockMvcResultMatchers.request().sessionAttribute("isCoordinator", true))
+                .andExpect(view().name("index"));
     }
 
     @Test

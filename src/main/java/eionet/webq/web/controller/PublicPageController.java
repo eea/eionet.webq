@@ -44,6 +44,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 import java.io.IOException;
 import java.io.InputStream;
@@ -97,6 +98,18 @@ public class PublicPageController {
             model.addAttribute(uploadForm, new UploadForm());
         }
         return "index";
+    }
+    /**
+     * Action to be performed on http GET method and path '/'.
+     *
+     * @param model holder for model attributes
+     * @param session http session
+     * @return view name
+     */
+    @RequestMapping(value = "/coordinator")
+    public String coordinator(Model model, HttpSession session) {
+        session.setAttribute("isCoordinator", true);
+        return welcome(model);
     }
 
     /**
