@@ -21,13 +21,19 @@
 package eionet.webq.web.controller;
 
 import eionet.webq.dao.MergeModules;
+import eionet.webq.dao.UserFileStorage;
 import eionet.webq.dao.orm.MergeModule;
 import eionet.webq.dao.orm.MergeModuleXmlSchema;
 import eionet.webq.dao.orm.UploadedFile;
+import eionet.webq.dao.orm.UserFile;
 import eionet.webq.web.AbstractContextControllerTests;
+import org.hibernate.FlushMode;
+import org.hibernate.SessionFactory;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
@@ -35,20 +41,58 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
 
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
+
 @RunWith(SpringJUnit4ClassRunner.class)
 @Transactional
 public class FileDownloadControllerIntegrationTest extends AbstractContextControllerTests {
+    public static final String XML_SCHEMA = "http://xml.schema";
     @Autowired
     private MergeModules modules;
+    @Autowired
+    private UserFileStorage userFileStorage;
+    @Autowired
+    private SessionFactory sessionFactory;
+    private MockHttpSession session = new MockHttpSession();
+
+    @Before
+    public void before() throws Exception {
+        sessionFactory.getCurrentSession().setFlushMode(FlushMode.ALWAYS);
+    }
+
     @Test
     public void allowsToDownloadMergeFiles() throws Exception {
-        MergeModule module = new MergeModule();
-        module.setXmlSchemas(Arrays.asList(new MergeModuleXmlSchema("http://xml.schema")));
-        UploadedFile xslFile = new UploadedFile("merge.xsl", "merge-file-content".getBytes());
-        module.setXslFile(xslFile);
-        modules.save(module);
+        UploadedFile xslFile = saveMergeModule("merge.xsl").getXslFile();
 
         request(MockMvcRequestBuilders.get("/download/merge/file/" + xslFile.getName()))
                 .andExpect(MockMvcResultMatchers.content().bytes(xslFile.getContent().getFileContent()));
     }
+
+    @Test
+    public void whenMergingUserFiles_ifMoreThatOneMergeModuleFound_showMergeModuleSelectPage() throws Exception {
+        saveMergeModule("merge1.xsl");
+        saveMergeModule("merge2.xsl");
+
+        int id1 = saveUserFile();
+        int id2 = saveUserFile();
+
+        request(MockMvcRequestBuilders.post("/download/merge/files")
+                .param("selectedUserFile", Integer.toString(id1), Integer.toString(id2))
+                .session(session))
+                .andExpect(view().name("merge_options"));
+    }
+
+    private int saveUserFile() {
+        return userFileStorage.save(new UserFile(new UploadedFile(), XML_SCHEMA), session.getId());
+    }
+
+    private MergeModule saveMergeModule(String fileName) {
+        MergeModule module = new MergeModule();
+        module.setXmlSchemas(Arrays.asList(new MergeModuleXmlSchema(XML_SCHEMA)));
+        UploadedFile xslFile = new UploadedFile(fileName, "merge-file-content".getBytes());
+        module.setXslFile(xslFile);
+        modules.save(module);
+        return module;
+    }
+
 }
