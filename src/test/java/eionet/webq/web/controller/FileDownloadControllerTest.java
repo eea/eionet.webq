@@ -32,10 +32,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.web.servlet.ModelAndView;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
+import static eionet.webq.web.controller.FileDownloadController.MergeModuleChoiceRequiredException;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.anyCollectionOf;
@@ -101,7 +104,7 @@ public class FileDownloadControllerTest {
         verifyNoMoreInteractions(userFileMergeService, mergeModules, userFileService);
     }
 
-    @Test(expected = FileDownloadController.MergeModuleChoiceRequiredException.class)
+    @Test(expected = MergeModuleChoiceRequiredException.class)
     public void whenMergingFiles_ifMoreThanOneXmlSchemaFound_throwsException() throws Exception {
         UserFile userFile1 = new UserFile();
         UserFile userFile2 = new UserFile();
@@ -127,5 +130,19 @@ public class FileDownloadControllerTest {
 
         verify(mergeModules).findById(mergeModuleId);
         verify(userFileMergeService).mergeFiles(anyCollectionOf(UserFile.class), eq(mergeModule));
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void whenHandlingMergeModuleChoiceRequiredException_ifNoModulesFound_showFullListOfModules() throws Exception {
+        List<MergeModule> modules = Arrays.asList(new MergeModule());
+        when(mergeModules.findAll()).thenReturn(modules);
+
+        MergeModuleChoiceRequiredException mergeModuleChoiceRequired =
+                new MergeModuleChoiceRequiredException(Arrays.asList(new UserFile()), Collections.<MergeModule>emptyList());
+        ModelAndView modelAndView = controller.mergeSelect(mergeModuleChoiceRequired);
+
+        assertThat((List<MergeModule>) modelAndView.getModel().get("mergeModules"), equalTo(modules));
+        verify(mergeModules).findAll();
     }
 }

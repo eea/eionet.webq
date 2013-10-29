@@ -201,7 +201,11 @@ public class FileDownloadController {
     @ExceptionHandler(MergeModuleChoiceRequiredException.class)
     public ModelAndView mergeSelect(MergeModuleChoiceRequiredException e) {
         Map<String, Object> model = new HashMap<String, Object>();
-        model.put("mergeModules", e.getMergeModules());
+        Collection<MergeModule> modules = e.getMergeModules();
+        if (modules.isEmpty()) {
+            modules = mergeModules.findAll();
+        }
+        model.put("mergeModules", modules);
         model.put("userFiles", e.getUserFiles());
         return new ModelAndView("merge_options", model);
     }
@@ -313,7 +317,7 @@ public class FileDownloadController {
     /**
      * Exception indicating that merge module choice is required.
      */
-    public class MergeModuleChoiceRequiredException extends RuntimeException {
+    public static class MergeModuleChoiceRequiredException extends RuntimeException {
         /**
          * Selected user files.
          */
