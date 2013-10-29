@@ -1,13 +1,13 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 
-<h1>Merging modules</h1>
 <div id="drop-operations">
     <h2>Operations</h2>
     <ul>
         <li><span><a title="Add module" href="<c:url value="/merge/module/add"/>">Add merging module</a></span></li>
     </ul>
 </div>
+<h1>Merging modules</h1>
 
 <c:if test="${not empty allMergeModules}">
     <form action="<c:url value="/merge/modules/remove"/>" method="post">

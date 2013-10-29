@@ -52,7 +52,7 @@ You can:
 </div>
 <c:if test="${not empty uploadedFiles}">
 <div class="files">
-    <h2>My XML files</h2>
+    <h2>My session files</h2>
         <div hidden="hidden" class="important-msg" id="not-downloaded-files-present"><strong>Note</strong><p>Please download your modified files!</p></div>
         <form id="actionForm" method="post" action="<c:url value="/remove/files"/>">
         <table class="datatable" style="width:100%">
@@ -75,9 +75,9 @@ You can:
                     <c:set var="id-prefix" value="${file.id}-"/>
                     <tr class="user_file">
                         <td>
-                            <input type="checkbox" name="selectedUserFile" value="${file.id}">
+                            <input type="checkbox" name="selectedUserFile" value="${file.id}" id="chk-${file.id}">
                         </td>
-                        <td>
+                        <td><label for="chk-${file.id}">
                             <c:choose>
                                 <c:when test="${downloadNotificationsRequired}">
                                     <strong>${file.name}</strong>
@@ -86,7 +86,7 @@ You can:
                                     ${file.name}
                                 </c:otherwise>
                             </c:choose>
-
+                            </label>
                         </td>
                         <td>
                             File size: ${humanReadableFileSize}<br/>
