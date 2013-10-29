@@ -139,7 +139,7 @@ You can:
             </c:forEach>
             </tbody>
         </table>
-        <input type="submit" value="Delete selected files"/>
+        <input type="submit" id="removeButton" value="Delete selected files"/>
         <c:if test="${isCoordinator}">
             <input type="button" id="mergeButton" value="Merge selected files"/>
         </c:if>

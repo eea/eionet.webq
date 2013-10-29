@@ -25,6 +25,10 @@
         }
     }
 
+    function anyFileSelected() {
+        return $('input[name=selectedUserFile]:checked').length > 0;
+    }
+
     function showStartWebformArea() {
         $("#startWebformArea").show();
     }
@@ -49,6 +53,10 @@
             var actionForm = $("form#actionForm");
             actionForm.attr("action", "<c:url value="/download/merge/files"/>");
             actionForm.submit();
+        }).hide();
+        $("#removeButton").hide();
+        $('input[name=selectedUserFile]').change(function() {
+            $("#mergeButton, #removeButton").toggle(anyFileSelected());
         });
     };
 
