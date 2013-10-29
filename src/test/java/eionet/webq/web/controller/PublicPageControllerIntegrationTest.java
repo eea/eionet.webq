@@ -95,7 +95,7 @@ public class PublicPageControllerIntegrationTest extends AbstractContextControll
     @Test
     public void whenUploadingFile_ifThereIsOnlyOneFormAvailableForThisFile_redirectToThisForm() throws Exception {
         saveActiveWebForm();
-        MvcResult result = mvc().perform(fileUpload("/uploadXml").file(createMockMultipartFile("file.name")).session(mockHttpSession))
+        MvcResult result = mvc().perform(fileUpload("/uploadXmlWithRedirect").file(createMockMultipartFile("file.name")).session(mockHttpSession))
                 .andExpect(status().isFound()).andReturn();
         String viewName = result.getModelAndView().getViewName();
         assertTrue(viewName.matches("redirect:/xform/\\?formId=\\d+&fileId=\\d+&instance=.*&base_uri=.*"));

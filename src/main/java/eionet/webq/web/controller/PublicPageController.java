@@ -121,7 +121,24 @@ public class PublicPageController {
     }
 
     /**
-     * Upload action. If there is only one form available for this file, redirect to this form.
+     * Upload action.
+     *
+     * @param uploadForm represents form used in UI, {@link UploadForm#userFiles} will be converted from
+     *            {@link org.springframework.web.multipart.MultipartFile}
+     * @param result binding result, contains validation errors
+     * @param model holder for model attributes
+     * @return view name
+     */
+    @RequestMapping(value = "/uploadXml", method = RequestMethod.POST)
+    public String upload(@Valid @ModelAttribute UploadForm uploadForm, BindingResult result, Model model) {
+        if (!result.hasErrors()) {
+            saveFiles(uploadForm);
+        }
+        return welcome(model);
+    }
+
+    /**
+     * Upload action. If there is only one file uploaded and one form available for this file, redirect to this form.
      *
      * @param uploadForm represents form used in UI, {@link UploadForm#userFiles} will be converted from
      *            {@link org.springframework.web.multipart.MultipartFile}
@@ -130,14 +147,12 @@ public class PublicPageController {
      * @param request http request
      * @return view name
      */
-    @RequestMapping(value = "/uploadXml", method = RequestMethod.POST)
-    public String upload(@Valid @ModelAttribute UploadForm uploadForm, BindingResult result, Model model,
+    @RequestMapping(value = "/uploadXmlWithRedirect", method = RequestMethod.POST)
+    public String uploadWithRedirectToWebForm(@Valid @ModelAttribute UploadForm uploadForm, BindingResult result, Model model,
             HttpServletRequest request) {
         if (!result.hasErrors()) {
-            Collection<UserFile> files = uploadForm.getUserFile();
-            for (UserFile userFile : files) {
-                userFileService.save(userFile);
-            }
+            saveFiles(uploadForm);
+            Collection<UserFile> files = uploadForm.getUserFiles();
             if (files.size() == 1) {
                 UserFile file = files.iterator().next();
                 Collection<ProjectFile> availableWebForms =
@@ -240,6 +255,16 @@ public class PublicPageController {
         OutputStream outputStream = response.getOutputStream();
         IOUtils.write(fileContent, outputStream);
         outputStream.flush();
+    }
+
+    /**
+     * Save files attached to upload form.
+     * @param uploadForm upload form
+     */
+    private void saveFiles(UploadForm uploadForm) {
+        for (UserFile userFile : uploadForm.getUserFiles()) {
+            userFileService.save(userFile);
+        }
     }
 
     /**

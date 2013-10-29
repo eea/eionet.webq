@@ -54,7 +54,7 @@ public abstract class AbstractContextControllerTests {
     }
 
     protected ResultActions uploadFile(MockMultipartFile file) throws Exception {
-        return request(fileUpload("/uploadXml").file(file).session(mockHttpSession));
+        return request(fileUpload("/uploadXmlWithRedirect").file(file).session(mockHttpSession));
     }
 
     protected MockHttpServletRequestBuilder postWithMockSession(String path) {

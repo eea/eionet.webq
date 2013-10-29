@@ -145,7 +145,7 @@ public class PublicPageControllerTest {
         UserFile file2 = new UserFile(new UploadedFile("file2", "file2-content".getBytes()), "xmlSchema");
         uploadForm.setUserFile(Arrays.asList(file1, file2));
 
-        publicPageController.upload(uploadForm, bindingResult, model, new MockHttpServletRequest());
+        publicPageController.upload(uploadForm, bindingResult, model);
 
         verify(userFileService).save(file1);
         verify(userFileService).save(file2);

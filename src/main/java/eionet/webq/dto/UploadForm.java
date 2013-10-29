@@ -35,7 +35,7 @@ public class UploadForm {
     @Valid
     private Collection<UserFile> userFiles;
 
-    public Collection<UserFile> getUserFile() {
+    public Collection<UserFile> getUserFiles() {
         return userFiles;
     }
 
