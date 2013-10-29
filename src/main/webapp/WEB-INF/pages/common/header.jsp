@@ -58,6 +58,7 @@
 <div id="leftcolumn" class="localnav">
     <ul>
         <li><a href="<c:url value="/"/>">My session files</a></li>
+        <li><a href="<c:url value="/coordinator"/>">Merge session files</a></li>
         <c:if test="${developerOrAdmin}">
             <li><a href="<c:url value="/projects/"/>">Webform projects</a></li>
             <li><a href="<c:url value="/merge/modules"/>">Merging modules</a></li>

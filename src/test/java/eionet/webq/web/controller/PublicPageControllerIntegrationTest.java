@@ -96,7 +96,7 @@ public class PublicPageControllerIntegrationTest extends AbstractContextControll
     @Test
     public void whenHitCoordinatorPage_markSessionAsUsedByCoordinator() throws Exception {
         request(get("/coordinator"))
-                .andExpect(MockMvcResultMatchers.request().sessionAttribute("isCoordinator", true))
+                .andExpect(MockMvcResultMatchers.request().attribute("isCoordinator", true))
                 .andExpect(view().name("index"));
     }
 
