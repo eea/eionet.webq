@@ -39,6 +39,10 @@
         }
     }
 
+    function disableActionButtonsIfNoFilesSelected() {
+        $("#mergeButton, #removeButton").prop('disabled', !anyFileSelected());
+    }
+
     var init = function() {
         $("#uploadButton").click(function () {
             $("#startWebformArea").hide();
@@ -53,11 +57,9 @@
             var actionForm = $("form#actionForm");
             actionForm.attr("action", "<c:url value="/download/merge/files"/>");
             actionForm.submit();
-        }).hide();
-        $("#removeButton").hide();
-        $('input[name=selectedUserFile]').change(function() {
-            $("#mergeButton, #removeButton").toggle(anyFileSelected());
         });
+        disableActionButtonsIfNoFilesSelected();
+        $('input[name=selectedUserFile]').change(disableActionButtonsIfNoFilesSelected);
     };
 
     $(init);
