@@ -26,6 +26,7 @@ import com.google.common.collect.ImmutableSet;
 import eionet.webq.dao.MergeModules;
 import eionet.webq.dao.orm.MergeModule;
 import eionet.webq.dao.orm.ProjectFile;
+import eionet.webq.dao.orm.UploadedFile;
 import eionet.webq.dao.orm.UserFile;
 import eionet.webq.service.ConversionService;
 import eionet.webq.service.ProjectFileService;
@@ -104,8 +105,7 @@ public class FileDownloadController {
     @Transactional
     public void downloadUserFile(@RequestParam int fileId, HttpServletResponse response) {
         UserFile file = userFileService.download(fileId);
-        addXmlFileHeaders(response, file.getName());
-        writeToResponse(response, file.getContent());
+        writeXmlFileToResponse(file.getName(), file.getContent(), response);
     }
 
     /**
@@ -119,8 +119,7 @@ public class FileDownloadController {
     @Transactional
     public void downloadProjectFile(@PathVariable String projectId, @PathVariable String fileName, HttpServletResponse response) {
         ProjectFile projectFile = projectFileService.fileContentBy(fileName, projectService.getByProjectId(projectId));
-        addXmlFileHeaders(response, encodeAsUrl(fileName));
-        writeToResponse(response, projectFile.getFileContent());
+        writeXmlFileToResponse(fileName, projectFile.getFileContent(), response);
     }
 
     /**
@@ -133,8 +132,8 @@ public class FileDownloadController {
     @Transactional
     public void downloadMergeFile(@PathVariable String moduleName, HttpServletResponse response) {
         MergeModule module = mergeModules.findByFileName(moduleName);
-        addXmlFileHeaders(response, encodeAsUrl(module.getXslFile().getName()));
-        writeToResponse(response, module.getXslFile().getContent().getFileContent());
+        UploadedFile xslFile = module.getXslFile();
+        writeXmlFileToResponse(xslFile.getName(), xslFile.getContent().getFileContent(), response);
     }
 
     /**
@@ -240,9 +239,19 @@ public class FileDownloadController {
     private void mergeFiles(Collection<UserFile> userFiles,
                             MergeModule mergeModule, HttpServletResponse response) throws TransformerException, IOException {
         byte[] mergeResult = mergeService.mergeFiles(userFiles, mergeModule);
+        writeXmlFileToResponse("merged_files.xml", mergeResult, response);
+    }
 
-        addXmlFileHeaders(response, encodeAsUrl("merged_files.xml"));
-        writeToResponse(response, mergeResult);
+    /**
+     * Writes xml files to response.
+     *
+     * @param name file name
+     * @param content file content
+     * @param response http response
+     */
+    private void writeXmlFileToResponse(String name, byte[] content, HttpServletResponse response) {
+        addXmlFileHeaders(response, encodeAsUrl(name));
+        writeToResponse(response, content);
     }
 
     /**
