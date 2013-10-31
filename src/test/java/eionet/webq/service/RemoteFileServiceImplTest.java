@@ -24,6 +24,7 @@ import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.when;
 
 import org.junit.Before;
@@ -33,7 +34,10 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestOperations;
+
+import java.net.URL;
 
 public class RemoteFileServiceImplTest {
     private final byte[] FILE_CONTENT_IN_RESPONSE = "test file content".getBytes();
@@ -43,7 +47,7 @@ public class RemoteFileServiceImplTest {
     RestOperations restOperations;
     private final String url = "http://file.url";
 
-    private final String localFileName = "test-localfile-content.txt";
+    private static final String LOCAL_FILE_NAME = "test-localfile-content.txt";
 
     @Before
     public void setUp() throws Exception {
@@ -59,14 +63,15 @@ public class RemoteFileServiceImplTest {
 
     @Test(expected = FileNotAvailableException.class)
     public void throwsExceptionIfResponseIsNotOK() throws Exception {
-        httpResponseWithBytes(FILE_CONTENT_IN_RESPONSE, HttpStatus.BAD_REQUEST);
+        when(restOperations.getForEntity(url, byte[].class))
+                .thenThrow(new RestClientException("Download is not possible"));
 
         remoteFileService.fileContent(url);
     }
 
     @Test(expected = FileNotAvailableException.class)
     public void throwsExceptionIfResponseDoesNotHaveBody() throws Exception {
-        httpResponseWithBytes(null, HttpStatus.OK);
+        httpResponseWithBytes(null);
 
         remoteFileService.fileContent(url);
     }
@@ -86,7 +91,11 @@ public class RemoteFileServiceImplTest {
 
     @Test
     public void fetchesFileContentFromFileUri() throws Exception {
-        String localFileUrl = "file://" + this.getClass().getClassLoader().getResource(localFileName).getFile();
+        URL resource = getClass().getClassLoader().getResource(LOCAL_FILE_NAME);
+        if (resource == null) {
+            fail("No test file available.");
+        }
+        String localFileUrl = "file://" + resource.getFile();
         byte[] bytes = remoteFileService.fileContent(localFileUrl);
         assertThat(bytes, equalTo(FILE_CONTENT_IN_RESPONSE));
     }
@@ -104,11 +113,11 @@ public class RemoteFileServiceImplTest {
     }
 
     private void httpResponseWithBytes() {
-        httpResponseWithBytes(FILE_CONTENT_IN_RESPONSE, HttpStatus.OK);
+        httpResponseWithBytes(FILE_CONTENT_IN_RESPONSE);
     }
 
-    private void httpResponseWithBytes(byte[] responseBody, HttpStatus status) {
+    private void httpResponseWithBytes(byte[] responseBody) {
         when(restOperations.getForEntity(url, byte[].class))
-                .thenReturn(new ResponseEntity<byte[]>(responseBody, status));
+                .thenReturn(new ResponseEntity<byte[]>(responseBody, HttpStatus.OK));
     }
 }

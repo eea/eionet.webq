@@ -29,7 +29,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -88,9 +87,6 @@ public class ConversionServiceImpl implements ConversionService {
         ResponseEntity<byte[]> entity = restOperations.postForEntity(apiCallTo(convertPush), request, byte[].class);
         LOGGER.info("Response from conversion service for file=" + fileContent.getName() + ", conversionId=" + conversionId
                 + "\n Status:" + entity.getStatusCode() + ", response headers=" + entity.getHeaders());
-        if (entity.getStatusCode() != HttpStatus.OK) {
-            throw new RuntimeException("Answer retrieved from conversion service was not OK.");
-        }
         return entity;
     }
 

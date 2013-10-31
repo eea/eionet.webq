@@ -27,10 +27,11 @@ import java.net.URISyntaxException;
 import java.util.zip.CRC32;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestOperations;
 
 /**
@@ -39,6 +40,10 @@ import org.springframework.web.client.RestOperations;
 @Service
 public class RemoteFileServiceImpl implements RemoteFileService {
     /**
+     * Logger for this class.
+     */
+    private static final Logger LOGGER = Logger.getLogger(RemoteFileServiceImpl.class);
+    /**
      * Used for file download.
      */
     @Autowired
@@ -46,12 +51,16 @@ public class RemoteFileServiceImpl implements RemoteFileService {
 
     @Override
     public byte[] fileContent(String remoteFileUrl) throws FileNotAvailableException {
-
         if (remoteFileUrl != null && remoteFileUrl.startsWith("file://")) {
             return readFilesystemFile(remoteFileUrl);
         } else {
-            ResponseEntity<byte[]> download = downloader.getForEntity(remoteFileUrl, byte[].class);
-            if (download.getStatusCode() != HttpStatus.OK || !download.hasBody()) {
+            ResponseEntity<byte[]> download = null;
+            try {
+                download = downloader.getForEntity(remoteFileUrl, byte[].class);
+            } catch (RestClientException e) {
+                LOGGER.error("Unable to download remote file.", e);
+            }
+            if (download == null || !download.hasBody()) {
                 throw new FileNotAvailableException("Response is not OK or body not attached for " + remoteFileUrl);
             }
             return download.getBody();

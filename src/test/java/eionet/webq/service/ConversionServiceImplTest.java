@@ -21,7 +21,6 @@
 package eionet.webq.service;
 
 import configuration.ApplicationTestContextWithMockSession;
-import eionet.webq.dao.orm.UploadedFile;
 import eionet.webq.dao.orm.UserFile;
 import eionet.webq.dto.Conversion;
 import eionet.webq.dto.ListConversionResponse;
@@ -135,14 +134,6 @@ public class ConversionServiceImplTest {
         verify(restOperations).postForEntity(anyString(), postParameters.capture(), eq(byte[].class));
 
         assertPostParametersAreCorrect((postParameters.getValue()), testContent, convertId);
-    }
-
-    @Test(expected = RuntimeException.class)
-    public void throwsExceptionIfRetrievedAnswerFromConversionWasNotOk() throws Exception {
-        when(restOperations.postForEntity(anyString(), any(), eq(byte[].class))).thenReturn(
-                new ResponseEntity<byte[]>(HttpStatus.BAD_REQUEST));
-
-        conversionService.convert(new UserFile(new UploadedFile("file", "file-content".getBytes()), "xml-schema"), "1");
     }
 
     @SuppressWarnings("unchecked")
