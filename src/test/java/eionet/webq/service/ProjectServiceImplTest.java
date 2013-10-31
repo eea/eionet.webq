@@ -1,17 +1,3 @@
-package eionet.webq.service;
-
-import eionet.webq.dao.ProjectFolders;
-import eionet.webq.dao.orm.ProjectEntry;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.Mockito;
-
-import java.util.Collections;
-
-import static org.mockito.Mockito.only;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 /*
  * The contents of this file are subject to the Mozilla Public
  * License Version 1.1 (the "License"); you may not use this file
@@ -32,6 +18,20 @@ import static org.mockito.Mockito.when;
  * Contributor(s):
  *        Anton Dmitrijev
  */
+package eionet.webq.service;
+
+import eionet.webq.dao.ProjectFolders;
+import eionet.webq.dao.orm.ProjectEntry;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.Mockito;
+
+import java.util.Collections;
+
+import static org.mockito.Mockito.only;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 public class ProjectServiceImplTest {
     private ProjectService service;
     private ProjectFolders folders;

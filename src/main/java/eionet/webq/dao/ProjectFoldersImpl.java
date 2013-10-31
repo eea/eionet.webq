@@ -1,15 +1,3 @@
-package eionet.webq.dao;
-
-import eionet.webq.dao.orm.ProjectEntry;
-import org.hibernate.SessionFactory;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Collection;
-
 /*
  * The contents of this file are subject to the Mozilla Public
  * License Version 1.1 (the "License"); you may not use this file
@@ -30,6 +18,17 @@ import java.util.Collection;
  * Contributor(s):
  *        Anton Dmitrijev
  */
+package eionet.webq.dao;
+
+import eionet.webq.dao.orm.ProjectEntry;
+import org.hibernate.SessionFactory;
+import org.hibernate.criterion.Order;
+import org.hibernate.criterion.Restrictions;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Collection;
 
 /**
  * Project folders interface implementation.

@@ -1,15 +1,3 @@
-package eionet.webq.web.controller;
-
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.validation.FieldError;
-
-import static org.apache.commons.lang3.StringUtils.EMPTY;
-import static org.apache.commons.lang3.StringUtils.repeat;
-
 /*
  * The contents of this file are subject to the Mozilla Public
  * License Version 1.1 (the "License"); you may not use this file
@@ -30,6 +18,18 @@ import static org.apache.commons.lang3.StringUtils.repeat;
  * Contributor(s):
  *        Anton Dmitrijev
  */
+package eionet.webq.web.controller;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.FieldError;
+
+import static org.apache.commons.lang3.StringUtils.EMPTY;
+import static org.apache.commons.lang3.StringUtils.repeat;
+
 @RunWith(SpringJUnit4ClassRunner.class)
 @Transactional
 public class ProjectValidationTest extends AbstractProjectsControllerTests {

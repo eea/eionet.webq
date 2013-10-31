@@ -1,9 +1,3 @@
-package util;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.Cache;
-import org.springframework.cache.CacheManager;
-
 /*
  * The contents of this file are subject to the Mozilla Public
  * License Version 1.1 (the "License"); you may not use this file
@@ -24,6 +18,12 @@ import org.springframework.cache.CacheManager;
  * Contributor(s):
  *        Anton Dmitrijev
  */
+package util;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
+
 public class CacheCleaner {
     @Autowired
     private CacheManager cacheManager;

@@ -1,15 +1,3 @@
-package configuration;
-
-import org.apache.xmlrpc.client.XmlRpcClient;
-import org.mockito.Mockito;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.ImportResource;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.web.client.RestOperations;
-import org.springframework.web.multipart.commons.CommonsMultipartResolver;
-import util.CacheCleaner;
-
 /*
  * The contents of this file are subject to the Mozilla Public
  * License Version 1.1 (the "License"); you may not use this file
@@ -30,6 +18,18 @@ import util.CacheCleaner;
  * Contributor(s):
  *        Anton Dmitrijev
  */
+package configuration;
+
+import org.apache.xmlrpc.client.XmlRpcClient;
+import org.mockito.Mockito;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.ImportResource;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.web.client.RestOperations;
+import org.springframework.web.multipart.commons.CommonsMultipartResolver;
+import util.CacheCleaner;
+
 @Configuration
 @ImportResource({"file:src/main/webapp/WEB-INF/spring/application-context.xml",
         "file:src/test/resources/test-datasource-context.xml",

@@ -1,10 +1,3 @@
-package eionet.webq.dto;
-
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-import java.util.List;
-
 /*
  * The contents of this file are subject to the Mozilla Public
  * License Version 1.1 (the "License"); you may not use this file
@@ -25,6 +18,12 @@ import java.util.List;
  * Contributor(s):
  *        Anton Dmitrijev
  */
+package eionet.webq.dto;
+
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+import java.util.List;
 
 /**
  * Class represents response of conversion service.

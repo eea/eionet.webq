@@ -1,22 +1,3 @@
-package eionet.webq.dao;
-
-import configuration.ApplicationTestContextWithMockSession;
-import eionet.webq.dao.orm.ProjectEntry;
-import org.hibernate.exception.ConstraintViolationException;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Collection;
-import java.util.Iterator;
-
-import static org.hamcrest.core.IsEqual.equalTo;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
-
 /*
  * The contents of this file are subject to the Mozilla Public
  * License Version 1.1 (the "License"); you may not use this file
@@ -37,6 +18,25 @@ import static org.junit.Assert.assertThat;
  * Contributor(s):
  *        Anton Dmitrijev
  */
+package eionet.webq.dao;
+
+import configuration.ApplicationTestContextWithMockSession;
+import eionet.webq.dao.orm.ProjectEntry;
+import org.hibernate.exception.ConstraintViolationException;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Collection;
+import java.util.Iterator;
+
+import static org.hamcrest.core.IsEqual.equalTo;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
+
 @RunWith(SpringJUnit4ClassRunner.class)
 @Transactional
 @ContextConfiguration(classes = {ApplicationTestContextWithMockSession.class})

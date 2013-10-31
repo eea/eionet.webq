@@ -1,5 +1,3 @@
-package eionet.webq.dao;
-
 /*
  * The contents of this file are subject to the Mozilla Public
  * License Version 1.1 (the "License"); you may not use this file
@@ -20,6 +18,7 @@ package eionet.webq.dao;
  * Contributor(s):
  *        Anton Dmitrijev
  */
+package eionet.webq.dao;
 
 import eionet.webq.dao.orm.ProjectEntry;
 
