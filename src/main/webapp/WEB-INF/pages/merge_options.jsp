@@ -21,6 +21,5 @@
 
     <div style="clear: both;"></div>
     <input type="submit" value="Merge"/>
-    <input type="button" onclick="window.location='<c:url value="/"/>'" value="Cancel"/>
 </form>
 
