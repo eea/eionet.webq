@@ -18,4 +18,19 @@
             modal: true
         });
     }
+
+    function viewXslSource(downloadLink) {
+        $.ajax({
+            url: downloadLink,
+            dataType: 'text'
+        })
+        .done(function (data) {
+            var xmlAsTextArea = $('<textarea cols="90" rows="20" style="border:none;"/>').text(data);
+            $('<div title="XSL content"/>').append(xmlAsTextArea).dialog({
+                maxHeight: 600,
+                width: 800,
+                modal: true
+            });
+        });
+    }
 </script>
