@@ -39,6 +39,8 @@ public class MultipartFileToUploadedFile implements Converter<MultipartFile, Upl
 
     @Override
     public UploadedFile convert(MultipartFile source) {
-        return new UploadedFile(source.getOriginalFilename(), toByteArrayConverter.convert(source));
+        UploadedFile uploadedFile = new UploadedFile(source.getOriginalFilename(), toByteArrayConverter.convert(source));
+        uploadedFile.setContentType(source.getContentType());
+        return uploadedFile;
     }
 }

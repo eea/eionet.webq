@@ -40,6 +40,7 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestOperations;
 
@@ -93,9 +94,16 @@ public class PublicPageControllerIntegrationTest extends AbstractContextControll
     }
 
     @Test
+    public void whenHitCoordinatorPage_markSessionAsUsedByCoordinator() throws Exception {
+        request(get("/coordinator"))
+                .andExpect(MockMvcResultMatchers.request().attribute("isCoordinator", true))
+                .andExpect(view().name("index"));
+    }
+
+    @Test
     public void whenUploadingFile_ifThereIsOnlyOneFormAvailableForThisFile_redirectToThisForm() throws Exception {
         saveActiveWebForm();
-        MvcResult result = mvc().perform(fileUpload("/uploadXml").file(createMockMultipartFile("file.name")).session(mockHttpSession))
+        MvcResult result = mvc().perform(fileUpload("/uploadXmlWithRedirect").file(createMockMultipartFile("file.name")).session(mockHttpSession))
                 .andExpect(status().isFound()).andReturn();
         String viewName = result.getModelAndView().getViewName();
         assertTrue(viewName.matches("redirect:/xform/\\?formId=\\d+&fileId=\\d+&instance=.*&base_uri=.*"));

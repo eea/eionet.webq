@@ -15,7 +15,7 @@
         </tr>
         <tr>
             <th scope="row">
-                <label for="label">Project label</label>
+                <label for="label">Title</label>
             </th>
             <td>
                 <f:input id="label" path="description" size="35"/>

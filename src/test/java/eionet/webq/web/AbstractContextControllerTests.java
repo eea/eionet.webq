@@ -50,11 +50,11 @@ public abstract class AbstractContextControllerTests {
     }
 
     protected MockMultipartFile createMockMultipartFile(String fileName, byte[] content) {
-        return new MockMultipartFile("userFile", fileName, MediaType.APPLICATION_XML_VALUE, content);
+        return new MockMultipartFile("userFiles", fileName, MediaType.APPLICATION_XML_VALUE, content);
     }
 
     protected ResultActions uploadFile(MockMultipartFile file) throws Exception {
-        return request(fileUpload("/uploadXml").file(file).session(mockHttpSession));
+        return request(fileUpload("/uploadXmlWithRedirect").file(file).session(mockHttpSession));
     }
 
     protected MockHttpServletRequestBuilder postWithMockSession(String path) {
@@ -96,8 +96,9 @@ public abstract class AbstractContextControllerTests {
                 (BeanPropertyBindingResult) result.getModelAndView().getModelMap()
                         .get(bindingResultPropertyNameInModel());
 
-        assertThat(bindingResult.getFieldErrorCount(), equalTo(size));
-        return bindingResult.getFieldErrors();
+        List<FieldError> fieldErrors = bindingResult.getFieldErrors();
+        assertThat("Field errors=" + fieldErrors, bindingResult.getFieldErrorCount(), equalTo(size));
+        return fieldErrors;
     }
     
     protected String bindingResultPropertyNameInModel() {

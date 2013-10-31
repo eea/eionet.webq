@@ -10,6 +10,7 @@
         <sec:authorize access="isAuthenticated()" var="authenticated"/>
         <sec:authorize access="hasRole('DEVELOPER')" var="isDeveloper"/>
         <sec:authorize access="hasRole('ADMIN')" var="isAdmin"/>
+        <c:set var="developerOrAdmin" value="${isAdmin or isDeveloper}"/>
         <c:choose>
             <c:when test="${authenticated}">
                 <sec:authentication property="name" var="userName"/>
@@ -57,8 +58,10 @@
 <div id="leftcolumn" class="localnav">
     <ul>
         <li><a href="<c:url value="/"/>">My session files</a></li>
-        <c:if test="${isDeveloper or isAdmin}">
+        <li><a href="<c:url value="/coordinator"/>">Merge session files</a></li>
+        <c:if test="${developerOrAdmin}">
             <li><a href="<c:url value="/projects/"/>">Webform projects</a></li>
+            <li><a href="<c:url value="/merge/modules"/>">Merging modules</a></li>
         </c:if>
         <c:if test="${isAdmin}">
             <li><a href="<c:url value="/users/new"/>">Add/replace user role</a></li>

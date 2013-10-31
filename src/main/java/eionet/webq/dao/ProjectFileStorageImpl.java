@@ -23,7 +23,8 @@ package eionet.webq.dao;
 import eionet.webq.dao.orm.ProjectEntry;
 import eionet.webq.dao.orm.ProjectFile;
 import eionet.webq.dao.orm.ProjectFileType;
-import eionet.webq.dao.orm.util.ProjectFileInfo;
+import eionet.webq.dao.orm.util.WebQFileInfo;
+import org.apache.commons.lang3.ArrayUtils;
 import org.hibernate.Session;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Order;
@@ -34,7 +35,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.sql.Timestamp;
 import java.util.Collection;
 
+import static org.hibernate.criterion.Restrictions.and;
 import static org.hibernate.criterion.Restrictions.eq;
+import static org.hibernate.criterion.Restrictions.in;
 
 /**
  * ProjectFileStorage implementation.
@@ -52,13 +55,13 @@ public class ProjectFileStorageImpl extends AbstractDao<ProjectFile> implements 
 
     @Override
     public ProjectFile findById(int id) {
-        return (ProjectFile) getCurrentSession().byId(getDtoClass()).load(id);
+        return (ProjectFile) getCurrentSession().byId(getEntityClass()).load(id);
     }
 
     @Override
     public void update(final ProjectFile projectFile, ProjectEntry projectEntry) {
         if (projectFile.getProjectId() == projectEntry.getId()) {
-            if (ProjectFileInfo.fileIsEmpty(projectFile)) {
+            if (WebQFileInfo.fileIsEmpty(projectFile.getFile())) {
                 updateWithoutChangingContent(projectFile);
             } else {
                 fullUpdate(projectFile);
@@ -74,9 +77,7 @@ public class ProjectFileStorageImpl extends AbstractDao<ProjectFile> implements 
 
     @Override
     public void remove(final ProjectEntry projectEntry, final int... fileIds) {
-        for (int fileId : fileIds) {
-            getCurrentSession().createQuery("delete from ProjectFile where id=:id").setInteger("id", fileId).executeUpdate();
-        }
+        removeByCriterion(and(eq("projectId", projectEntry.getId()), in("id", ArrayUtils.toObject(fileIds))));
     }
 
     @Override
@@ -99,7 +100,7 @@ public class ProjectFileStorageImpl extends AbstractDao<ProjectFile> implements 
     }
 
     @Override
-    Class<ProjectFile> getDtoClass() {
+    Class<ProjectFile> getEntityClass() {
         return ProjectFile.class;
     }
 

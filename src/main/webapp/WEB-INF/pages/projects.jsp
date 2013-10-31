@@ -13,7 +13,7 @@
         <thead>
         <tr>
             <th>Id</th>
-            <th>Description</th>
+            <th>Title</th>
             <th>Created</th>
         </tr>
         </thead>

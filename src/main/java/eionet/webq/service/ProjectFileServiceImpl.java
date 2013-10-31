@@ -25,7 +25,7 @@ import eionet.webq.dao.ProjectFileStorage;
 import eionet.webq.dao.orm.ProjectEntry;
 import eionet.webq.dao.orm.ProjectFile;
 import eionet.webq.dao.orm.ProjectFileType;
-import eionet.webq.dao.orm.util.ProjectFileInfo;
+import eionet.webq.dao.orm.util.WebQFileInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
@@ -50,7 +50,7 @@ public class ProjectFileServiceImpl implements ProjectFileService {
 
     @Override
     public void saveOrUpdate(ProjectFile file, ProjectEntry project) {
-        if (!ProjectFileInfo.isNew(file)) {
+        if (!WebQFileInfo.isNew(file)) {
             projectFileStorage.update(file, project);
             return;
         }

@@ -98,6 +98,18 @@ public class PublicPageController {
         }
         return "index";
     }
+    /**
+     * Action to be performed on http GET method and path '/'.
+     *
+     * @param model holder for model attributes
+     * @param request http request
+     * @return view name
+     */
+    @RequestMapping(value = "/coordinator")
+    public String coordinator(Model model, HttpServletRequest request) {
+        request.setAttribute("isCoordinator", true);
+        return welcome(model);
+    }
 
     /**
      * Redirects to welcome page after login.
@@ -123,28 +135,50 @@ public class PublicPageController {
     /**
      * Upload action.
      *
-     * @param uploadForm represents form used in UI, {@link UploadForm#userFile} will be converted from
+     * @param uploadForm represents form used in UI, {@link UploadForm#userFiles} will be converted from
+     *            {@link org.springframework.web.multipart.MultipartFile}
+     * @param result binding result, contains validation errors
+     * @param model holder for model attributes
+     * @return view name
+     */
+    @RequestMapping(value = "/uploadXml", method = RequestMethod.POST)
+    public String upload(@Valid @ModelAttribute UploadForm uploadForm, BindingResult result, Model model) {
+        if (!result.hasErrors()) {
+            saveFiles(uploadForm);
+        }
+        return welcome(model);
+    }
+
+    /**
+     * Upload action. If there is only one file uploaded and one form available for this file, redirect to this form.
+     *
+     * @param uploadForm represents form used in UI, {@link UploadForm#userFiles} will be converted from
      *            {@link org.springframework.web.multipart.MultipartFile}
      * @param result binding result, contains validation errors
      * @param model holder for model attributes
      * @param request http request
      * @return view name
      */
-    @RequestMapping(value = "/uploadXml", method = RequestMethod.POST)
-    public String upload(@Valid @ModelAttribute UploadForm uploadForm, BindingResult result, Model model,
+    @RequestMapping(value = "/uploadXmlWithRedirect", method = RequestMethod.POST)
+    public String uploadWithRedirectToWebForm(@Valid @ModelAttribute UploadForm uploadForm, BindingResult result, Model model,
             HttpServletRequest request) {
         if (!result.hasErrors()) {
-            UserFile file = uploadForm.getUserFile();
-            int fileId = userFileService.save(file);
-            Collection<ProjectFile> availableWebForms = webFormService.findWebFormsForSchemas(Arrays.asList(file.getXmlSchema()));
-            if (availableWebForms.size() == 1) {
-                int formId = availableWebForms.iterator().next().getId();
-                String contextPath = request.getContextPath();
-                String downloadUrl = contextPath + "/download/user_file?fileId=" + fileId;
-                return "redirect:/xform/?formId=" + formId + "&fileId=" + fileId + "&instance=" + downloadUrl
-                        + "&base_uri=" + contextPath;
+            saveFiles(uploadForm);
+            Collection<UserFile> files = uploadForm.getUserFiles();
+            if (files.size() == 1) {
+                UserFile file = files.iterator().next();
+                Collection<ProjectFile> availableWebForms =
+                        webFormService.findWebFormsForSchemas(Arrays.asList(file.getXmlSchema()));
+                if (availableWebForms.size() == 1) {
+                    int fileId = file.getId();
+                    int formId = availableWebForms.iterator().next().getId();
+                    String contextPath = request.getContextPath();
+                    String downloadUrl = contextPath + "/download/user_file?fileId=" + fileId;
+                    return "redirect:/xform/?formId=" + formId + "&fileId=" + fileId + "&instance=" + downloadUrl
+                            + "&base_uri=" + contextPath;
+                }
+                model.addAttribute("message", "File '" + file.getName() + "' uploaded successfully");
             }
-            model.addAttribute("message", "File '" + file.getName() + "' uploaded successfully");
         }
         return welcome(model);
     }
@@ -233,6 +267,16 @@ public class PublicPageController {
         OutputStream outputStream = response.getOutputStream();
         IOUtils.write(fileContent, outputStream);
         outputStream.flush();
+    }
+
+    /**
+     * Save files attached to upload form.
+     * @param uploadForm upload form
+     */
+    private void saveFiles(UploadForm uploadForm) {
+        for (UserFile userFile : uploadForm.getUserFiles()) {
+            userFileService.save(userFile);
+        }
     }
 
     /**

@@ -34,10 +34,10 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.util.Date;
 
+import static eionet.webq.dao.FileContentUtil.getFileContentRowsCount;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertThat;
 
@@ -84,18 +84,12 @@ public class RemoveExpiredUserFilesTaskIntegrationTest {
         setFileAsExpired();
 
         assertThat(userFileService.allUploadedFiles().size(), equalTo(1));
-        assertThat(getFileContentRowsCount(), equalTo(1));
+        assertThat(getFileContentRowsCount(factory), equalTo(1));
 
         task.removeExpiredUserFiles();
 
         assertThat(userFileService.allUploadedFiles().size(), equalTo(0));
-        assertThat(getFileContentRowsCount(), equalTo(0));
-    }
-
-    private int getFileContentRowsCount() {
-        BigInteger count = (BigInteger) factory.getCurrentSession()
-                .createSQLQuery("select count(*) from file_content").uniqueResult();
-        return count.intValue();
+        assertThat(getFileContentRowsCount(factory), equalTo(0));
     }
 
     private void setFileAsExpired() {

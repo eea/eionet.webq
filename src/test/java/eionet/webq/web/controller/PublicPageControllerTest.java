@@ -21,7 +21,9 @@
 package eionet.webq.web.controller;
 
 import eionet.webq.dao.orm.ProjectFile;
+import eionet.webq.dao.orm.UploadedFile;
 import eionet.webq.dao.orm.UserFile;
+import eionet.webq.dto.UploadForm;
 import eionet.webq.service.CDREnvelopeService;
 import eionet.webq.service.RemoteFileService;
 import eionet.webq.service.UserFileService;
@@ -33,6 +35,10 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+
+import java.util.Arrays;
 
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertThat;
@@ -56,6 +62,10 @@ public class PublicPageControllerTest {
     private RemoteFileService remoteFileService;
     @Mock
     private CDREnvelopeService envelopeService;
+    @Mock
+    private BindingResult bindingResult;
+    @Mock
+    private Model model;
 
     @Before
     public void setUp() throws Exception {
@@ -126,6 +136,19 @@ public class PublicPageControllerTest {
         assertThat(response.getContentType(), equalTo("application/xhtml+html"));
         assertThat(response.getContentLength(), equalTo(testContent.length));
         assertThat(response.getContentAsByteArray(), equalTo(testContent));
+    }
+
+    @Test
+    public void whenUploadingFile_ifMultipleFilesGiven_saveThemToStorage() throws Exception {
+        UploadForm uploadForm = new UploadForm();
+        UserFile file1 = new UserFile(new UploadedFile("file1", "file1-content".getBytes()), "xmlSchema");
+        UserFile file2 = new UserFile(new UploadedFile("file2", "file2-content".getBytes()), "xmlSchema");
+        uploadForm.setUserFiles(Arrays.asList(file1, file2));
+
+        publicPageController.upload(uploadForm, bindingResult, model);
+
+        verify(userFileService).save(file1);
+        verify(userFileService).save(file2);
     }
 
     private UserFile userFileServiceWillReturnUserFileFromCdr() {

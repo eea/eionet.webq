@@ -21,6 +21,7 @@
 package eionet.webq.dao;
 
 import eionet.webq.dao.orm.UserFile;
+import org.apache.commons.lang3.ArrayUtils;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 
@@ -30,6 +31,7 @@ import java.util.Date;
 
 import static org.hibernate.criterion.Restrictions.and;
 import static org.hibernate.criterion.Restrictions.eq;
+import static org.hibernate.criterion.Restrictions.in;
 
 /**
  * {@link eionet.webq.dao.UserFileStorage} implementation.
@@ -67,10 +69,7 @@ public class UserFileStorageImpl extends AbstractDao<UserFile> implements UserFi
 
     @Override
     public void remove(final String userId, final int... ids) {
-        for (int id : ids) {
-            getCurrentSession().createQuery("delete from UserFile where id in :fileIds")
-                    .setParameter("fileIds", id).executeUpdate();
-        }
+        removeByCriterion(and(eq("userId", userId), in("id", ArrayUtils.toObject(ids))));
     }
 
     @Override
@@ -80,7 +79,7 @@ public class UserFileStorageImpl extends AbstractDao<UserFile> implements UserFi
     }
 
     @Override
-    Class<UserFile> getDtoClass() {
+    Class<UserFile> getEntityClass() {
         return UserFile.class;
     }
 }

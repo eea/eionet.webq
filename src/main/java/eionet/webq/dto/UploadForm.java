@@ -23,6 +23,7 @@ package eionet.webq.dto;
 import eionet.webq.dao.orm.UserFile;
 
 import javax.validation.Valid;
+import java.util.Collection;
 
 /**
  * Class represent xml file upload form.
@@ -32,13 +33,13 @@ public class UploadForm {
      * Uploaded file.
      */
     @Valid
-    private UserFile userFile;
+    private Collection<UserFile> userFiles;
 
-    public UserFile getUserFile() {
-        return userFile;
+    public Collection<UserFile> getUserFiles() {
+        return userFiles;
     }
 
-    public void setUserFile(UserFile file) {
-        this.userFile = file;
+    public void setUserFiles(Collection<UserFile> files) {
+        this.userFiles = files;
     }
 }

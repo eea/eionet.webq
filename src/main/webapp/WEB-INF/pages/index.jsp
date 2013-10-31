@@ -3,8 +3,9 @@
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib prefix="s" uri="http://www.springframework.org/tags" %>
 
-<h1>Web questionnaires</h1>
-<p>This tool helps you gather data for reporting obligations, using web questionnaires predefined by the EEA.<br />
+<c:set value="${requestScope.isCoordinator}" var="isCoordinator"/>
+<h1>Web Questionnaires</h1>
+<p>This tool helps gather data for reporting obligations, using web questionnaires predefined by the EEA.<br />
 Data entries are gathered in a session file(in XML format).<br />
 You can:
 <ul>
@@ -16,7 +17,14 @@ You can:
 
 <p><input type="button" value="Start new session" onclick="showStartWebformArea()"/> or <input type="button" id="uploadButton" value="Upload session file"/></p>
 <div class="container">
-    <c:url var="uploadUrl" value="/uploadXml"/>
+    <c:choose>
+        <c:when test="${isCoordinator}">
+            <c:url var="uploadUrl" value="/uploadXml"/>
+        </c:when>
+        <c:otherwise>
+            <c:url var="uploadUrl" value="/uploadXmlWithRedirect"/>
+        </c:otherwise>
+    </c:choose>
     <f:form modelAttribute="uploadForm" action="${uploadUrl}" method="POST" enctype="multipart/form-data">
         <f:errors path="*" element="div" cssClass="error-msg"/>
         <div class="col1" id="startWebformArea">
@@ -35,7 +43,7 @@ You can:
         </fieldset>
         </div>
         <div class="col2" id="uploadXmlArea">
-            <f:input id="userFile" class="hidden" type="file" path="userFile"/>
+            <f:input id="userFile" class="hidden" type="file" path="userFiles"/>
             <input id="newFileSubmit" class="hidden" type="submit" value="Upload"/>
         </div>
     </f:form>
@@ -44,7 +52,7 @@ You can:
 <div class="files">
     <h2>My session files</h2>
         <div hidden="hidden" class="important-msg" id="not-downloaded-files-present"><strong>Note</strong><p>Please download your modified files!</p></div>
-        <form method="post" action="<c:url value="/remove/files"/>">
+        <form id="actionForm" method="post" action="<c:url value="/remove/files"/>">
         <table class="datatable" style="width:100%">
             <thead>
             <tr>
@@ -60,22 +68,23 @@ You can:
                     <c:url value="/download/user_file?fileId=${file.id}" var="downloadLink"/>
                     <s:eval expression="T(eionet.webq.dao.orm.util.UserFileInfo).isNotUpdatedOrDownloadedAfterUpdateUsingForm(file)"
                         var="downloadedAfterUpdateOrNotChanged"/>
+                    <c:set var="downloadNotificationsRequired" value="${not isCoordinator and downloadedAfterUpdateOrNotChanged}"/>
                     <s:eval expression="T(org.apache.commons.io.FileUtils).byteCountToDisplaySize(file.sizeInBytes)" var="humanReadableFileSize"/>
                     <c:set var="id-prefix" value="${file.id}-"/>
                     <tr class="user_file">
                         <td>
-                            <input type="checkbox" name="selectedUserFile" value="${file.id}">
+                            <input type="checkbox" name="selectedUserFile" value="${file.id}" id="chk-${file.id}">
                         </td>
-                        <td>
+                        <td><label for="chk-${file.id}">
                             <c:choose>
-                                <c:when test="${not downloadedAfterUpdateOrNotChanged}">
+                                <c:when test="${downloadNotificationsRequired}">
                                     <strong>${file.name}</strong>
                                 </c:when>
                                 <c:otherwise>
                                     ${file.name}
                                 </c:otherwise>
                             </c:choose>
-
+                            </label>
                         </td>
                         <td>
                             File size: ${humanReadableFileSize}<br/>
@@ -94,7 +103,7 @@ You can:
                         <td>
                             <div class="action">
                                 <c:choose>
-                                    <c:when test="${not downloadedAfterUpdateOrNotChanged}">
+                                    <c:when test="${downloadNotificationsRequired}">
                                         <c:set var="updateNote" value="(NB! updated through web form)"/>
                                     </c:when>
                                     <c:otherwise>
@@ -128,7 +137,10 @@ You can:
             </c:forEach>
             </tbody>
         </table>
-        <input type="submit" value="Delete selected files"/>
+        <input type="submit" id="removeButton" value="Delete selected files"/>
+        <c:if test="${isCoordinator}">
+            <input type="button" id="mergeButton" value="Merge selected files"/>
+        </c:if>
         </form>
 </div>
 </c:if>

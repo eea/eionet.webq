@@ -23,7 +23,7 @@ package eionet.webq.web.controller;
 import eionet.webq.dao.orm.ProjectEntry;
 import eionet.webq.dao.orm.ProjectFile;
 import eionet.webq.dao.orm.ProjectFileType;
-import eionet.webq.dao.orm.util.ProjectFileInfo;
+import eionet.webq.dao.orm.util.WebQFileInfo;
 import eionet.webq.service.FileNotAvailableException;
 import eionet.webq.service.ProjectFileService;
 import eionet.webq.service.ProjectService;
@@ -182,7 +182,7 @@ public class ProjectsController {
         if (principal == null) {
             bindingResult.rejectValue("userName", "NotEmpty.projectFile.userName");
         }
-        if (ProjectFileInfo.isNew(projectFile) && ProjectFileInfo.fileIsEmpty(projectFile)) {
+        if (WebQFileInfo.isNew(projectFile) && WebQFileInfo.fileIsEmpty(projectFile.getFile())) {
             bindingResult.rejectValue("file", "project.file.null");
         }
         ProjectEntry currentProject = projectService.getByProjectId(projectFolderId);

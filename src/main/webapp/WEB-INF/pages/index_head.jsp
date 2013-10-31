@@ -25,6 +25,10 @@
         }
     }
 
+    function anyFileSelected() {
+        return $('input[name=selectedUserFile]:checked').length > 0;
+    }
+
     function showStartWebformArea() {
         $("#startWebformArea").show();
     }
@@ -33,6 +37,10 @@
         if (!$("tr.user_file").length) {
             $("div.files").hide();
         }
+    }
+
+    function disableActionButtonsIfNoFilesSelected() {
+        $("#mergeButton, #removeButton").prop('disabled', !anyFileSelected());
     }
 
     var init = function() {
@@ -45,6 +53,13 @@
         hideFilesTableIfNoFilesPresent();
         $("#startWebformArea").hide();
         showWarningIfNotAllFilesDownloaded();
+        $("#mergeButton").click(function () {
+            var actionForm = $("form#actionForm");
+            actionForm.attr("action", "<c:url value="/download/merge/files"/>");
+            actionForm.submit();
+        });
+        disableActionButtonsIfNoFilesSelected();
+        $('input[name=selectedUserFile]').change(disableActionButtonsIfNoFilesSelected);
     };
 
     $(init);

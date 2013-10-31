@@ -20,11 +20,18 @@
  */
 package eionet.webq.web.controller;
 
+import com.google.common.base.Function;
+import com.google.common.collect.Collections2;
+import com.google.common.collect.ImmutableSet;
+import eionet.webq.dao.MergeModules;
+import eionet.webq.dao.orm.MergeModule;
 import eionet.webq.dao.orm.ProjectFile;
+import eionet.webq.dao.orm.UploadedFile;
 import eionet.webq.dao.orm.UserFile;
 import eionet.webq.service.ConversionService;
 import eionet.webq.service.ProjectFileService;
 import eionet.webq.service.ProjectService;
+import eionet.webq.service.UserFileMergeService;
 import eionet.webq.service.UserFileService;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,15 +40,23 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
+import javax.xml.transform.TransformerException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Spring controller for WebQ file download.
@@ -69,6 +84,16 @@ public class FileDownloadController {
      */
     @Autowired
     private ConversionService conversionService;
+    /**
+     * Merge modules repository.
+     */
+    @Autowired
+    private MergeModules mergeModules;
+    /**
+     * User files merge service.
+     */
+    @Autowired
+    private UserFileMergeService mergeService;
 
     /**
      * Download uploaded file action.
@@ -80,8 +105,7 @@ public class FileDownloadController {
     @Transactional
     public void downloadUserFile(@RequestParam int fileId, HttpServletResponse response) {
         UserFile file = userFileService.download(fileId);
-        addXmlFileHeaders(response, file.getName());
-        writeToResponse(response, file.getContent());
+        writeXmlFileToResponse(file.getName(), file.getContent(), response);
     }
 
     /**
@@ -95,8 +119,94 @@ public class FileDownloadController {
     @Transactional
     public void downloadProjectFile(@PathVariable String projectId, @PathVariable String fileName, HttpServletResponse response) {
         ProjectFile projectFile = projectFileService.fileContentBy(fileName, projectService.getByProjectId(projectId));
-        addXmlFileHeaders(response, encodeAsUrl(fileName));
-        writeToResponse(response, projectFile.getFileContent());
+        writeXmlFileToResponse(fileName, projectFile.getFileContent(), response);
+    }
+
+    /**
+     * Allows to download merge module file.
+     *
+     * @param moduleName module name.
+     * @param response http response to write file
+     */
+    @RequestMapping("/merge/file/{moduleName:.*}")
+    @Transactional
+    public void downloadMergeFile(@PathVariable String moduleName, HttpServletResponse response) {
+        MergeModule module = mergeModules.findByFileName(moduleName);
+        UploadedFile xslFile = module.getXslFile();
+        writeXmlFileToResponse(xslFile.getName(), xslFile.getContent().getFileContent(), response);
+    }
+
+    /**
+     * Merge selected user files.
+     *
+     * @param selectedUserFile ids of user files
+     * @param mergeModule module required to merge files.
+     * @param response http response
+     * @throws TransformerException if transformation fails
+     * @throws IOException if content operations fail.
+     */
+    @RequestMapping("/merge/files")
+    @Transactional
+    public void mergeFiles(@RequestParam(required = false) List<Integer> selectedUserFile,
+                           @RequestParam(required = false) Integer mergeModule, HttpServletResponse response)
+            throws TransformerException, IOException {
+        if (selectedUserFile == null || selectedUserFile.isEmpty()) {
+            throw new IllegalArgumentException("No files selected");
+        }
+        if (selectedUserFile.size() == 1) {
+            downloadUserFile(selectedUserFile.get(0), response);
+            return;
+        }
+
+        Collection<UserFile> userFiles = Collections2.transform(selectedUserFile, new Function<Integer, UserFile>() {
+            @Override
+            public UserFile apply(Integer id) {
+                return userFileService.getById(id);
+            }
+        });
+
+        if (mergeModule != null) {
+            MergeModule module = mergeModules.findById(mergeModule);
+            mergeFiles(userFiles, module, response);
+            return;
+        }
+
+        Set<String> xmlSchemas = ImmutableSet.copyOf(Collections2.transform(userFiles, new Function<UserFile, String>() {
+            @Override
+            public String apply(UserFile userFile) {
+                return userFile.getXmlSchema();
+            }
+        }));
+
+        Collection<MergeModule> mergeModulesFound = mergeModules.findByXmlSchemas(xmlSchemas);
+        if (mergeModulesFound.size() == 1) {
+            mergeFiles(userFiles, mergeModulesFound.iterator().next(), response);
+            return;
+        }
+
+        throw new MergeModuleChoiceRequiredException(userFiles, mergeModulesFound);
+    }
+
+    /**
+     * Handler for case where automatic merge could not be performed.
+     * Such cases are:
+     * <ul>
+     *     <li>Multiple modules found</li>
+     *     <li>No modules found</li>
+     * </ul>
+     * @param e custom exception, holding modules and selected files
+     * @return model and view
+     */
+    @ExceptionHandler(MergeModuleChoiceRequiredException.class)
+    public ModelAndView mergeSelect(MergeModuleChoiceRequiredException e) {
+        Map<String, Object> model = new HashMap<String, Object>();
+        Collection<MergeModule> modules = e.getMergeModules();
+        if (modules.isEmpty()) {
+            modules = mergeModules.findAll();
+        }
+        model.put("mergeModules", modules);
+        model.put("userFiles", e.getUserFiles());
+        return new ModelAndView("merge_options", model);
     }
 
     /**
@@ -115,6 +225,33 @@ public class FileDownloadController {
         setContentType(response, headers.getContentType());
         setContentDisposition(response, headers.getFirst("Content-Disposition"));
         writeToResponse(response, convert.getBody());
+    }
+
+    /**
+     * Merge selected files.
+     *
+     * @param userFiles list of selected files ids
+     * @param mergeModule module used for merge
+     * @param response http response
+     * @throws TransformerException if transformation fails.
+     * @throws IOException if content operations fail.
+     */
+    private void mergeFiles(Collection<UserFile> userFiles,
+                            MergeModule mergeModule, HttpServletResponse response) throws TransformerException, IOException {
+        byte[] mergeResult = mergeService.mergeFiles(userFiles, mergeModule);
+        writeXmlFileToResponse("merged_files.xml", mergeResult, response);
+    }
+
+    /**
+     * Writes xml files to response.
+     *
+     * @param name file name
+     * @param content file content
+     * @param response http response
+     */
+    private void writeXmlFileToResponse(String name, byte[] content, HttpServletResponse response) {
+        addXmlFileHeaders(response, encodeAsUrl(name));
+        writeToResponse(response, content);
     }
 
     /**
@@ -183,6 +320,38 @@ public class FileDownloadController {
             throw new RuntimeException("Unable to write response", e);
         } finally {
             IOUtils.closeQuietly(output);
+        }
+    }
+
+    /**
+     * Exception indicating that merge module choice is required.
+     */
+    public static class MergeModuleChoiceRequiredException extends RuntimeException {
+        /**
+         * Selected user files.
+         */
+        private Collection<UserFile> userFiles;
+        /**
+         * Available merge modules.
+         */
+        private Collection<MergeModule> mergeModules;
+
+        /**
+         * Initializes this object with user files and modules.
+         * @param userFiles user files
+         * @param mergeModules merge modules
+         */
+        public MergeModuleChoiceRequiredException(Collection<UserFile> userFiles, Collection<MergeModule> mergeModules) {
+            this.userFiles = userFiles;
+            this.mergeModules = mergeModules;
+        }
+
+        public Collection<UserFile> getUserFiles() {
+            return userFiles;
+        }
+
+        public Collection<MergeModule> getMergeModules() {
+            return mergeModules;
         }
     }
 }

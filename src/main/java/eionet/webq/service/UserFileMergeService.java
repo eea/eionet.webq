@@ -18,37 +18,25 @@
  * Contributor(s):
  *        Anton Dmitrijev
  */
-package eionet.webq.dao.orm.util;
+package eionet.webq.service;
 
-import eionet.webq.dao.orm.ProjectFile;
+import eionet.webq.dao.orm.MergeModule;
+import eionet.webq.dao.orm.UserFile;
+
+import javax.xml.transform.TransformerException;
+import java.util.Collection;
 
 /**
- * Utility methods for {@link ProjectFile}.
+ * Service merging {@link UserFile}s using {@link MergeModule}s.
  */
-public final class ProjectFileInfo {
+public interface UserFileMergeService {
     /**
-     * No instantiation.
+     * Performs merging of {@link UserFile#getContent()}
+     * using {@link MergeModule#getXslFile()}.
+     * @param filesToMerge files to merge
+     * @param module merge module
+     * @return merged content.
+     * @throws javax.xml.transform.TransformerException if transformation fails.
      */
-    private ProjectFileInfo() {
-    }
-
-    /**
-     * Check whether this file is new.
-     *
-     * @param file file to be checked
-     * @return is new
-     */
-    public static boolean isNew(ProjectFile file) {
-        return file.getId() == 0;
-    }
-
-    /**
-     * Check whether this file has empty content.
-     *
-     * @param file file to be checked
-     * @return is empty
-     */
-    public static boolean fileIsEmpty(ProjectFile file) {
-        return file.getFileSizeInBytes() == 0;
-    }
+    byte[] mergeFiles(Collection<UserFile> filesToMerge, MergeModule module) throws TransformerException;
 }

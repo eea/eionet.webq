@@ -56,6 +56,11 @@ public class UploadedFile {
     private long sizeInBytes;
 
     /**
+     * File content type.
+     */
+    private transient String contentType;
+
+    /**
      * Shorthand for uploaded file creation.
      * File size in bytes is taken from content length.
      *
@@ -96,6 +101,14 @@ public class UploadedFile {
 
     public void setSizeInBytes(long sizeInBytes) {
         this.sizeInBytes = sizeInBytes;
+    }
+
+    public String getContentType() {
+        return contentType;
+    }
+
+    public void setContentType(String contentType) {
+        this.contentType = contentType;
     }
 
     @Override

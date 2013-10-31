@@ -26,7 +26,7 @@
     <tiles:insertAttribute name="header" />
     <div id="workarea" class="documentContent">
         <c:if test="${not empty message}">
-            <div id="message" class="system-msg">${message}</div>
+            <div id="message" class="system-msg"><c:out value="${message}" escapeXml="true"/></div>
         </c:if>
         <tiles:insertAttribute name="content" />
     </div>
