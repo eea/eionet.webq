@@ -1,5 +1,3 @@
-package eionet.webq.dto;
-
 /*
  * The contents of this file are subject to the Mozilla Public
  * License Version 1.1 (the "License"); you may not use this file
@@ -20,6 +18,7 @@ package eionet.webq.dto;
  * Contributor(s):
  *        Anton Dmitrijev
  */
+package eionet.webq.dto;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -35,26 +34,6 @@ public class Conversion {
     @XmlElement(name = "convert_id")
     private String id;
     /**
-     * Conversion output type.
-     */
-    @XmlElement(name = "content_type_out")
-    private String outputType;
-    /**
-     * Xml schema for which this conversion is valid.
-     */
-    @XmlElement(name = "xml_schema")
-    private String xmlSchema;
-    /**
-     * Xsl file name.
-     */
-    @XmlElement(name = "xsl")
-    private String xslName;
-    /**
-     * Resulting type (e.g. HTML, RDF).
-     */
-    @XmlElement(name = "result_type")
-    private String resultType;
-    /**
      * Description of this conversion.
      */
     @XmlElement(name = "description")
@@ -62,22 +41,6 @@ public class Conversion {
 
     public String getId() {
         return id;
-    }
-
-    public String getOutputType() {
-        return outputType;
-    }
-
-    public String getXmlSchema() {
-        return xmlSchema;
-    }
-
-    public String getXslName() {
-        return xslName;
-    }
-
-    public String getResultType() {
-        return resultType;
     }
 
     public String getDescription() {
