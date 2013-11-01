@@ -3,7 +3,7 @@
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib prefix="s" uri="http://www.springframework.org/tags" %>
 
-<c:set value="${requestScope.isCoordinator}" var="isCoordinator"/>
+<c:set value="${sessionScope.isCoordinator}" var="isCoordinator"/>
 <h1>Web Questionnaires</h1>
 <p>This tool helps gather data for reporting obligations, using web questionnaires predefined by the EEA.<br />
 Data entries are gathered in a session file(in XML format).<br />

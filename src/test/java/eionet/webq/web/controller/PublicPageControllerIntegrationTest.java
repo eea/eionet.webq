@@ -20,15 +20,26 @@
  */
 package eionet.webq.web.controller;
 
-import eionet.webq.dao.orm.ProjectEntry;
-import eionet.webq.dao.orm.ProjectFile;
-import eionet.webq.dao.orm.ProjectFileType;
-import eionet.webq.dao.orm.UserFile;
-import eionet.webq.dto.Conversion;
-import eionet.webq.dto.ListConversionResponse;
-import eionet.webq.service.ProjectFileService;
-import eionet.webq.service.UserFileService;
-import eionet.webq.web.AbstractContextControllerTests;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.fileUpload;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.junit.Before;
@@ -44,25 +55,15 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestOperations;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.fileUpload;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
+import eionet.webq.dao.orm.ProjectEntry;
+import eionet.webq.dao.orm.ProjectFile;
+import eionet.webq.dao.orm.ProjectFileType;
+import eionet.webq.dao.orm.UserFile;
+import eionet.webq.dto.Conversion;
+import eionet.webq.dto.ListConversionResponse;
+import eionet.webq.service.ProjectFileService;
+import eionet.webq.service.UserFileService;
+import eionet.webq.web.AbstractContextControllerTests;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @Transactional
@@ -96,7 +97,14 @@ public class PublicPageControllerIntegrationTest extends AbstractContextControll
     @Test
     public void whenHitCoordinatorPage_markSessionAsUsedByCoordinator() throws Exception {
         request(get("/coordinator"))
-                .andExpect(MockMvcResultMatchers.request().attribute("isCoordinator", true))
+                .andExpect(MockMvcResultMatchers.request().sessionAttribute("isCoordinator", true))
+                .andExpect(view().name("index"));
+    }
+
+    @Test
+    public void whenHitCoordinatorPage_markSessionAsNotUsedByCoordinator() throws Exception {
+        request(get("/sessionfiles"))
+                .andExpect(MockMvcResultMatchers.request().sessionAttribute("isCoordinator", false))
                 .andExpect(view().name("index"));
     }
 

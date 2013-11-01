@@ -20,15 +20,17 @@
  */
 package eionet.webq.web.controller;
 
-import eionet.webq.dao.orm.ProjectFile;
-import eionet.webq.dao.orm.UserFile;
-import eionet.webq.dto.UploadForm;
-import eionet.webq.dto.XmlSaveResult;
-import eionet.webq.service.CDREnvelopeService;
-import eionet.webq.service.ConversionService;
-import eionet.webq.service.FileNotAvailableException;
-import eionet.webq.service.UserFileService;
-import eionet.webq.service.WebFormService;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.Arrays;
+import java.util.Collection;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import javax.validation.Valid;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,14 +44,15 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.validation.Valid;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.Arrays;
-import java.util.Collection;
+import eionet.webq.dao.orm.ProjectFile;
+import eionet.webq.dao.orm.UserFile;
+import eionet.webq.dto.UploadForm;
+import eionet.webq.dto.XmlSaveResult;
+import eionet.webq.service.CDREnvelopeService;
+import eionet.webq.service.ConversionService;
+import eionet.webq.service.FileNotAvailableException;
+import eionet.webq.service.UserFileService;
+import eionet.webq.service.WebFormService;
 
 
 /**
@@ -106,8 +109,20 @@ public class PublicPageController {
      * @return view name
      */
     @RequestMapping(value = "/coordinator")
-    public String coordinator(Model model, HttpServletRequest request) {
-        request.setAttribute("isCoordinator", true);
+    public String coordinator(Model model, HttpSession session) {
+        session.setAttribute("isCoordinator", true);
+        return welcome(model);
+    }
+    /**
+     * Action to be performed on http GET method and path '/'.
+     *
+     * @param model holder for model attributes
+     * @param request http request
+     * @return view name
+     */
+    @RequestMapping(value = "/sessionfiles")
+    public String sessionfiles(Model model, HttpSession session) {
+        session.setAttribute("isCoordinator", false);
         return welcome(model);
     }
 
