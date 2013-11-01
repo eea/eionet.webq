@@ -146,10 +146,10 @@
         <link rel="stylesheet" type="text/css" href="http://www.eionet.europa.eu/styles/eionet2007/handheld.css" media="handheld" />
         <style type="text/css">
             #bfLoading{
-                top:200px;
+                top:155px;
             }
             #betterformMessageToaster{
-                top:200px;
+                top:155px;
             }
         </style>
     </xsl:template>
@@ -227,4 +227,34 @@
             <br/>Kgs. Nytorv 6, DK-1050 Copenhagen K, Denmark - Phone: +45 3336 7100</p>
         </div>
     </xsl:template>
+
+    <!-- Overwrite bf template for fixing inline javascript - do not escape it. -->
+    <xsl:template name="copyInlineScript">
+        <!-- copy inline javascript -->
+        <xsl:for-each select="script">
+            <script xmlns="http://www.w3.org/1999/xhtml">
+                <xsl:attribute name="type">
+                    <xsl:value-of select="@type"/>
+                </xsl:attribute>
+                <xsl:if test="exists(@src)">
+                    <xsl:attribute name="src">
+                        <xsl:value-of select="@src"/>
+                    </xsl:attribute>
+                </xsl:if>
+                <xsl:if test="exists(@defer)">
+                    <xsl:attribute name="defer">
+                        <xsl:value-of select="@defer"/>
+                    </xsl:attribute>
+                </xsl:if>
+                <xsl:if test="not(exists(@src))">
+                    <!--<xsl:text disable-output-escaping="yes">&lt;![CDATA[</xsl:text>-->
+                        <xsl:value-of select="." disable-output-escaping="yes"/>
+                    <!--<xsl:text disable-output-escaping="yes">]]&gt;</xsl:text>               -->
+                </xsl:if>
+            </script>
+                <xsl:text>
+</xsl:text>
+        </xsl:for-each>
+    </xsl:template>
+
 </xsl:stylesheet>
