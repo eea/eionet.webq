@@ -25,10 +25,10 @@
             dataType: 'text'
         })
         .done(function (data) {
-            var xmlAsTextArea = $('<textarea cols="90" rows="20" style="border:none;"/>').text(data);
+            var xmlAsTextArea = $('<textarea cols="120" rows="30" style="border:none;" readonly="readonly"/>').text(data);
             $('<div title="XSL content"/>').append(xmlAsTextArea).dialog({
-                maxHeight: 600,
-                width: 800,
+                maxHeight: 800,
+                width: 1000,
                 modal: true
             });
         });
