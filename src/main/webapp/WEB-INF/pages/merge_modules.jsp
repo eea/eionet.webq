@@ -47,7 +47,7 @@
                                 <tr>
                                     <th scope="row">Xsl file</th>
                                     <td><a href="<c:url var="downloadLink" value="/download/merge/file/${module.xslFile.name}"/>">${module.xslFile.name}</a>
-                                        <button onclick="viewXslSource('${downloadLink}');">View Source</button> </td>
+                                        <button onclick="viewFileSource('${downloadLink}');">View Source</button> </td>
                                 </tr>
                                 <tr>
                                     <th scope="row">File size</th>
