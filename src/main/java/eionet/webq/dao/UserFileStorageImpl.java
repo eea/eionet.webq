@@ -20,18 +20,19 @@
  */
 package eionet.webq.dao;
 
-import eionet.webq.dao.orm.UserFile;
-import org.apache.commons.lang3.ArrayUtils;
-import org.hibernate.criterion.Restrictions;
-import org.springframework.stereotype.Repository;
+import static org.hibernate.criterion.Restrictions.and;
+import static org.hibernate.criterion.Restrictions.eq;
+import static org.hibernate.criterion.Restrictions.in;
 
 import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.Date;
 
-import static org.hibernate.criterion.Restrictions.and;
-import static org.hibernate.criterion.Restrictions.eq;
-import static org.hibernate.criterion.Restrictions.in;
+import org.apache.commons.lang3.ArrayUtils;
+import org.hibernate.criterion.Restrictions;
+import org.springframework.stereotype.Repository;
+
+import eionet.webq.dao.orm.UserFile;
 
 /**
  * {@link eionet.webq.dao.UserFileStorage} implementation.
@@ -74,8 +75,8 @@ public class UserFileStorageImpl extends AbstractDao<UserFile> implements UserFi
 
     @Override
     public void updateDownloadTime(int userFileId) {
-        getCurrentSession().createQuery("update UserFile set downloaded=:downloaded")
-                .setTimestamp("downloaded", new Date()).executeUpdate();
+        getCurrentSession().createQuery("update UserFile set downloaded=:downloaded where id=:id")
+                .setTimestamp("downloaded", new Date()).setInteger("id", userFileId).executeUpdate();
     }
 
     @Override

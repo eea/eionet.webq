@@ -20,9 +20,16 @@
  */
 package eionet.webq.dao;
 
-import configuration.ApplicationTestContextWithMockSession;
-import eionet.webq.dao.orm.UploadedFile;
-import eionet.webq.dao.orm.UserFile;
+import static eionet.webq.dao.FileContentUtil.getFileContentRowsCount;
+import static junit.framework.TestCase.assertNotNull;
+import static org.hamcrest.core.IsEqual.equalTo;
+import static org.junit.Assert.assertThat;
+
+import java.util.Collection;
+import java.util.Iterator;
+
+import javax.validation.ConstraintViolationException;
+
 import org.hibernate.FlushMode;
 import org.hibernate.LazyInitializationException;
 import org.hibernate.Session;
@@ -36,14 +43,9 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.validation.ConstraintViolationException;
-import java.util.Collection;
-import java.util.Iterator;
-
-import static eionet.webq.dao.FileContentUtil.getFileContentRowsCount;
-import static junit.framework.TestCase.assertNotNull;
-import static org.hamcrest.core.IsEqual.equalTo;
-import static org.junit.Assert.assertThat;
+import configuration.ApplicationTestContextWithMockSession;
+import eionet.webq.dao.orm.UploadedFile;
+import eionet.webq.dao.orm.UserFile;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {ApplicationTestContextWithMockSession.class})
@@ -144,7 +146,7 @@ public class UserFileStorageImplTest {
         UserFile theOnlyFile = getFirstUploadedFileAndAssertThatItIsTheOnlyOneAvailableFor(userId);
         currentSession.evict(theOnlyFile);
 
-        theOnlyFile.getContent();//content must be not initialized
+        theOnlyFile.getContent();// content must be not initialized
     }
 
     @Test
@@ -229,7 +231,7 @@ public class UserFileStorageImplTest {
         UserFile userFile =
                 new UserFile(new UploadedFile("name", "test_content".getBytes()), "xmlSchema");
         int fileId = storage.save(userFile, userId);
-        int maxId = (Integer)sessionFactory.getCurrentSession().createQuery("SELECT MAX(id) from UserFile").uniqueResult() ;
+        int maxId = (Integer) sessionFactory.getCurrentSession().createQuery("SELECT MAX(id) from UserFile").uniqueResult();
 
         assertThat(fileId, equalTo(maxId));
     }
