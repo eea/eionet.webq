@@ -20,14 +20,15 @@
  */
 package eionet.webq.dao.orm.util;
 
-import eionet.webq.dao.orm.UserFile;
-import org.junit.Test;
-
-import java.util.Date;
-
 import static eionet.webq.dao.orm.util.UserFileInfo.isDownloadedAfterUpdate;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+
+import java.util.Date;
+
+import org.junit.Test;
+
+import eionet.webq.dao.orm.UserFile;
 
 public class UserFileInfoTest {
     private static final Date NOW = new Date();
@@ -90,6 +91,18 @@ public class UserFileInfoTest {
     public void fileNotUpdatedAndDownloaded() throws Exception {
         UserFile userFile = fileWithCreatedUpdatedDownloadedSet(NOW, NOW, ONE_MILLISECOND_AFTER_NOW);
         assertTrue(UserFileInfo.isNotUpdatedOrDownloadedAfterUpdateUsingForm(userFile));
+    }
+
+    @Test
+    public void fileNotDownloadedAfterUpdateUsingFormCreatedANdUpdateTimesEqual() throws Exception {
+        UserFile userFile = fileWithCreatedUpdatedDownloadedSet(NOW, NOW, null);
+        assertFalse(UserFileInfo.isNotDownloadedAfterUpdateUsingForm(userFile));
+    }
+
+    @Test
+    public void fileNotDownloadedAfterUpdateUsingFormCreatedLessThanUpdateAndDownloadTimeIsNull() throws Exception {
+        UserFile userFile = fileWithCreatedUpdatedDownloadedSet(ONE_MILLISECOND_BEFORE_NOW, NOW, null);
+        assertTrue(UserFileInfo.isNotDownloadedAfterUpdateUsingForm(userFile));
     }
 
     private UserFile fileWithUpdatedAndDownloadedSet(Date updated, Date downloaded) {

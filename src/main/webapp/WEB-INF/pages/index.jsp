@@ -4,18 +4,30 @@
 <%@ taglib prefix="s" uri="http://www.springframework.org/tags" %>
 
 <c:set value="${sessionScope.isCoordinator}" var="isCoordinator"/>
-<h1>Web Questionnaires</h1>
-<p>This tool helps gather data for reporting obligations, using web questionnaires predefined by the EEA.<br />
-Data entries are gathered in a session file(in XML format).<br />
-You can:
-<ul>
-    <li>start a new session, or</li>
-    <li>upload a file from a previous session to edit it.</li>
-</ul>
-</p>
-<p>Do not forget to save your file on your computer, and to do that often! The data will disappear if the session expires or if you close your browser.</p>
 
-<p><input type="button" value="Start new session" onclick="showStartWebformArea()"/> or <input type="button" id="uploadButton" value="Upload session file"/></p>
+<c:choose>
+    <c:when test="${isCoordinator}">
+        <h1>Merge session files</h1>
+        <p>This tool helps you to merge multiple XML files. Either upload XML files separately or multiple files packed into a zip archive. The zip file will be uploaded and unwrapped.<br />
+        <p><input type="button" id="uploadButton" value="Upload session file"/></p>
+    </c:when>
+    <c:otherwise>
+        <h1>Web Questionnaires</h1>
+        <p>This tool helps gather data for reporting obligations, using web questionnaires predefined by the EEA.<br />
+        Data entries are gathered in a session file(in XML format).<br />
+        You can:
+        </p>
+        <ul>
+            <li>start a new session, or</li>
+            <li>upload a file from a previous session to edit it.</li>
+        </ul>
+        <p>Do not forget to save your file on your computer, and to do that often! The data will disappear if the session expires or if you close your browser.</p>
+
+        <p><input type="button" value="Start new session" onclick="showStartWebformArea()"/> or <input type="button" id="uploadButton" value="Upload session file"/></p>
+    </c:otherwise>
+</c:choose>
+
+
 <div class="container">
     <c:choose>
         <c:when test="${isCoordinator}">
@@ -66,11 +78,11 @@ You can:
             <c:forEach items="${uploadedFiles}" var="file">
                 <c:if test="${not file.fromCdr}">
                     <c:url value="/download/user_file?fileId=${file.id}" var="downloadLink"/>
-                    <s:eval expression="T(eionet.webq.dao.orm.util.UserFileInfo).isNotUpdatedOrDownloadedAfterUpdateUsingForm(file)"
-                        var="downloadedAfterUpdateOrNotChanged"/>
-                    <c:set var="downloadNotificationsRequired" value="${not isCoordinator and downloadedAfterUpdateOrNotChanged}"/>
+                    <s:eval expression="T(eionet.webq.dao.orm.util.UserFileInfo).isNotDownloadedAfterUpdateUsingForm(file)"
+                        var="notDownloadedAfterUpdate"/>
+                    <c:set var="downloadNotificationsRequired" value="${not isCoordinator and notDownloadedAfterUpdate}"/>
                     <s:eval expression="T(org.apache.commons.io.FileUtils).byteCountToDisplaySize(file.sizeInBytes)" var="humanReadableFileSize"/>
-                    <c:set var="id-prefix" value="${file.id}-"/>
+                    <c:set var="idPrefix" value="${file.id}-"/>
                     <tr class="user_file">
                         <td>
                             <input type="checkbox" name="selectedUserFile" value="${file.id}" id="chk-${file.id}">
@@ -90,7 +102,7 @@ You can:
                             File size: ${humanReadableFileSize}<br/>
                             Created: <fmt:formatDate pattern="dd MMM yyyy HH:mm:ss" value="${file.created}" /><br/>
                             Updated:  <fmt:formatDate pattern="dd MMM yyyy HH:mm:ss" value="${file.updated}" /><br/>
-                            Downloaded:  <span id="${id-prefix}downloaded"><c:choose>
+                            Downloaded:  <span id="${idPrefix}downloaded"><c:choose>
                             <c:when test="${not empty file.downloaded}">
                                 <fmt:formatDate pattern="dd MMM yyyy HH:mm:ss" value="${file.downloaded}" />
                             </c:when>
@@ -110,14 +122,15 @@ You can:
                                         <c:set var="updateNote" value=""/>
                                     </c:otherwise>
                                 </c:choose>
-                            <a href="${downloadLink}" onclick="hideNotDownloadedNote('${id-prefix}');" title="Download file">Download
+                            <a href="${downloadLink}" onclick="hideNotDownloadedNote('${idPrefix}');" title="Download file">Download
                                 <c:if test="${not empty updateNote}">
-                                    <span id="${id-prefix}not-downloaded" class="not-downloaded" style="color:red;text-decoration:none"> ${updateNote}</span></a>
+                                    <span id="${idPrefix}not-downloaded" class="not-downloaded" style="color:red;text-decoration:none"> ${updateNote}</span>
                                 </c:if>
+                            </a>
                             </div>
                             <c:forEach var="webForm" items="${allWebForms}">
                                 <c:if test="${file.xmlSchema eq webForm.xmlSchema}">
-                                    <div class="action"><strong><a href="<c:url value="/xform/?formId=${webForm.id}&instance=${downloadLink}&amp;fileId=${file.id}&amp;base_uri=${pageContext.request.contextPath}"/>">Edit
+                                    <div class="action"><strong><a href="<c:url value="/xform/?formId=${webForm.id}&amp;instance=${downloadLink}&amp;fileId=${file.id}&amp;base_uri=${pageContext.request.contextPath}"/>">Edit
                                         with '${webForm.title}' web form</a></strong></div>
                                 </c:if>
                             </c:forEach>
@@ -126,7 +139,7 @@ You can:
                                 View file as:
                                 <ul>
                                 <c:forEach items="${file.availableConversions}" var="conversion">
-                                    <li><a href="<c:url value="/download/convert?fileId=${file.id}&conversionId=${conversion.id}"/>">${conversion.description}</a></li>
+                                    <li><a href="<c:url value="/download/convert?fileId=${file.id}&amp;conversionId=${conversion.id}"/>">${conversion.description}</a></li>
                                 </c:forEach>
                                 </ul>
                             </div>

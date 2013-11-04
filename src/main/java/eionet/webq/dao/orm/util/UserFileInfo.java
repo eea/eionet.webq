@@ -20,9 +20,9 @@
  */
 package eionet.webq.dao.orm.util;
 
-import eionet.webq.dao.orm.UserFile;
-
 import java.util.Date;
+
+import eionet.webq.dao.orm.UserFile;
 
 /**
  * Provides utility methods for {@link eionet.webq.dao.orm.UserFile}.
@@ -41,13 +41,23 @@ public final class UserFileInfo {
     }
 
     /**
-     * Checks whether this file was downloaded after change using form.
+     * Checks whether this file was downloaded or updated after change using form.
      *
      * @param userFile file
      * @return is downloaded after update using form.
      */
     public static boolean isNotUpdatedOrDownloadedAfterUpdateUsingForm(UserFile userFile) {
         return notUpdated(userFile) || (isUpdatedAfterUpload(userFile) && isDownloadedAfterUpdate(userFile));
+    }
+
+    /**
+     * Checks whether this file was downloaded after change using form.
+     *
+     * @param userFile file
+     * @return is downloaded after update using form.
+     */
+    public static boolean isNotDownloadedAfterUpdateUsingForm(UserFile userFile) {
+        return isUpdatedAfterUpload(userFile) && !isDownloadedAfterUpdate(userFile);
     }
 
     /**
