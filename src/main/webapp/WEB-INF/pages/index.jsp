@@ -14,7 +14,7 @@
     <c:otherwise>
         <h1>Web Questionnaires</h1>
         <p>This tool helps gather data for reporting obligations, using web questionnaires predefined by the EEA.<br />
-        Data entries are gathered in a session file(in XML format).<br />
+        Data entries are gathered in a session file (in XML format).<br />
         You can:
         </p>
         <ul>
@@ -85,7 +85,7 @@
                     <c:set var="idPrefix" value="${file.id}-"/>
                     <tr class="user_file">
                         <td>
-                            <input type="checkbox" name="selectedUserFile" value="${file.id}" id="chk-${file.id}">
+                            <input type="checkbox" name="selectedUserFile" value="${file.id}" id="chk-${file.id}"/>
                         </td>
                         <td><label for="chk-${file.id}">
                             <c:choose>
@@ -101,8 +101,8 @@
                         <td>
                             File size: ${humanReadableFileSize}<br/>
                             Created: <fmt:formatDate pattern="dd MMM yyyy HH:mm:ss" value="${file.created}" /><br/>
-                            Updated:  <fmt:formatDate pattern="dd MMM yyyy HH:mm:ss" value="${file.updated}" /><br/>
-                            Downloaded:  <span id="${idPrefix}downloaded"><c:choose>
+                            Updated: <fmt:formatDate pattern="dd MMM yyyy HH:mm:ss" value="${file.updated}" /><br/>
+                            Downloaded: <span id="${idPrefix}downloaded"><c:choose>
                             <c:when test="${not empty file.downloaded}">
                                 <fmt:formatDate pattern="dd MMM yyyy HH:mm:ss" value="${file.downloaded}" />
                             </c:when>
