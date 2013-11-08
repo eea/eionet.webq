@@ -52,6 +52,9 @@
             .red{
                 color:red;
                 }
+            .red .xfValue{
+                color:red;
+                }
             .bold label{
                 font-weight: bold;
                 padding-right:5px;
@@ -116,6 +119,17 @@
             .xfRepeatIndex{
                 background-color: #e4f1bc;
             }
+            #rConversions .xfRepeatIndex{
+                background-color: #FFFFFF;
+            }
+
+            /*
+            .xfInvalid > .widgetContainer > input, .xfInvalid > .widgetContainer > select{
+                background-color:#A42322;
+                color: white;
+                font-style: italic;
+            }
+            */
         </style>
         <xf:model id="main-model">
             <!-- ##########            DEFAULT instance          ############-->
@@ -141,6 +155,7 @@
                 <xf:message level="modal" ev:event="xforms-submit-done" ref="instance('context')/save_message"/>
                 -->
                 <xf:dispatch targetid="main-model" name="reset-content-modified" ev:event="xforms-submit-done" />
+                <xf:message level="ephemeral" ev:event="xforms-submit-done" bind="b-saveresult-message"/>
 
                 <xf:action ev:event="xforms-submit-error">
                     <xf:setvalue ref="instance('saveresult')/code" value="0"/>
@@ -158,6 +173,7 @@
                     <timestamp desc="Result time"/>
                 </saveresult>
             </xf:instance>
+
             <!-- bindings for save result -->
             <xf:bind id="b-saveresult-message" nodeset="instance('context')/save_message" relevant="instance('saveresult')/code &gt; -1" calculate="concat(instance('saveresult')/message, ' (', translate(substring-before(instance('saveresult')/timestamp, '.'),'T',' '), ')')"/>
             <xf:bind id="b-saveresult-message-ok" nodeset="instance('context')/save_message_ok" relevant="instance('saveresult')/code = 1" calculate="../save_message"/>
@@ -165,7 +181,7 @@
 
             <!-- ##########            DEFAULT instance BINDINGS          ############-->
             <!--xf:bind id="b-lang" nodeset="/derogations/@xml:lang" required="true()"/-->
-            <xf:bind id="b-country" nodeset="/derogations/@country" required="true()"/>
+            <xf:bind id="b-country" nodeset="/derogations/@country" required="true()" constraint="string-length(.) &gt; 0"/>
             <xf:bind id="b-directive" nodeset="derogation/@directive" required="true()"/>
             <xf:bind id="b-licensingAuthority" nodeset="derogation/licensingAuthority" required="true()"/>
             <xf:bind id="b-validFrom" type="xs:date" nodeset="derogation/licenseValidFrom" required="true()" constraint="string-length(.)=0 or string-length(../licenseValidUntil)=0 or number(replace(., '-', '')) - number(replace(../licenseValidUntil, '-', '')) &lt; 0"/>
@@ -231,7 +247,7 @@
                     <speciesDeleteButton/>
                 </data>
             </xf:instance>
-            <xf:bind id="b-user" nodeset="instance('context')/user" required="true()"/>
+            <xf:bind id="b-user" nodeset="instance('context')/user" required="true()"  constraint="string-length(.) &gt; 0"/>
             <xf:bind nodeset="instance('context')/trigger-switch" readonly="false()"/>
 
             <!-- ##########           HELPER   BINDINGS          ############-->
@@ -411,7 +427,6 @@
                 <h2>List of derogations</h2>
         <!-- ##################################         DEROGATIONS LIST           ############################################-->
         <xf:group>
-            <xf:dispatch targetid="main-model" name="set-content-modified" ev:event="xforms-value-changed" />
             <xf:repeat id="rDerogList" nodeset="derogation" appearance="compact" class="datatable">
                 <xf:output ref="@derogation_reference">
                     <xf:label class="bold">Derogation Reference</xf:label>
@@ -437,14 +452,33 @@
                 <xf:trigger appearance="minimal" bind="b-derogDeleteButton">
                     <xf:label>Delete</xf:label>
                     <xf:hint>Deletes selected derogation from report</xf:hint>
-                    <xf:dispatch targetid="main-model" name="my-reset-all"
-                        if="count(instance('default')/derogation) = 1 and instance('default')/derogation[1]/@derogation_reference != ''"/>
-                    <xf:delete ref="instance('default')/derogation" at="index('rDerogList')" if="count(instance('default')/derogation) > 1"/>
-                    <xf:dispatch targetid="main-model" name="set-content-modified"/>
+                    <bfc:show dialog="deleteDerogationConfirmationDialog" ev:event="DOMActivate"/>
                 </xf:trigger>
 
             </xf:repeat>
         </xf:group>
+
+        <bfc:dialog id="deleteDerogationConfirmationDialog">
+            <xf:label>Delete derogation report?</xf:label>
+            <xf:group appearance="minimal">
+                <p>Are you sure you want to delete the derogation report with reference <xf:output class="red" value="instance('default')/derogation[index('rDerogList')]/@derogation_reference"/>?</p>
+                <div class="section">
+                <xf:trigger>
+                    <xf:label>Delete</xf:label>
+                    <xf:dispatch targetid="main-model" name="my-reset-all"
+                        if="count(instance('default')/derogation) = 1 and instance('default')/derogation[1]/@derogation_reference != ''"/>
+                    <xf:delete ref="instance('default')/derogation" at="index('rDerogList')" if="count(instance('default')/derogation) > 1"/>
+                    <xf:dispatch targetid="main-model" name="set-content-modified"/>
+                    <bfc:hide dialog="deleteDerogationConfirmationDialog" ev:event="DOMActivate"></bfc:hide>
+                </xf:trigger>
+                <xf:trigger>
+                    <xf:label>Cancel</xf:label>
+                    <bfc:hide dialog="deleteDerogationConfirmationDialog" ev:event="DOMActivate"></bfc:hide>
+                </xf:trigger>
+                </div>
+            </xf:group>
+        </bfc:dialog>
+
         <div class="section section-buttons">
             <xf:group>
                 <xf:trigger>
@@ -454,6 +488,7 @@
                         <xf:insert nodeset="/derogations/derogation" at="last()" position="after" origin="instance('emptyinstance')/derogation"
                             if="count(instance('default')/derogation)&gt;1 or instance('default')/derogation[1]/@derogation_reference!=''"/>
                         <xf:dispatch targetid="main-model" name="my-insert"/>
+                        <xf:dispatch targetid="main-model" name="set-content-modified" ev:event="xforms-value-changed" />
                     </xf:action>
                 </xf:trigger>
                 <xf:trigger>
@@ -463,15 +498,107 @@
                         <xf:insert nodeset="instance('default')/derogation" at="last()" position="after" origin="instance('emptyinstance')/derogation"
                             if="count(instance('default')/derogation)&gt;1 or instance('default')/derogation[1]/@derogation_reference!=''"/>
                         <xf:dispatch targetid="main-model" name="my-insert"/>
+                        <xf:dispatch targetid="main-model" name="set-content-modified" ev:event="xforms-value-changed" />
                     </xf:action>
                 </xf:trigger>
 
             </xf:group>
         </div>
         </div>
+        <div style="color:red;margin-top:5px;">
+            <xf:output value="if (instance('context')/contentModified = 1) then 'NOTE: there are unsaved changes! Remember to save this session.' else '' "/>
+        </div>
+
+        <!-- ##################################          LOCAL file info & BUTTONS            ############################################-->
+        <xf:model id="fileinfo-model">
+            <!-- session file metadata -->
+            <xf:instance xmlns="" id="fileinfo" src="{$base_uri}/file/info?fileId={$fileId}"/>
+            <!-- reload session file metadata -->
+            <xf:submission id="reload-fileinfo" action="{$base_uri}/file/info?fileId={$fileId}" method="get" replace="instance" encoding="UTF-8" instance="fileinfo" validate="false"/>
+            <!-- delete session file from database -->
+            <xf:submission id="deleteXml" action="{$base_uri}{ instance('fileinfo')/deleteLink }" method="get" replace="none" validate="false"/>
+
+            <xf:instance id="fileinfo-helper" xmlns="">
+                <data>
+                    <local/>
+                    <remote/>
+                    <contentModified/>
+                </data>
+            </xf:instance>
+            <xf:bind id="b-local-file" nodeset="instance('fileinfo-helper')/local" relevant="instance('fileinfo')/isLocalFile = 'true'"/>
+            <xf:bind id="b-remote-file" nodeset="instance('fileinfo-helper')/remote" relevant="instance('fileinfo')/isLocalFile = 'false'"/>
+            <xf:action ev:event="update-fileinfo-content-modified">
+                <xf:setvalue ref="bf:instanceOfModel('fileinfo-model', 'fileinfo-helper')/contentModified" value="bf:instanceOfModel('main-model', 'context')/contentModified"/>
+                <xf:refresh />
+            </xf:action>
+        </xf:model>
+
+        <xf:group model="fileinfo-model" bind="b-local-file">
+            <h2>Session file overview</h2>
+            <table class="datatable">
+                <tr>
+                    <th scope="col">View file as</th>
+                    <td>
+                        <xf:repeat nodeset="instance('fileinfo')/conversion" id="rConversions">
+                            <xf:trigger id="showConversion" appearance="minimal">
+                                <xf:label ref="description"/>
+                                <xf:hint>The conversion opens in a new window.</xf:hint>
+                                <xf:load resource="{$base_uri}{ instance('fileinfo')/conversionLink }{ instance('fileinfo')/conversion[index('rConversions')]/convert_id }" show="new"/>
+                            </xf:trigger>
+                        </xf:repeat>
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="col">File size</th>
+                    <td><xf:output ref="instance('fileinfo')/fileSize"/></td>
+                </tr>
+                <tr>
+                    <th scope="col">Created</th>
+                    <td><xf:output value="instance('fileinfo')/created"/></td>
+                </tr>
+                <tr>
+                    <th scope="col">Updated</th>
+                    <td><xf:output value="instance('fileinfo')/updated"/></td>
+                </tr>
+                <tr>
+                    <th scope="col">Downloaded</th>
+                    <td><xf:output value="instance('fileinfo')/downloaded"/></td>
+                </tr>
+            </table>
+
+        <!-- ##################################   LOCAL FILE BUTTONS            ############################################-->
         <div class="section bottom-buttons">
-        <!-- ##################################          BUTTONS            ############################################-->
-        <xf:group appearance="minimal">
+            <xf:group appearance="minimal">
+                <xf:trigger id="tr_savelocal">
+                    <xf:label>Save to disk</xf:label>
+                    <xf:hint>Saves the current status of the data to local computer.</xf:hint>
+                    <xf:action ev:event="DOMActivate">
+                        <xf:send submission="savexml" name="xforms-submit"/>
+                        <xf:load resource="{$base_uri}{ instance('fileinfo')/downloadLink }" show="new"/>
+                        <xf:send submission="reload-fileinfo" name="xforms-submit"/>
+                        <!--  TODO replace fileinfo instance -->
+                    </xf:action>
+                </xf:trigger>
+                <xf:trigger id="tr_delete_file">
+                    <xf:label>Delete</xf:label>
+                    <xf:hint>Delete session file.</xf:hint>
+                    <bfc:show dialog="closeFileDeleteConfirmationDialog" ev:event="DOMActivate"/>
+                </xf:trigger>
+                <xf:trigger id="tr_close_localfile">
+                    <xf:label>Close</xf:label>
+                    <xf:hint>Go back to WebQ front page.</xf:hint>
+                    <xf:dispatch targetid="fileinfo-model" name="update-fileinfo-content-modified"/>
+                    <bfc:show dialog="closeConfirmationDialog" ev:event="DOMActivate" if="instance('fileinfo-helper')/contentModified=1"/>
+                    <xf:load resource="{$base_uri}" show="replace" if="instance('fileinfo-helper')/contentModified=0"/>
+                </xf:trigger>
+            </xf:group>
+        </div>
+
+        </xf:group>
+        <!-- ##################################   CDR BUTTONS            ############################################-->
+        <!--  buttons for CDR -->
+        <xf:group model="fileinfo-model" bind="b-remote-file">
+          <div class="section bottom-buttons">
             <xf:trigger id="tr_savedraft">
                 <xf:label>Save</xf:label>
                 <xf:hint>Saves the current status of the data into XML file, without moving away from the web form</xf:hint>
@@ -490,13 +617,30 @@
             <xf:trigger id="tr_close">
                 <xf:label>Close</xf:label>
                 <xf:hint>Go back to WebQ front page.</xf:hint>
-                <bfc:show dialog="closeConfirmationDialog" ev:event="DOMActivate" if="instance('context')/contentModified=1"/>
-                <xf:load resource="{$base_uri}" show="replace" if="instance('context')/contentModified=0"/>
+                <xf:dispatch targetid="fileinfo-model" name="update-fileinfo-content-modified"/>
+                <bfc:show dialog="closeConfirmationDialog" ev:event="DOMActivate" if="instance('fileinfo-helper')/contentModified=1"/>
+                <xf:load resource="{$base_uri}" show="replace" if="instance('fileinfo-helper')/contentModified=0"/>
             </xf:trigger>
+          </div>
         </xf:group>
-        </div>
-
-        <bfc:dialog id="closeConfirmationDialog">
+            <bfc:dialog id="closeFileDeleteConfirmationDialog">
+                <xf:label>Delete file?</xf:label>
+                <xf:group appearance="minimal">
+                    <p>You are deleting the session file. All inserted data will be lost.</p>
+                    <div class="section">
+                    <xf:trigger>
+                        <xf:label>Delete file</xf:label>
+                        <xf:send submission="deleteXml" name="xforms-submit"/>
+                        <xf:load resource="{$base_uri}" show="replace"/>
+                    </xf:trigger>
+                    <xf:trigger>
+                        <xf:label>Cancel</xf:label>
+                        <bfc:hide dialog="closeFileDeleteConfirmationDialog" ev:event="DOMActivate"></bfc:hide>
+                    </xf:trigger>
+                    </div>
+                </xf:group>
+            </bfc:dialog>
+            <bfc:dialog id="closeConfirmationDialog">
             <xf:label>The content is modified!</xf:label>
             <xf:group appearance="minimal">
                 <p>You have unsaved modifications on the form.</p>
@@ -513,7 +657,9 @@
                 </div>
             </xf:group>
         </bfc:dialog>
-        </xf:case>
+
+
+       </xf:case>
 
  <!-- ##################################         EDIT           ############################################-->
         <xf:case id="case-edit">
@@ -679,11 +825,13 @@
     </xf:switch>
 </xf:group>
 </div>
-
-        <xf:output ref="instance('context')/contentModified"><xf:label>Content modified: </xf:label></xf:output>
+<!--  Debugging area  -->
+<div style="display:none">
         <xf:output value="instance('context')/derogIndex"/>
         <xf:output value="instance('context')/tblSpeciesFilled"/>
         <xf:output value="count(if (instance('context')/derogIndex castable as xs:integer) then instance('default')/derogation[number(instance('context')/derogIndex)]/species else 1)"/>
+        <xf:output ref="instance('context')/contentModified"><xf:label>Content modified: </xf:label></xf:output>
+</div>
         </div>
     </body>
 </html>
