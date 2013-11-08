@@ -66,16 +66,16 @@ public class FileInfo {
     private boolean isLocalFile;
 
     /** Path to download file. */
-    private final static String FILE_DOWNLOAD_LINK = "/download/user_file?fileId=";
+    private static final String FILE_DOWNLOAD_LINK = "/download/user_file?fileId=";
 
     /** Path to convert file. */
-    private final static String FILE_CONVERSION_LINK = "/download/convert?fileId=";
+    private static final String FILE_CONVERSION_LINK = "/download/convert?fileId=";
 
     /** Path to delete file. */
-    private final static String FILE_DELETE_LINK = "/remove/files?selectedUserFile=";
+    private static final String FILE_DELETE_LINK = "/remove/files?selectedUserFile=";
 
     /** Default date format used when formatting user-friendly dates. */
-    private final static String USERFRIENDLY_DATE_FORMAT = "dd MMM yyyy HH:mm:ss";
+    private static final String USERFRIENDLY_DATE_FORMAT = "dd MMM yyyy HH:mm:ss";
 
     /**
      * No-arg default constructor required by {@link org.springframework.oxm.jaxb.Jaxb2Marshaller}.

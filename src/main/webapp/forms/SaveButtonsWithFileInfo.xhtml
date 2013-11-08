@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<div xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:xf="http://www.w3.org/2002/xforms"
+      xmlns:ev="http://www.w3.org/2001/xml-events"
+      xmlns:bf="http://betterform.sourceforge.net/xforms"
+      xmlns:bfc="http://betterform.sourceforge.net/xforms/controls">
+<!--
+The subform can be used in the footer of main form and it provides the buttons for file actions.
+The form detects if the instance file is stored locally in WebQ or is it fetched remotely from CDR.
+
+If it is a local file, then the session file metadata with links to conversions and "Save to disk" and "Delete buttons" are displayed.
+If it is a file from CDR, then Save, Save & Close and Cancel buttons are displayed.
+
+This subform can be embedded in parent XForm like this:
+
+ 1. Add load action into xforms-ready event:
+
+     <xf:load show="embed" targetid="footerButtonsWithFileInfo" resource="{$base_uri}/download/project/common/file/SaveButtonsWithFileInfo.xhtml">
+         <xf:extension includeCSS="true" includeScript="true"></xf:extension>
+     </xf:load>
+
+ 2. Add container for the subform to be filled with load event.
+     <div id="footerButtonsWithFileInfo"></div>
+
+  -->
+
+
+        <!-- ##################################          LOCAL file info & BUTTONS            ############################################-->
+        <xf:model id="fileinfo-model">
+            <!-- session file metadata -->
+            <xf:instance xmlns="" id="fileinfo" src="{$base_uri}/file/info?fileId={$fileId}"/>
+            <!-- reload session file metadata -->
+            <xf:submission id="reload-fileinfo" action="{$base_uri}/file/info?fileId={$fileId}" method="get" replace="instance" encoding="UTF-8" instance="fileinfo" validate="false"/>
+            <!-- delete session file from database -->
+            <xf:submission id="deleteXml" action="{$base_uri}{ instance('fileinfo')/deleteLink }" method="get" replace="none" validate="false"/>
+
+            <xf:instance id="fileinfo-helper" xmlns="">
+                <data>
+                    <local/>
+                    <remote/>
+                    <contentModified/>
+                </data>
+            </xf:instance>
+            <xf:bind id="b-local-file" nodeset="instance('fileinfo-helper')/local" relevant="instance('fileinfo')/isLocalFile = 'true'"/>
+            <xf:bind id="b-remote-file" nodeset="instance('fileinfo-helper')/remote" relevant="instance('fileinfo')/isLocalFile = 'false'"/>
+            <xf:action ev:event="update-fileinfo-content-modified">
+                <xf:setvalue ref="bf:instanceOfModel('fileinfo-model', 'fileinfo-helper')/contentModified" value="bf:instanceOfModel('main-model', 'context')/contentModified"/>
+                <xf:refresh />
+            </xf:action>
+        </xf:model>
+
+        <xf:group model="fileinfo-model" bind="b-local-file">
+            <h2>Session file overview</h2>
+            <table class="datatable">
+                <tr>
+                    <th scope="col">View file as</th>
+                    <td>
+                        <xf:repeat nodeset="instance('fileinfo')/conversion" id="rConversions">
+                            <xf:trigger id="showConversion" appearance="minimal">
+                                <xf:label ref="description"/>
+                                <xf:hint>The conversion opens in a new window.</xf:hint>
+                                <xf:load resource="{$base_uri}{ instance('fileinfo')/conversionLink }{ instance('fileinfo')/conversion[index('rConversions')]/convert_id }" show="new"/>
+                            </xf:trigger>
+                        </xf:repeat>
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="col">File size</th>
+                    <td><xf:output ref="instance('fileinfo')/fileSize"/></td>
+                </tr>
+                <tr>
+                    <th scope="col">Created</th>
+                    <td><xf:output value="instance('fileinfo')/created"/></td>
+                </tr>
+                <tr>
+                    <th scope="col">Updated</th>
+                    <td><xf:output value="instance('fileinfo')/updated"/></td>
+                </tr>
+                <tr>
+                    <th scope="col">Downloaded</th>
+                    <td><xf:output value="instance('fileinfo')/downloaded"/></td>
+                </tr>
+            </table>
+
+        <!-- ##################################   LOCAL FILE BUTTONS            ############################################-->
+        <div class="section bottom-buttons">
+            <xf:group appearance="minimal">
+                <xf:trigger id="tr_savelocal">
+                    <xf:label>Save to disk</xf:label>
+                    <xf:hint>Saves the current status of the data to local computer.</xf:hint>
+                    <xf:action ev:event="DOMActivate">
+                        <xf:send submission="savexml" name="xforms-submit"/>
+                        <xf:load resource="{$base_uri}{ instance('fileinfo')/downloadLink }" show="new"/>
+                        <xf:send submission="reload-fileinfo" name="xforms-submit"/>
+                        <!--  TODO replace fileinfo instance -->
+                    </xf:action>
+                </xf:trigger>
+                <xf:trigger id="tr_delete_file">
+                    <xf:label>Delete</xf:label>
+                    <xf:hint>Delete session file.</xf:hint>
+                    <bfc:show dialog="closeFileDeleteConfirmationDialog" ev:event="DOMActivate"/>
+                </xf:trigger>
+                <xf:trigger id="tr_close_localfile">
+                    <xf:label>Close</xf:label>
+                    <xf:hint>Go back to WebQ front page.</xf:hint>
+                    <xf:dispatch targetid="fileinfo-model" name="update-fileinfo-content-modified"/>
+                    <bfc:show dialog="closeConfirmationDialog" ev:event="DOMActivate" if="instance('fileinfo-helper')/contentModified=1"/>
+                    <xf:load resource="{$base_uri}" show="replace" if="instance('fileinfo-helper')/contentModified=0"/>
+                </xf:trigger>
+            </xf:group>
+        </div>
+
+        </xf:group>
+        <!-- ##################################   CDR BUTTONS            ############################################-->
+        <!--  buttons for CDR -->
+        <xf:group model="fileinfo-model" bind="b-remote-file">
+          <div class="section bottom-buttons">
+            <xf:trigger id="tr_savedraft">
+                <xf:label>Save</xf:label>
+                <xf:hint>Saves the current status of the data into XML file, without moving away from the web form</xf:hint>
+                <xf:action ev:event="DOMActivate">
+                    <xf:send submission="savexml" name="xforms-submit"/>
+                </xf:action>
+            </xf:trigger>
+            <xf:trigger id="tr_finish">
+                <xf:label>Save &amp; Close</xf:label>
+                <xf:hint>Saves the changes into XML file and opens the front page of WebQ</xf:hint>
+                <xf:action ev:event="DOMActivate">
+                    <xf:send submission="savexml" name="xforms-submit"/>
+                    <xf:load ev:event="xforms-submit-done" resource="{$base_uri}" show="replace" if="instance('saveresult')/code=1"/>
+                </xf:action>
+            </xf:trigger>
+            <xf:trigger id="tr_close">
+                <xf:label>Close</xf:label>
+                <xf:hint>Go back to WebQ front page.</xf:hint>
+                <xf:dispatch targetid="fileinfo-model" name="update-fileinfo-content-modified"/>
+                <bfc:show dialog="closeConfirmationDialog" ev:event="DOMActivate" if="instance('fileinfo-helper')/contentModified=1"/>
+                <xf:load resource="{$base_uri}" show="replace" if="instance('fileinfo-helper')/contentModified=0"/>
+            </xf:trigger>
+          </div>
+        </xf:group>
+            <bfc:dialog id="closeFileDeleteConfirmationDialog">
+                <xf:label>Delete file?</xf:label>
+                <xf:group appearance="minimal">
+                    <p>You are deleting the session file. All inserted data will be lost.</p>
+                    <div class="section">
+                    <xf:trigger>
+                        <xf:label>Delete file</xf:label>
+                        <xf:send submission="deleteXml" name="xforms-submit"/>
+                        <xf:load resource="{$base_uri}" show="replace"/>
+                    </xf:trigger>
+                    <xf:trigger>
+                        <xf:label>Cancel</xf:label>
+                        <bfc:hide dialog="closeFileDeleteConfirmationDialog" ev:event="DOMActivate"></bfc:hide>
+                    </xf:trigger>
+                    </div>
+                </xf:group>
+            </bfc:dialog>
+            <bfc:dialog id="closeConfirmationDialog">
+            <xf:label>The content is modified!</xf:label>
+            <xf:group appearance="minimal">
+                <p>You have unsaved modifications on the form.</p>
+                <p>Cancel and Save your content if you want to store the modifications, otherwise continue with Close button.</p>
+                <div class="section">
+                <xf:trigger>
+                    <xf:label>Cancel closing</xf:label>
+                    <bfc:hide dialog="closeConfirmationDialog" ev:event="DOMActivate"></bfc:hide>
+                </xf:trigger>
+                <xf:trigger>
+                    <xf:label>Close without saving</xf:label>
+                    <xf:load resource="{$base_uri}" show="replace"/>
+                </xf:trigger>
+                </div>
+            </xf:group>
+        </bfc:dialog>
+</div>
