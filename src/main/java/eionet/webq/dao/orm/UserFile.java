@@ -20,8 +20,8 @@
  */
 package eionet.webq.dao.orm;
 
-import eionet.webq.dto.Conversion;
-import org.hibernate.validator.constraints.NotEmpty;
+import java.util.Collection;
+import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Embedded;
@@ -33,8 +33,10 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Transient;
-import java.util.Collection;
-import java.util.Date;
+
+import org.hibernate.validator.constraints.NotEmpty;
+
+import eionet.webq.dto.Conversion;
 
 /**
  * Data transfer object to pass uploaded file data across application.
@@ -60,6 +62,7 @@ public class UserFile {
     private UploadedFile file = new UploadedFile();
     /**
      * Xml schema name extracted during conversion.
+     *
      * @see eionet.webq.converter.MultipartFileToUserFileConverter
      */
     @NotEmpty
@@ -136,7 +139,7 @@ public class UserFile {
     }
 
     /**
-     * Empty constructor for instantiation by reflexion.
+     * Empty constructor for instantiation by reflection.
      */
     public UserFile() {
     }
@@ -152,6 +155,7 @@ public class UserFile {
     public String getName() {
         return file.getName();
     }
+
     /**
      * Set file name for embedded {@link UploadedFile}.
      *
@@ -173,6 +177,7 @@ public class UserFile {
         }
         return content.getFileContent();
     }
+
     /**
      * Set file content for embedded {@link UploadedFile}.
      *

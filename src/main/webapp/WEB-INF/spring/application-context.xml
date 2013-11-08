@@ -84,6 +84,7 @@
             <list>
                 <value>eionet.webq.dto.XmlSaveResult</value>
                 <value>eionet.webq.dto.ListConversionResponse</value>
+                <value>eionet.webq.dto.FileInfo</value>
             </list>
         </property>
     </bean>

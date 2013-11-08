@@ -39,11 +39,21 @@ public class Conversion {
     @XmlElement(name = "description")
     private String description;
 
+    /**
+     * Conversion result type (HTML, TXT, ...).
+     */
+    @XmlElement(name = "result_type")
+    private String resultType;
+
     public String getId() {
         return id;
     }
 
     public String getDescription() {
         return description;
+    }
+
+    public String getResultType() {
+        return resultType;
     }
 }
