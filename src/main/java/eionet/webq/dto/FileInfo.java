@@ -21,7 +21,6 @@
 
 package eionet.webq.dto;
 
-import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
 
@@ -29,27 +28,16 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.time.DateFormatUtils;
 
 /**
- * Object for transferring {@link eionet.webq.dao.orm.UserFile} public data and related conversions into XML format for XForms.
- * The returned object contains also user-friendly formatted dates and links to download, delete and convert the file.
+ * Object for transferring {@link eionet.webq.dao.orm.UserFile} public data and related conversions into XML format for XForms. The
+ * returned object contains also user-friendly formatted dates and links to download, delete and convert the file.
  *
  * @author Enriko Käsper
  */
 @XmlRootElement(name = "fileinfo")
 public class FileInfo {
-
-    /** Path to download file. */
-    private final static String FILE_DOWNLOAD_LINK = "/download/user_file?fileId=";
-
-    /** Path to convert file. */
-    private final static String FILE_CONVERSION_LINK = "/download/convert?fileId=";
-
-    /** Path to delete file. */
-    private final static String FILE_DELETE_LINK = "/remove/files?selectedUserFile=";
-
-    /** Default date format used when formatting user-friendly dates. */
-    private static SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMM yyyy HH:mm:ss");
 
     /** User file id. */
     @XmlElement(name = "fileId")
@@ -77,6 +65,18 @@ public class FileInfo {
     /** File is locally stored in WebQ. */
     private boolean isLocalFile;
 
+    /** Path to download file. */
+    private final static String FILE_DOWNLOAD_LINK = "/download/user_file?fileId=";
+
+    /** Path to convert file. */
+    private final static String FILE_CONVERSION_LINK = "/download/convert?fileId=";
+
+    /** Path to delete file. */
+    private final static String FILE_DELETE_LINK = "/remove/files?selectedUserFile=";
+
+    /** Default date format used when formatting user-friendly dates. */
+    private final static String USERFRIENDLY_DATE_FORMAT = "dd MMM yyyy HH:mm:ss";
+
     /**
      * No-arg default constructor required by {@link org.springframework.oxm.jaxb.Jaxb2Marshaller}.
      */
@@ -90,7 +90,7 @@ public class FileInfo {
      */
     @XmlElement(name = "created")
     public String getCreated() {
-        return (createdDate != null) ? dateFormat.format(createdDate) : null;
+        return (createdDate != null) ? DateFormatUtils.format(createdDate, USERFRIENDLY_DATE_FORMAT) : null;
     }
 
     /**
@@ -100,7 +100,7 @@ public class FileInfo {
      */
     @XmlElement(name = "updated")
     public String getUpdated() {
-        return (updatedDate != null) ? dateFormat.format(updatedDate) : null;
+        return (updatedDate != null) ? DateFormatUtils.format(updatedDate, USERFRIENDLY_DATE_FORMAT) : null;
     }
 
     /**
@@ -110,7 +110,7 @@ public class FileInfo {
      */
     @XmlElement(name = "downloaded")
     public String getDownloaded() {
-        return (downloadedDate != null) ? dateFormat.format(downloadedDate) : null;
+        return (downloadedDate != null) ? DateFormatUtils.format(downloadedDate, USERFRIENDLY_DATE_FORMAT) : null;
     }
 
     /**

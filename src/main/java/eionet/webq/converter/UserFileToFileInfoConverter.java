@@ -30,13 +30,14 @@ import eionet.webq.dto.FileInfo;
 import eionet.webq.service.ConversionService;
 
 /**
- * Convert {@link UserFile} to {@link FileInfo}
+ * Convert {@link UserFile} to {@link FileInfo}.
  *
  * @author Enriko Käsper
  */
 @Component
 public class UserFileToFileInfoConverter implements Converter<UserFile, FileInfo> {
 
+    /** Injected service for asking conversions for given XML Schema. */
     @Autowired
     ConversionService conversionService;
 

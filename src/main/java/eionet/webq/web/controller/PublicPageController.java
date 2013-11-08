@@ -113,7 +113,7 @@ public class PublicPageController {
      * Action to be performed on http GET method and path '/'.
      *
      * @param model holder for model attributes
-     * @param request http request
+     * @param session http session
      * @return view name
      */
     @RequestMapping(value = "/coordinator")
@@ -126,7 +126,7 @@ public class PublicPageController {
      * Action to be performed on http GET method and path '/'.
      *
      * @param model holder for model attributes
-     * @param request http request
+     * @param session http session
      * @return view name
      */
     @RequestMapping(value = "/sessionfiles")
@@ -307,10 +307,13 @@ public class PublicPageController {
     public FileInfo getFileInfo(@RequestParam int fileId, HttpServletRequest request, HttpServletResponse response) {
 
         UserFile userFile = userFileService.getById(fileId);
+        FileInfo fileInfo = new FileInfo();
         if (userFile == null) {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+        } else {
+            fileInfo = fileInfoConverter.convert(userFile);
         }
-        return fileInfoConverter.convert(userFile);
+        return fileInfo;
     }
 
     /**
