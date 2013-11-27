@@ -30,6 +30,7 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.validation.constraints.NotNull;
 
 /**
  * Known host data.
@@ -47,6 +48,7 @@ public class KnownHost {
      */
     @Length(max = 255)
     @Column(name = "host_url")
+    @NotNull
     private String hostURL;
     /**
      * Host name.
@@ -57,17 +59,20 @@ public class KnownHost {
      * Authentication method.
      */
     @Enumerated(EnumType.STRING)
+    @NotNull
     private KnownHostAuthenticationMethod authenticationMethod;
     /**
      * Authentication key.
      */
     @Length(max = 255)
     @Column(name = "auth_key")
+    @NotNull
     private String key;
     /**
      * Authentication ticket.
      */
     @Length(max = 255)
+    @NotNull
     private String ticket;
 
     public int getId() {
@@ -116,5 +121,28 @@ public class KnownHost {
 
     public void setTicket(String ticket) {
         this.ticket = ticket;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        KnownHost host = (KnownHost) o;
+
+        return id == host.id && authenticationMethod == host.authenticationMethod
+                && !(hostName != null ? !hostName.equals(host.hostName) : host.hostName != null)
+                && hostURL.equals(host.hostURL) && key.equals(host.key) && ticket.equals(host.ticket);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = id;
+        result = 31 * result + hostURL.hashCode();
+        result = 31 * result + (hostName != null ? hostName.hashCode() : 0);
+        result = 31 * result + authenticationMethod.hashCode();
+        result = 31 * result + key.hashCode();
+        result = 31 * result + ticket.hashCode();
+        return result;
     }
 }

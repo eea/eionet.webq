@@ -21,7 +21,6 @@
 package eionet.webq.web.controller;
 
 import eionet.webq.dao.orm.KnownHost;
-import eionet.webq.dto.KnownHostAuthenticationMethod;
 import eionet.webq.service.KnownHostsService;
 import eionet.webq.web.AbstractContextControllerTests;
 import org.junit.Test;
@@ -30,6 +29,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
+import static eionet.webq.dto.KnownHostAuthenticationMethod.BASIC;
+import static eionet.webq.dto.KnownHostAuthenticationMethod.REQUEST_PARAMETER;
 import static org.hamcrest.core.IsCollectionContaining.hasItem;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertThat;
@@ -53,7 +54,7 @@ public class KnownHostsControllerIntegrationTest extends AbstractContextControll
 
     @Test
     public void whenComingListOfKnownHostsPage_listIsAddedToModel() throws Exception {
-        KnownHost host = new KnownHost();
+        KnownHost host = saveKnownHost();
         knownHostsService.save(host);
         request(get("/known_hosts"))
                 .andExpect(model().attributeExists("allKnownHosts"))
@@ -63,7 +64,7 @@ public class KnownHostsControllerIntegrationTest extends AbstractContextControll
     @Test
     public void showsNewKnowHostPageOnGetRequest() throws Exception {
         request(get("/known_hosts/add"))
-                .andExpect(view().name("add_known_host"));
+                .andExpect(view().name("add_edit_known_host"));
     }
 
     @Test
@@ -73,12 +74,34 @@ public class KnownHostsControllerIntegrationTest extends AbstractContextControll
         request(post("/known_hosts/add")
                 .param("hostURL", "http://host.url")
                 .param("hostName", "Host name")
-                .param("authenticationMethod", KnownHostAuthenticationMethod.REQUEST_PARAMETER.name())
+                .param("authenticationMethod", REQUEST_PARAMETER.name())
                 .param("key", "api-key")
                 .param("ticket", "api-ticket"))
                 .andExpect(model().attribute("message", "Known host saved"))
                 .andExpect(view().name("known_hosts_list"));
 
         assertThat(knownHostsService.findAll().size(), equalTo(1));
+    }
+
+    @Test
+    public void whenRequestForEdit_showEditPageAndLoadRequiredHostData() throws Exception {
+        KnownHost host = saveKnownHost();
+
+        request(get("/known_hosts/update/" + host.getId()))
+                .andExpect(view().name("add_edit_known_host"))
+                .andExpect(model().attribute("host", equalTo(host)));
+
+    }
+
+    private KnownHost saveKnownHost() {
+        KnownHost host = new KnownHost();
+        host.setHostURL("http://host.url");
+        host.setTicket("ticket");
+        host.setKey("key");
+        host.setAuthenticationMethod(BASIC);
+
+        knownHostsService.save(host);
+
+        return host;
     }
 }

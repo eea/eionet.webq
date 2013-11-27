@@ -26,6 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
@@ -60,7 +61,7 @@ public class KnownHostsController {
     @RequestMapping(value = "/add", method = RequestMethod.GET)
     public String savePage(Model model) {
         model.addAttribute("host", new KnownHost());
-        return "add_known_host";
+        return "add_edit_known_host";
     }
 
     /**
@@ -75,5 +76,18 @@ public class KnownHostsController {
         knownHostsService.save(host);
         model.addAttribute("message", "Known host saved");
         return listKnownHosts(model);
+    }
+
+    /**
+     * Opens edit form.
+     *
+     * @param id host id
+     * @param model model
+     * @return view name
+     */
+    @RequestMapping(value = "/update/{id}", method = RequestMethod.GET)
+    public String save(@PathVariable int id, Model model) {
+        model.addAttribute("host", knownHostsService.findById(id));
+        return "add_edit_known_host";
     }
 }
