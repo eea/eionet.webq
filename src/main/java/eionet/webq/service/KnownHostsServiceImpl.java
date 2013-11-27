@@ -51,4 +51,9 @@ public class KnownHostsServiceImpl implements KnownHostsService {
     public Collection<KnownHost> findAll() {
         return knownHosts.findAll();
     }
+
+    @Override
+    public void update(KnownHost host) {
+        knownHosts.update(host);
+    }
 }

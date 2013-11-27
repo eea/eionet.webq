@@ -31,6 +31,8 @@ public interface KnownHostsService {
 
     /**
      * Saves known host.
+     *
+     * @param host host
      */
     void save(KnownHost host);
 
@@ -48,4 +50,11 @@ public interface KnownHostsService {
      * @return collection of known hosts.
      */
     Collection<KnownHost> findAll();
+
+    /**
+     * Update known host.
+     *
+     * @param host host
+     */
+    void update(KnownHost host);
 }

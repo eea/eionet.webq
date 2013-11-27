@@ -60,4 +60,12 @@ public class KnownHostsServiceImplTest {
 
         verify(knownHosts).findAll();
     }
+
+    @Test
+    public void whenUpdateIsCalled_callDaoMethod() throws Exception {
+        KnownHost host = new KnownHost();
+        service.update(host);
+
+        verify(knownHosts).update(host);
+    }
 }
