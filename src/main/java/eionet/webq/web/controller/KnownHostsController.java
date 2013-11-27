@@ -35,6 +35,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 @Controller
 @RequestMapping("/known_hosts")
 public class KnownHostsController {
+    /**
+     * Successful save/update message.
+     */
     public static final String KNOWN_HOST_SAVED_MESSAGE = "Known host saved";
     /**
      * Known hosts service.
