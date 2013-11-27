@@ -224,18 +224,18 @@
     <changeSet id="13" author="dmitrant">
         <preConditions onFail="MARK_RAN">
             <not>
-                <tableExists tableName="known_hosts"/>
+                <tableExists tableName="known_host"/>
             </not>
         </preConditions>
-        <createTable tableName="known_hosts">
+        <createTable tableName="known_host">
             <column name="id" type="int" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="host_url" type="varchar(255)">
                 <constraints unique="true"/>
             </column>
-            <column name="hostName" type="varchar(255)"/>
-            <column name="authenticationMethod" type="varchar(255)"/>
+            <column name="host_name" type="varchar(255)"/>
+            <column name="authentication_method" type="varchar(255)"/>
             <column name="key" type="varchar(255)"/>
             <column name="ticket" type="varchar(255)"/>
         </createTable>
