@@ -43,6 +43,11 @@ public class KnownHostsImpl extends AbstractDao<KnownHost> implements KnownHosts
     }
 
     @Override
+    public void update(KnownHost host) {
+        getCurrentSession().update(host);
+    }
+
+    @Override
     Class<KnownHost> getEntityClass() {
         return KnownHost.class;
     }

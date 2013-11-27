@@ -24,6 +24,7 @@ import configuration.ApplicationTestContextWithMockSession;
 import eionet.webq.dao.orm.KnownHost;
 import eionet.webq.dto.KnownHostAuthenticationMethod;
 import org.hibernate.FlushMode;
+import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.junit.Before;
 import org.junit.Test;
@@ -71,11 +72,7 @@ public class KnownHostsTest {
 
         KnownHost knownHostFromStorage = knownHosts.findById(id);
 
-        assertThat(knownHostFromStorage.getAuthenticationMethod(), equalTo(knownHost.getAuthenticationMethod()));
-        assertThat(knownHostFromStorage.getHostName(), equalTo(knownHost.getHostName()));
-        assertThat(knownHostFromStorage.getHostURL(), equalTo(knownHost.getHostURL()));
-        assertThat(knownHostFromStorage.getKey(), equalTo(knownHost.getKey()));
-        assertThat(knownHostFromStorage.getTicket(), equalTo(knownHost.getTicket()));
+        assertEquals(knownHost, knownHostFromStorage);
     }
 
     @Test
@@ -92,10 +89,46 @@ public class KnownHostsTest {
         assertThat(hosts.size(), equalTo(2));
     }
 
+    @Test
+    public void allowsToUpdateKnownHost() throws Exception {
+        KnownHost example = createKnownHost();
+        save(example);
+
+        example.setTicket("new_" + example.getTicket());
+        example.setKey("new_" + example.getKey());
+        example.setAuthenticationMethod(KnownHostAuthenticationMethod.BASIC);
+        example.setHostURL(example.getHostURL() + "/new");
+        example.setHostName("new_" + example.getHostName());
+
+        update(example);
+
+        KnownHost updated = knownHosts.findById(example.getId());
+        assertEquals(example, updated);
+    }
+
+    private void assertEquals(KnownHost knownHost, KnownHost knownHostFromStorage) {
+        assertThat(knownHostFromStorage.getAuthenticationMethod(), equalTo(knownHost.getAuthenticationMethod()));
+        assertThat(knownHostFromStorage.getHostName(), equalTo(knownHost.getHostName()));
+        assertThat(knownHostFromStorage.getHostURL(), equalTo(knownHost.getHostURL()));
+        assertThat(knownHostFromStorage.getKey(), equalTo(knownHost.getKey()));
+        assertThat(knownHostFromStorage.getTicket(), equalTo(knownHost.getTicket()));
+    }
+
+    private void update(KnownHost example) {
+        knownHosts.update(example);
+        evict(example);
+    }
+
     private int save(KnownHost knownHost) {
         int id = knownHosts.save(knownHost);
-        sessionFactory.getCurrentSession().evict(knownHost);
+        evict(knownHost);
         return id;
+    }
+
+    private void evict(KnownHost knownHost) {
+        Session currentSession = sessionFactory.getCurrentSession();
+        currentSession.flush();
+        currentSession.evict(knownHost);
     }
 
     private KnownHost createKnownHost() {

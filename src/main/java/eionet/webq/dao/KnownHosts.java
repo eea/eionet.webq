@@ -51,4 +51,11 @@ public interface KnownHosts {
      * @return all hosts
      */
     Collection<KnownHost> findAll();
+
+    /**
+     * Update host.
+     *
+     * @param host host
+     */
+    void update(KnownHost host);
 }
