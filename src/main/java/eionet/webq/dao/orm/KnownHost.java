@@ -59,6 +59,7 @@ public class KnownHost {
      * Authentication key.
      */
     @Length(max = 255)
+    @Column(name = "auth_key")
     private String key;
     /**
      * Authentication ticket.

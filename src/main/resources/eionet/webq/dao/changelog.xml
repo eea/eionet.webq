@@ -236,7 +236,7 @@
             </column>
             <column name="host_name" type="varchar(255)"/>
             <column name="authentication_method" type="varchar(255)"/>
-            <column name="key" type="varchar(255)"/>
+            <column name="auth_key" type="varchar(255)"/>
             <column name="ticket" type="varchar(255)"/>
         </createTable>
     </changeSet>

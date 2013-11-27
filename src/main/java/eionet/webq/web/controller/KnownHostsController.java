@@ -18,37 +18,33 @@
  * Contributor(s):
  *        Anton Dmitrijev
  */
-package eionet.webq.service;
+package eionet.webq.web.controller;
 
-import eionet.webq.dao.KnownHosts;
-import eionet.webq.dao.orm.KnownHost;
+import eionet.webq.service.KnownHostsService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import java.util.Collection;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 /**
  */
-@Service
-public class KnownHostsServiceImpl implements KnownHostsService {
+@Controller
+@RequestMapping("/known_hosts")
+public class KnownHostsController {
     /**
-     * Known hosts storage.
+     * Known hosts service.
      */
     @Autowired
-    private KnownHosts knownHosts;
-
-    @Override
-    public void save(KnownHost host) {
-        knownHosts.save(host);
-    }
-
-    @Override
-    public KnownHost findById(int id) {
-        return knownHosts.findById(id);
-    }
-
-    @Override
-    public Collection<KnownHost> findAll() {
-        return knownHosts.findAll();
+    private KnownHostsService service;
+    /**
+     * Lists all known hosts.
+     *
+     * @param model model
+     * @return view name
+     */
+    @RequestMapping({ "/", "" })
+    public String listKnownHosts(Model model) {
+        model.addAttribute("allKnownHosts", service.findAll());
+        return "known_hosts_list";
     }
 }
