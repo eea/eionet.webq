@@ -35,6 +35,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 @Controller
 @RequestMapping("/known_hosts")
 public class KnownHostsController {
+    public static final String KNOWN_HOST_SAVED_MESSAGE = "Known host saved";
     /**
      * Known hosts service.
      */
@@ -71,10 +72,14 @@ public class KnownHostsController {
      * @param model model
      * @return view name
      */
-    @RequestMapping(value = "/add", method = RequestMethod.POST)
+    @RequestMapping(value = "/save", method = RequestMethod.POST)
     public String save(@ModelAttribute KnownHost host, Model model) {
-        knownHostsService.save(host);
-        model.addAttribute("message", "Known host saved");
+        if (host.getId() > 0) {
+            knownHostsService.update(host);
+        } else {
+            knownHostsService.save(host);
+        }
+        model.addAttribute("message", KNOWN_HOST_SAVED_MESSAGE);
         return listKnownHosts(model);
     }
 

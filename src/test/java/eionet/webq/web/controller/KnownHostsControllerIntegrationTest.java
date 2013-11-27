@@ -23,14 +23,16 @@ package eionet.webq.web.controller;
 import eionet.webq.dao.orm.KnownHost;
 import eionet.webq.service.KnownHostsService;
 import eionet.webq.web.AbstractContextControllerTests;
+import org.hibernate.SessionFactory;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.transaction.annotation.Transactional;
 
 import static eionet.webq.dto.KnownHostAuthenticationMethod.BASIC;
-import static eionet.webq.dto.KnownHostAuthenticationMethod.REQUEST_PARAMETER;
+import static eionet.webq.web.controller.KnownHostsController.KNOWN_HOST_SAVED_MESSAGE;
 import static org.hamcrest.core.IsCollectionContaining.hasItem;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertThat;
@@ -47,15 +49,18 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class KnownHostsControllerIntegrationTest extends AbstractContextControllerTests {
     @Autowired
     private KnownHostsService knownHostsService;
+    @Autowired
+    private SessionFactory sessionFactory;
+
     @Test
     public void returnsListOfAllKnownHostsPageAsDefaultPage() throws Exception {
         request(get("/known_hosts")).andExpect(view().name("known_hosts_list"));
     }
 
     @Test
-    public void whenComingListOfKnownHostsPage_listIsAddedToModel() throws Exception {
+    public void whenListOfKnownHostsPageRequested_listIsAddedToModel() throws Exception {
         KnownHost host = saveKnownHost();
-        knownHostsService.save(host);
+
         request(get("/known_hosts"))
                 .andExpect(model().attributeExists("allKnownHosts"))
                 .andExpect(model().attribute("allKnownHosts", hasItem(host)));
@@ -70,14 +75,10 @@ public class KnownHostsControllerIntegrationTest extends AbstractContextControll
     @Test
     public void allowsToAddNewHost() throws Exception {
         assertThat(knownHostsService.findAll().size(), equalTo(0));
+        KnownHost knownHost = createKnownHost();
 
-        request(post("/known_hosts/add")
-                .param("hostURL", "http://host.url")
-                .param("hostName", "Host name")
-                .param("authenticationMethod", REQUEST_PARAMETER.name())
-                .param("key", "api-key")
-                .param("ticket", "api-ticket"))
-                .andExpect(model().attribute("message", "Known host saved"))
+        request(setHostPropertiesToRequest(post("/known_hosts/save"), knownHost))
+                .andExpect(model().attribute("message", KNOWN_HOST_SAVED_MESSAGE))
                 .andExpect(view().name("known_hosts_list"));
 
         assertThat(knownHostsService.findAll().size(), equalTo(1));
@@ -93,15 +94,43 @@ public class KnownHostsControllerIntegrationTest extends AbstractContextControll
 
     }
 
+    @Test
+    public void whenHostIsUpdated_messageIsAddedToModel() throws Exception {
+        KnownHost host = saveKnownHost();
+        host.setHostURL(host.getHostURL() + "/new_url");
+
+        request(setHostPropertiesToRequest(post("/known_hosts/save"), host))
+                .andExpect(view().name("known_hosts_list"))
+                .andExpect(model().attribute("message", KNOWN_HOST_SAVED_MESSAGE));
+
+        KnownHost hostFromStorage = knownHostsService.findById(host.getId());
+        assertThat(hostFromStorage, equalTo(host));
+    }
+
+    private MockHttpServletRequestBuilder setHostPropertiesToRequest(MockHttpServletRequestBuilder request, KnownHost knownHost) {
+        return request
+                .param("id", Integer.toString(knownHost.getId()))
+                .param("hostURL", knownHost.getHostURL())
+                .param("hostName", knownHost.getHostName())
+                .param("authenticationMethod", knownHost.getAuthenticationMethod().name())
+                .param("key", knownHost.getKey())
+                .param("ticket", knownHost.getTicket());
+    }
+
     private KnownHost saveKnownHost() {
+        KnownHost host = createKnownHost();
+        knownHostsService.save(host);
+        sessionFactory.getCurrentSession().evict(host);
+        return host;
+    }
+
+    private KnownHost createKnownHost() {
         KnownHost host = new KnownHost();
         host.setHostURL("http://host.url");
         host.setTicket("ticket");
         host.setKey("key");
         host.setAuthenticationMethod(BASIC);
-
-        knownHostsService.save(host);
-
+        host.setHostName("host name");
         return host;
     }
 }
