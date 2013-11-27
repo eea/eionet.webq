@@ -74,6 +74,6 @@ public class KnownHostsController {
     public String save(@ModelAttribute KnownHost host, Model model) {
         knownHostsService.save(host);
         model.addAttribute("message", "Known host saved");
-        return "known_hosts_list";
+        return listKnownHosts(model);
     }
 }
