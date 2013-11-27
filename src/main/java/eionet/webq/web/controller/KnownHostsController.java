@@ -20,11 +20,14 @@
  */
 package eionet.webq.web.controller;
 
+import eionet.webq.dao.orm.KnownHost;
 import eionet.webq.service.KnownHostsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 
 /**
  */
@@ -35,7 +38,7 @@ public class KnownHostsController {
      * Known hosts service.
      */
     @Autowired
-    private KnownHostsService service;
+    private KnownHostsService knownHostsService;
     /**
      * Lists all known hosts.
      *
@@ -44,7 +47,33 @@ public class KnownHostsController {
      */
     @RequestMapping({ "/", "" })
     public String listKnownHosts(Model model) {
-        model.addAttribute("allKnownHosts", service.findAll());
+        model.addAttribute("allKnownHosts", knownHostsService.findAll());
+        return "known_hosts_list";
+    }
+
+    /**
+     * Shows save page.
+     *
+     * @param model model
+     * @return view name
+     */
+    @RequestMapping(value = "/add", method = RequestMethod.GET)
+    public String savePage(Model model) {
+        model.addAttribute("host", new KnownHost());
+        return "add_known_host";
+    }
+
+    /**
+     * Save new known host to storage.
+     *
+     * @param host host to save
+     * @param model model
+     * @return view name
+     */
+    @RequestMapping(value = "/add", method = RequestMethod.POST)
+    public String save(@ModelAttribute KnownHost host, Model model) {
+        knownHostsService.save(host);
+        model.addAttribute("message", "Known host saved");
         return "known_hosts_list";
     }
 }

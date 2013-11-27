@@ -21,6 +21,7 @@
 package eionet.webq.web.controller;
 
 import eionet.webq.dao.orm.KnownHost;
+import eionet.webq.dto.KnownHostAuthenticationMethod;
 import eionet.webq.service.KnownHostsService;
 import eionet.webq.web.AbstractContextControllerTests;
 import org.junit.Test;
@@ -30,7 +31,10 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
 import static org.hamcrest.core.IsCollectionContaining.hasItem;
+import static org.hamcrest.core.IsEqual.equalTo;
+import static org.junit.Assert.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
@@ -54,5 +58,27 @@ public class KnownHostsControllerIntegrationTest extends AbstractContextControll
         request(get("/known_hosts"))
                 .andExpect(model().attributeExists("allKnownHosts"))
                 .andExpect(model().attribute("allKnownHosts", hasItem(host)));
+    }
+
+    @Test
+    public void showsNewKnowHostPageOnGetRequest() throws Exception {
+        request(get("/known_hosts/add"))
+                .andExpect(view().name("add_known_host"));
+    }
+
+    @Test
+    public void allowsToAddNewHost() throws Exception {
+        assertThat(knownHostsService.findAll().size(), equalTo(0));
+
+        request(post("/known_hosts/add")
+                .param("hostURL", "http://host.url")
+                .param("hostName", "Host name")
+                .param("authenticationMethod", KnownHostAuthenticationMethod.REQUEST_PARAMETER.name())
+                .param("key", "api-key")
+                .param("ticket", "api-ticket"))
+                .andExpect(model().attribute("message", "Known host saved"))
+                .andExpect(view().name("known_hosts_list"));
+
+        assertThat(knownHostsService.findAll().size(), equalTo(1));
     }
 }
