@@ -35,4 +35,11 @@ public interface KnownHosts {
      */
     int save(KnownHost host);
 
+    /**
+     * Finds known host by id.
+     *
+     * @param id id
+     * @return known host for specified id
+     */
+    KnownHost findById(int id);
 }

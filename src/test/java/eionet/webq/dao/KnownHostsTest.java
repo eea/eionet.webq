@@ -33,6 +33,8 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
+import static org.hamcrest.core.IsEqual.equalTo;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -54,14 +56,39 @@ public class KnownHostsTest {
 
     @Test
     public void shouldSaveKnownHost() throws Exception {
+        KnownHost knownHost = createKnownHost();
+
+        int id = knownHosts.save(knownHost);
+        assertTrue(id > 0);
+    }
+
+    @Test
+    public void shouldReadSavedDataAfterSave() throws Exception {
+        KnownHost knownHost = createKnownHost();
+        int id = save(knownHost);
+
+        KnownHost knownHostFromStorage = knownHosts.findById(id);
+
+        assertThat(knownHostFromStorage.getAuthenticationMethod(), equalTo(knownHost.getAuthenticationMethod()));
+        assertThat(knownHostFromStorage.getHostName(), equalTo(knownHost.getHostName()));
+        assertThat(knownHostFromStorage.getHostURL(), equalTo(knownHost.getHostURL()));
+        assertThat(knownHostFromStorage.getKey(), equalTo(knownHost.getKey()));
+        assertThat(knownHostFromStorage.getTicket(), equalTo(knownHost.getTicket()));
+    }
+
+    private int save(KnownHost knownHost) {
+        int id = knownHosts.save(knownHost);
+        sessionFactory.getCurrentSession().evict(knownHost);
+        return id;
+    }
+
+    private KnownHost createKnownHost() {
         KnownHost knownHost = new KnownHost();
         knownHost.setHostURL("http://host.url");
         knownHost.setAuthenticationMethod(KnownHostAuthenticationMethod.REQUEST_PARAMETER);
         knownHost.setHostName("Host name");
         knownHost.setKey("api-key");
         knownHost.setTicket("api-ticket");
-
-        int id = knownHosts.save(knownHost);
-        assertTrue(id > 0);
+        return knownHost;
     }
 }

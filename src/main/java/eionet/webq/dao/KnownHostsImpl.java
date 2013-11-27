@@ -27,7 +27,7 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public class KnownHostsImpl extends AbstractDao<KnownHost> implements KnownHosts {
-    
+
     @Override
     public int save(KnownHost host) {
         getCurrentSession().save(host);
