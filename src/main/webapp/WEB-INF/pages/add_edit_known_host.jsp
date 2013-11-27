@@ -4,7 +4,7 @@
 <%@ taglib prefix="s" uri="http://www.springframework.org/tags" %>
 
 <h1>Add known host</h1>
-<c:url var="saveUrl" value="/known_hosts/add"/>
+<c:url var="saveUrl" value="/known_hosts/save"/>
 <sf:form action="${saveUrl}" modelAttribute="host" method="post">
     <sf:errors path="*" element="div" cssClass="error-msg"/>
     <table class="datatable">
@@ -34,5 +34,7 @@
             <td><sf:input path="ticket" style="width:200px"/></td>
         </tr>
     </table>
+    <sf:hidden path="id"/>
     <input type="submit" value="Save"/>
+    <input type="button" onclick="window.location = '<c:url value="/known_hosts/"/>'" value="Cancel">
 </sf:form>

@@ -74,6 +74,7 @@ public class KnownHostsController {
      */
     @RequestMapping(value = "/save", method = RequestMethod.POST)
     public String save(@ModelAttribute KnownHost host, Model model) {
+        //TODO validation
         if (host.getId() > 0) {
             knownHostsService.update(host);
         } else {

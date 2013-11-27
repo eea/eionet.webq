@@ -21,7 +21,7 @@
         <tbody>
         <c:forEach items="${allKnownHosts}" var="host">
             <tr>
-                <td><a href="<c:url value="/known_hosts/${host.id}/view"/>">${host.hostName}</a></td>
+                <td><a href="<c:url value="/known_hosts/update/${host.id}"/>">${host.hostName}</a></td>
                 <td>${host.hostURL}</td>
                 <td>${host.key}</td>
             </tr>
