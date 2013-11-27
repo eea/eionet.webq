@@ -23,6 +23,8 @@ package eionet.webq.dao;
 import eionet.webq.dao.orm.KnownHost;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
+
 /**
  */
 @Repository
@@ -32,6 +34,12 @@ public class KnownHostsImpl extends AbstractDao<KnownHost> implements KnownHosts
     public int save(KnownHost host) {
         getCurrentSession().save(host);
         return host.getId();
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public Collection<KnownHost> findAll() {
+        return getCriteria().list();
     }
 
     @Override

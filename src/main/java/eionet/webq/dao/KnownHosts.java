@@ -22,6 +22,8 @@ package eionet.webq.dao;
 
 import eionet.webq.dao.orm.KnownHost;
 
+import java.util.Collection;
+
 /**
  * Known hosts repository.
  */
@@ -42,4 +44,11 @@ public interface KnownHosts {
      * @return known host for specified id
      */
     KnownHost findById(int id);
+
+    /**
+     * Finds all hosts.
+     *
+     * @return all hosts
+     */
+    Collection<KnownHost> findAll();
 }

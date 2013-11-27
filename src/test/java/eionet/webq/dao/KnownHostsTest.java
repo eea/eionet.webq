@@ -33,6 +33,8 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collection;
+
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
@@ -74,6 +76,20 @@ public class KnownHostsTest {
         assertThat(knownHostFromStorage.getHostURL(), equalTo(knownHost.getHostURL()));
         assertThat(knownHostFromStorage.getKey(), equalTo(knownHost.getKey()));
         assertThat(knownHostFromStorage.getTicket(), equalTo(knownHost.getTicket()));
+    }
+
+    @Test
+    public void shouldFetchAllKnownHosts() throws Exception {
+        KnownHost host1 = createKnownHost();
+        KnownHost host2 = createKnownHost();
+        host2.setHostURL("http://other.host.url");
+
+        knownHosts.save(host1);
+        knownHosts.save(host2);
+
+        Collection<KnownHost> hosts = knownHosts.findAll();
+
+        assertThat(hosts.size(), equalTo(2));
     }
 
     private int save(KnownHost knownHost) {
