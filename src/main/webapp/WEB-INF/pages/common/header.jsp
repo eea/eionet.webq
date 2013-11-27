@@ -65,6 +65,7 @@
         </c:if>
         <c:if test="${isAdmin}">
             <li><a href="<c:url value="/users/new"/>">Add/replace user role</a></li>
+            <li><a href="<c:url value="/known_hosts/"/>">Manage known hosts</a></li>
         </c:if>
     </ul>
 </div>
