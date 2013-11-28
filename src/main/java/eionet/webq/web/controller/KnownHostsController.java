@@ -112,6 +112,6 @@ public class KnownHostsController {
     public String remove(@PathVariable int id, Model model) {
         model.addAttribute("message", HOST_REMOVED_MESSAGE);
         knownHostsService.remove(id);
-        return "known_hosts_list";
+        return listKnownHosts(model);
     }
 }

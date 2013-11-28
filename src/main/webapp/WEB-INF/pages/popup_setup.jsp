@@ -20,4 +20,20 @@
             modal: true
         });
     }
+
+    function removeDialog(dialogElement, callUrl) {
+        dialogElement.dialog({
+            resizable: false,
+            maxHeight: 300,
+            modal: true,
+            buttons: {
+                "Delete" : function() {
+                    window.location = callUrl;
+                },
+                Cancel: function() {
+                    $(this).dialog("close");
+                }
+            }
+        });
+    }
 </script>

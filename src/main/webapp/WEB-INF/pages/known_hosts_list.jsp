@@ -50,6 +50,7 @@
                             </tr>
                         </table>
                         <input type="button" onclick="window.location = '<c:url value="/known_hosts/update/${host.id}"/>'" value="Edit"/>
+                        <input type="button" onclick="removeDialog($('#remove-host'), '<c:url value="/known_hosts/remove/${host.id}"/>');" value="Delete"/>
                         <input type="button" onclick="$('#${popup_id}').dialog('close');" value="Close"/>
                     </div>
                 </td>
@@ -57,5 +58,9 @@
         </c:forEach>
         </tbody>
     </table>
+
+    <div id="remove-host" title="Delete host?" class="dialogTemplate">
+        <p>This host will be deleted. Are you sure?</p>
+    </div>
 </c:if>
 

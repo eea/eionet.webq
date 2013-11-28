@@ -2,22 +2,6 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
 <script type="text/javascript">
-    function removeDialog(dialogElement, callUrl) {
-        dialogElement.dialog({
-            resizable: false,
-            maxHeight: 300,
-            modal: true,
-            buttons: {
-                "Delete" : function() {
-                    window.location = callUrl;
-                },
-                Cancel: function() {
-                    $(this).dialog("close");
-                }
-            }
-        });
-    }
-
     function view_file(popupElement, width) {
         popupElement.dialog({
             width: width,
