@@ -20,10 +20,39 @@
         </thead>
         <tbody>
         <c:forEach items="${allKnownHosts}" var="host">
+            <c:set var="popup_id" value="host_${host.id}"/>
             <tr>
-                <td><a href="<c:url value="/known_hosts/update/${host.id}"/>">${host.hostName}</a></td>
+                <td><a href="#" onclick="viewHost('${popup_id}')">${host.hostName}</a></td>
                 <td>${host.hostURL}</td>
                 <td>${host.key}</td>
+                <td class="dialogTemplate">
+                    <div title="Host information" id="${popup_id}">
+                        <table class="datatable" style="width:100%">
+                            <tr>
+                                <th scope="row">Host name</th>
+                                <td>${host.hostName}</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Host URL</th>
+                                <td>${host.hostURL}</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Authentication method</th>
+                                <td>${host.authenticationMethod}</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Key/Username</th>
+                                <td>${host.key}</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Ticket/password</th>
+                                <td>${host.ticket}</td>
+                            </tr>
+                        </table>
+                        <input type="button" onclick="window.location = '<c:url value="/known_hosts/update/${host.id}"/>'" value="Edit"/>
+                        <input type="button" onclick="$('#${popup_id}').dialog('close');" value="Close"/>
+                    </div>
+                </td>
             </tr>
         </c:forEach>
         </tbody>
