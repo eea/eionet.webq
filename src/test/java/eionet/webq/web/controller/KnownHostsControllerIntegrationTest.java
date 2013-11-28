@@ -88,8 +88,7 @@ public class KnownHostsControllerIntegrationTest extends AbstractContextControll
 
         request(get("/known_hosts/update/" + host.getId()))
                 .andExpect(view().name("add_edit_known_host"))
-                .andExpect(model().attribute("host", equalTo(host)));
-
+                .andExpect(model().attribute("knownHost", equalTo(host)));
     }
 
     @Test
@@ -114,6 +113,15 @@ public class KnownHostsControllerIntegrationTest extends AbstractContextControll
                 .andExpect(model().attribute("message", HOST_REMOVED_MESSAGE));
 
         assertThat(knownHostsService.findAll().size(), equalTo(0));
+    }
+
+    @Test
+    public void whenSavingInvalidHost_ReturnToSamePage() throws Exception {
+        KnownHost knownHost = createValidKnownHost();
+        knownHost.setHostURL("");
+
+        request(setHostPropertiesToRequest(post("/known_hosts/save"), knownHost))
+                .andExpect(view().name("add_edit_known_host"));
     }
 
     static MockHttpServletRequestBuilder setHostPropertiesToRequest(MockHttpServletRequestBuilder request, KnownHost knownHost) {

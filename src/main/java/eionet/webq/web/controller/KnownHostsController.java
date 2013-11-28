@@ -71,29 +71,30 @@ public class KnownHostsController {
      */
     @RequestMapping(value = "/add", method = RequestMethod.GET)
     public String savePage(Model model) {
-        model.addAttribute("host", new KnownHost());
+        model.addAttribute("knownHost", new KnownHost());
         return "add_edit_known_host";
     }
 
     /**
      * Save new known host to storage.
      *
-     * @param host host to save
+     * @param knownHost host to save
      * @param bindingResult bindingResult
      * @param model model
      * @return view name
      */
     @RequestMapping(value = "/save", method = RequestMethod.POST)
-    public String save(@Valid @ModelAttribute KnownHost host, BindingResult bindingResult, Model model) {
-        //TODO validation
-        if (!bindingResult.hasErrors()) {
-            if (host.getId() > 0) {
-                knownHostsService.update(host);
-            } else {
-                knownHostsService.save(host);
-            }
-            model.addAttribute("message", KNOWN_HOST_SAVED_MESSAGE);
+    public String save(@Valid @ModelAttribute KnownHost knownHost, BindingResult bindingResult, Model model) {
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("knownHost", knownHost);
+            return "add_edit_known_host";
         }
+        if (knownHost.getId() > 0) {
+            knownHostsService.update(knownHost);
+        } else {
+            knownHostsService.save(knownHost);
+        }
+        model.addAttribute("message", KNOWN_HOST_SAVED_MESSAGE);
         return listKnownHosts(model);
     }
 
@@ -106,7 +107,7 @@ public class KnownHostsController {
      */
     @RequestMapping(value = "/update/{id}", method = RequestMethod.GET)
     public String save(@PathVariable int id, Model model) {
-        model.addAttribute("host", knownHostsService.findById(id));
+        model.addAttribute("knownHost", knownHostsService.findById(id));
         return "add_edit_known_host";
     }
 
