@@ -58,4 +58,11 @@ public interface KnownHosts {
      * @param host host
      */
     void update(KnownHost host);
+
+    /**
+     * Removes known host from storage.
+     *
+     * @param id id
+     */
+    void remove(int id);
 }

@@ -56,4 +56,9 @@ public class KnownHostsServiceImpl implements KnownHostsService {
     public void update(KnownHost host) {
         knownHosts.update(host);
     }
+
+    @Override
+    public void remove(int id) {
+        knownHosts.remove(id);
+    }
 }

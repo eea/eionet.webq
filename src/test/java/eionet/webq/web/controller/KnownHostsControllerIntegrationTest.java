@@ -32,6 +32,7 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import org.springframework.transaction.annotation.Transactional;
 
 import static eionet.webq.dto.KnownHostAuthenticationMethod.BASIC;
+import static eionet.webq.web.controller.KnownHostsController.HOST_REMOVED_MESSAGE;
 import static eionet.webq.web.controller.KnownHostsController.KNOWN_HOST_SAVED_MESSAGE;
 import static org.hamcrest.core.IsCollectionContaining.hasItem;
 import static org.hamcrest.core.IsEqual.equalTo;
@@ -95,7 +96,7 @@ public class KnownHostsControllerIntegrationTest extends AbstractContextControll
     }
 
     @Test
-    public void whenHostIsUpdated_messageIsAddedToModel() throws Exception {
+    public void whenHostIsUpdated_hostIsUpdatedAndMessageIsAddedToModel() throws Exception {
         KnownHost host = saveKnownHost();
         host.setHostURL(host.getHostURL() + "/new_url");
 
@@ -105,6 +106,17 @@ public class KnownHostsControllerIntegrationTest extends AbstractContextControll
 
         KnownHost hostFromStorage = knownHostsService.findById(host.getId());
         assertThat(hostFromStorage, equalTo(host));
+    }
+
+    @Test
+    public void whenRemovingHost_hostIsRemovedAndMessageIsAdded() throws Exception {
+        KnownHost host = saveKnownHost();
+        assertThat(knownHostsService.findAll().size(), equalTo(1));
+
+        request(get("/known_hosts/remove/" + host.getId()))
+                .andExpect(model().attribute("message", HOST_REMOVED_MESSAGE));
+
+        assertThat(knownHostsService.findAll().size(), equalTo(0));
     }
 
     private MockHttpServletRequestBuilder setHostPropertiesToRequest(MockHttpServletRequestBuilder request, KnownHost knownHost) {

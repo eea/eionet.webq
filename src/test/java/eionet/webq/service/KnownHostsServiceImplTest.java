@@ -68,4 +68,11 @@ public class KnownHostsServiceImplTest {
 
         verify(knownHosts).update(host);
     }
+
+    @Test
+    public void whenRemovingHost_callDaoMethod() throws Exception {
+        service.remove(1);
+
+        verify(knownHosts).remove(1);
+    }
 }

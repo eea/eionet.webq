@@ -39,6 +39,7 @@ public class KnownHostsController {
      * Successful save/update message.
      */
     public static final String KNOWN_HOST_SAVED_MESSAGE = "Known host saved";
+    public static final String HOST_REMOVED_MESSAGE = "Host removed";
     /**
      * Known hosts service.
      */
@@ -98,5 +99,19 @@ public class KnownHostsController {
     public String save(@PathVariable int id, Model model) {
         model.addAttribute("host", knownHostsService.findById(id));
         return "add_edit_known_host";
+    }
+
+    /**
+     * Removes host from storage.
+     *
+     * @param id host id
+     * @param model model
+     * @return view name
+     */
+    @RequestMapping("/remove/{id}")
+    public String remove(@PathVariable int id, Model model) {
+        model.addAttribute("message", HOST_REMOVED_MESSAGE);
+        knownHostsService.remove(id);
+        return "known_hosts_list";
     }
 }

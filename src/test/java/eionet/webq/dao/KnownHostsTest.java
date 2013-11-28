@@ -106,6 +106,17 @@ public class KnownHostsTest {
         assertEquals(example, updated);
     }
 
+    @Test
+    public void allowsKnownHostRemovalById() throws Exception {
+        KnownHost knownHost = createKnownHost();
+        save(knownHost);
+        assertThat(knownHosts.findAll().size(), equalTo(1));
+
+        knownHosts.remove(knownHost.getId());
+
+        assertThat(knownHosts.findAll().size(), equalTo(0));
+    }
+
     private void assertEquals(KnownHost knownHost, KnownHost knownHostFromStorage) {
         assertThat(knownHostFromStorage.getAuthenticationMethod(), equalTo(knownHost.getAuthenticationMethod()));
         assertThat(knownHostFromStorage.getHostName(), equalTo(knownHost.getHostName()));

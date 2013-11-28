@@ -21,6 +21,7 @@
 package eionet.webq.dao;
 
 import eionet.webq.dao.orm.KnownHost;
+import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 
 import java.util.Collection;
@@ -45,6 +46,11 @@ public class KnownHostsImpl extends AbstractDao<KnownHost> implements KnownHosts
     @Override
     public void update(KnownHost host) {
         getCurrentSession().update(host);
+    }
+
+    @Override
+    public void remove(int id) {
+        removeByCriterion(Restrictions.eq("id", id));
     }
 
     @Override

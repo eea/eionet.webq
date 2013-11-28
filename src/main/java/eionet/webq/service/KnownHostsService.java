@@ -57,4 +57,11 @@ public interface KnownHostsService {
      * @param host host
      */
     void update(KnownHost host);
+
+    /**
+     * Remove {@link eionet.webq.dao.orm.KnownHost} by id.
+     *
+     * @param id id
+     */
+    void remove(int id);
 }
