@@ -22,6 +22,7 @@ package eionet.webq.dao.orm;
 
 import eionet.webq.dto.KnownHostAuthenticationMethod;
 import org.hibernate.validator.constraints.Length;
+import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -48,7 +49,7 @@ public class KnownHost {
      */
     @Length(max = 255)
     @Column(name = "host_url")
-    @NotNull
+    @NotEmpty
     private String hostURL;
     /**
      * Host name.
@@ -66,13 +67,13 @@ public class KnownHost {
      */
     @Length(max = 255)
     @Column(name = "auth_key")
-    @NotNull
+    @NotEmpty
     private String key;
     /**
      * Authentication ticket.
      */
     @Length(max = 255)
-    @NotNull
+    @NotEmpty
     private String ticket;
 
     public int getId() {

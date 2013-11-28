@@ -25,10 +25,13 @@ import eionet.webq.service.KnownHostsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+
+import javax.validation.Valid;
 
 /**
  */
@@ -39,6 +42,9 @@ public class KnownHostsController {
      * Successful save/update message.
      */
     public static final String KNOWN_HOST_SAVED_MESSAGE = "Known host saved";
+    /**
+     * Host removed message.
+     */
     public static final String HOST_REMOVED_MESSAGE = "Host removed";
     /**
      * Known hosts service.
@@ -73,18 +79,21 @@ public class KnownHostsController {
      * Save new known host to storage.
      *
      * @param host host to save
+     * @param bindingResult bindingResult
      * @param model model
      * @return view name
      */
     @RequestMapping(value = "/save", method = RequestMethod.POST)
-    public String save(@ModelAttribute KnownHost host, Model model) {
+    public String save(@Valid @ModelAttribute KnownHost host, BindingResult bindingResult, Model model) {
         //TODO validation
-        if (host.getId() > 0) {
-            knownHostsService.update(host);
-        } else {
-            knownHostsService.save(host);
+        if (!bindingResult.hasErrors()) {
+            if (host.getId() > 0) {
+                knownHostsService.update(host);
+            } else {
+                knownHostsService.save(host);
+            }
+            model.addAttribute("message", KNOWN_HOST_SAVED_MESSAGE);
         }
-        model.addAttribute("message", KNOWN_HOST_SAVED_MESSAGE);
         return listKnownHosts(model);
     }
 

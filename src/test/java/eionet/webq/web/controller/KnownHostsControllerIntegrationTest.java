@@ -42,9 +42,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
-/**
- * Controller for {@link eionet.webq.dao.orm.KnownHost}.
- */
 @RunWith(SpringJUnit4ClassRunner.class)
 @Transactional
 public class KnownHostsControllerIntegrationTest extends AbstractContextControllerTests {
@@ -76,7 +73,7 @@ public class KnownHostsControllerIntegrationTest extends AbstractContextControll
     @Test
     public void allowsToAddNewHost() throws Exception {
         assertThat(knownHostsService.findAll().size(), equalTo(0));
-        KnownHost knownHost = createKnownHost();
+        KnownHost knownHost = createValidKnownHost();
 
         request(setHostPropertiesToRequest(post("/known_hosts/save"), knownHost))
                 .andExpect(model().attribute("message", KNOWN_HOST_SAVED_MESSAGE))
@@ -119,7 +116,7 @@ public class KnownHostsControllerIntegrationTest extends AbstractContextControll
         assertThat(knownHostsService.findAll().size(), equalTo(0));
     }
 
-    private MockHttpServletRequestBuilder setHostPropertiesToRequest(MockHttpServletRequestBuilder request, KnownHost knownHost) {
+    static MockHttpServletRequestBuilder setHostPropertiesToRequest(MockHttpServletRequestBuilder request, KnownHost knownHost) {
         return request
                 .param("id", Integer.toString(knownHost.getId()))
                 .param("hostURL", knownHost.getHostURL())
@@ -129,20 +126,20 @@ public class KnownHostsControllerIntegrationTest extends AbstractContextControll
                 .param("ticket", knownHost.getTicket());
     }
 
-    private KnownHost saveKnownHost() {
-        KnownHost host = createKnownHost();
-        knownHostsService.save(host);
-        sessionFactory.getCurrentSession().evict(host);
-        return host;
-    }
-
-    private KnownHost createKnownHost() {
+    static KnownHost createValidKnownHost() {
         KnownHost host = new KnownHost();
         host.setHostURL("http://host.url");
         host.setTicket("ticket");
         host.setKey("key");
         host.setAuthenticationMethod(BASIC);
         host.setHostName("host name");
+        return host;
+    }
+
+    private KnownHost saveKnownHost() {
+        KnownHost host = createValidKnownHost();
+        knownHostsService.save(host);
+        sessionFactory.getCurrentSession().evict(host);
         return host;
     }
 }
