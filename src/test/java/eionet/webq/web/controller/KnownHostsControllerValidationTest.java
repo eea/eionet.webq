@@ -113,6 +113,13 @@ public class KnownHostsControllerValidationTest extends AbstractContextControlle
         assertNoFieldErrorsOnSave(host);
     }
 
+    @Test
+    public void duplicateHostURLNotAllowed() throws Exception {
+        KnownHost host = createValidKnownHost();
+        assertNoFieldErrorsOnSave(host);
+        assertFieldErrorOnSave(host, "hostURL");
+    }
+
     private void assertNoFieldErrorsOnSave(KnownHost validKnownHost) throws Exception {
         saveHost(validKnownHost).andExpect(model().attributeErrorCount("knownHost", 0));
     }

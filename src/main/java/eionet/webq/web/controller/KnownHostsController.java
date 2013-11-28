@@ -22,6 +22,7 @@ package eionet.webq.web.controller;
 
 import eionet.webq.dao.orm.KnownHost;
 import eionet.webq.service.KnownHostsService;
+import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -71,8 +72,7 @@ public class KnownHostsController {
      */
     @RequestMapping(value = "/add", method = RequestMethod.GET)
     public String savePage(Model model) {
-        model.addAttribute("knownHost", new KnownHost());
-        return "add_edit_known_host";
+        return editView(new KnownHost(), model);
     }
 
     /**
@@ -86,13 +86,17 @@ public class KnownHostsController {
     @RequestMapping(value = "/save", method = RequestMethod.POST)
     public String save(@Valid @ModelAttribute KnownHost knownHost, BindingResult bindingResult, Model model) {
         if (bindingResult.hasErrors()) {
-            model.addAttribute("knownHost", knownHost);
-            return "add_edit_known_host";
+            return editView(knownHost, model);
         }
-        if (knownHost.getId() > 0) {
-            knownHostsService.update(knownHost);
-        } else {
-            knownHostsService.save(knownHost);
+        try {
+            if (knownHost.getId() > 0) {
+                knownHostsService.update(knownHost);
+            } else {
+                knownHostsService.save(knownHost);
+            }
+        } catch (ConstraintViolationException e) {
+            bindingResult.rejectValue("hostURL", "duplicate.host.url");
+            return editView(knownHost, model);
         }
         model.addAttribute("message", KNOWN_HOST_SAVED_MESSAGE);
         return listKnownHosts(model);
@@ -123,5 +127,17 @@ public class KnownHostsController {
         model.addAttribute("message", HOST_REMOVED_MESSAGE);
         knownHostsService.remove(id);
         return listKnownHosts(model);
+    }
+
+    /**
+     * Prepares edit view.
+     *
+     * @param host host.
+     * @param model model.
+     * @return view name
+     */
+    private String editView(KnownHost host, Model model) {
+        model.addAttribute("knownHost", host);
+        return "add_edit_known_host";
     }
 }
