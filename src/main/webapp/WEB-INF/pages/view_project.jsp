@@ -52,7 +52,7 @@
                 <td><fmt:formatDate pattern="dd MMM yyyy HH:mm:ss" value="${projectFile.updated}" /></td>
                 <c:if test="${isWebForm}">
                     <td><input type="checkbox" ${projectFile.active ? 'checked="checked"' : ''} disabled="disabled"/></td>
-                    <td><input type="checkbox" ${projectFile.mainForm ? 'checked="checked"' : ''} disabled="disabled"/></td>
+                    <td><input type="checkbox" ${projectFile.localForm ? 'checked="checked"' : ''} disabled="disabled"/></td>
                 </c:if>
                 <td>${projectFile.userName}</td>
                 <td>
@@ -112,7 +112,7 @@
                                 </tr>
                                 <tr>
                                     <th scope="row">Main form</th>
-                                    <td>${projectFile.mainForm}</td>
+                                    <td>${projectFile.localForm}</td>
                                 </tr>
                             </c:if>
                             <tr>

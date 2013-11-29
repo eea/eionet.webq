@@ -186,7 +186,7 @@ public class IntegrationWithCDRControllerIntegrationTest extends AbstractContext
         ProjectFile file = new ProjectFile();
         file.setXmlSchema(xmlSchema);
         file.setActive(true);
-        file.setMainForm(true);
+        file.setLocalForm(true);
         file.setTitle("web form");
         file.setFileContent("content".getBytes());
         file.setFileType(ProjectFileType.WEBFORM);

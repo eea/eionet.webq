@@ -240,4 +240,10 @@
             <column name="ticket" type="varchar(255)"/>
         </createTable>
     </changeSet>
+    <changeSet id="14" author="dmitrant">
+        <renameColumn tableName="project_file" oldColumnName="main_form" newColumnName="local_form"/>
+        <addColumn tableName="project_file">
+            <column name="remote_form" type="boolean" defaultValue="false"/>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

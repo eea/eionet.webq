@@ -85,7 +85,7 @@ public class ProjectFileStorageImpl extends AbstractDao<ProjectFile> implements 
     @Override
     public Collection<ProjectFile> getAllActiveWebForms() {
         return getCriteria().add(
-                Restrictions.and(eq("fileType", ProjectFileType.WEBFORM), eq("active", true), eq("mainForm", true),
+                Restrictions.and(eq("fileType", ProjectFileType.WEBFORM), eq("active", true), eq("localForm", true),
                         Restrictions.isNotNull("xmlSchema"))).list();
     }
 
@@ -119,7 +119,7 @@ public class ProjectFileStorageImpl extends AbstractDao<ProjectFile> implements 
     private void updateWithoutChangingContent(ProjectFile projectFile) {
         getCurrentSession().createQuery("UPDATE ProjectFile SET title=:title, xmlSchema=:xmlSchema, "
                 + " description=:description, userName=:userName, "
-                + " active=:active, mainForm=:mainForm, remoteFileUrl=:remoteFileUrl, "
+                + " active=:active, localForm=:localForm, remoteFileUrl=:remoteFileUrl, "
                 + " newXmlFileName=:newXmlFileName, emptyInstanceUrl=:emptyInstanceUrl, updated=CURRENT_TIMESTAMP() "
                 + " WHERE id=:id").setProperties(projectFile).executeUpdate();
     }
@@ -130,7 +130,7 @@ public class ProjectFileStorageImpl extends AbstractDao<ProjectFile> implements 
      * @return criterion
      */
     private Criterion activeWebFormCriterion() {
-        return Restrictions.and(eq("fileType", ProjectFileType.WEBFORM), eq("active", true), eq("mainForm", true),
+        return Restrictions.and(eq("fileType", ProjectFileType.WEBFORM), eq("active", true), eq("localForm", true),
                 Restrictions.isNotNull("xmlSchema"));
     }
 }

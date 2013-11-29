@@ -112,7 +112,7 @@ public class ProjectFileStorageImplTest {
         assertThat(projectFile.getUserName(), equalTo(testFileForUpload.getUserName()));
         assertThat(projectFile.getXmlSchema(), equalTo(testFileForUpload.getXmlSchema()));
         assertThat(projectFile.isActive(), equalTo(testFileForUpload.isActive()));
-        assertThat(projectFile.isMainForm(), equalTo(testFileForUpload.isMainForm()));
+        assertThat(projectFile.isLocalForm(), equalTo(testFileForUpload.isLocalForm()));
         assertThat(projectFile.getRemoteFileUrl(), equalTo(testFileForUpload.getRemoteFileUrl()));
         assertThat(projectFile.getFileSizeInBytes(), equalTo(testFileForUpload.getFileSizeInBytes()));
     }
@@ -145,7 +145,7 @@ public class ProjectFileStorageImplTest {
         defaultProjectFile.setNewXmlFileName("brand new xml file name");
         defaultProjectFile.setRemoteFileUrl("brand-new-remote-file-url");
         defaultProjectFile.setActive(true);
-        defaultProjectFile.setMainForm(true);
+        defaultProjectFile.setLocalForm(true);
 
         projectFileStorage.update(defaultProjectFile, projectEntry);
 
@@ -304,7 +304,7 @@ public class ProjectFileStorageImplTest {
         assertThat(after.getNewXmlFileName(), equalTo(before.getNewXmlFileName()));
         assertThat(after.getDescription(), equalTo(before.getDescription()));
         assertThat(after.isActive(), equalTo(before.isActive()));
-        assertThat(after.isMainForm(), equalTo(before.isMainForm()));
+        assertThat(after.isLocalForm(), equalTo(before.isLocalForm()));
         assertThat(after.getRemoteFileUrl(), equalTo(before.getRemoteFileUrl()));
     }
 
@@ -324,7 +324,7 @@ public class ProjectFileStorageImplTest {
     private ProjectFile projectFileWithoutTypeSet() {
         ProjectFile projectFile = new ProjectFile();
         projectFile.setActive(true);
-        projectFile.setMainForm(true);
+        projectFile.setLocalForm(true);
         projectFile.setTitle("Main form");
         projectFile.setDescription("Main web form for questionnaire");
         projectFile.setUserName("User Name");

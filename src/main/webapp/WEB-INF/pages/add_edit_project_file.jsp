@@ -75,8 +75,8 @@
                     <td><f:checkbox path="active" id="active"/></td>
                 </tr>
                 <tr>
-                    <th scope="row"><label for="mainForm">Main form</label></th>
-                    <td><f:checkbox path="mainForm" id="mainForm"/></td>
+                    <th scope="row"><label for="localForm">Main form</label></th>
+                    <td><f:checkbox path="localForm" id="localForm"/></td>
                 </tr>
             </c:if>
         </table>

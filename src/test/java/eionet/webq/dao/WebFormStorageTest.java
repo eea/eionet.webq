@@ -94,12 +94,12 @@ public class WebFormStorageTest {
         save(createWebform());
 
         ProjectFile otherWebform = createWebform();
-        otherWebform.setMainForm(false);
+        otherWebform.setLocalForm(false);
         save(otherWebform);
 
         Collection<ProjectFile> allActiveWebForms = webFormStorage.getAllActiveWebForms();
         assertThat(allActiveWebForms.size(), equalTo(1));
-        assertTrue(allActiveWebForms.iterator().next().isMainForm());
+        assertTrue(allActiveWebForms.iterator().next().isLocalForm());
     }
 
     @Test
@@ -123,7 +123,7 @@ public class WebFormStorageTest {
         ProjectFile file = new ProjectFile();
         file.setFileType(type);
         file.setActive(true);
-        file.setMainForm(true);
+        file.setLocalForm(true);
         file.setXmlSchema("test-schema");
         file.setTitle("test-title");
         file.setUserName("test-username");
