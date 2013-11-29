@@ -31,6 +31,17 @@ public abstract class AbstractDao<E> {
     }
 
     /**
+     * Finds entity by id.
+     *
+     * @param id id
+     * @return entity
+     */
+    @SuppressWarnings("unchecked")
+    public E findById(int id) {
+        return (E) getCurrentSession().byId(getEntityClass()).load(id);
+    }
+
+    /**
      * Removes entity with its children.
      *
      * @param criterion criterion to search entities.

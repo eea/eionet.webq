@@ -221,4 +221,23 @@
             <column name="xml_schema" type="varchar(255)"/>
         </createTable>
     </changeSet>
+    <changeSet id="13" author="dmitrant">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="known_host"/>
+            </not>
+        </preConditions>
+        <createTable tableName="known_host">
+            <column name="id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="host_url" type="varchar(255)">
+                <constraints unique="true"/>
+            </column>
+            <column name="host_name" type="varchar(255)"/>
+            <column name="authentication_method" type="varchar(255)"/>
+            <column name="auth_key" type="varchar(255)"/>
+            <column name="ticket" type="varchar(255)"/>
+        </createTable>
+    </changeSet>
 </databaseChangeLog>

@@ -29,6 +29,7 @@ import org.springframework.validation.FieldError;
 
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.apache.commons.lang3.StringUtils.repeat;
+import static util.ValidationUtil.stringOfLength;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @Transactional
@@ -94,10 +95,6 @@ public class ProjectValidationTest extends AbstractProjectsControllerTests {
             assertFieldError(getFirstAndOnlyFieldError(addNewProjectWithId(repeat(c, 3))), "projectId",
                     PATTERN_VALIDATION_CODE_PREFIX + "projectId");
         }
-    }
-
-    private String stringOfLength(int length) {
-        return repeat("1", length);
     }
 
     private void assertLengthFieldError(FieldError fieldError, String field) {

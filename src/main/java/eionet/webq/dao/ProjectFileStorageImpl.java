@@ -54,11 +54,6 @@ public class ProjectFileStorageImpl extends AbstractDao<ProjectFile> implements 
     }
 
     @Override
-    public ProjectFile findById(int id) {
-        return (ProjectFile) getCurrentSession().byId(getEntityClass()).load(id);
-    }
-
-    @Override
     public void update(final ProjectFile projectFile, ProjectEntry projectEntry) {
         if (projectFile.getProjectId() == projectEntry.getId()) {
             if (WebQFileInfo.fileIsEmpty(projectFile.getFile())) {
