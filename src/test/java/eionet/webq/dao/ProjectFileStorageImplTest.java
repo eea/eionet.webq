@@ -113,6 +113,7 @@ public class ProjectFileStorageImplTest {
         assertThat(projectFile.getXmlSchema(), equalTo(testFileForUpload.getXmlSchema()));
         assertThat(projectFile.isActive(), equalTo(testFileForUpload.isActive()));
         assertThat(projectFile.isLocalForm(), equalTo(testFileForUpload.isLocalForm()));
+        assertThat(projectFile.isRemoteForm(), equalTo(testFileForUpload.isLocalForm()));
         assertThat(projectFile.getRemoteFileUrl(), equalTo(testFileForUpload.getRemoteFileUrl()));
         assertThat(projectFile.getFileSizeInBytes(), equalTo(testFileForUpload.getFileSizeInBytes()));
     }
@@ -325,6 +326,7 @@ public class ProjectFileStorageImplTest {
         ProjectFile projectFile = new ProjectFile();
         projectFile.setActive(true);
         projectFile.setLocalForm(true);
+        projectFile.setRemoteForm(true);
         projectFile.setTitle("Main form");
         projectFile.setDescription("Main web form for questionnaire");
         projectFile.setUserName("User Name");
