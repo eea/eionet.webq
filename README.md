@@ -27,7 +27,7 @@ Minimum requirements are:
 
 ### Setup
 
-Do `cp config/local-template.properties config/local.properties`
+Do `cp config/application-template.properties config/local/application.properties`
 
 Set all properties to your environment.
 
