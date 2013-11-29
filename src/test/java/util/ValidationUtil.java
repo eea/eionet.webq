@@ -22,7 +22,7 @@ package util;
 
 import static org.apache.commons.lang3.StringUtils.repeat;
 
-public class TestUtil {
+public class ValidationUtil {
 
     public static String stringOfLength(int length) {
         return repeat("1", length);

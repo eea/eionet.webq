@@ -32,7 +32,7 @@ import static eionet.webq.web.controller.KnownHostsControllerIntegrationTest.cre
 import static eionet.webq.web.controller.KnownHostsControllerIntegrationTest.setHostPropertiesToRequest;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
-import static util.TestUtil.stringOfLength;
+import static util.ValidationUtil.stringOfLength;
 
 /**
  */

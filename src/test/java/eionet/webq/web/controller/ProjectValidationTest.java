@@ -29,7 +29,7 @@ import org.springframework.validation.FieldError;
 
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.apache.commons.lang3.StringUtils.repeat;
-import static util.TestUtil.stringOfLength;
+import static util.ValidationUtil.stringOfLength;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @Transactional
