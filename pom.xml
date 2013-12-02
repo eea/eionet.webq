@@ -319,12 +319,18 @@
             </plugin>
         </plugins>
         <filters>
-            <filter>config/${env}.properties</filter>
+            <filter>config/${env}/application.properties</filter>
         </filters>
         <resources>
             <resource>
                 <directory>src/main/resources</directory>
                 <filtering>true</filtering>
+            </resource>
+            <resource>
+                <directory>config/${env}</directory>
+                <includes>
+                    <include>log4j.xml</include>
+                </includes>
             </resource>
         </resources>
     </build>
