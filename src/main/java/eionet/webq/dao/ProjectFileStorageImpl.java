@@ -137,7 +137,7 @@ public class ProjectFileStorageImpl extends AbstractDao<ProjectFile> implements 
      * @return criterion
      */
     private Conjunction activeWebFormCriterionForType(WebFormType type) {
-        Conjunction criterion = Restrictions.and(eq("fileType", ProjectFileType.WEBFORM), eq("active", true), isNotNull("xmlSchema"));
+        Conjunction criterion = and(eq("fileType", ProjectFileType.WEBFORM), eq("active", true), isNotNull("xmlSchema"));
         if (type == WebFormType.LOCAL) {
             criterion.add(eq("localForm", true));
         }
