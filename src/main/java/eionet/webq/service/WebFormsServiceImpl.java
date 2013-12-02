@@ -29,7 +29,7 @@ import org.springframework.stereotype.Service;
 import java.util.Collection;
 
 /**
- * {@link eionet.webq.service.WebFormService} implementation.
+ * {@link eionet.webq.service.WebFormService} implementation for local web forms.
  */
 @Service("localWebForms")
 public class WebFormsServiceImpl extends AbstractWebFormsService {
