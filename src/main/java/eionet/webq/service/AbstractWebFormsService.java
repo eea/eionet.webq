@@ -20,37 +20,28 @@
  */
 package eionet.webq.service;
 
-import eionet.webq.dao.WebFormStorage;
 import eionet.webq.dao.orm.ProjectFile;
-import eionet.webq.dto.WebFormType;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.util.Collection;
 
 /**
- * {@link eionet.webq.service.WebFormService} implementation.
  */
-@Service("localWebForms")
-public class WebFormsServiceImpl extends AbstractWebFormsService {
+public abstract class AbstractWebFormsService implements WebFormService {
+
+    @Override
+    public Collection<ProjectFile> findWebFormsForSchemas(Collection<String> xmlSchemas) {
+        if (CollectionUtils.isEmpty(xmlSchemas)) {
+            return getAllActiveWebForms();
+        }
+        return findWebFormsForNotEmptyXmlSchemas(xmlSchemas);
+    }
+
     /**
-     * Web forms storage.
+     * Performs search for project files when provided collection of xml schemas is not empty.
+     *
+     * @param xmlSchemas xml schemas
+     * @return web forms belonging to provided schemas
      */
-    @Autowired
-    WebFormStorage storage;
-
-    @Override
-    public Collection<ProjectFile> getAllActiveWebForms() {
-        return storage.getAllActiveWebForms(WebFormType.LOCAL);
-    }
-
-    @Override
-    public ProjectFile findActiveWebFormById(int id) {
-        return storage.getActiveWebFormById(WebFormType.LOCAL, id);
-    }
-
-    @Override
-    protected Collection<ProjectFile> findWebFormsForNotEmptyXmlSchemas(Collection<String> xmlSchemas) {
-        return storage.findWebFormsForSchemas(WebFormType.LOCAL, xmlSchemas);
-    }
+    protected abstract Collection<ProjectFile> findWebFormsForNotEmptyXmlSchemas(Collection<String> xmlSchemas);
 }

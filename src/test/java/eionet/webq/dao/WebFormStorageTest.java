@@ -46,6 +46,8 @@ import static org.junit.Assert.assertTrue;
 @ContextConfiguration(classes = {ApplicationTestContextWithMockSession.class})
 @Transactional
 public class WebFormStorageTest {
+    public static final String ANOTHER_TEST_SCHEMA = "another-test-schema";
+    public static final String TEST_SCHEMA = "test-schema";
     @Autowired
     private WebFormStorage webFormStorage;
     @Autowired
@@ -127,7 +129,7 @@ public class WebFormStorageTest {
 
     @Test
     public void fetchWebFormsByXmlSchemaAndType() throws Exception {
-        String xmlSchema = "another-test-schema";
+        String xmlSchema = ANOTHER_TEST_SCHEMA;
         saveWithXmlSchema(getFirstActiveFormOfType(WebFormType.LOCAL), xmlSchema);
         saveWithXmlSchema(createRemoteWebform(), xmlSchema);
 
@@ -138,6 +140,15 @@ public class WebFormStorageTest {
         Collection<ProjectFile> remoteWebForms =
                 webFormStorage.findWebFormsForSchemas(WebFormType.LOCAL, Arrays.asList(xmlSchema));
         assertOnlyOneWebFormWithSchema(remoteWebForms, xmlSchema);
+    }
+
+    @Test
+    public void allowToSpecifyMoreThanOneXmlSchema() throws Exception {
+        saveWithXmlSchema(getFirstActiveFormOfType(WebFormType.LOCAL), ANOTHER_TEST_SCHEMA);
+        Collection<ProjectFile> xForms = webFormStorage.findWebFormsForSchemas(WebFormType.LOCAL,
+                Arrays.asList(TEST_SCHEMA, ANOTHER_TEST_SCHEMA));
+
+        assertThat(xForms.size(), equalTo(2));
     }
 
     private ProjectFile getFirstActiveFormOfType(WebFormType type) {
@@ -164,7 +175,7 @@ public class WebFormStorageTest {
         ProjectFile file = new ProjectFile();
         file.setFileType(type);
         file.setActive(true);
-        file.setXmlSchema("test-schema");
+        file.setXmlSchema(TEST_SCHEMA);
         file.setTitle("test-title");
         file.setUserName("test-username");
         return file;
