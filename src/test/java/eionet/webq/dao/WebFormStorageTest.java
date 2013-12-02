@@ -24,6 +24,8 @@ import configuration.ApplicationTestContextWithMockSession;
 import eionet.webq.dao.orm.ProjectEntry;
 import eionet.webq.dao.orm.ProjectFile;
 import eionet.webq.dao.orm.ProjectFileType;
+import eionet.webq.dto.WebFormType;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,82 +50,114 @@ public class WebFormStorageTest {
     @Autowired
     private ProjectFileStorage projectFileStorage;
     private ProjectEntry project = testProject();
+    private int localFormId;
+    private int remoteFormId;
 
-    @Test
-    public void allowsToFetchAllWebformsInRepository() throws Exception {
-        save(createWebform());
-        save(createWebform());
+    @Before
+    public void setUp() {
+        ProjectFile localWebForm1 = createLocalWebform();
+        ProjectFile remoteWebform = createRemoteWebform();
+        save(localWebForm1);
+        save(createLocalWebform());
+        save(remoteWebform);
         save(createProjectFile(ProjectFileType.FILE));
-
-        Collection<ProjectFile> activeWebForms = webFormStorage.getAllActiveWebForms();
-
-        assertThat(activeWebForms.size(), equalTo(2));
-        Iterator<ProjectFile> iterator = activeWebForms.iterator();
-        assertThat(iterator.next().getFileType(), equalTo(ProjectFileType.WEBFORM));
-        assertThat(iterator.next().getFileType(), equalTo(ProjectFileType.WEBFORM));
+        localFormId = localWebForm1.getId();
+        remoteFormId = remoteWebform.getId();
     }
 
     @Test
-    public void webformsMustBeActive() throws Exception {
-        save(createWebform());
+    public void allowsToFetchAllLocalWebformsFromRepository() throws Exception {
+        Collection<ProjectFile> activeWebForms = webFormStorage.getAllActiveWebForms(WebFormType.LOCAL);
 
-        ProjectFile otherWebform = createWebform();
-        otherWebform.setActive(false);
-        save(otherWebform);
+        assertThat(activeWebForms.size(), equalTo(2));
+        Iterator<ProjectFile> iterator = activeWebForms.iterator();
+        assertIsLocalWebForm(iterator.next());
+        assertIsLocalWebForm(iterator.next());
+    }
 
-        Collection<ProjectFile> allActiveWebForms = webFormStorage.getAllActiveWebForms();
-        assertThat(allActiveWebForms.size(), equalTo(1));
-        assertTrue(allActiveWebForms.iterator().next().isActive());
+    @Test
+    public void allowsToFetchAllRemoteWebformsFromRepository() throws Exception {
+        Collection<ProjectFile> remoteWebForms = webFormStorage.getAllActiveWebForms(WebFormType.REMOTE);
+        assertThat(remoteWebForms.size(), equalTo(1));
+
+        ProjectFile form = remoteWebForms.iterator().next();
+        assertIsRemoteWebForm(form);
+    }
+
+    @Test
+    public void localAndRemoteWebFormsMustBeActiveToBeFetched() throws Exception {
+        saveAsInactive(getFirstActiveFormOfType(WebFormType.LOCAL));
+        saveAsInactive(getFirstActiveFormOfType(WebFormType.REMOTE));
+
+        Collection<ProjectFile> activeLocalForms = webFormStorage.getAllActiveWebForms(WebFormType.LOCAL);
+
+        assertThat(activeLocalForms.size(), equalTo(1));
+        assertTrue(activeLocalForms.iterator().next().isActive());
+
+        assertThat(webFormStorage.getAllActiveWebForms(WebFormType.REMOTE).size(), equalTo(0));
     }
 
     @Test
     public void xmlSchemaMustBeSet() throws Exception {
-        save(createWebform());
+        saveWithoutXmlSchema(getFirstActiveFormOfType(WebFormType.LOCAL));
+        saveWithoutXmlSchema(getFirstActiveFormOfType(WebFormType.REMOTE));
 
-        ProjectFile otherWebform = createWebform();
-        otherWebform.setXmlSchema(null);
-        save(otherWebform);
+        Collection<ProjectFile> activeLocalForms = webFormStorage.getAllActiveWebForms(WebFormType.LOCAL);
 
-        Collection<ProjectFile> allActiveWebForms = webFormStorage.getAllActiveWebForms();
-        assertThat(allActiveWebForms.size(), equalTo(1));
-        assertNotNull(allActiveWebForms.iterator().next().getXmlSchema());
+        assertThat(activeLocalForms.size(), equalTo(1));
+        assertNotNull(activeLocalForms.iterator().next().getXmlSchema());
+
+        assertThat(webFormStorage.getAllActiveWebForms(WebFormType.REMOTE).size(), equalTo(0));
     }
 
     @Test
-    public void webformMustBeMarkedAsMainForm() throws Exception {
-        save(createWebform());
-
-        ProjectFile otherWebform = createWebform();
-        otherWebform.setLocalForm(false);
-        save(otherWebform);
-
-        Collection<ProjectFile> allActiveWebForms = webFormStorage.getAllActiveWebForms();
-        assertThat(allActiveWebForms.size(), equalTo(1));
-        assertTrue(allActiveWebForms.iterator().next().isLocalForm());
+    public void getLocalWebFormById() throws Exception {
+        ProjectFile webForm = webFormStorage.getActiveWebFormById(WebFormType.LOCAL, localFormId);
+        assertIsLocalWebForm(webForm);
+        assertThat(webForm.getId(), equalTo(localFormId));
     }
 
     @Test
-    public void getActiveWebFormById() throws Exception {
-        ProjectFile webform = createWebform();
-        int id = save(webform);
-        ProjectFile file = webFormStorage.getActiveWebFormById(id);
+    public void getRemoteWebFormById() throws Exception {
+        ProjectFile webForm = webFormStorage.getActiveWebFormById(WebFormType.REMOTE, remoteFormId);
+        assertIsRemoteWebForm(webForm);
+        assertThat(webForm.getId(), equalTo(remoteFormId));
+    }
 
-        assertThat(file.getTitle(), equalTo(webform.getTitle()));
+    private ProjectFile getFirstActiveFormOfType(WebFormType type) {
+        return webFormStorage.getAllActiveWebForms(type).iterator().next();
+    }
+
+    private void saveWithoutXmlSchema(ProjectFile webForm) {
+        webForm.setXmlSchema(null);
+        save(webForm);
+    }
+
+    private void saveAsInactive(ProjectFile webForm) {
+        webForm.setActive(false);
+        save(webForm);
     }
 
     private int save(ProjectFile projectFile) {
         return projectFileStorage.save(projectFile, project);
     }
 
-    private ProjectFile createWebform() {
-        return createProjectFile(ProjectFileType.WEBFORM);
+    private ProjectFile createLocalWebform() {
+        ProjectFile projectFile = createProjectFile(ProjectFileType.WEBFORM);
+        projectFile.setLocalForm(true);
+        return projectFile;
+    }
+
+    private ProjectFile createRemoteWebform() {
+        ProjectFile projectFile = createProjectFile(ProjectFileType.WEBFORM);
+        projectFile.setRemoteForm(true);
+        return projectFile;
     }
 
     private ProjectFile createProjectFile(ProjectFileType type) {
         ProjectFile file = new ProjectFile();
         file.setFileType(type);
         file.setActive(true);
-        file.setLocalForm(true);
         file.setXmlSchema("test-schema");
         file.setTitle("test-title");
         file.setUserName("test-username");
@@ -135,5 +169,19 @@ public class WebFormStorageTest {
         projectEntry.setId(1);
         projectEntry.setProjectId("test");
         return projectEntry;
+    }
+
+    private void assertIsLocalWebForm(ProjectFile file) {
+        assertThatFileIsWebForm(file);
+        assertTrue(file.isLocalForm());
+    }
+
+    private void assertIsRemoteWebForm(ProjectFile form) {
+        assertTrue(form.isRemoteForm());
+        assertThat(form.getFileType(), equalTo(ProjectFileType.WEBFORM));
+    }
+
+    private void assertThatFileIsWebForm(ProjectFile file) {
+        assertThat(file.getFileType(), equalTo(ProjectFileType.WEBFORM));
     }
 }

@@ -22,6 +22,7 @@ package eionet.webq.service;
 
 import eionet.webq.dao.WebFormStorage;
 import eionet.webq.dao.orm.ProjectFile;
+import eionet.webq.dto.WebFormType;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
@@ -59,27 +60,27 @@ public class WebFormsServiceImplTest {
     public void asksStorageForFullListOfActiveWebForms() throws Exception {
         webFormService.getAllActiveWebForms();
 
-        verify(storage).getAllActiveWebForms();
+        verify(storage).getAllActiveWebForms(WebFormType.LOCAL);
         verifyNoMoreInteractions(storage);
     }
 
     @Test
     public void returnsAllAvailableFormsIfProvidedXmlSchemasArrayIsEmpty() throws Exception {
-        when(storage.getAllActiveWebForms()).thenReturn(Arrays.asList(file1, file2, file3));
+        when(storage.getAllActiveWebForms(WebFormType.LOCAL)).thenReturn(Arrays.asList(file1, file2, file3));
 
         assertThat(webFormService.findWebFormsForSchemas(new ArrayList<String>()).size(), equalTo(3));
     }
 
     @Test
     public void forNullXmlSchemasArgumentReturnTheSameResultAsForEmptyArray() throws Exception {
-        when(storage.getAllActiveWebForms()).thenReturn(Arrays.asList(file1, file2));
+        when(storage.getAllActiveWebForms(WebFormType.LOCAL)).thenReturn(Arrays.asList(file1, file2));
 
         assertThat(webFormService.findWebFormsForSchemas(null), equalTo(webFormService.findWebFormsForSchemas(new ArrayList<String>())));
     }
 
     @Test
     public void findWebFormsForSchemasReturnSpecificResultForSchemaInParameter() throws Exception {
-        when(storage.getAllActiveWebForms()).thenReturn(Arrays.asList(file1, file2));
+        when(storage.getAllActiveWebForms(WebFormType.LOCAL)).thenReturn(Arrays.asList(file1, file2));
 
         Collection<ProjectFile> xForms = webFormService.findWebFormsForSchemas(Arrays.asList(file1.getXmlSchema()));
 
@@ -89,7 +90,7 @@ public class WebFormsServiceImplTest {
 
     @Test
     public void allowToSpecifyMoreThanOneXmlSchema() throws Exception {
-        when(storage.getAllActiveWebForms()).thenReturn(Arrays.asList(file1, file2, file3));
+        when(storage.getAllActiveWebForms(WebFormType.LOCAL)).thenReturn(Arrays.asList(file1, file2, file3));
 
         Collection<ProjectFile> xForms = webFormService.findWebFormsForSchemas(Arrays.asList(file1.getXmlSchema(), file3.getXmlSchema()));
 
@@ -101,10 +102,9 @@ public class WebFormsServiceImplTest {
 
     @Test
     public void findActiveWebFormById() throws Exception {
-        int webFormId = Integer.MAX_VALUE / 42;
-        webFormService.findActiveWebFormById(webFormId);
+        webFormService.findActiveWebFormById(1);
 
-        verify(storage).getActiveWebFormById(webFormId);
+        verify(storage).getActiveWebFormById(WebFormType.LOCAL, 1);
     }
 
     private ProjectFile webFormWithXmlSchema(String fileName) {

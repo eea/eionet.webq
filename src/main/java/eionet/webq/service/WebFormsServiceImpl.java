@@ -22,6 +22,7 @@ package eionet.webq.service;
 
 import eionet.webq.dao.WebFormStorage;
 import eionet.webq.dao.orm.ProjectFile;
+import eionet.webq.dto.WebFormType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -33,7 +34,7 @@ import java.util.List;
 /**
  * {@link eionet.webq.service.WebFormService} implementation.
  */
-@Service
+@Service("localWebForms")
 public class WebFormsServiceImpl implements WebFormService {
     /**
      * Web forms storage.
@@ -43,12 +44,12 @@ public class WebFormsServiceImpl implements WebFormService {
 
     @Override
     public Collection<ProjectFile> getAllActiveWebForms() {
-        return storage.getAllActiveWebForms();
+        return storage.getAllActiveWebForms(WebFormType.LOCAL);
     }
 
     @Override
     public ProjectFile findActiveWebFormById(int id) {
-        return storage.getActiveWebFormById(id);
+        return storage.getActiveWebFormById(WebFormType.LOCAL, id);
     }
 
     @Override

@@ -24,9 +24,10 @@ import eionet.webq.dao.orm.ProjectEntry;
 import eionet.webq.dao.orm.ProjectFile;
 import eionet.webq.dao.orm.ProjectFileType;
 import eionet.webq.dao.orm.util.WebQFileInfo;
+import eionet.webq.dto.WebFormType;
 import org.apache.commons.lang3.ArrayUtils;
 import org.hibernate.Session;
-import org.hibernate.criterion.Criterion;
+import org.hibernate.criterion.Conjunction;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
@@ -38,6 +39,7 @@ import java.util.Collection;
 import static org.hibernate.criterion.Restrictions.and;
 import static org.hibernate.criterion.Restrictions.eq;
 import static org.hibernate.criterion.Restrictions.in;
+import static org.hibernate.criterion.Restrictions.isNotNull;
 
 /**
  * ProjectFileStorage implementation.
@@ -83,15 +85,13 @@ public class ProjectFileStorageImpl extends AbstractDao<ProjectFile> implements 
 
     @SuppressWarnings("unchecked")
     @Override
-    public Collection<ProjectFile> getAllActiveWebForms() {
-        return getCriteria().add(
-                Restrictions.and(eq("fileType", ProjectFileType.WEBFORM), eq("active", true), eq("localForm", true),
-                        Restrictions.isNotNull("xmlSchema"))).list();
+    public Collection<ProjectFile> getAllActiveWebForms(WebFormType type) {
+        return getCriteria().add(activeWebFormCriterionForType(type)).list();
     }
 
     @Override
-    public ProjectFile getActiveWebFormById(int id) {
-        return (ProjectFile) getCriteria().add(Restrictions.and(activeWebFormCriterion(), Restrictions.idEq(id))).uniqueResult();
+    public ProjectFile getActiveWebFormById(WebFormType type, int id) {
+        return (ProjectFile) getCriteria().add(Restrictions.and(activeWebFormCriterionForType(type), Restrictions.idEq(id))).uniqueResult();
     }
 
     @Override
@@ -127,10 +127,17 @@ public class ProjectFileStorageImpl extends AbstractDao<ProjectFile> implements 
     /**
      * Criterion defining active web form.
      *
+     * @param type web form type
      * @return criterion
      */
-    private Criterion activeWebFormCriterion() {
-        return Restrictions.and(eq("fileType", ProjectFileType.WEBFORM), eq("active", true), eq("localForm", true),
-                Restrictions.isNotNull("xmlSchema"));
+    private Conjunction activeWebFormCriterionForType(WebFormType type) {
+        Conjunction criterion = Restrictions.and(eq("fileType", ProjectFileType.WEBFORM), eq("active", true), isNotNull("xmlSchema"));
+        if (type == WebFormType.LOCAL) {
+            criterion.add(eq("localForm", true));
+        }
+        if (type == WebFormType.REMOTE) {
+            criterion.add(eq("remoteForm", true));
+        }
+        return criterion;
     }
 }
