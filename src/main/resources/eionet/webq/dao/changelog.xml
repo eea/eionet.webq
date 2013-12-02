@@ -241,9 +241,9 @@
         </createTable>
     </changeSet>
     <changeSet id="14" author="dmitrant">
-        <renameColumn tableName="project_file" oldColumnName="main_form" newColumnName="local_form"/>
+        <renameColumn tableName="project_file" oldColumnName="main_form" newColumnName="local_form" columnDataType="boolean"/>
         <addColumn tableName="project_file">
-            <column name="remote_form" type="boolean" defaultValue="false"/>
+            <column name="remote_form" type="boolean"/>
         </addColumn>
     </changeSet>
 </databaseChangeLog>
