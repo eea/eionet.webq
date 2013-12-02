@@ -33,6 +33,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 
@@ -124,18 +125,23 @@ public class WebFormStorageTest {
         assertThat(webForm.getId(), equalTo(remoteFormId));
     }
 
+    @Test
+    public void fetchWebFormsByXmlSchemaAndType() throws Exception {
+        String xmlSchema = "another-test-schema";
+        saveWithXmlSchema(getFirstActiveFormOfType(WebFormType.LOCAL), xmlSchema);
+        saveWithXmlSchema(createRemoteWebform(), xmlSchema);
+
+        Collection<ProjectFile> localWebForms =
+                webFormStorage.findWebFormsForSchemas(WebFormType.LOCAL, Arrays.asList(xmlSchema));
+        assertOnlyOneWebFormWithSchema(localWebForms, xmlSchema);
+
+        Collection<ProjectFile> remoteWebForms =
+                webFormStorage.findWebFormsForSchemas(WebFormType.LOCAL, Arrays.asList(xmlSchema));
+        assertOnlyOneWebFormWithSchema(remoteWebForms, xmlSchema);
+    }
+
     private ProjectFile getFirstActiveFormOfType(WebFormType type) {
         return webFormStorage.getAllActiveWebForms(type).iterator().next();
-    }
-
-    private void saveWithoutXmlSchema(ProjectFile webForm) {
-        webForm.setXmlSchema(null);
-        save(webForm);
-    }
-
-    private void saveAsInactive(ProjectFile webForm) {
-        webForm.setActive(false);
-        save(webForm);
     }
 
     private int save(ProjectFile projectFile) {
@@ -169,6 +175,28 @@ public class WebFormStorageTest {
         projectEntry.setId(1);
         projectEntry.setProjectId("test");
         return projectEntry;
+    }
+
+    private void saveWithXmlSchema(ProjectFile webForm, String xmlSchema) {
+        webForm.setXmlSchema(xmlSchema);
+        save(webForm);
+    }
+
+    private void saveWithoutXmlSchema(ProjectFile webForm) {
+        webForm.setXmlSchema(null);
+        save(webForm);
+    }
+
+    private void saveAsInactive(ProjectFile webForm) {
+        webForm.setActive(false);
+        save(webForm);
+    }
+
+    private void assertOnlyOneWebFormWithSchema(Collection<ProjectFile> projectFiles, String xmlSchema) {
+        assertThat(projectFiles.size(), equalTo(1));
+        ProjectFile webForm = projectFiles.iterator().next();
+        assertThatFileIsWebForm(webForm);
+        assertThat(webForm.getXmlSchema(), equalTo(xmlSchema));
     }
 
     private void assertIsLocalWebForm(ProjectFile file) {

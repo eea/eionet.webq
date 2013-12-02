@@ -91,7 +91,13 @@ public class ProjectFileStorageImpl extends AbstractDao<ProjectFile> implements 
 
     @Override
     public ProjectFile getActiveWebFormById(WebFormType type, int id) {
-        return (ProjectFile) getCriteria().add(Restrictions.and(activeWebFormCriterionForType(type), Restrictions.idEq(id))).uniqueResult();
+        return (ProjectFile) getCriteria().add(and(activeWebFormCriterionForType(type), Restrictions.idEq(id))).uniqueResult();
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public Collection<ProjectFile> findWebFormsForSchemas(WebFormType type, Collection<String> xmlSchemas) {
+        return getCriteria().add(and(activeWebFormCriterionForType(type), in("xmlSchema", xmlSchemas))).list();
     }
 
     @Override

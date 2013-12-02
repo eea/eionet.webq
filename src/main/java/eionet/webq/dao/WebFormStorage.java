@@ -47,4 +47,13 @@ public interface WebFormStorage {
      * @return active web form
      */
     ProjectFile getActiveWebFormById(WebFormType type, int id);
+
+    /**
+     * Finds web forms for schemas.
+     *
+     * @param type form type
+     * @param xmlSchemas xml schemas collection
+     * @return matched web forms
+     */
+    Collection<ProjectFile> findWebFormsForSchemas(WebFormType type, Collection<String> xmlSchemas);
 }
