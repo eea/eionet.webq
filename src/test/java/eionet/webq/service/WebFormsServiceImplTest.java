@@ -81,7 +81,7 @@ public class WebFormsServiceImplTest {
         when(storage.findWebFormsForSchemas(WebFormType.LOCAL, xmlSchemas))
                 .thenReturn(result);
 
-        Collection<ProjectFile> webForms = webFormService.findWebFormsForNotEmptyXmlSchemas(xmlSchemas);
+        Collection<ProjectFile> webForms = webFormService.findWebFormsForSchemas(xmlSchemas);
 
         assertTrue(webForms == result);
         verify(storage).findWebFormsForSchemas(WebFormType.LOCAL, xmlSchemas);

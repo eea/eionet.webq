@@ -20,36 +20,15 @@
  */
 package eionet.webq.service;
 
-import eionet.webq.dao.WebFormStorage;
-import eionet.webq.dao.orm.ProjectFile;
 import eionet.webq.dto.WebFormType;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.Collection;
 
 /**
  */
 @Service("remoteWebForms")
 public class RemoteWebFormService extends AbstractWebFormsService {
-    /**
-     * Web forms storage.
-     */
-    @Autowired
-    private WebFormStorage webFormStorage;
-
     @Override
-    public Collection<ProjectFile> getAllActiveWebForms() {
-        return webFormStorage.getAllActiveWebForms(WebFormType.REMOTE);
-    }
-
-    @Override
-    public ProjectFile findActiveWebFormById(int id) {
-        return webFormStorage.getActiveWebFormById(WebFormType.REMOTE, id);
-    }
-
-    @Override
-    protected Collection<ProjectFile> findWebFormsForNotEmptyXmlSchemas(Collection<String> xmlSchemas) {
-        return webFormStorage.findWebFormsForSchemas(WebFormType.REMOTE, xmlSchemas);
+    protected WebFormType webFormsForType() {
+        return WebFormType.REMOTE;
     }
 }

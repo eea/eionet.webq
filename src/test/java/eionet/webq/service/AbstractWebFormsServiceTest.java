@@ -20,10 +20,13 @@
  */
 package eionet.webq.service;
 
+import eionet.webq.dao.WebFormStorage;
 import eionet.webq.dao.orm.ProjectFile;
+import eionet.webq.dto.WebFormType;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Spy;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import java.util.ArrayList;
@@ -32,26 +35,19 @@ import java.util.Collection;
 
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyCollectionOf;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AbstractWebFormsServiceTest {
-    @Spy
+    @Mock
+    private WebFormStorage storage;
+    @InjectMocks
     private AbstractWebFormsService webFormsService = new AbstractWebFormsService() {
         @Override
-        public Collection<ProjectFile> getAllActiveWebForms() {
-            return null;
-        }
-
-        @Override
-        public ProjectFile findActiveWebFormById(int id) {
-            return null;
-        }
-
-        @Override
-        protected Collection<ProjectFile> findWebFormsForNotEmptyXmlSchemas(Collection<String> xmlSchemas) {
+        protected WebFormType webFormsForType() {
             return null;
         }
     };
@@ -77,14 +73,14 @@ public class AbstractWebFormsServiceTest {
 
     @Test
     public void findWebFormsForSchemasReturnSpecificResultForSchemaInParameter() throws Exception {
-        when(webFormsService.findWebFormsForNotEmptyXmlSchemas(anyCollectionOf(String.class)))
+        when(storage.findWebFormsForSchemas(any(WebFormType.class), anyCollectionOf(String.class)))
                 .thenReturn(Arrays.asList(file1));
 
         Collection<ProjectFile> xForms = webFormsService.findWebFormsForSchemas(Arrays.asList(file1.getXmlSchema()));
 
         assertThat(xForms.size(), equalTo(1));
         assertThat(xForms.iterator().next(), equalTo(file1));
-        verify(webFormsService).findWebFormsForNotEmptyXmlSchemas(anyCollectionOf(String.class));
+        verify(storage).findWebFormsForSchemas(any(WebFormType.class), anyCollectionOf(String.class));
     }
 
     private ProjectFile webFormWithXmlSchema(String fileName) {

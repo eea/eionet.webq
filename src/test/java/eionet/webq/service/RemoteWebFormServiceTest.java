@@ -75,7 +75,7 @@ public class RemoteWebFormServiceTest {
         when(storage.findWebFormsForSchemas(WebFormType.REMOTE, xmlSchemas))
                 .thenReturn(expected);
 
-        Collection<ProjectFile> actual = webFormService.findWebFormsForNotEmptyXmlSchemas(xmlSchemas);
+        Collection<ProjectFile> actual = webFormService.findWebFormsForSchemas(xmlSchemas);
 
         assertTrue(expected == actual);
         verify(storage).findWebFormsForSchemas(WebFormType.REMOTE, xmlSchemas);
