@@ -33,7 +33,7 @@
     <tiles:insertAttribute name="footer" />
 </div>
 <%-- FIXME log local IP for debugging. --%>
-<div style="display:none">request.getLocalAddr(): <%=request.getLocalAddr() %></div>
+<div style="display:none">java.net.InetAddress.getLocalHost(): <%=java.net.InetAddress.getLocalHost() %></div>
 <div style="display:none">request.getRemoteAddr(): <%=request.getRemoteAddr() %></div>
 </body>
 </html>
