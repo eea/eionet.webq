@@ -75,8 +75,12 @@
                     <td><f:checkbox path="active" id="active"/></td>
                 </tr>
                 <tr>
-                    <th scope="row"><label for="localForm">Main form</label></th>
-                    <td><f:checkbox path="localForm" id="localForm"/></td>
+                    <th scope="row"><label for="localForm" title="Anonymous users can select the form on WebQ front page.">Local form</label></th>
+                    <td><f:checkbox path="localForm"/></td>
+                </tr>
+                <tr>
+                    <th scope="row"><label for="remoteForm" title="The form is available for remote systems (CDR).">Remote form</label></th>
+                    <td><f:checkbox path="remoteForm"/></td>
                 </tr>
             </c:if>
         </table>
