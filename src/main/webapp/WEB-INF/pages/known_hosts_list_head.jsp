@@ -2,6 +2,6 @@
 
 <script>
     function viewHost(id) {
-        popup(id, 300, 400);
+        popup(id, 400, 700);
     }
 </script>
