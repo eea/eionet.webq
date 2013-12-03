@@ -122,6 +122,9 @@
                         </table>
                         <input type="button" onclick="$('#${popup_id}').dialog('close');" value="Close"/>
                         <input type="button" onclick="window.location = '<c:url value="/projects/${projectEntry.projectId}/webform/edit/?fileId=${projectFile.id}"/>'" value="Edit"/>
+                        <c:if test="${projectFile.remoteForm}">
+                            <input type="button" onclick="webFormOpenDialog(${projectFile.id});return;" value="Open webForm">
+                        </c:if>
                         <input type="button" onclick="removeFile('${projectFile.id}');" value="Delete"/>
                     </div>
                 </td>
@@ -139,4 +142,20 @@
 
 <div id="remove-project" title="Delete project?" class="dialogTemplate">
     <p>This project and all its files will be deleted. Are you sure?</p>
+</div>
+<div id="openWebForm" title="Open webForm" class="dialogTemplate">
+    <form method="GET" action="<c:url value="/webform/test/run"/>">
+        <table>
+            <tr>
+                <th scope="row">Instance URL</th>
+                <td><input type="text" name="instance"></td>
+            </tr>
+            <tr>
+                <th scope="row">Additional request parameters</th>
+                <td><input type="text" name="additionalParameters"></td>
+            </tr>
+        </table>
+        <input id="webFormId" type="hidden" name="webFormId">
+        <input type="submit" value="Open webForm">
+    </form>
 </div>
