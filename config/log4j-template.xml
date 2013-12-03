@@ -14,7 +14,7 @@
     -->
     <!-- LOG4J Default Appenders (Tomcat / Jetty) -->
     <appender name="ROLLING_FILE" class="org.apache.log4j.RollingFileAppender">
-        <param name="File" value="webq2.log"/>
+        <param name="File" value="/var/log/tomcat/webq2.log"/>
         <param name="MaxFileSize" value="10MB"/>
         <layout class="org.apache.log4j.PatternLayout">
             <param name="ConversionPattern" value="%-5p %c %x: %m%n"/>

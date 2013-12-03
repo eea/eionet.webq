@@ -27,7 +27,12 @@ Minimum requirements are:
 
 ### Setup
 
-Do `cp config/application-template.properties config/local/application.properties`
+Do:
+
+```sh
+$ cp config/application-template.properties config/local/application.properties
+$ cp config/log4j-template.xml config/local/log4j.xml
+```
 
 Set all properties to your environment.
 
@@ -35,7 +40,7 @@ Please _**do not commit**_ your local properties.
 
 ### Build
 
-Build with Maven `mvn clean install`
+Build with Maven `mvn -Denv=local clean install`
 
 ### Deployment
 
