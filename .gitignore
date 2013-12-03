@@ -1,6 +1,5 @@
 .idea/*
-config/local/application.properties
-config/production/application.properties
+config/local/*
 # target/ will match a directory target and paths underneath it, but not a regular file
 target/
 webq2.iml
