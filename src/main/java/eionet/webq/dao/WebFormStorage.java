@@ -62,7 +62,6 @@ public interface WebFormStorage {
      *
      *
      * @param id web form id
-     * @param type form type
      * @return active web form
      */
     ProjectFile getWebFormById(int id);
