@@ -20,10 +20,8 @@
  */
 package eionet.webq.web.controller;
 
-import eionet.webq.dao.orm.UserFile;
-import eionet.webq.service.FileNotAvailableException;
-import eionet.webq.service.UserFileService;
-import eionet.webq.service.WebFormService;
+import javax.servlet.http.HttpServletRequest;
+
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -31,7 +29,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import javax.servlet.http.HttpServletRequest;
+import eionet.webq.dao.orm.UserFile;
+import eionet.webq.service.FileNotAvailableException;
+import eionet.webq.service.UserFileService;
+import eionet.webq.service.WebFormService;
 
 /**
  * Test runner for remote form developers.
@@ -71,7 +72,7 @@ public class RemoteWebFormTestRun {
             redirect += "&instance=" + instance;
         }
         if (StringUtils.isNotEmpty(additionalParameters)) {
-            redirect += additionalParameters;
+            redirect += "&" + additionalParameters;
         }
 
         return redirect;
