@@ -9,6 +9,15 @@
         });
     }
 
+    function webFormOpenDialog(id) {
+        $('#openWebForm #webFormId').val(id);
+        $('#openWebForm').dialog({
+            width: 700,
+            height: 250,
+            modal: true
+        });
+    }
+
     function removeFile(id) {
         removeDialog($("#remove-file"), "<c:url value="/projects/${projectEntry.projectId}/webform/remove/?fileId="/>" + id);
     }

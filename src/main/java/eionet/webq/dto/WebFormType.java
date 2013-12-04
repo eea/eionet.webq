@@ -18,18 +18,14 @@
  * Contributor(s):
  *        Anton Dmitrijev
  */
-package eionet.webq.service;
-
-import eionet.webq.dto.WebFormType;
-import org.springframework.stereotype.Service;
+package eionet.webq.dto;
 
 /**
- * {@link eionet.webq.service.WebFormService} implementation for local web forms.
+ * Web form type.
  */
-@Service("localWebForms")
-public class WebFormsServiceImpl extends AbstractWebFormsService {
-    @Override
-    protected WebFormType webFormsForType() {
-        return WebFormType.LOCAL;
-    }
+public enum  WebFormType {
+    /**
+     * Web form could be only local or remote.
+     */
+    LOCAL, REMOTE
 }

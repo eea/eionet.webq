@@ -88,9 +88,14 @@ public class ProjectFile {
      */
     private boolean active;
     /**
-     * in case XML Schema has several webforms attached, then it is possible to edit XML file only with main webforms.
+     * form is available for webq users.
      */
-    private boolean mainForm;
+    private boolean localForm;
+    /**
+     * form is available for remote usage(e.g. CDR).
+     */
+    private boolean remoteForm;
+
     /**
      * Project file type.
      */
@@ -231,12 +236,20 @@ public class ProjectFile {
         this.active = active;
     }
 
-    public boolean isMainForm() {
-        return mainForm;
+    public boolean isLocalForm() {
+        return localForm;
     }
 
-    public void setMainForm(boolean mainForm) {
-        this.mainForm = mainForm;
+    public void setLocalForm(boolean localForm) {
+        this.localForm = localForm;
+    }
+
+    public boolean isRemoteForm() {
+        return remoteForm;
+    }
+
+    public void setRemoteForm(boolean remoteForm) {
+        this.remoteForm = remoteForm;
     }
 
     public String getUserName() {
@@ -291,7 +304,8 @@ public class ProjectFile {
         sb.append(", description='").append(description).append('\'');
         sb.append(", xmlSchema='").append(xmlSchema).append('\'');
         sb.append(", active=").append(active);
-        sb.append(", mainForm=").append(mainForm);
+        sb.append(", localForm=").append(localForm);
+        sb.append(", remoteForm=").append(remoteForm);
         sb.append(", fileType=").append(fileType);
         sb.append(", userName='").append(userName).append('\'');
         sb.append(", created=").append(created);

@@ -20,9 +20,9 @@
  */
 package eionet.webq.service;
 
-import eionet.webq.dao.orm.ProjectFile;
-
 import java.util.Collection;
+
+import eionet.webq.dao.orm.ProjectFile;
 
 /**
  * Operations with webForms.
@@ -51,4 +51,12 @@ public interface WebFormService {
      * @return collection of web forms found.
      */
     Collection<ProjectFile> findWebFormsForSchemas(Collection<String> xmlSchemas);
+
+    /**
+     * Find web form by id.
+     *
+     * @param id form id
+     * @return web form
+     */
+    ProjectFile findWebFormById(int id);
 }

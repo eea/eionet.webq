@@ -24,12 +24,11 @@ import eionet.webq.dto.WebFormType;
 import org.springframework.stereotype.Service;
 
 /**
- * {@link eionet.webq.service.WebFormService} implementation for local web forms.
  */
-@Service("localWebForms")
-public class WebFormsServiceImpl extends AbstractWebFormsService {
+@Service("remoteWebForms")
+public class RemoteWebFormService extends AbstractWebFormsService {
     @Override
     protected WebFormType webFormsForType() {
-        return WebFormType.LOCAL;
+        return WebFormType.REMOTE;
     }
 }

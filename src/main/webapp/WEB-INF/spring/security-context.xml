@@ -11,6 +11,7 @@
         <security:intercept-url pattern="/login" access="isAuthenticated()"/>
         <security:intercept-url pattern="/projects/**" access="hasAnyRole('DEVELOPER', 'ADMIN')"/>
         <security:intercept-url pattern="/merge/**" access="hasAnyRole('DEVELOPER', 'ADMIN')"/>
+        <security:intercept-url pattern="/webform/test/**" access="hasAnyRole('DEVELOPER', 'ADMIN')"/>
         <security:intercept-url pattern="/users/**" access="hasRole('ADMIN')"/>
         <security:intercept-url pattern="/known_hosts/**" access="hasRole('ADMIN')"/>
         <security:intercept-url pattern="/**" access="permitAll()"/>

@@ -26,6 +26,7 @@ import org.apache.xmlrpc.XmlRpcException;
 import org.apache.xmlrpc.client.XmlRpcClient;
 import org.apache.xmlrpc.client.XmlRpcClientConfigImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -45,6 +46,7 @@ public class AvailableFormsService extends SpringBeanAutowiringSupport {
      * Project files service.
      */
     @Autowired
+    @Qualifier("remoteWebForms")
     WebFormService webFormService;
     /**
      * Xml-Rpc client for querying previous version of WebQ.

@@ -34,6 +34,7 @@ import javax.validation.Valid;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
@@ -79,6 +80,7 @@ public class PublicPageController {
      * WebForms storage.
      */
     @Autowired
+    @Qualifier("localWebForms")
     private WebFormService webFormService;
     /**
      * Cdr envelope service.
@@ -284,7 +286,7 @@ public class PublicPageController {
     @RequestMapping(value = "/xform")
     @Transactional
     public void startWebFormWriteFormToResponse(@RequestParam int formId, HttpServletResponse response) throws IOException {
-        ProjectFile webForm = webFormService.findActiveWebFormById(formId);
+        ProjectFile webForm = webFormService.findWebFormById(formId);
         byte[] fileContent = webForm.getFileContent();
         response.setContentLength(fileContent.length);
         response.setContentType("application/xhtml+html");
