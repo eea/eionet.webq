@@ -20,17 +20,17 @@
  */
 package eionet.webq.web.controller;
 
-import eionet.webq.converter.UserFileToFileInfoConverter;
-import eionet.webq.dao.orm.ProjectFile;
-import eionet.webq.dao.orm.UserFile;
-import eionet.webq.dto.FileInfo;
-import eionet.webq.dto.UploadForm;
-import eionet.webq.dto.XmlSaveResult;
-import eionet.webq.service.CDREnvelopeService;
-import eionet.webq.service.ConversionService;
-import eionet.webq.service.FileNotAvailableException;
-import eionet.webq.service.UserFileService;
-import eionet.webq.service.WebFormService;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.Arrays;
+import java.util.Collection;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import javax.validation.Valid;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,15 +45,17 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-import javax.validation.Valid;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.Arrays;
-import java.util.Collection;
+import eionet.webq.converter.UserFileToFileInfoConverter;
+import eionet.webq.dao.orm.ProjectFile;
+import eionet.webq.dao.orm.UserFile;
+import eionet.webq.dto.FileInfo;
+import eionet.webq.dto.UploadForm;
+import eionet.webq.dto.XmlSaveResult;
+import eionet.webq.service.CDREnvelopeService;
+import eionet.webq.service.ConversionService;
+import eionet.webq.service.FileNotAvailableException;
+import eionet.webq.service.UserFileService;
+import eionet.webq.service.WebFormService;
 
 /**
  * Base controller for front page actions.
@@ -284,7 +286,7 @@ public class PublicPageController {
     @RequestMapping(value = "/xform")
     @Transactional
     public void startWebFormWriteFormToResponse(@RequestParam int formId, HttpServletResponse response) throws IOException {
-        ProjectFile webForm = webFormService.findActiveWebFormById(formId);
+        ProjectFile webForm = webFormService.findWebFormById(formId);
         byte[] fileContent = webForm.getFileContent();
         response.setContentLength(fileContent.length);
         response.setContentType("application/xhtml+html");

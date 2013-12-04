@@ -20,14 +20,15 @@
  */
 package eionet.webq.web.controller;
 
-import eionet.webq.dao.orm.ProjectFile;
-import eionet.webq.dao.orm.UploadedFile;
-import eionet.webq.dao.orm.UserFile;
-import eionet.webq.dto.UploadForm;
-import eionet.webq.service.CDREnvelopeService;
-import eionet.webq.service.RemoteFileService;
-import eionet.webq.service.UserFileService;
-import eionet.webq.service.WebFormService;
+import static org.hamcrest.core.IsEqual.equalTo;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.Arrays;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
@@ -38,14 +39,14 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 
-import java.util.Arrays;
-
-import static org.hamcrest.core.IsEqual.equalTo;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import eionet.webq.dao.orm.ProjectFile;
+import eionet.webq.dao.orm.UploadedFile;
+import eionet.webq.dao.orm.UserFile;
+import eionet.webq.dto.UploadForm;
+import eionet.webq.service.CDREnvelopeService;
+import eionet.webq.service.RemoteFileService;
+import eionet.webq.service.UserFileService;
+import eionet.webq.service.WebFormService;
 
 /**
  */
@@ -128,7 +129,7 @@ public class PublicPageControllerTest {
         ProjectFile projectFile = new ProjectFile();
         byte[] testContent = "test-content".getBytes();
         projectFile.setFileContent(testContent);
-        when(webFormService.findActiveWebFormById(WEB_FORM_ID)).thenReturn(projectFile);
+        when(webFormService.findWebFormById(WEB_FORM_ID)).thenReturn(projectFile);
 
         MockHttpServletResponse response = new MockHttpServletResponse();
         publicPageController.startWebFormWriteFormToResponse(WEB_FORM_ID, response);

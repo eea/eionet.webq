@@ -20,10 +20,10 @@
  */
 package eionet.webq.dao;
 
+import java.util.Collection;
+
 import eionet.webq.dao.orm.ProjectFile;
 import eionet.webq.dto.WebFormType;
-
-import java.util.Collection;
 
 /**
  * Interface for interactions with web forms repository.
@@ -56,4 +56,14 @@ public interface WebFormStorage {
      * @return matched web forms
      */
     Collection<ProjectFile> findWebFormsForSchemas(WebFormType type, Collection<String> xmlSchemas);
+
+    /**
+     * Get web form by id.
+     *
+     *
+     * @param id web form id
+     * @param type form type
+     * @return active web form
+     */
+    ProjectFile getWebFormById(int id);
 }

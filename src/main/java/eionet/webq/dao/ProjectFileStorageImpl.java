@@ -20,11 +20,14 @@
  */
 package eionet.webq.dao;
 
-import eionet.webq.dao.orm.ProjectEntry;
-import eionet.webq.dao.orm.ProjectFile;
-import eionet.webq.dao.orm.ProjectFileType;
-import eionet.webq.dao.orm.util.WebQFileInfo;
-import eionet.webq.dto.WebFormType;
+import static org.hibernate.criterion.Restrictions.and;
+import static org.hibernate.criterion.Restrictions.eq;
+import static org.hibernate.criterion.Restrictions.in;
+import static org.hibernate.criterion.Restrictions.isNotNull;
+
+import java.sql.Timestamp;
+import java.util.Collection;
+
 import org.apache.commons.lang3.ArrayUtils;
 import org.hibernate.Session;
 import org.hibernate.criterion.Conjunction;
@@ -33,13 +36,11 @@ import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.Timestamp;
-import java.util.Collection;
-
-import static org.hibernate.criterion.Restrictions.and;
-import static org.hibernate.criterion.Restrictions.eq;
-import static org.hibernate.criterion.Restrictions.in;
-import static org.hibernate.criterion.Restrictions.isNotNull;
+import eionet.webq.dao.orm.ProjectEntry;
+import eionet.webq.dao.orm.ProjectFile;
+import eionet.webq.dao.orm.ProjectFileType;
+import eionet.webq.dao.orm.util.WebQFileInfo;
+import eionet.webq.dto.WebFormType;
 
 /**
  * ProjectFileStorage implementation.
@@ -94,6 +95,11 @@ public class ProjectFileStorageImpl extends AbstractDao<ProjectFile> implements 
         return (ProjectFile) getCriteria().add(and(activeWebFormCriterionForType(type), Restrictions.idEq(id))).uniqueResult();
     }
 
+    @Override
+    public ProjectFile getWebFormById(int id) {
+        return (ProjectFile) getCriteria().add(Restrictions.idEq(id)).uniqueResult();
+    }
+
     @SuppressWarnings("unchecked")
     @Override
     public Collection<ProjectFile> findWebFormsForSchemas(WebFormType type, Collection<String> xmlSchemas) {
@@ -125,7 +131,7 @@ public class ProjectFileStorageImpl extends AbstractDao<ProjectFile> implements 
     private void updateWithoutChangingContent(ProjectFile projectFile) {
         getCurrentSession().createQuery("UPDATE ProjectFile SET title=:title, xmlSchema=:xmlSchema, "
                 + " description=:description, userName=:userName, "
-                + " active=:active, localForm=:localForm, remoteFileUrl=:remoteFileUrl, "
+                + " active=:active, localForm=:localForm, remoteForm=:remoteForm, remoteFileUrl=:remoteFileUrl, "
                 + " newXmlFileName=:newXmlFileName, emptyInstanceUrl=:emptyInstanceUrl, updated=CURRENT_TIMESTAMP() "
                 + " WHERE id=:id").setProperties(projectFile).executeUpdate();
     }

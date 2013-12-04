@@ -20,23 +20,24 @@
  */
 package eionet.webq.service;
 
-import eionet.webq.dao.WebFormStorage;
-import eionet.webq.dao.orm.ProjectFile;
-import eionet.webq.dto.WebFormType;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
+
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
+import eionet.webq.dao.WebFormStorage;
+import eionet.webq.dao.orm.ProjectFile;
+import eionet.webq.dto.WebFormType;
 
 /**
  */
@@ -85,5 +86,16 @@ public class WebFormsServiceImplTest {
 
         assertTrue(webForms == result);
         verify(storage).findWebFormsForSchemas(WebFormType.LOCAL, xmlSchemas);
+    }
+
+    @Test
+    public void findWebFormById() throws Exception {
+        ProjectFile expectedResult = new ProjectFile();
+        when(storage.getWebFormById(1)).thenReturn(expectedResult);
+
+        ProjectFile actualResult = webFormService.findWebFormById(1);
+
+        assertTrue(expectedResult == actualResult);
+        verify(storage).getWebFormById(1);
     }
 }

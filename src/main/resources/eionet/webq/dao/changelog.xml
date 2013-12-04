@@ -241,9 +241,15 @@
         </createTable>
     </changeSet>
     <changeSet id="14" author="dmitrant">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="project_file" columnName="remote_form"/>
+            </not>
+        </preConditions>
         <renameColumn tableName="project_file" oldColumnName="main_form" newColumnName="local_form" columnDataType="boolean"/>
         <addColumn tableName="project_file">
             <column name="remote_form" type="boolean"/>
         </addColumn>
+        <sql>update project_file set remote_form=0;</sql>
     </changeSet>
 </databaseChangeLog>

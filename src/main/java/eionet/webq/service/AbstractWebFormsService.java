@@ -20,13 +20,14 @@
  */
 package eionet.webq.service;
 
-import eionet.webq.dao.WebFormStorage;
-import eionet.webq.dao.orm.ProjectFile;
-import eionet.webq.dto.WebFormType;
+import java.util.Collection;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
 
-import java.util.Collection;
+import eionet.webq.dao.WebFormStorage;
+import eionet.webq.dao.orm.ProjectFile;
+import eionet.webq.dto.WebFormType;
 
 /**
  */
@@ -53,6 +54,11 @@ public abstract class AbstractWebFormsService implements WebFormService {
     @Override
     public ProjectFile findActiveWebFormById(int id) {
         return webFormStorage.getActiveWebFormById(webFormsForType(), id);
+    }
+
+    @Override
+    public ProjectFile findWebFormById(int id) {
+        return webFormStorage.getWebFormById(id);
     }
 
     /**

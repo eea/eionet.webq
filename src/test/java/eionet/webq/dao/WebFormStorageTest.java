@@ -20,11 +20,15 @@
  */
 package eionet.webq.dao;
 
-import configuration.ApplicationTestContextWithMockSession;
-import eionet.webq.dao.orm.ProjectEntry;
-import eionet.webq.dao.orm.ProjectFile;
-import eionet.webq.dao.orm.ProjectFileType;
-import eionet.webq.dto.WebFormType;
+import static org.hamcrest.core.IsEqual.equalTo;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Iterator;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -33,14 +37,11 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Iterator;
-
-import static org.hamcrest.core.IsEqual.equalTo;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import configuration.ApplicationTestContextWithMockSession;
+import eionet.webq.dao.orm.ProjectEntry;
+import eionet.webq.dao.orm.ProjectFile;
+import eionet.webq.dao.orm.ProjectFileType;
+import eionet.webq.dto.WebFormType;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {ApplicationTestContextWithMockSession.class})
@@ -125,6 +126,13 @@ public class WebFormStorageTest {
         ProjectFile webForm = webFormStorage.getActiveWebFormById(WebFormType.REMOTE, remoteFormId);
         assertIsRemoteWebForm(webForm);
         assertThat(webForm.getId(), equalTo(remoteFormId));
+    }
+
+    @Test
+    public void getWebFormById() throws Exception {
+        ProjectFile webForm = webFormStorage.getWebFormById(localFormId);
+        assertIsLocalWebForm(webForm);
+        assertThat(webForm.getId(), equalTo(localFormId));
     }
 
     @Test

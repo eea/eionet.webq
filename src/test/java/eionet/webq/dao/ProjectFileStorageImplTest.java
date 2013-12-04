@@ -20,12 +20,21 @@
  */
 package eionet.webq.dao;
 
-import configuration.ApplicationTestContextWithMockSession;
-import eionet.webq.dao.orm.ProjectEntry;
-import eionet.webq.dao.orm.ProjectFile;
-import eionet.webq.dao.orm.ProjectFileType;
-import eionet.webq.dao.orm.UploadedFile;
-import eionet.webq.dao.orm.util.WebQFileInfo;
+import static eionet.webq.dao.FileContentUtil.getFileContentRowsCount;
+import static eionet.webq.dao.orm.ProjectFileType.FILE;
+import static eionet.webq.dao.orm.ProjectFileType.WEBFORM;
+import static org.hamcrest.core.IsEqual.equalTo;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+
+import java.util.Collection;
+import java.util.Iterator;
+
+import javax.validation.ConstraintViolationException;
+
 import org.hibernate.FlushMode;
 import org.hibernate.LazyInitializationException;
 import org.hibernate.Session;
@@ -38,19 +47,12 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.validation.ConstraintViolationException;
-import java.util.Collection;
-import java.util.Iterator;
-
-import static eionet.webq.dao.FileContentUtil.getFileContentRowsCount;
-import static eionet.webq.dao.orm.ProjectFileType.FILE;
-import static eionet.webq.dao.orm.ProjectFileType.WEBFORM;
-import static org.hamcrest.core.IsEqual.equalTo;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import configuration.ApplicationTestContextWithMockSession;
+import eionet.webq.dao.orm.ProjectEntry;
+import eionet.webq.dao.orm.ProjectFile;
+import eionet.webq.dao.orm.ProjectFileType;
+import eionet.webq.dao.orm.UploadedFile;
+import eionet.webq.dao.orm.util.WebQFileInfo;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {ApplicationTestContextWithMockSession.class})
@@ -113,7 +115,7 @@ public class ProjectFileStorageImplTest {
         assertThat(projectFile.getXmlSchema(), equalTo(testFileForUpload.getXmlSchema()));
         assertThat(projectFile.isActive(), equalTo(testFileForUpload.isActive()));
         assertThat(projectFile.isLocalForm(), equalTo(testFileForUpload.isLocalForm()));
-        assertThat(projectFile.isRemoteForm(), equalTo(testFileForUpload.isLocalForm()));
+        assertThat(projectFile.isRemoteForm(), equalTo(testFileForUpload.isRemoteForm()));
         assertThat(projectFile.getRemoteFileUrl(), equalTo(testFileForUpload.getRemoteFileUrl()));
         assertThat(projectFile.getFileSizeInBytes(), equalTo(testFileForUpload.getFileSizeInBytes()));
     }
