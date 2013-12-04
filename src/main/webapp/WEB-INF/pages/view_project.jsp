@@ -35,7 +35,8 @@
                 <th>Last modified</th>
                 <c:if test="${isWebForm}">
                     <th>Active</th>
-                    <th>Main form</th>
+                    <th>Local</th>
+                    <th>Remote</th>
                 </c:if>
                 <th>Username</th>
                 <th>Remote location</th>
@@ -53,6 +54,7 @@
                 <c:if test="${isWebForm}">
                     <td><input type="checkbox" ${projectFile.active ? 'checked="checked"' : ''} disabled="disabled"/></td>
                     <td><input type="checkbox" ${projectFile.localForm ? 'checked="checked"' : ''} disabled="disabled"/></td>
+                    <td><input type="checkbox" ${projectFile.remoteForm ? 'checked="checked"' : ''} disabled="disabled"/></td>
                 </c:if>
                 <td>${projectFile.userName}</td>
                 <td>
@@ -111,8 +113,12 @@
                                     <td>${projectFile.active}</td>
                                 </tr>
                                 <tr>
-                                    <th scope="row">Main form</th>
+                                    <th scope="row">Local form</th>
                                     <td>${projectFile.localForm}</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">Remote form</th>
+                                    <td>${projectFile.remoteForm}</td>
                                 </tr>
                             </c:if>
                             <tr>
@@ -123,7 +129,7 @@
                         <input type="button" onclick="$('#${popup_id}').dialog('close');" value="Close"/>
                         <input type="button" onclick="window.location = '<c:url value="/projects/${projectEntry.projectId}/webform/edit/?fileId=${projectFile.id}"/>'" value="Edit"/>
                         <c:if test="${projectFile.remoteForm}">
-                            <input type="button" onclick="webFormOpenDialog(${projectFile.id});return;" value="Open webForm">
+                            <input type="button" onclick="webFormOpenDialog(${projectFile.id});return;" value="Open webform">
                         </c:if>
                         <input type="button" onclick="removeFile('${projectFile.id}');" value="Delete"/>
                     </div>
@@ -143,19 +149,19 @@
 <div id="remove-project" title="Delete project?" class="dialogTemplate">
     <p>This project and all its files will be deleted. Are you sure?</p>
 </div>
-<div id="openWebForm" title="Open webForm" class="dialogTemplate">
+<div id="openWebForm" title="Open webform" class="dialogTemplate">
     <form method="GET" action="<c:url value="/webform/test/run"/>">
-        <table>
+        <table class="datatable">
             <tr>
                 <th scope="row">Instance URL</th>
-                <td><input type="text" name="instance"></td>
+                <td><input type="text" name="instance" style="width:500px"></td>
             </tr>
             <tr>
-                <th scope="row">Additional request parameters</th>
-                <td><input type="text" name="additionalParameters"></td>
+                <th scope="row">Request parameters</th>
+                <td><input type="text" name="additionalParameters" placeholder="e.g. country=EE&amp;envelope=http://cdr.eionet.europa.eu/..."  style="width:500px"></td>
             </tr>
         </table>
         <input id="webFormId" type="hidden" name="webFormId">
-        <input type="submit" value="Open webForm">
+        <input type="submit" value="Open webform">
     </form>
 </div>

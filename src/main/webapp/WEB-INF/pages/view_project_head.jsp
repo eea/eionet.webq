@@ -12,8 +12,8 @@
     function webFormOpenDialog(id) {
         $('#openWebForm #webFormId').val(id);
         $('#openWebForm').dialog({
-            width: 600,
-            height: 400,
+            width: 700,
+            height: 250,
             modal: true
         });
     }
