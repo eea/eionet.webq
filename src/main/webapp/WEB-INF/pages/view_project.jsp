@@ -101,12 +101,12 @@
                             </tr>
                             <c:if test="${isWebForm}">
                                 <tr>
-                                    <th scope="row">Empty instance URL</th>
-                                    <td>${projectFile.emptyInstanceUrl}</td>
-                                </tr>
-                                <tr>
                                     <th scope="row">New xml file name</th>
                                     <td>${projectFile.newXmlFileName}</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">Empty instance URL</th>
+                                    <td>${projectFile.emptyInstanceUrl}</td>
                                 </tr>
                                 <tr>
                                     <th scope="row">Active</th>
