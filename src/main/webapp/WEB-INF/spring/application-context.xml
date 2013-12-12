@@ -11,6 +11,7 @@
     <context:component-scan base-package="eionet.webq"/>
     <mvc:annotation-driven conversion-service="conversionService"/>
     <cache:annotation-driven/>
+    <context:spring-configured/>
 
     <bean id="cacheManager" class="org.springframework.cache.support.SimpleCacheManager">
         <property name="caches">
