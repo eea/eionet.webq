@@ -23,6 +23,17 @@
             <xsl:otherwise><xsl:value-of select="'http'"/></xsl:otherwise>
         </xsl:choose>
     </xsl:variable>
+	
+	
+    <xsl:param name="envelope" select="''"/>
+    <xsl:param name="instance" select="''"/>
+	<xsl:variable name="cdrUrl">
+        <xsl:choose>
+            <xsl:when test="string-length($envelope) &gt; 0"><xsl:value-of select="concat(substring-before($envelope, '//'), '//', substring-before(substring-after($envelope, '//'), '/'))"/></xsl:when>
+            <xsl:when test="string-length($instance) &gt; 0"><xsl:value-of select="concat(substring-before($instance, '//'), '//', substring-before(substring-after($instance, '//'), '/'))"/></xsl:when>
+            <xsl:otherwise><xsl:value-of select="$baseUri"/></xsl:otherwise>
+        </xsl:choose>	
+	</xsl:variable>
 
     <!-- Overwrite betterForm InputDateAndTime template to change the default date pattern. -->
     <xsl:template name="InputDateAndTime">
@@ -142,8 +153,8 @@
             </xsl:otherwise>
         </xsl:choose>
         <!-- EIONET 2007 styles -->
-        <link rel="stylesheet" type="text/css" href="http://www.eionet.europa.eu/styles/eionet2007/print.css" media="print" />
-        <link rel="stylesheet" type="text/css" href="http://www.eionet.europa.eu/styles/eionet2007/handheld.css" media="handheld" />
+        <link rel="stylesheet" type="text/css" href="{$webq-protocol}://www.eionet.europa.eu/styles/eionet2007/print.css" media="print" />
+        <link rel="stylesheet" type="text/css" href="{$webq-protocol}://www.eionet.europa.eu/styles/eionet2007/handheld.css" media="handheld" />
         <style type="text/css">
             #bfLoading{
                 top:155px;
@@ -155,27 +166,12 @@
     </xsl:template>
 
     <xsl:template match="div[@id='workarea']">
-        <xsl:variable name="cdr_url">
+        <xsl:variable name="cdrName">
             <xsl:choose>
-                <xsl:when test="contains($baseURI , '.eu/webq/')"><xsl:value-of select="substring-before($baseURI , '/webq/')"/></xsl:when>
-                <!--
-                <xsl:when test="string-length($webq-cdr_url) &gt; 0">
-                    <xsl:value-of select="$webq-cdr_url"/>
-                </xsl:when>
-                -->
-                <xsl:otherwise><xsl:value-of select="$baseURI"/></xsl:otherwise>
-            </xsl:choose>
-        </xsl:variable>
-        <xsl:variable name="cdr_name">
-            <xsl:choose>
-                <xsl:when test="contains($baseURI , 'bdr.')">BDR</xsl:when>
-                <xsl:when test="contains($baseURI , 'cdrtest.')">CDRTEST</xsl:when>
-                <xsl:when test="contains($baseURI , 'cdr.')">CDR</xsl:when>
-                <!--
-                <xsl:when test="string-length($webq-cdr_name) &gt; 0">
-                    <xsl:value-of select="$webq-cdr_name"/>
-                </xsl:when>
-                -->
+                <xsl:when test="contains($cdrUrl , 'bdr.')">BDR</xsl:when>
+                <xsl:when test="contains($cdrUrl , 'bdr-test.')">BDR-TEST</xsl:when>
+                <xsl:when test="contains($cdrUrl , 'cdrtest.')">CDRTEST</xsl:when>
+                <xsl:when test="contains($cdrUrl , 'cdr.')">CDR</xsl:when>
                 <xsl:otherwise>WebQ</xsl:otherwise>
             </xsl:choose>
         </xsl:variable>
@@ -211,8 +207,8 @@
                 <div class="breadcrumbitem eionetaccronym"><a href="http://www.eionet.europa.eu/">Eionet</a></div>
                 <div class="breadcrumbitem">
                     <xsl:element name="a">
-                        <xsl:attribute name="href"><xsl:value-of select="$cdr_url"/></xsl:attribute>
-                        <xsl:value-of select="$cdr_name"/>
+                        <xsl:attribute name="href"><xsl:value-of select="$cdrUrl"/></xsl:attribute>
+                        <xsl:value-of select="$cdrName"/>
                     </xsl:element>
                 </div>
                 <div class="breadcrumbitemlast">WebForm</div>
@@ -226,6 +222,9 @@
             <p><a href="http://www.eea.europa.eu/"><b>European Environment Agency</b></a>
             <br/>Kgs. Nytorv 6, DK-1050 Copenhagen K, Denmark - Phone: +45 3336 7100</p>
         </div>
+		<div style="display:none">baseUri: <xsl:value-of select="$baseUri"/></div>
+		<div style="display:none">envelope: <xsl:value-of select="$envelope"/></div>
+		<div style="display:none">instance: <xsl:value-of select="$instance"/></div>
     </xsl:template>
 
     <!-- Overwrite bf template for fixing inline javascript - do not escape it. -->
