@@ -35,6 +35,16 @@
         <url-pattern>/RpcRouter</url-pattern>
     </servlet-mapping>
 
+    <filter>
+        <description>CDR requests come from another domain. The filter is responsible of keeping the user's sessions.</description>
+        <filter-name>CdrRequestRedirectFilter</filter-name>
+        <filter-class>eionet.webq.web.filter.CdrRequestRedirectFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>CdrRequestRedirectFilter</filter-name>
+        <url-pattern>/xform/*</url-pattern>
+    </filter-mapping>
+
     <!--  betterFORM XForms Filter -->
     <filter>
         <filter-name>XFormsFilter</filter-name>

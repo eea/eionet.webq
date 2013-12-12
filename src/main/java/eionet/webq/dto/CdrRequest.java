@@ -76,6 +76,11 @@ public class CdrRequest {
      */
     private String contextPath;
 
+    /**
+     * Session ID the request was received.
+     */
+    private String sessionId;
+
     public String getEnvelopeUrl() {
         return envelopeUrl;
     }
@@ -178,5 +183,34 @@ public class CdrRequest {
 
     public void setContextPath(String contextPath) {
         this.contextPath = contextPath;
+    }
+
+    /**
+     * @return the sessionId
+     */
+    public String getSessionId() {
+        return sessionId;
+    }
+
+    /**
+     * @param sessionId the sessionId to set
+     */
+    public void setSessionId(String sessionId) {
+        this.sessionId = sessionId;
+    }
+
+    /*
+     * (non-Javadoc)
+     *
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+        return "CdrRequest [envelopeUrl=" + envelopeUrl + ", schema=" + schema + ", newFormCreationAllowed="
+                + newFormCreationAllowed + ", newFileName=" + newFileName + ", authorizationSet=" + authorizationSet
+                + ", userName=" + userName
+                + ", instanceUrl=" + instanceUrl + ", instanceName=" + instanceName + ", instanceTitle=" + instanceTitle
+                + ", additionalParametersAsQueryString=" + additionalParametersAsQueryString + ", contextPath=" + contextPath
+                + ", sessionId=" + sessionId + "]";
     }
 }

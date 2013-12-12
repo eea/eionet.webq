@@ -20,20 +20,22 @@
  */
 package eionet.webq.service;
 
-import eionet.webq.dao.UserFileDownload;
-import eionet.webq.dao.UserFileStorage;
-import eionet.webq.dao.orm.ProjectFile;
-import eionet.webq.dao.orm.UserFile;
+import static org.apache.commons.lang3.StringUtils.defaultIfEmpty;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
+
+import java.util.Arrays;
+import java.util.Collection;
+
+import javax.servlet.http.HttpSession;
+
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.servlet.http.HttpSession;
-import java.util.Arrays;
-import java.util.Collection;
-
-import static org.apache.commons.lang3.StringUtils.defaultIfEmpty;
-import static org.apache.commons.lang3.StringUtils.isNotEmpty;
+import eionet.webq.dao.UserFileDownload;
+import eionet.webq.dao.UserFileStorage;
+import eionet.webq.dao.orm.ProjectFile;
+import eionet.webq.dao.orm.UserFile;
 
 /**
  * {@link UserFileService} implementation.
@@ -90,6 +92,13 @@ public class UserFileServiceImpl implements UserFileService {
     @Override
     public UserFile getById(int id) {
         UserFile userFile = storage.findFile(id, userId());
+        LOGGER.info("Loaded user file=" + userFile);
+        return userFile;
+    }
+
+    @Override
+    public UserFile getByIdAndUser(int id, String userId) {
+        UserFile userFile = storage.findFile(id, userId);
         LOGGER.info("Loaded user file=" + userFile);
         return userFile;
     }

@@ -271,7 +271,16 @@ public class PublicPageController {
     public String startWebFormSaveFile(@RequestParam int formId, HttpServletRequest request)
             throws FileNotAvailableException {
         int fileId = userFileService.saveBasedOnWebForm(new UserFile(), webFormService.findActiveWebFormById(formId));
-        return "redirect:/xform/?formId=" + formId + "&fileId=" + fileId + "&base_uri=" + request.getContextPath();
+        String absolutePath = "";
+        String baseUri = "&base_uri=";
+        if (StringUtils.isNotEmpty(request.getParameter("base_uri"))) {
+            baseUri += request.getParameter("base_uri");
+            absolutePath = (request.getParameter("base_uri").startsWith("http")) ? request.getParameter("base_uri") : "";
+        } else {
+            baseUri += request.getContextPath();
+        }
+
+        return "redirect:" + absolutePath + "/xform/?formId=" + formId + "&fileId=" + fileId + baseUri;
     }
 
     /**

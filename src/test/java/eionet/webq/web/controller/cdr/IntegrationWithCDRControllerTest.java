@@ -20,14 +20,24 @@
  */
 package eionet.webq.web.controller.cdr;
 
-import eionet.webq.converter.CdrRequestConverter;
-import eionet.webq.dao.orm.ProjectFile;
-import eionet.webq.dao.orm.UserFile;
-import eionet.webq.dto.CdrRequest;
-import eionet.webq.service.CDREnvelopeService;
-import eionet.webq.service.FileNotAvailableException;
-import eionet.webq.service.UserFileService;
-import eionet.webq.service.WebFormService;
+import static org.hamcrest.core.IsEqual.equalTo;
+import static org.hamcrest.core.StringStartsWith.startsWith;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyCollectionOf;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -40,23 +50,15 @@ import org.springframework.ui.Model;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
-import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
-import static eionet.webq.service.CDREnvelopeService.XmlFile;
-import static org.hamcrest.core.IsEqual.equalTo;
-import static org.hamcrest.core.StringStartsWith.startsWith;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyCollectionOf;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import eionet.webq.converter.CdrRequestConverter;
+import eionet.webq.dao.orm.ProjectFile;
+import eionet.webq.dao.orm.UserFile;
+import eionet.webq.dto.CdrRequest;
+import eionet.webq.service.CDREnvelopeService;
+import eionet.webq.service.CDREnvelopeService.XmlFile;
+import eionet.webq.service.FileNotAvailableException;
+import eionet.webq.service.UserFileService;
+import eionet.webq.service.WebFormService;
 
 /**
  */
@@ -94,7 +96,8 @@ public class IntegrationWithCDRControllerTest {
     @Test(expected = IllegalArgumentException.class)
     public void throwsExceptionIfWebFormsAmountIsZero() throws Exception {
         getXmlFilesWillReturnFilesAmountOf(1);
-        when(webFormService.findWebFormsForSchemas(anyCollectionOf(String.class))).thenReturn(Collections.<ProjectFile>emptyList());
+        when(webFormService.findWebFormsForSchemas(anyCollectionOf(String.class))).thenReturn(
+                Collections.<ProjectFile> emptyList());
 
         controller.webQMenu(mockRequest, model);
     }
@@ -121,7 +124,8 @@ public class IntegrationWithCDRControllerTest {
 
         ProjectFile webFormForAnotherSchema = new ProjectFile();
         webFormForAnotherSchema.setXmlSchema(XML_SCHEMA + "-another-schema");
-        when(webFormService.findWebFormsForSchemas(anyCollectionOf(String.class))).thenReturn(Arrays.asList(webFormForAnotherSchema));
+        when(webFormService.findWebFormsForSchemas(anyCollectionOf(String.class))).thenReturn(
+                Arrays.asList(webFormForAnotherSchema));
 
         assertNoRedirectOnMenuCall();
     }

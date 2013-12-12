@@ -14,9 +14,9 @@
 
     <title>Web Questionnaires</title>
 
-    <link rel="stylesheet" type="text/css" href="http://www.eionet.europa.eu/styles/eionet2007/print.css" media="print" />
-    <link rel="stylesheet" type="text/css" href="http://www.eionet.europa.eu/styles/eionet2007/handheld.css" media="handheld" />
-    <link rel="stylesheet" type="text/css" href="http://www.eionet.europa.eu/styles/eionet2007/screen.css" media="screen" title="Eionet 2007 style" />
+    <link rel="stylesheet" type="text/css" href="${pageContext.request.scheme}://www.eionet.europa.eu/styles/eionet2007/print.css" media="print" />
+    <link rel="stylesheet" type="text/css" href="${pageContext.request.scheme}://www.eionet.europa.eu/styles/eionet2007/handheld.css" media="handheld" />
+    <link rel="stylesheet" type="text/css" href="${pageContext.request.scheme}://www.eionet.europa.eu/styles/eionet2007/screen.css" media="screen" title="Eionet 2007 style" />
     <link rel="stylesheet" type="text/css" href="<c:url value="/css/eionet2007.css"/>" media="screen" title="Eionet 2007 style" />
     <script type="text/javascript" src="<c:url value="/js/pageops.js"/>"></script>
     <tiles:insertAttribute name="specific_header" ignore="true"/>
@@ -32,7 +32,7 @@
     </div>
     <tiles:insertAttribute name="footer" />
 </div>
-<%-- FIXME log local IP for debugging. --%>
+<%-- FIXME log server info for debugging. --%>
 <div style="display:none">java.net.InetAddress.getLocalHost(): <%=java.net.InetAddress.getLocalHost() %></div>
 <div style="display:none">request.getRemoteAddr(): <%=request.getRemoteAddr() %></div>
 <div style="display:none">request.getContextPath(): <%=request.getContextPath() %></div>

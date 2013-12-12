@@ -20,16 +20,15 @@
  */
 package eionet.webq.web.controller.cdr;
 
-import eionet.webq.converter.CdrRequestConverter;
-import eionet.webq.dao.orm.ProjectFile;
-import eionet.webq.dao.orm.UserFile;
-import eionet.webq.dto.CdrRequest;
-import eionet.webq.service.CDREnvelopeService;
-import eionet.webq.service.CDREnvelopeService.XmlFile;
-import eionet.webq.service.FileNotAvailableException;
-import eionet.webq.service.UserFileService;
-import eionet.webq.service.WebFormService;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -43,11 +42,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
+import eionet.webq.converter.CdrRequestConverter;
+import eionet.webq.dao.orm.ProjectFile;
+import eionet.webq.dao.orm.UserFile;
+import eionet.webq.dto.CdrRequest;
+import eionet.webq.service.CDREnvelopeService;
+import eionet.webq.service.CDREnvelopeService.XmlFile;
+import eionet.webq.service.FileNotAvailableException;
+import eionet.webq.service.UserFileService;
+import eionet.webq.service.WebFormService;
 
 /**
  * Provides integration options with CDR.
@@ -58,6 +61,10 @@ public class IntegrationWithCDRController {
      * Latest cdr request session attribute.
      */
     public static final String LATEST_CDR_REQUEST = "latestCdrRequest";
+    /**
+     * This class logger.
+     */
+    private static final Logger LOGGER = Logger.getLogger(IntegrationWithCDRController.class);
     /**
      * Converts request to CdrRequest.
      */
@@ -97,6 +104,9 @@ public class IntegrationWithCDRController {
     public String webQMenu(HttpServletRequest request, Model model)
             throws FileNotAvailableException {
         CdrRequest parameters = convertAndPutResultIntoSession(request);
+
+        LOGGER.debug("Received WebQMenu request with parameters:" + parameters.toString());
+
         MultiValueMap<String, XmlFile> xmlFiles = envelopeService.getXmlFiles(parameters);
         Collection<String> requiredSchemas =
                 StringUtils.isNotEmpty(parameters.getSchema()) ? Arrays.asList(parameters.getSchema()) : xmlFiles.keySet();
@@ -124,6 +134,9 @@ public class IntegrationWithCDRController {
     @RequestMapping("/WebQEdit")
     public String webQEdit(HttpServletRequest request, Model model) throws FileNotAvailableException {
         CdrRequest parameters = convertAndPutResultIntoSession(request);
+
+        LOGGER.debug("Received WebQEdit request with parameters:" + parameters.toString());
+
         String schema = parameters.getSchema();
         if (StringUtils.isEmpty(schema)) {
             throw new IllegalArgumentException("schema parameter is required");
@@ -144,8 +157,8 @@ public class IntegrationWithCDRController {
     }
 
     /**
-     * IllegalArgumentException handler for this class.
-     * If request parameters cannot be handled by this application, redirect to webQ1.
+     * IllegalArgumentException handler for this class. If request parameters cannot be handled by this application, redirect to
+     * webQ1.
      *
      * @param request current request
      * @param response http response
@@ -200,9 +213,14 @@ public class IntegrationWithCDRController {
             throws FileNotAvailableException {
         int fileId =
                 userFileService.saveBasedOnWebForm(userFileBasedOn(parameters), webFormService.findActiveWebFormById(formId));
-        return "redirect:/xform/?formId=" + formId + "&fileId=" + fileId + "&base_uri=" + parameters.getContextPath()
+
+        LOGGER.debug("Add new file file with CdrRequest:" + parameters.toString());
+
+        return "redirect:/xform/?formId=" + formId + "&fileId=" + fileId + "&base_uri="
+                + parameters.getContextPath()
                 + "&envelope=" + StringUtils.defaultString(parameters.getEnvelopeUrl())
-                + StringUtils.defaultString(parameters.getAdditionalParametersAsQueryString());
+                + StringUtils.defaultString(parameters.getAdditionalParametersAsQueryString())
+                + "&jsessionid=" + parameters.getSessionId();
     }
 
     /**
@@ -257,9 +275,13 @@ public class IntegrationWithCDRController {
         int fileId = userFileService.save(userFile);
         String envelopeParam = (request.getEnvelopeUrl() != null) ? "&envelope=" + request.getEnvelopeUrl() : "";
 
-        return "redirect:/xform/?formId=" + webForm.getId() + "&instance=" + remoteFileUrl + "&fileId=" + fileId
+        LOGGER.debug("Edit file with CdrRequest:" + request.toString());
+
+        return "redirect:/xform/?formId=" + webForm.getId() + "&instance=" + remoteFileUrl + "&fileId="
+                + fileId
                 + "&base_uri=" + request.getContextPath() + envelopeParam
-                + request.getAdditionalParametersAsQueryString();
+                + request.getAdditionalParametersAsQueryString()
+                + "&jsessionid=" + request.getSessionId();
     }
 
     /**

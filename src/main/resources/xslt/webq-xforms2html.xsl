@@ -23,17 +23,17 @@
             <xsl:otherwise><xsl:value-of select="'http'"/></xsl:otherwise>
         </xsl:choose>
     </xsl:variable>
-	
-	
+
+
     <xsl:param name="envelope" select="''"/>
     <xsl:param name="instance" select="''"/>
-	<xsl:variable name="cdrUrl">
+    <xsl:variable name="cdrUrl">
         <xsl:choose>
             <xsl:when test="string-length($envelope) &gt; 0"><xsl:value-of select="concat(substring-before($envelope, '//'), '//', substring-before(substring-after($envelope, '//'), '/'))"/></xsl:when>
             <xsl:when test="string-length($instance) &gt; 0"><xsl:value-of select="concat(substring-before($instance, '//'), '//', substring-before(substring-after($instance, '//'), '/'))"/></xsl:when>
-            <xsl:otherwise><xsl:value-of select="$baseUri"/></xsl:otherwise>
-        </xsl:choose>	
-	</xsl:variable>
+            <xsl:otherwise><xsl:value-of select="$baseURI"/></xsl:otherwise>
+        </xsl:choose>
+    </xsl:variable>
 
     <!-- Overwrite betterForm InputDateAndTime template to change the default date pattern. -->
     <xsl:template name="InputDateAndTime">
@@ -222,9 +222,9 @@
             <p><a href="http://www.eea.europa.eu/"><b>European Environment Agency</b></a>
             <br/>Kgs. Nytorv 6, DK-1050 Copenhagen K, Denmark - Phone: +45 3336 7100</p>
         </div>
-		<div style="display:none">baseUri: <xsl:value-of select="$baseUri"/></div>
-		<div style="display:none">envelope: <xsl:value-of select="$envelope"/></div>
-		<div style="display:none">instance: <xsl:value-of select="$instance"/></div>
+        <div style="display:none">baseURI: <xsl:value-of select="$baseURI"/></div>
+        <div style="display:none">envelope: <xsl:value-of select="$envelope"/></div>
+        <div style="display:none">instance: <xsl:value-of select="$instance"/></div>
     </xsl:template>
 
     <!-- Overwrite bf template for fixing inline javascript - do not escape it. -->

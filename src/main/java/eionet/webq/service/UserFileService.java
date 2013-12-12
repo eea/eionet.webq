@@ -20,10 +20,10 @@
  */
 package eionet.webq.service;
 
+import java.util.Collection;
+
 import eionet.webq.dao.orm.ProjectFile;
 import eionet.webq.dao.orm.UserFile;
-
-import java.util.Collection;
 
 /**
  * Service for storing uploaded files.
@@ -40,7 +40,7 @@ public interface UserFileService {
     /**
      * Save data from uploaded file to storage.
      *
-     * @param file uploaded file to be saved to storagena
+     * @param file uploaded file to be saved to storage
      * @param webForm web form
      * @return auto generated id of inserted record
      * @throws eionet.webq.service.FileNotAvailableException if remote file not available
@@ -55,6 +55,16 @@ public interface UserFileService {
      * @return uploaded file
      */
     UserFile getById(int id);
+
+    /**
+     * Fetches uploaded file from storage by specified id and user session id. User access to this file must be checked. Only
+     * {@link eionet.webq.dao.orm.UserFile#getName()} and {@link eionet.webq.dao.orm.UserFile#getContent()} will be set.
+     *
+     * @param id file id
+     * @param userId user id
+     * @return uploaded file
+     */
+    UserFile getByIdAndUser(int id, String userId);
 
     /**
      * Keeps track on file download by user.

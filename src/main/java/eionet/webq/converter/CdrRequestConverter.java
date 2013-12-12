@@ -20,19 +20,21 @@
  */
 package eionet.webq.converter;
 
-import eionet.webq.dto.CdrRequest;
-import eionet.webq.web.interceptor.CdrAuthorizationInterceptor;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
+
+import java.util.ArrayList;
+import java.util.Collection;
+
+import javax.servlet.http.HttpServletRequest;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.net.util.Base64;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
 
-import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
-import java.util.Collection;
-
-import static org.apache.commons.lang3.StringUtils.isEmpty;
-import static org.apache.commons.lang3.StringUtils.isNotEmpty;
+import eionet.webq.dto.CdrRequest;
+import eionet.webq.web.interceptor.CdrAuthorizationInterceptor;
 
 /**
  * Converts {@link javax.servlet.http.HttpServletRequest} to {@link eionet.webq.dto.CdrRequest}.
@@ -56,6 +58,7 @@ public class CdrRequestConverter implements Converter<HttpServletRequest, CdrReq
         parameters.setSchema(parametersTracker.getParameter("schema"));
         parameters.setNewFormCreationAllowed(Boolean.valueOf(parametersTracker.getParameter("add")));
         parameters.setNewFileName(parametersTracker.getParameter("file_id"));
+        parameters.setSessionId(httpRequest.getSession().getId());
         String instanceUrl = parametersTracker.getParameter("instance");
         parameters.setInstanceUrl(instanceUrl);
         if (isNotEmpty(instanceUrl)) {
