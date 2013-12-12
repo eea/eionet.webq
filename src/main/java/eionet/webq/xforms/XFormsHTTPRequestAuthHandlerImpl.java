@@ -21,14 +21,21 @@
 
 package eionet.webq.xforms;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.Collection;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.net.util.Base64;
 import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import eionet.webq.dao.orm.KnownHost;
 import eionet.webq.dao.orm.UserFile;
+import eionet.webq.dto.KnownHostAuthenticationMethod;
 import eionet.webq.service.KnownHostsService;
 import eionet.webq.service.UserFileService;
 
@@ -40,11 +47,18 @@ import eionet.webq.service.UserFileService;
 @Component
 public class XFormsHTTPRequestAuthHandlerImpl implements HTTPRequestAuthHandler {
 
+    /** User XML file service. */
     @Autowired
     UserFileService userFileService;
 
+    /** Known host service. */
     @Autowired
     KnownHostsService knownHostsService;
+
+    /**
+     * The logger.
+     */
+    private static Logger LOGGER = Logger.getLogger(XFormsHTTPRequestAuthHandlerImpl.class);
 
     @Override
     public void addAuthToHttpRequest(HttpRequestBase httpRequestBase, Map<?, ?> context) {
@@ -52,6 +66,7 @@ public class XFormsHTTPRequestAuthHandlerImpl implements HTTPRequestAuthHandler 
         String uri = httpRequestBase.getURI().toString();
 
         String instance = null;
+        String envelope = null;
         String requestURL = null;
         Integer fileId = null;
         String basicAuth = null;
@@ -59,6 +74,9 @@ public class XFormsHTTPRequestAuthHandlerImpl implements HTTPRequestAuthHandler 
 
         if (context.get("instance") != null) {
             instance = (String) context.get("instance");
+        }
+        if (context.get("envelope") != null) {
+            instance = (String) context.get("envelope");
         }
         if (context.get("requestURL") != null) {
             requestURL = (String) context.get("requestURL");
@@ -70,19 +88,90 @@ public class XFormsHTTPRequestAuthHandlerImpl implements HTTPRequestAuthHandler 
             sessionId = (String) context.get("jsessionid");
         }
 
+        // TODO cover the logic with unittests
         // add auth info only for URIs that are not on the same host.
         if (!uri.startsWith(requestURL)) {
-            // if the URI starts with instance URI, then we can use the basic auth retrieved from CDR.
-            if (uri.startsWith(instance) && fileId != null && sessionId != null) {
+            if (fileId != null && sessionId != null) {
+                // check if user is logged in
                 UserFile userFile = userFileService.getByIdAndUser(fileId, sessionId);
                 if (userFile != null) {
                     basicAuth = userFile.getAuthorization();
                 }
-            }
-            if (StringUtils.isNotEmpty(basicAuth)) {
-                httpRequestBase.addHeader("Authorization", basicAuth);
+                // add auth info only if user is logged in
+                if (StringUtils.isNotEmpty(basicAuth)) {
+
+                    // if the URI starts with instance or envelope URI, then we can use the basic auth retrieved from CDR.
+                    if (((StringUtils.isNotBlank(instance) && uri.startsWith(instance)) || (StringUtils.isNotBlank(envelope) && uri
+                            .startsWith(envelope)))) {
+                        httpRequestBase.addHeader("Authorization", basicAuth);
+                        LOGGER.debug("Add basic auth from session to URL: " + uri);
+                    } else {
+                        // check if we have known host in db
+                        KnownHost knownHost = getKnownHost(uri);
+                        if (knownHost != null) {
+                            // add ticket parameter to request URI if needed
+                            if (knownHost.getAuthenticationMethod() == KnownHostAuthenticationMethod.REQUEST_PARAMETER) {
+                                LOGGER.debug("Add ticket parameter from known hosts to URL: " + uri);
+                                uri = getUrlWithAuthParam(uri, knownHost);
+                                if (!uri.equals(httpRequestBase.getURI())) {
+                                    try {
+                                        httpRequestBase.setURI(new URI(uri));
+                                    } catch (URISyntaxException e) {
+                                        LOGGER.error("Unable to add known host ticket parameter for URI:" + uri);
+                                        e.printStackTrace();
+                                    }
+                                }
+                            } else if (knownHost.getAuthenticationMethod() == KnownHostAuthenticationMethod.BASIC) {
+                                // Add basic authorisation if needed
+                                httpRequestBase.addHeader(
+                                        "Authorization",
+                                        "Basic "
+                                                +
+                                                Base64.encodeBase64String((new String(knownHost.getKey() + ":"
+                                                        + knownHost.getTicket())).getBytes()));
+                                LOGGER.debug("Add basic auth from known hosts to URL: " + uri);
+                            }
+                        }
+                    }
+                }
             }
         }
-        // TODO add auth info from known hosts
     }
+
+    /**
+     * Get authorization info for known hosts.
+     *
+     * @param uri URL to look for authorisation.
+     * @return KnownHost object with auth info
+     */
+    private KnownHost getKnownHost(String uri) {
+
+        KnownHost knownHost = null;
+        Collection<KnownHost> hosts = knownHostsService.findAll();
+        for (KnownHost host : hosts) {
+            if (uri.startsWith(host.getHostURL())) {
+                knownHost = host;
+                break;
+            }
+        }
+        return knownHost;
+    }
+
+    /**
+     * Adds authorization info as request parameter to given URI, if it is known host.
+     *
+     * @param url URL to add authorization info.
+     * @param knownHost Host object with authorization info.
+     * @return parsed URL.
+     */
+    public static String getUrlWithAuthParam(String url, KnownHost knownHost) {
+
+        String authUrl = url;
+        if (knownHost != null && knownHost.getAuthenticationMethod() == KnownHostAuthenticationMethod.REQUEST_PARAMETER) {
+            authUrl += (url.contains("?")) ? "&" : "?";
+            authUrl += knownHost.getKey() + "=" + knownHost.getTicket();
+        }
+        return authUrl;
+    }
+
 }

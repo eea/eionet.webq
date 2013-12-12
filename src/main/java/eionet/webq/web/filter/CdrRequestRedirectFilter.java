@@ -47,19 +47,13 @@ public class CdrRequestRedirectFilter implements Filter {
         HttpServletResponse httpResponse = (HttpServletResponse) response;
         HttpSession session = httpRequest.getSession(true);
 
-        boolean changeSessionId = false;
         // SessionId received from WebQMenu or WebQEdit request.
         String initialSessionId = httpRequest.getParameter("jsessionid");
 
         LOGGER.debug("Current JSESSIONID:" + session.getId());
         LOGGER.debug("Initial JSESSIONID:" + initialSessionId);
 
-        if (StringUtils.isNotEmpty(initialSessionId)) {
-            if (!session.getId().equals(initialSessionId)) {
-                changeSessionId = true;
-            }
-        }
-        if (changeSessionId) {
+        if (StringUtils.isNotEmpty(initialSessionId) && !session.getId().equals(initialSessionId)) {
             Cookie sessionCookie = new Cookie("JSESSIONID", initialSessionId);
             sessionCookie.setPath(httpRequest.getContextPath());
             sessionCookie.setDomain(httpRequest.getServerName());
