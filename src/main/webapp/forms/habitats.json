@@ -1,0 +1,25 @@
+{
+    "country": "EE",
+    "userIdentity": "Tarto",
+    "derogations": [
+        {
+            "validFrom": "2013-08-05",
+            "validTo": "2013-11-29",
+            "license": "EE456",
+            "amount": 3
+        },
+        {
+            "validFrom": "2013-01-05",
+            "validTo": "2013-11-11",
+            "license": "EE789",
+            "amount": 1
+        },
+        {
+
+            "validFrom": "2013-06-15",
+            "validTo": "2013-11-11",
+            "license": "EE123",
+            "amount": 5
+        }
+    ]
+}
