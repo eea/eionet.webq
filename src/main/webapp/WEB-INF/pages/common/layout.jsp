@@ -2,6 +2,7 @@
 <%@page pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@ taglib prefix="tiles" uri="http://tiles.apache.org/tags-tiles" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 
 <!DOCTYPE html>
 <html>
@@ -14,9 +15,16 @@
 
     <title>Web Questionnaires</title>
 
-    <link rel="stylesheet" type="text/css" href="${pageContext.request.scheme}://www.eionet.europa.eu/styles/eionet2007/print.css" media="print" />
-    <link rel="stylesheet" type="text/css" href="${pageContext.request.scheme}://www.eionet.europa.eu/styles/eionet2007/handheld.css" media="handheld" />
-    <link rel="stylesheet" type="text/css" href="${pageContext.request.scheme}://www.eionet.europa.eu/styles/eionet2007/screen.css" media="screen" title="Eionet 2007 style" />
+    <c:choose>
+        <c:when test="${not empty param.base_uri && fn:startsWith(param.base_uri, 'http')}">
+            <c:set var="scheme" value="${fn:substringBefore(param.base_uri, ':')}"/>
+        </c:when>
+        <c:otherwise><c:set var="scheme" value="${pageContext.request.scheme}"/></c:otherwise>
+    </c:choose>
+
+    <link rel="stylesheet" type="text/css" href="${scheme}://www.eionet.europa.eu/styles/eionet2007/print.css" media="print" />
+    <link rel="stylesheet" type="text/css" href="${scheme}://www.eionet.europa.eu/styles/eionet2007/handheld.css" media="handheld" />
+    <link rel="stylesheet" type="text/css" href="${scheme}://www.eionet.europa.eu/styles/eionet2007/screen.css" media="screen" title="Eionet 2007 style" />
     <link rel="stylesheet" type="text/css" href="<c:url value="/css/eionet2007.css"/>" media="screen" title="Eionet 2007 style" />
     <script type="text/javascript" src="<c:url value="/js/pageops.js"/>"></script>
     <tiles:insertAttribute name="specific_header" ignore="true"/>
