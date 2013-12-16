@@ -294,7 +294,7 @@ public class IntegrationWithCDRController {
      */
     private boolean hasOnlyOneFileAndWebFormForSameSchema(MultiValueMap<String, XmlFile> xmlFiles,
             Collection<ProjectFile> webForms, CdrRequest parameters) {
-        if (webForms.size() == 1 && xmlFiles.size() == 1 && !parameters.isNewFormCreationAllowed()) {
+        if (webForms.size() == 1 && !parameters.isNewFormCreationAllowed()) {
             List<XmlFile> filesForSchema = xmlFiles.get(webForms.iterator().next().getXmlSchema());
             if (filesForSchema != null && filesForSchema.size() == 1) {
                 return true;
@@ -313,7 +313,14 @@ public class IntegrationWithCDRController {
      */
     private boolean oneWebFormAndNoFilesButNewFileCreationIsAllowed(MultiValueMap<String, XmlFile> xmlFiles,
             Collection<ProjectFile> webForms, CdrRequest parameters) {
-        return webForms.size() == 1 && xmlFiles.size() == 0 && parameters.isNewFormCreationAllowed();
+        if (webForms.size() == 1 && parameters.isNewFormCreationAllowed()) {
+            List<XmlFile> filesForSchema = xmlFiles.get(webForms.iterator().next().getXmlSchema());
+            if (filesForSchema == null || filesForSchema.size() == 0) {
+                return true;
+            }
+
+        }
+        return false;
     }
 
     /**

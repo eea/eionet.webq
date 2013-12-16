@@ -20,14 +20,27 @@
  */
 package eionet.webq.web.controller.cdr;
 
-import eionet.webq.dao.UserFileStorage;
-import eionet.webq.dao.orm.ProjectEntry;
-import eionet.webq.dao.orm.ProjectFile;
-import eionet.webq.dao.orm.ProjectFileType;
-import eionet.webq.dao.orm.UserFile;
-import eionet.webq.dto.CdrRequest;
-import eionet.webq.service.ProjectFileService;
-import eionet.webq.web.AbstractContextControllerTests;
+import static java.util.Collections.singletonMap;
+import static org.hamcrest.core.IsEqual.equalTo;
+import static org.hamcrest.core.StringContains.containsString;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyList;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
+
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.apache.xmlrpc.XmlRpcException;
 import org.apache.xmlrpc.client.XmlRpcClient;
 import org.apache.xmlrpc.client.XmlRpcClientConfig;
@@ -47,25 +60,15 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestOperations;
 
-import java.util.Collection;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import static eionet.webq.service.CDREnvelopeService.XmlFile;
-import static java.util.Collections.singletonMap;
-import static org.hamcrest.core.IsEqual.equalTo;
-import static org.hamcrest.core.StringContains.containsString;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyList;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
+import eionet.webq.dao.UserFileStorage;
+import eionet.webq.dao.orm.ProjectEntry;
+import eionet.webq.dao.orm.ProjectFile;
+import eionet.webq.dao.orm.ProjectFileType;
+import eionet.webq.dao.orm.UserFile;
+import eionet.webq.dto.CdrRequest;
+import eionet.webq.service.CDREnvelopeService.XmlFile;
+import eionet.webq.service.ProjectFileService;
+import eionet.webq.web.AbstractContextControllerTests;
 
 /**
  */
@@ -145,9 +148,10 @@ public class IntegrationWithCDRControllerIntegrationTest extends AbstractContext
         request.setAdditionalParametersAsQueryString("");
         session.setAttribute(IntegrationWithCDRController.LATEST_CDR_REQUEST, request);
 
-        MvcResult mvcResult = mvc().perform(post("/cdr/edit/file").param("formId", String.valueOf(formId)).param("fileName", fileName)
-                .param("remoteFileUrl", "http://remote-file.url").session(session))
-                .andExpect(status().isFound()).andReturn();
+        MvcResult mvcResult =
+                mvc().perform(post("/cdr/edit/file").param("formId", String.valueOf(formId)).param("fileName", fileName)
+                        .param("remoteFileUrl", "http://remote-file.url").session(session))
+                        .andExpect(status().isFound()).andReturn();
 
         String redirectedUrl = mvcResult.getResponse().getRedirectedUrl();
 
@@ -159,11 +163,23 @@ public class IntegrationWithCDRControllerIntegrationTest extends AbstractContext
 
     @Test
     public void ifOnlyOneFileAndWebFormAvailableDoRedirectToEdit() throws Exception {
-        rpcClientWillReturnFileForSchema(XML_SCHEMA);
+        rpcClientWillReturnSeveralFilesButOnlyOneForSchema(XML_SCHEMA);
         saveAvailableWebFormWithSchema(XML_SCHEMA);
 
         MvcResult mvcResult =
                 mvc().perform(post("/WebQMenu").param("envelope", ENVELOPE_URL)).andExpect(status().isFound()).andReturn();
+
+        assertTrue(mvcResult.getResponse().getRedirectedUrl().startsWith("/xform"));
+    }
+
+    @Test
+    public void ifNoFilesButWebFormAvailableAndAddParamEqTrueDoRedirectToEditNewFile() throws Exception {
+        rpcClientWillReturnSeveralFilesButOnlyOneForSchema("unknown");
+        saveAvailableWebFormWithSchema(XML_SCHEMA);
+
+        MvcResult mvcResult =
+                mvc().perform(post("/WebQMenu").param("envelope", ENVELOPE_URL).param("add", "true").param("schema", XML_SCHEMA))
+                        .andExpect(status().isFound()).andReturn();
 
         assertTrue(mvcResult.getResponse().getRedirectedUrl().startsWith("/xform"));
     }
@@ -196,7 +212,16 @@ public class IntegrationWithCDRControllerIntegrationTest extends AbstractContext
 
     private void rpcClientWillReturnFileForSchema(String xmlSchema) throws XmlRpcException {
         when(xmlRpcClient.execute(any(XmlRpcClientConfig.class), anyString(), anyList()))
-                .thenReturn(singletonMap(xmlSchema, new Object[]{new Object[]{"file.url", "file name"}}));
+                .thenReturn(singletonMap(xmlSchema, new Object[] {new Object[] {"file.url", "file name"}}));
+    }
+
+    private void rpcClientWillReturnSeveralFilesButOnlyOneForSchema(String xmlSchema) throws XmlRpcException {
+        Map<String, Object[]> cdrXmlFiles = new HashMap<String, Object[]>();
+        cdrXmlFiles.put(xmlSchema, new Object[] {new Object[] {"file.url", "file name"}});
+        cdrXmlFiles.put("schema2", new Object[] {new Object[] {"file2.url", "file name2"}});
+
+        when(xmlRpcClient.execute(any(XmlRpcClientConfig.class), anyString(), anyList()))
+                .thenReturn(cdrXmlFiles);
     }
 
     private Object requestToWebQMenuAndGetModelAttribute(String attributeName) throws Exception {
