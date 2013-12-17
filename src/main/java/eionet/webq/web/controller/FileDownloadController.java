@@ -114,18 +114,26 @@ public class FileDownloadController {
     @Transactional
     public void downloadUserFileJson(@RequestParam int fileId, HttpServletResponse response) throws UnsupportedEncodingException {
         UserFile file = userFileService.download(fileId);
-        String json = XML.toJSONObject(new String(file.getContent())).toString();
+        byte[] json = toJson(file);
         setContentType(response, MediaType.APPLICATION_JSON);
-        writeToResponse(response, json.getBytes("UTF-8"));
+        writeToResponse(response, json);
     }
 
     @RequestMapping(value = "/user_file", produces = MediaType.APPLICATION_XML_VALUE, method = RequestMethod.GET)
     @Transactional
     public void downloadUserFileJsonToXml(@RequestParam int fileId, HttpServletResponse response) throws UnsupportedEncodingException {
         UserFile file = userFileService.download(fileId);
-        String xml = XML.toString(XML.toJSONObject(new String(file.getContent())));
+        byte[] xml = convertJsonToXml(file);
 
-        writeXmlFileToResponse("json.xml", xml.getBytes("UTF-8"), response);
+        writeXmlFileToResponse("json.xml", xml, response);
+    }
+
+    private byte[] toJson(UserFile file) throws UnsupportedEncodingException {
+        return XML.toJSONObject(new String(file.getContent())).toString().getBytes("UTF-8");
+    }
+
+    private byte[] convertJsonToXml(UserFile file) throws UnsupportedEncodingException {
+        return XML.toString(XML.toJSONObject(new String(file.getContent()))).getBytes("UTF-8");
     }
 
     /**
