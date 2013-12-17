@@ -98,6 +98,17 @@ public class FileDownloadControllerIntegrationTest extends AbstractContextContro
                 .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON));
     }
 
+    @Test
+    public void convertsFileToJsonAndThanToXml() throws Exception {
+        String xml = "<?xml version=\"1.0\"?><html><head>headText</head><body>bodyText</body></html>";
+        int id = userFileStorage.save(new UserFile(new UploadedFile("test.xml", xml.getBytes()), "someSchema"), session.getId());
+        request(get("/download/user_file?fileId={id}", id)
+                .accept(MediaType.APPLICATION_XML)
+                .session(session))
+                .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_XML))
+                .andExpect(MockMvcResultMatchers.handler().methodName("downloadUserFileJsonToXml"));
+    }
+
     private int saveUserFile() {
         return userFileStorage.save(new UserFile(new UploadedFile(), XML_SCHEMA), session.getId());
     }

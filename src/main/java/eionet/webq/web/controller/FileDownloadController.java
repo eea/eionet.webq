@@ -119,6 +119,15 @@ public class FileDownloadController {
         writeToResponse(response, json.getBytes("UTF-8"));
     }
 
+    @RequestMapping(value = "/user_file", produces = MediaType.APPLICATION_XML_VALUE, method = RequestMethod.GET)
+    @Transactional
+    public void downloadUserFileJsonToXml(@RequestParam int fileId, HttpServletResponse response) throws UnsupportedEncodingException {
+        UserFile file = userFileService.download(fileId);
+        String xml = XML.toString(XML.toJSONObject(new String(file.getContent())));
+
+        writeXmlFileToResponse("json.xml", xml.getBytes("UTF-8"), response);
+    }
+
     /**
      * Download uploaded file action.
      *
