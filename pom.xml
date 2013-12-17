@@ -250,6 +250,12 @@
             <version>1.6</version>
             <type>jar</type>
         </dependency>
+        <!--JSON-->
+        <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <version>20131018</version>
+        </dependency>
 
         <!-- Test -->
         <dependency>
@@ -274,6 +280,12 @@
             <groupId>xmlunit</groupId>
             <artifactId>xmlunit</artifactId>
             <version>1.5</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.jayway.jsonpath</groupId>
+            <artifactId>json-path</artifactId>
+            <version>0.9.1</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

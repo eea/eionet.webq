@@ -34,6 +34,7 @@ import eionet.webq.service.ProjectService;
 import eionet.webq.service.UserFileMergeService;
 import eionet.webq.service.UserFileService;
 import org.apache.commons.io.IOUtils;
+import org.json.XML;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -43,6 +44,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -106,6 +108,15 @@ public class FileDownloadController {
     public void downloadUserFile(@RequestParam int fileId, HttpServletResponse response) {
         UserFile file = userFileService.download(fileId);
         writeXmlFileToResponse(file.getName(), file.getContent(), response);
+    }
+
+    @RequestMapping(value = "/user_file", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.GET)
+    @Transactional
+    public void downloadUserFileJson(@RequestParam int fileId, HttpServletResponse response) throws UnsupportedEncodingException {
+        UserFile file = userFileService.download(fileId);
+        String json = XML.toJSONObject(new String(file.getContent())).toString();
+        setContentType(response, MediaType.APPLICATION_JSON);
+        writeToResponse(response, json.getBytes("UTF-8"));
     }
 
     /**
