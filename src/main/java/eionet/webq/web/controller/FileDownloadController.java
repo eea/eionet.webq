@@ -97,19 +97,6 @@ public class FileDownloadController {
     @Autowired
     private UserFileMergeService mergeService;
 
-    /**
-     * Download uploaded file action.
-     *
-     * @param fileId requested file id
-     * @param response http response to write file
-     */
-    @RequestMapping(value = "/user_file")
-    @Transactional
-    public void downloadUserFile(@RequestParam int fileId, HttpServletResponse response) {
-        UserFile file = userFileService.download(fileId);
-        writeXmlFileToResponse(file.getName(), file.getContent(), response);
-    }
-
     @RequestMapping(value = "/user_file", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.GET)
     @Transactional
     public void downloadUserFileJson(@RequestParam int fileId, HttpServletResponse response) throws UnsupportedEncodingException {
@@ -133,7 +120,20 @@ public class FileDownloadController {
     }
 
     private byte[] convertJsonToXml(UserFile file) throws UnsupportedEncodingException {
-        return XML.toString(XML.toJSONObject(new String(file.getContent()))).getBytes("UTF-8");
+        return XML.toString(toJson(file)).getBytes("UTF-8");
+    }
+
+    /**
+     * Download uploaded file action.
+     *
+     * @param fileId requested file id
+     * @param response http response to write file
+     */
+    @RequestMapping(value = "/user_file")
+    @Transactional
+    public void downloadUserFile(@RequestParam int fileId, HttpServletResponse response) {
+        UserFile file = userFileService.download(fileId);
+        writeXmlFileToResponse(file.getName(), file.getContent(), response);
     }
 
     /**
