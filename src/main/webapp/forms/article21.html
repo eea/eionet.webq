@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html ng-app="article21" ng-controller="questionnaire">
+<head>
+    <title>Article 21</title>
+    <link href="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-combined.min.css" rel="stylesheet">
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.4/angular.js"></script>
+    <script src="http://angular-ui.github.io/bootstrap/ui-bootstrap-tpls-0.7.0.js"></script>
+
+
+    <script type="text/javascript">
+        var app = angular.module("article21", ['ui.bootstrap']);
+        app.controller("questionnaire", function ($scope) {
+            $scope.article = {"responsible_authorities" : {
+                "implementers" : [{}]
+
+            }};
+
+            $scope.addItem = function(path) {
+                var tokens = path.split(".");
+                var result = $scope.article;
+                while(tokens.length) {
+                    result = result[tokens.shift()];
+                }
+                result.push({});
+            };
+        });
+    </script>
+</head>
+<body>
+<div class="row span10">
+    <tabset>
+        <tab heading="Question 1">
+            <h1>1. Details of institution submitting the report</h1>
+
+            <div class="row">
+                <div class="span4">
+                    <label for="organization">Name and department of organisation: </label>
+                </div>
+                <div class="span6">
+                    <input id="organization" type="text" ng-model="article.institution.organization"/>
+                </div>
+            </div>
+            <div class="row">
+                <div class="span4">
+                    <label for="contact-person">Name of contact person: </label>
+                </div>
+                <div class="span6">
+                    <input id="contact-person" type="text" ng-model="article.institution.contact.person"/>
+                </div>
+            </div>
+            <div class="row">
+                <div class="span4">
+                    <label for="job-title">Job title of contact person: </label>
+                </div>
+                <div class="span6">
+                    <input id="job-title" type="text" ng-model="article.institution.contact.jobTitle"/>
+                </div>
+            </div>
+            <div class="row">
+                <div class="span4">
+                    <label for="contact-person-address">Address: </label>
+                </div>
+                <div class="span6">
+                    <input id="contact-person-address" type="text" ng-model="article.institution.contact.address"/>
+                </div>
+            </div>
+            <div class="row">
+                <div class="span4">
+                    <label for="int-phone-number">International telephone number: </label>
+                </div>
+                <div class="span6">
+                    <input id="int-phone-number" type="text" ng-model="article.institution.contact.phone"/>
+                </div>
+            </div>
+            <div class="row">
+                <div class="span4">
+                    <label for="e-mail">E-mail: </label>
+                </div>
+                <div class="span6">
+                    <input id="e-mail" type="text" ng-model="article.institution.contact.email"/>
+                </div>
+            </div>
+        </tab>
+        <tab heading="Question 2">
+            <h1>2. Responsible authorities in the emissions trading scheme (EU ETS) and coordination between authorities</h1>
+            <h6>Questions in this section 2 are to be answered in the report due by 30 June 2014
+                and in subsequent reports if changes have occurred during the reporting period.</h6>
+            <h4>2.1 In the table below, please state the name, abbreviation and contact details of
+                the competent authorities involved in the implementation of EU ETS for installations
+                and aviation in your Member State. Add further rows if necessary.
+            </h4>
+            <div class="row">
+                <div class="span2">Name</div>
+                <div class="span2">Abbreviation</div>
+                <div class="span2">Telephone number</div>
+                <div class="span2">Email address</div>
+                <div class="span2">Website</div>
+            </div>
+            <div class="row" ng-repeat="p in article.responsible_authorities.implementers">
+                <div class="span2"><input class="input-medium" type="text" ng-model="p.name"/></div>
+                <div class="span2"><input class="input-medium" type="text" ng-model="p.abbreviation"/></div>
+                <div class="span2"><input class="input-medium" type="text" ng-model="p.phone"/></div>
+                <div class="span2"><input class="input-medium" type="text" ng-model="p.email"/></div>
+                <div class="span2"><input class="input-medium" type="text" ng-model="p.website"/></div>
+            </div>
+            <div class="row">
+                <div class="span2"><input type="button" ng-click="addItem('responsible_authorities.implementers')" value="Add row"/></div>
+            </div>
+
+            <h4>In the table below, please state name, abbreviation and contact details
+                of the national accreditation body appointed pursuant to Article 4(1) of
+                Regulation (EC) No 765/2008. </h4>
+            <div class="row">
+                <div class="span2">Name</div>
+                <div class="span2">Abbreviation</div>
+                <div class="span2">Telephone number</div>
+                <div class="span2">Email address</div>
+                <div class="span2">Website</div>
+            </div>
+            <div class="row">
+                <div class="span2"><input class="input-medium" type="text" ng-model="article.responsible_authorities.nationalAccreditationBody.name"/></div>
+                <div class="span2"><input class="input-medium" type="text" ng-model="article.responsible_authorities.nationalAccreditationBody.abbreviation"/></div>
+                <div class="span2"><input class="input-medium" type="text" ng-model="article.responsible_authorities.nationalAccreditationBody.phone"/></div>
+                <div class="span2"><input class="input-medium" type="text" ng-model="article.responsible_authorities.nationalAccreditationBody.email"/></div>
+                <div class="span2"><input class="input-medium" type="text" ng-model="article.responsible_authorities.nationalAccreditationBody.website"/></div>
+            </div>
+
+            <h4>
+                Have you set up a national certification authority to certify verifiers
+                pursuant to Article 54(2) of Commission Regulation (EU) No 600/2012? Yes/No
+            </h4>
+            <h4>
+                If yes, please state the name, abbreviation and contact details of the
+                national certification authority using the table below.
+            </h4>
+            <div class="row">
+                <div class="span2">Name</div>
+                <div class="span2">Abbreviation</div>
+                <div class="span2">Telephone number</div>
+                <div class="span2">Email address</div>
+                <div class="span2">Website</div>
+            </div>
+            <div class="row">
+                <div class="span2"><input class="input-medium" type="text" ng-model="article.responsible_authorities.nationalCertificationAuthority.name"/></div>
+                <div class="span2"><input class="input-medium" type="text" ng-model="article.responsible_authorities.nationalCertificationAuthority.abbreviation"/></div>
+                <div class="span2"><input class="input-medium" type="text" ng-model="article.responsible_authorities.nationalCertificationAuthority.phone"/></div>
+                <div class="span2"><input class="input-medium" type="text" ng-model="article.responsible_authorities.nationalCertificationAuthority.email"/></div>
+                <div class="span2"><input class="input-medium" type="text" ng-model="article.responsible_authorities.nationalCertificationAuthority.website"/></div>
+            </div>
+            <h4>
+                In the table below, please state the name, abbreviation and
+                contact details of the registry administrator in your Member State.
+            </h4>
+            <div class="row">
+                <div class="span2">Name</div>
+                <div class="span2">Abbreviation</div>
+                <div class="span2">Telephone number</div>
+                <div class="span2">Email address</div>
+                <div class="span2">Website</div>
+            </div>
+            <div class="row">
+                <div class="span2"><input class="input-medium" type="text" ng-model="article.responsible_authorities.registryAdministrator.name"/></div>
+                <div class="span2"><input class="input-medium" type="text" ng-model="article.responsible_authorities.registryAdministrator.abbreviation"/></div>
+                <div class="span2"><input class="input-medium" type="text" ng-model="article.responsible_authorities.registryAdministrator.phone"/></div>
+                <div class="span2"><input class="input-medium" type="text" ng-model="article.responsible_authorities.registryAdministrator.email"/></div>
+                <div class="span2"><input class="input-medium" type="text" ng-model="article.responsible_authorities.registryAdministrator.website"/></div>
+            </div>
+
+            <h4>In the table below, please indicate which competent authority
+                is responsible for the following tasks, using their abbreviation.
+                Add further rows if necessary.
+            </h4>
+
+        </tab>
+    </tabset>
+</div>
+<div class="row span2">{{article | json}}</div>
+</body>
+</html>
