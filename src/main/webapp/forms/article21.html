@@ -10,9 +10,57 @@
     <script type="text/javascript">
         var app = angular.module("article21", ['ui.bootstrap']);
         app.controller("questionnaire", function ($scope) {
-            $scope.article = {"responsible_authorities" : {
-                "implementers" : [{}]
+            $scope.article = {"responsibleAuthorities" : {
+                "implementers" : [{}],
+                "tasks" : [
+                    {"label": "Issuance of permits",  "aviationDisabled": true},
+                    {"label": "Free allocation to stationary installations pursuant to Article 10a of Directive 2003/87/EC",
+                          "aviationDisabled": true},
+                    {"label": "Free allocation pursuant to Article 3e and 3f of Directive 2003/87/EC",
+                         "installationDisabled": true},
+                    {"label": "Activities related to auctioning (the auctioneer mentioned in Commission Regulation (EU) No 1031/2010)" },
+                    {"label": "Financial measures with respect to indirect carbon leakage"},
+                    {"label": "Issuance of allowances"},
+                    {"label": "Approval of the monitoring plan and significant changes to the monitoring plan" },
+                    {"label": "Receiving and assessing verified emissions reports and verification reports" },
+                    {"label": "Making a conservative estimation of emissions according to Article 70 of Commission Regulation (EU) No 601/2012" },
+                    {"label": "Approval of improvement reports according to Article 69 of Commission Regulation (EU) No 601/2012" },
+                    {"label": "Approval of the operator’s application to waive a verifier’s site visit pursuant to Article 31(1) of Commission Regulation (EU) No 600/2012",
+                          "aviationDisabled": true},
+                    {"label": "Inspection and enforcement"},
+                    {"label": "Information to the public"},
+                    {"label": "Administration of unilateral inclusion of activities and gases under Article 24 of Directive 2003/87/EC [*]",
+                          "aviationDisabled": true},
+                    {"label": "Administration of installations excluded under Article 27 of Directive 2003/87/EC [**]",
+                          "aviationDisabled": true}
+                ],
+                "activityMeasures": [
+                    {"label" : "Does national legislation require a central competent authority to review and " +
+                            "provide binding instructions on monitoring plans, notifications of changes to the " +
+                            "monitoring plan or emissions reports? "},
+                    {"label" : "Does a central competent authority steer local and/or regional competent " +
+                            "authorities by giving binding instructions and guidance? "},
+                    {"label" : "Does a central competent authority review and provide advice on monitoring plans," +
+                            " notifications and emissions reports on a voluntary basis? "},
+                    {"label" : "Are regular working groups or meetings organised with the competent authorities?"},
+                    {"label" : "Is common training organised for all competent authorities to " +
+                            "ensure consistent implementation of requirements? "},
+                    {"label" : "Are IT systems or tools used to ensure common approaches to monitoring " +
+                            "and reporting issues?"},
+                    {"label" : "Is a coordination group established, with competent authority staff, which discusses " +
+                            "monitoring and reporting issues and develops common approaches? "}
+                ],
+                "informationExchange": [
+                    {"label" : "Are regular meetings organised between the national " +
+                            "accreditation body/ national certification authority (if relevant) " +
+                            "and the competent authority responsible for the coordination? "},
+                    {"label" : "Has a working group been established where the " +
+                            "national accreditation body/ national certification authority (if relevant), " +
+                            "the competent authority and verifiers discuss accreditation and verification issues?"},
+                    {"label" : "Can the competent authority accompany the national " +
+                            "accreditation body in accreditation activities as an observer?"}
 
+                ]
             }};
 
             $scope.addItem = function(path) {
@@ -21,7 +69,7 @@
                 while(tokens.length) {
                     result = result[tokens.shift()];
                 }
-                result.push({});
+                result.push({"customItem": true });
             };
         });
     </script>
@@ -96,7 +144,7 @@
                 <div class="span2">Email address</div>
                 <div class="span2">Website</div>
             </div>
-            <div class="row" ng-repeat="p in article.responsible_authorities.implementers">
+            <div class="row" ng-repeat="p in article.responsibleAuthorities.implementers">
                 <div class="span2"><input class="input-medium" type="text" ng-model="p.name"/></div>
                 <div class="span2"><input class="input-medium" type="text" ng-model="p.abbreviation"/></div>
                 <div class="span2"><input class="input-medium" type="text" ng-model="p.phone"/></div>
@@ -104,7 +152,7 @@
                 <div class="span2"><input class="input-medium" type="text" ng-model="p.website"/></div>
             </div>
             <div class="row">
-                <div class="span2"><input type="button" ng-click="addItem('responsible_authorities.implementers')" value="Add row"/></div>
+                <div class="span2"><input type="button" ng-click="addItem('responsibleAuthorities.implementers')" value="Add row"/></div>
             </div>
 
             <h4>In the table below, please state name, abbreviation and contact details
@@ -118,11 +166,11 @@
                 <div class="span2">Website</div>
             </div>
             <div class="row">
-                <div class="span2"><input class="input-medium" type="text" ng-model="article.responsible_authorities.nationalAccreditationBody.name"/></div>
-                <div class="span2"><input class="input-medium" type="text" ng-model="article.responsible_authorities.nationalAccreditationBody.abbreviation"/></div>
-                <div class="span2"><input class="input-medium" type="text" ng-model="article.responsible_authorities.nationalAccreditationBody.phone"/></div>
-                <div class="span2"><input class="input-medium" type="text" ng-model="article.responsible_authorities.nationalAccreditationBody.email"/></div>
-                <div class="span2"><input class="input-medium" type="text" ng-model="article.responsible_authorities.nationalAccreditationBody.website"/></div>
+                <div class="span2"><input class="input-medium" type="text" ng-model="article.responsibleAuthorities.nationalAccreditationBody.name"/></div>
+                <div class="span2"><input class="input-medium" type="text" ng-model="article.responsibleAuthorities.nationalAccreditationBody.abbreviation"/></div>
+                <div class="span2"><input class="input-medium" type="text" ng-model="article.responsibleAuthorities.nationalAccreditationBody.phone"/></div>
+                <div class="span2"><input class="input-medium" type="text" ng-model="article.responsibleAuthorities.nationalAccreditationBody.email"/></div>
+                <div class="span2"><input class="input-medium" type="text" ng-model="article.responsibleAuthorities.nationalAccreditationBody.website"/></div>
             </div>
 
             <h4>
@@ -141,11 +189,11 @@
                 <div class="span2">Website</div>
             </div>
             <div class="row">
-                <div class="span2"><input class="input-medium" type="text" ng-model="article.responsible_authorities.nationalCertificationAuthority.name"/></div>
-                <div class="span2"><input class="input-medium" type="text" ng-model="article.responsible_authorities.nationalCertificationAuthority.abbreviation"/></div>
-                <div class="span2"><input class="input-medium" type="text" ng-model="article.responsible_authorities.nationalCertificationAuthority.phone"/></div>
-                <div class="span2"><input class="input-medium" type="text" ng-model="article.responsible_authorities.nationalCertificationAuthority.email"/></div>
-                <div class="span2"><input class="input-medium" type="text" ng-model="article.responsible_authorities.nationalCertificationAuthority.website"/></div>
+                <div class="span2"><input class="input-medium" type="text" ng-model="article.responsibleAuthorities.nationalCertificationAuthority.name"/></div>
+                <div class="span2"><input class="input-medium" type="text" ng-model="article.responsibleAuthorities.nationalCertificationAuthority.abbreviation"/></div>
+                <div class="span2"><input class="input-medium" type="text" ng-model="article.responsibleAuthorities.nationalCertificationAuthority.phone"/></div>
+                <div class="span2"><input class="input-medium" type="text" ng-model="article.responsibleAuthorities.nationalCertificationAuthority.email"/></div>
+                <div class="span2"><input class="input-medium" type="text" ng-model="article.responsibleAuthorities.nationalCertificationAuthority.website"/></div>
             </div>
             <h4>
                 In the table below, please state the name, abbreviation and
@@ -159,18 +207,108 @@
                 <div class="span2">Website</div>
             </div>
             <div class="row">
-                <div class="span2"><input class="input-medium" type="text" ng-model="article.responsible_authorities.registryAdministrator.name"/></div>
-                <div class="span2"><input class="input-medium" type="text" ng-model="article.responsible_authorities.registryAdministrator.abbreviation"/></div>
-                <div class="span2"><input class="input-medium" type="text" ng-model="article.responsible_authorities.registryAdministrator.phone"/></div>
-                <div class="span2"><input class="input-medium" type="text" ng-model="article.responsible_authorities.registryAdministrator.email"/></div>
-                <div class="span2"><input class="input-medium" type="text" ng-model="article.responsible_authorities.registryAdministrator.website"/></div>
+                <div class="span2"><input class="input-medium" type="text" ng-model="article.responsibleAuthorities.registryAdministrator.name"/></div>
+                <div class="span2"><input class="input-medium" type="text" ng-model="article.responsibleAuthorities.registryAdministrator.abbreviation"/></div>
+                <div class="span2"><input class="input-medium" type="text" ng-model="article.responsibleAuthorities.registryAdministrator.phone"/></div>
+                <div class="span2"><input class="input-medium" type="text" ng-model="article.responsibleAuthorities.registryAdministrator.email"/></div>
+                <div class="span2"><input class="input-medium" type="text" ng-model="article.responsibleAuthorities.registryAdministrator.website"/></div>
             </div>
 
             <h4>In the table below, please indicate which competent authority
                 is responsible for the following tasks, using their abbreviation.
                 Add further rows if necessary.
             </h4>
+            <div class="row">
+                <div class="span3">Competent authority in charge of:</div>
+                <div class="span3">Installations</div>
+                <div class="span3">Aviation</div>
+            </div>
+            <div class="row" ng-repeat="task in article.responsibleAuthorities.tasks">
+                <div class="span3"><input type="text" ng-if="task.customItem" ng-model="task.label"/><p ng-if="!task.customItem">{{task.label}}</p></div>
+                <div class="span3"><input type="text" ng-disabled="task.installationDisabled" ng-model="task.installations"/></div>
+                <div class="span3"><input type="text" ng-disabled="task.aviationDisabled"  ng-model="task.aviation"/></div>
+            </div>
+            <div class="row">
+                <div class="span2"><input type="button" ng-click="addItem('responsibleAuthorities.tasks')" value="Add row"/></div>
+            </div>
+            <div class="row">
+                <div class="span10">
+                <p>
+                    <small>[*] This box needs only to be completed if the Member State has
+                        included activities or gases under Article 24 of Directive 2003/87/ EC.</small>
+                </p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="span10">
+                    <p>
+                        <small>[**] This box needs only to be completed if the Member State has
+                            excluded activities or gases under Article 27 of Directive 2003/87/ EC.
+                        </small>
+                    </p>
+                </div>
+            </div>
 
+            <h4>
+                2.3 If more than one competent authority is designated in your Member State pursuant to Article 18
+                of Directive 2003/87/EC, which competent authority is your focal point referred to in Article 69(2)
+                of Commission Regulation 600/2012? Please answer using the abbreviation concerned in the table below.
+            </h4>
+            
+            <div class="row">
+                <div class="span5">Name of the competent authority that is the focal point 
+                    referred to in Article 69(2) of Commission Regulation (EU) No 600/2012
+                </div>
+                <div class="span5">Abbreviation</div>
+            </div>
+            <div class="row">
+                <div class="span5"><input type="text" ng-model="article.responsibleAuthorities.focalPointAuthority.name"/></div>
+                <div class="span5"><input type="text" ng-model="article.responsibleAuthorities.focalPointAuthority.abbreviation"/></div>
+            </div>
+
+            <h4>
+                If more than one competent authority is designated in your Member State to carry out the activities
+                in Commission Regulation (EU) No 601/2012, what measures have been taken to coordinate the work of
+                those competent authorities in accordance with Article 10 of Commission Regulation (EU) No 601/2012?
+                Please answer using the table below. Add further rows if necessary.
+            </h4>
+            <div class="row">
+                <div class="span5">Coordination of activities with respect to Article 10 
+                    of Commission Regulation (EU) No 601/2012</div>
+                <div class="span1">Yes/No</div>
+                <div class="span4">Comments(Optional)</div>
+            </div>
+            <div class="row" ng-repeat="measure in article.responsibleAuthorities.activityMeasures">
+                <div class="span5"><input type="text" ng-if="measure.customItem" ng-model="measure.label"/><p ng-if="!measure.customItem">{{measure.label}}</p></div>
+                <div class="span1"><input type="checkbox" ng-true-value="true" ng-false-value="false" ng-model="measure.taken"/></div>
+                <div class="span4"><input type="text" ng-model="measure.comment"/></div>
+            </div>
+            <div class="row">
+                <div class="span2"><input type="button" ng-click="addItem('responsibleAuthorities.activityMeasures')" value="Add row"/></div>
+            </div>
+
+            <h4>2.4 What effective exchange of information and cooperation has been established in accordance
+                with Article 69(1) of Commission Regulation (EU) No 600/2012 between the national accreditation body or,
+                if relevant, the national certification authority and the competent authority within your Member State?
+                Please answer using the table below. Add further rows if necessary.
+            </h4>
+
+            <div class="row">
+                <div class="span5">Coordination of activities with respect
+                    to Article 69(1) of Commission Regulation (EU) No 600/2012</div>
+                <div class="span1">Yes/No</div>
+                <div class="span4">Comments(Optional)</div>
+            </div>
+            <div class="row" ng-repeat="exchange in article.responsibleAuthorities.informationExchange">
+                <div class="span5"><input type="text" ng-if="exchange.customItem" ng-model="exchange.label"/>
+                    <p ng-if="!exchange.customItem">{{exchange.label}}</p>
+                </div>
+                <div class="span1"><input type="checkbox" ng-true-value="true" ng-false-value="false" ng-model="exchange.established"/></div>
+                <div class="span4"><input type="text" ng-model="exchange.comment"/></div>
+            </div>
+            <div class="row">
+                <div class="span2"><input type="button" ng-click="addItem('responsibleAuthorities.informationExchange')" value="Add row"/></div>
+            </div>
         </tab>
     </tabset>
 </div>
