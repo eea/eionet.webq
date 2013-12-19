@@ -20,22 +20,20 @@
  */
 package eionet.webq.service;
 
-import static org.apache.commons.lang3.StringUtils.defaultIfEmpty;
-import static org.apache.commons.lang3.StringUtils.isNotEmpty;
-
-import java.util.Arrays;
-import java.util.Collection;
-
-import javax.servlet.http.HttpSession;
-
-import org.apache.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import eionet.webq.dao.UserFileDownload;
 import eionet.webq.dao.UserFileStorage;
 import eionet.webq.dao.orm.ProjectFile;
 import eionet.webq.dao.orm.UserFile;
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import javax.servlet.http.HttpSession;
+import java.util.Arrays;
+import java.util.Collection;
+
+import static org.apache.commons.lang3.StringUtils.defaultIfEmpty;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 /**
  * {@link UserFileService} implementation.
@@ -52,6 +50,11 @@ public class UserFileServiceImpl implements UserFileService {
      */
     @Autowired
     HttpSession session;
+    /**
+     * User id provider.
+     */
+    @Autowired
+    UserIdProvider userIdProvider;
     /**
      * Service for getting conversion available for file.
      */
@@ -147,7 +150,7 @@ public class UserFileServiceImpl implements UserFileService {
      *
      * @return current http session id
      */
-    private String userId() {
-        return session.getId();
+    String userId() {
+        return userIdProvider.getUserId();
     }
 }

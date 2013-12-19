@@ -20,27 +20,15 @@
  */
 package eionet.webq.web.controller.cdr;
 
-import static java.util.Collections.singletonMap;
-import static org.hamcrest.core.IsEqual.equalTo;
-import static org.hamcrest.core.StringContains.containsString;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyList;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
-
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
+import eionet.webq.dao.orm.ProjectEntry;
+import eionet.webq.dao.orm.ProjectFile;
+import eionet.webq.dao.orm.ProjectFileType;
+import eionet.webq.dao.orm.UserFile;
+import eionet.webq.dto.CdrRequest;
+import eionet.webq.service.CDREnvelopeService.XmlFile;
+import eionet.webq.service.ProjectFileService;
+import eionet.webq.service.UserFileService;
+import eionet.webq.web.AbstractContextControllerTests;
 import org.apache.xmlrpc.XmlRpcException;
 import org.apache.xmlrpc.client.XmlRpcClient;
 import org.apache.xmlrpc.client.XmlRpcClientConfig;
@@ -60,15 +48,26 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestOperations;
 
-import eionet.webq.dao.UserFileStorage;
-import eionet.webq.dao.orm.ProjectEntry;
-import eionet.webq.dao.orm.ProjectFile;
-import eionet.webq.dao.orm.ProjectFileType;
-import eionet.webq.dao.orm.UserFile;
-import eionet.webq.dto.CdrRequest;
-import eionet.webq.service.CDREnvelopeService.XmlFile;
-import eionet.webq.service.ProjectFileService;
-import eionet.webq.web.AbstractContextControllerTests;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import static java.util.Collections.singletonMap;
+import static org.hamcrest.core.IsEqual.equalTo;
+import static org.hamcrest.core.StringContains.containsString;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyList;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
 /**
  */
@@ -82,7 +81,10 @@ public class IntegrationWithCDRControllerIntegrationTest extends AbstractContext
     @Autowired
     private RestOperations restOperations;
     @Autowired
-    private UserFileStorage userFileStorage;
+    private UserFileService userFileService;
+    @Autowired
+    private MockHttpSession session;
+
     @Value("#{ws['webq1.url']}")
     private String webQFallBackUrl;
 
@@ -136,7 +138,6 @@ public class IntegrationWithCDRControllerIntegrationTest extends AbstractContext
 
     @Test
     public void editCdrFileWillSaveFileLocallyAndRedirectToXFormsEngine() throws Exception {
-        MockHttpSession session = new MockHttpSession();
         byte[] fileContent = "file-content".getBytes();
         when(restOperations.getForEntity(anyString(), any(Class.class)))
                 .thenReturn(new ResponseEntity<byte[]>(fileContent, HttpStatus.OK));
@@ -155,7 +156,7 @@ public class IntegrationWithCDRControllerIntegrationTest extends AbstractContext
 
         String redirectedUrl = mvcResult.getResponse().getRedirectedUrl();
 
-        UserFile file = userFileStorage.findFile(extractFileIdFromXFormRedirectUrl(redirectedUrl), session.getId());
+        UserFile file = userFileService.getById(extractFileIdFromXFormRedirectUrl(redirectedUrl));
         assertNull(file.getContent());
         assertThat(file.getName(), equalTo(fileName));
         assertThat(file.getXmlSchema(), equalTo(XML_SCHEMA));

@@ -34,7 +34,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
-import javax.servlet.http.HttpSession;
 import java.util.Arrays;
 import java.util.Collection;
 
@@ -53,24 +52,25 @@ public class UserFileServiceImplTest {
     @Mock
     private UserFileStorage storage;
     @Mock
-    HttpSession mockSession;
+    private UserFileDownload userFileDownload;
     @Mock
-    UserFileDownload userFileDownload;
+    private RemoteFileService remoteFileService;
     @Mock
-    RemoteFileService remoteFileService;
+    private UserIdProvider userIdProvider;
+
     private final String userId = "userId";
     private static final int FILE_ID = 1;
 
     @Before
     public void prepare() {
         MockitoAnnotations.initMocks(this);
-        Mockito.when(mockSession.getId()).thenReturn(userId);
+        Mockito.when(userIdProvider.getUserId()).thenReturn(userId);
     }
 
     @After
     public void verifyGeneralMockCalls() {
-        verify(mockSession).getId();
-        verifyNoMoreInteractions(mockSession, storage, userFileDownload);
+        verify(userIdProvider).getUserId();
+        verifyNoMoreInteractions(userIdProvider, storage, userFileDownload);
     }
 
     @Test

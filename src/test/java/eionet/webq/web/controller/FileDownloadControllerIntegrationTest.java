@@ -21,11 +21,11 @@
 package eionet.webq.web.controller;
 
 import eionet.webq.dao.MergeModules;
-import eionet.webq.dao.UserFileStorage;
 import eionet.webq.dao.orm.MergeModule;
 import eionet.webq.dao.orm.MergeModuleXmlSchema;
 import eionet.webq.dao.orm.UploadedFile;
 import eionet.webq.dao.orm.UserFile;
+import eionet.webq.service.UserFileService;
 import eionet.webq.web.AbstractContextControllerTests;
 import org.hibernate.FlushMode;
 import org.hibernate.SessionFactory;
@@ -50,10 +50,11 @@ public class FileDownloadControllerIntegrationTest extends AbstractContextContro
     @Autowired
     private MergeModules modules;
     @Autowired
-    private UserFileStorage userFileStorage;
+    private UserFileService userFileService;
     @Autowired
     private SessionFactory sessionFactory;
-    private MockHttpSession session = new MockHttpSession();
+    @Autowired
+    private MockHttpSession session;
 
     @Before
     public void before() throws Exception {
@@ -83,7 +84,7 @@ public class FileDownloadControllerIntegrationTest extends AbstractContextContro
     }
 
     private int saveUserFile() {
-        return userFileStorage.save(new UserFile(new UploadedFile(), XML_SCHEMA), session.getId());
+        return userFileService.save(new UserFile(new UploadedFile(), XML_SCHEMA));
     }
 
     private MergeModule saveMergeModule(String fileName) {
