@@ -2,11 +2,30 @@
 <html ng-app="article21" ng-controller="questionnaire">
 <head>
     <title>Article 21</title>
+    <meta name="Publisher" content="EEA, The European Environment Agency" />
+    <link type="text/css" rel="stylesheet" media="screen" href="http://www.eionet.europa.eu/styles/eionet2007/screen.css" title="Eionet 2007 style" />
+    <!-- EIONET 2007 styles -->
+    <link rel="stylesheet" type="text/css" href="http://www.eionet.europa.eu/styles/eionet2007/print.css" media="print" />
+    <link rel="stylesheet" type="text/css" href="http://www.eionet.europa.eu/styles/eionet2007/handheld.css" media="handheld" />
     <link href="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-combined.min.css" rel="stylesheet">
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.4/angular.js"></script>
     <script src="http://angular-ui.github.io/bootstrap/ui-bootstrap-tpls-0.7.0.js"></script>
 
-
+	<style type="text/css">
+		.css-form input.ng-invalid.ng-dirty {
+			background-color: #FA787E;
+		}
+		.css-form input.ng-valid.ng-dirty {
+			background-color: #78FA89;
+		}
+		.validation-msg{
+			color:red;
+		}
+		#workarea ul {
+			list-style-image: none;
+			list-style-type: none;
+		}
+</style>
     <script type="text/javascript">
         var app = angular.module("article21", ['ui.bootstrap']);
         app.controller("questionnaire", function ($scope) {
@@ -62,7 +81,7 @@
 
                 ]
             }};
-
+			$scope.yesno = ['yes', 'no']
             $scope.addItem = function(path) {
                 var tokens = path.split(".");
                 var result = $scope.article;
@@ -71,29 +90,66 @@
                 }
                 result.push({"customItem": true });
             };
+			$scope.remove = function(array, index){
+				array.splice(index, 1);
+			}
         });
     </script>
 </head>
-<body>
-<div class="row span10">
+<body class="fullscreen">
+        <div id="container">
+            <div id="toolribbon">
+                <div id="lefttools">
+                    <a id="eealink" href="http://www.eea.europa.eu/">EEA</a>
+                    <a id="ewlink" href="http://www.ewindows.eu.org/">EnviroWindows</a>
+                </div>
+                <div id="righttools">
+                    <a id="printlink" title="Print this page" href="javascript:this.print();"><span>Print</span></a>
+                </div>
+            </div> <!-- toolribbon -->
+
+            <div id="pagehead">
+                <a href="/" accesskey="1"><img src="/images/eea-print-logo.gif" alt="Logo" id="logo" /></a>
+                <div id="networktitle">Eionet</div>
+                <div id="sitetitle">European Environment Information and Observation Network</div>
+                <div id="sitetagline">Web questionnaires</div>
+            </div>  <!-- page head -->
+
+            <div id="menuribbon"></div>
+
+            <div class="breadcrumbtrail">
+                <div class="breadcrumbhead">You are here:</div>
+                <div class="breadcrumbitem eionetaccronym"><a href="http://www.eionet.europa.eu/">Eionet</a></div>
+                <div class="breadcrumbitem">CDR</div>
+                <div class="breadcrumbitemlast">WebForm</div>
+                <div class="breadcrumbtail"></div>
+            </div>
+            <div id="workarea">
+			
+			<div class="row span10">
     <tabset>
         <tab heading="Question 1">
             <h1>1. Details of institution submitting the report</h1>
-
+			<form name="form" novalidate class="css-form">
             <div class="row">
                 <div class="span4">
                     <label for="organization">Name and department of organisation: </label>
                 </div>
                 <div class="span6">
-                    <input id="organization" type="text" ng-model="article.institution.organization"/>
+                    <input id="organization" type="text" name="uOrg" ng-model="article.institution.organization" required/>
                 </div>
             </div>
+            <div class="row">
+				<div class="offset4 span6 validation-msg" ng-show="form.$dirty && form.uOrg.$invalid">Invalid:
+					<span ng-show="form.uOrg.$error.required">This is required field.</span>
+				</div>
+			</div>
             <div class="row">
                 <div class="span4">
                     <label for="contact-person">Name of contact person: </label>
                 </div>
                 <div class="span6">
-                    <input id="contact-person" type="text" ng-model="article.institution.contact.person"/>
+                    <input id="contact-person" type="text" ng-model="article.institution.contact.person" required/>
                 </div>
             </div>
             <div class="row">
@@ -125,9 +181,16 @@
                     <label for="e-mail">E-mail: </label>
                 </div>
                 <div class="span6">
-                    <input id="e-mail" type="text" ng-model="article.institution.contact.email"/>
+                    <input id="e-mail" type="email" ng-model="article.institution.contact.email" name="uEmail" required />
                 </div>
-            </div>
+			</div>
+            <div class="row">
+				<div class="offset4 span6 validation-msg" ng-show="form.uEmail.$dirty && form.uEmail.$invalid">Invalid:
+					<span ng-show="form.uEmail.$error.required">Tell us your email.</span>
+					<span ng-show="form.uEmail.$error.email">This is not a valid email.</span>
+				</div>
+			</div>
+		</form>
         </tab>
         <tab heading="Question 2">
             <h1>2. Responsible authorities in the emissions trading scheme (EU ETS) and coordination between authorities</h1>
@@ -139,20 +202,22 @@
             </h4>
             <div class="row">
                 <div class="span2">Name</div>
-                <div class="span2">Abbreviation</div>
+                <div class="span1">Abbreviation</div>
                 <div class="span2">Telephone number</div>
                 <div class="span2">Email address</div>
                 <div class="span2">Website</div>
+				<div class="span1"></div>
             </div>
             <div class="row" ng-repeat="p in article.responsibleAuthorities.implementers">
                 <div class="span2"><input class="input-medium" type="text" ng-model="p.name"/></div>
-                <div class="span2"><input class="input-medium" type="text" ng-model="p.abbreviation"/></div>
+                <div class="span1"><input class="input-mini" type="text" ng-model="p.abbreviation"/></div>
                 <div class="span2"><input class="input-medium" type="text" ng-model="p.phone"/></div>
                 <div class="span2"><input class="input-medium" type="text" ng-model="p.email"/></div>
                 <div class="span2"><input class="input-medium" type="text" ng-model="p.website"/></div>
+				<div class="span1"><button type="button" class="btn btn-mini" ng-click="remove(article.responsibleAuthorities.implementers, $index)">Remove</button></div>
             </div>
             <div class="row">
-                <div class="span2"><input type="button" ng-click="addItem('responsibleAuthorities.implementers')" value="Add row"/></div>
+                <div class="span2"><input type="button" ng-click="addItem('responsibleAuthorities.implementers')" value="Add row" class="btn btn-small btn-primary"/></div>
             </div>
 
             <h4>In the table below, please state name, abbreviation and contact details
@@ -177,18 +242,21 @@
                 Have you set up a national certification authority to certify verifiers
                 pursuant to Article 54(2) of Commission Regulation (EU) No 600/2012? Yes/No
             </h4>
-            <h4>
+			<div class="row">
+				<div class="span11"><select ng-model="article.responsibleAuthorities.nationalCertificationAuthority.yesno" ng-options="yn for yn in yesno"></select></div>
+			</div>
+            <h4 ng-show="article.responsibleAuthorities.nationalCertificationAuthority.yesno == 'yes'">
                 If yes, please state the name, abbreviation and contact details of the
                 national certification authority using the table below.
             </h4>
-            <div class="row">
+            <div class="row" ng-show="article.responsibleAuthorities.nationalCertificationAuthority.yesno == 'yes'">
                 <div class="span2">Name</div>
                 <div class="span2">Abbreviation</div>
                 <div class="span2">Telephone number</div>
                 <div class="span2">Email address</div>
                 <div class="span2">Website</div>
             </div>
-            <div class="row">
+            <div class="row" ng-show="article.responsibleAuthorities.nationalCertificationAuthority.yesno == 'yes'">
                 <div class="span2"><input class="input-medium" type="text" ng-model="article.responsibleAuthorities.nationalCertificationAuthority.name"/></div>
                 <div class="span2"><input class="input-medium" type="text" ng-model="article.responsibleAuthorities.nationalCertificationAuthority.abbreviation"/></div>
                 <div class="span2"><input class="input-medium" type="text" ng-model="article.responsibleAuthorities.nationalCertificationAuthority.phone"/></div>
@@ -229,7 +297,7 @@
                 <div class="span3"><input type="text" ng-disabled="task.aviationDisabled"  ng-model="task.aviation"/></div>
             </div>
             <div class="row">
-                <div class="span2"><input type="button" ng-click="addItem('responsibleAuthorities.tasks')" value="Add row"/></div>
+                <div class="span2"><input type="button" ng-click="addItem('responsibleAuthorities.tasks')" value="Add row" class="btn btn-small btn-primary"//></div>
             </div>
             <div class="row">
                 <div class="span10">
@@ -284,7 +352,7 @@
                 <div class="span4"><input type="text" ng-model="measure.comment"/></div>
             </div>
             <div class="row">
-                <div class="span2"><input type="button" ng-click="addItem('responsibleAuthorities.activityMeasures')" value="Add row"/></div>
+                <div class="span2"><input type="button" ng-click="addItem('responsibleAuthorities.activityMeasures')" value="Add row" class="btn btn-small btn-primary"//></div>
             </div>
 
             <h4>2.4 What effective exchange of information and cooperation has been established in accordance
@@ -307,11 +375,23 @@
                 <div class="span4"><input type="text" ng-model="exchange.comment"/></div>
             </div>
             <div class="row">
-                <div class="span2"><input type="button" ng-click="addItem('responsibleAuthorities.informationExchange')" value="Add row"/></div>
+                <div class="span2"><input type="button" ng-click="addItem('responsibleAuthorities.informationExchange')" value="Add row" class="btn btn-small btn-primary"//></div>
             </div>
         </tab>
+        <tab heading="Q 3">
+		</tab>
+        <tab heading="Q 4">
+		</tab>
+        <tab heading="Q 5">
+		</tab>
     </tabset>
 </div>
 <div class="row span2">{{article | json}}</div>
+            </div>
+        </div> <!-- container -->
+        <div id="pagefoot">
+            <p><a href="http://www.eea.europa.eu/"><b>European Environment Agency</b></a>
+            <br/>Kgs. Nytorv 6, DK-1050 Copenhagen K, Denmark - Phone: +45 3336 7100</p>
+        </div>
 </body>
 </html>
