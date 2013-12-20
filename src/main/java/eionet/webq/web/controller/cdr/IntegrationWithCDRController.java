@@ -20,13 +20,15 @@
  */
 package eionet.webq.web.controller.cdr;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import eionet.webq.converter.CdrRequestConverter;
+import eionet.webq.dao.orm.ProjectFile;
+import eionet.webq.dao.orm.UserFile;
+import eionet.webq.dto.CdrRequest;
+import eionet.webq.service.CDREnvelopeService;
+import eionet.webq.service.CDREnvelopeService.XmlFile;
+import eionet.webq.service.FileNotAvailableException;
+import eionet.webq.service.UserFileService;
+import eionet.webq.service.WebFormService;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,15 +44,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-import eionet.webq.converter.CdrRequestConverter;
-import eionet.webq.dao.orm.ProjectFile;
-import eionet.webq.dao.orm.UserFile;
-import eionet.webq.dto.CdrRequest;
-import eionet.webq.service.CDREnvelopeService;
-import eionet.webq.service.CDREnvelopeService.XmlFile;
-import eionet.webq.service.FileNotAvailableException;
-import eionet.webq.service.UserFileService;
-import eionet.webq.service.WebFormService;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+
+import static org.apache.commons.codec.digest.DigestUtils.md5Hex;
 
 /**
  * Provides integration options with CDR.
@@ -220,7 +220,7 @@ public class IntegrationWithCDRController {
                 + parameters.getContextPath()
                 + "&envelope=" + StringUtils.defaultString(parameters.getEnvelopeUrl())
                 + StringUtils.defaultString(parameters.getAdditionalParametersAsQueryString())
-                + "&jsessionid=" + parameters.getSessionId();
+                + "&jsessionid=" + md5Hex(parameters.getSessionId());
     }
 
     /**
@@ -281,7 +281,7 @@ public class IntegrationWithCDRController {
                 + fileId
                 + "&base_uri=" + request.getContextPath() + envelopeParam
                 + request.getAdditionalParametersAsQueryString()
-                + "&jsessionid=" + request.getSessionId();
+                + "&jsessionid=" + md5Hex(request.getSessionId());
     }
 
     /**

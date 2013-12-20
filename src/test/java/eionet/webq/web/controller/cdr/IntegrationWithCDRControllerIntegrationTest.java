@@ -147,6 +147,7 @@ public class IntegrationWithCDRControllerIntegrationTest extends AbstractContext
         CdrRequest request = new CdrRequest();
         request.setNewFileName(fileName);
         request.setAdditionalParametersAsQueryString("");
+        request.setSessionId("sessionId");
         session.setAttribute(IntegrationWithCDRController.LATEST_CDR_REQUEST, request);
 
         MvcResult mvcResult =
