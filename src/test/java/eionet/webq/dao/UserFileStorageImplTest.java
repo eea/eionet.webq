@@ -20,16 +20,9 @@
  */
 package eionet.webq.dao;
 
-import static eionet.webq.dao.FileContentUtil.getFileContentRowsCount;
-import static junit.framework.TestCase.assertNotNull;
-import static org.hamcrest.core.IsEqual.equalTo;
-import static org.junit.Assert.assertThat;
-
-import java.util.Collection;
-import java.util.Iterator;
-
-import javax.validation.ConstraintViolationException;
-
+import configuration.ApplicationTestContextWithMockSession;
+import eionet.webq.dao.orm.UploadedFile;
+import eionet.webq.dao.orm.UserFile;
 import org.hibernate.FlushMode;
 import org.hibernate.LazyInitializationException;
 import org.hibernate.Session;
@@ -43,9 +36,15 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
-import configuration.ApplicationTestContextWithMockSession;
-import eionet.webq.dao.orm.UploadedFile;
-import eionet.webq.dao.orm.UserFile;
+import javax.validation.ConstraintViolationException;
+import java.util.Collection;
+import java.util.Iterator;
+
+import static eionet.webq.dao.FileContentUtil.getFileContentRowsCount;
+import static junit.framework.TestCase.assertNotNull;
+import static org.hamcrest.core.IsEqual.equalTo;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertThat;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {ApplicationTestContextWithMockSession.class})
@@ -271,6 +270,22 @@ public class UserFileStorageImplTest {
         storage.remove(userId, userFile.getId());
 
         assertThat(getFileContentRowsCount(sessionFactory), equalTo(0));
+    }
+
+    @Test
+    public void allowToUpdateUserIdForFiles() throws Exception {
+        UserFile userFile = saveAndGetBackSavedFileForDefaultUser();
+        String userId = userFile.getUserId();
+        String newUserId = "newUserId";
+
+        assertNotEquals(userId, newUserId);
+        assertThat(storage.findAllUserFiles(userId).size(), equalTo(1));
+        assertThat(storage.findAllUserFiles(newUserId).size(), equalTo(0));
+
+        storage.updateUserId(userId, newUserId);
+
+        assertThat(storage.findAllUserFiles(userId).size(), equalTo(0));
+        assertThat(storage.findAllUserFiles(newUserId).size(), equalTo(1));
     }
 
     private UserFile saveAndGetBackSavedFileForDefaultUser() {

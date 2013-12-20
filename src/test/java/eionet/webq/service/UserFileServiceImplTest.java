@@ -163,4 +163,19 @@ public class UserFileServiceImplTest {
         verify(remoteFileService).fileContent(webForm.getEmptyInstanceUrl());
         verify(storage).save(eq(userFile), anyString());
     }
+
+    @Test
+    public void allowToUpdateFilesUserIdIfNewUserIsCurrentOne() throws Exception {
+        String oldUserId = "old";
+        service.updateUserId(oldUserId, userId);
+
+        verify(storage).updateUserId(oldUserId, userId);
+    }
+
+    @Test
+    public void doNotUpdateFilesUserIdIfUserIsNotCurrentOne() throws Exception {
+        String oldUserId = "old";
+        String newUserId = "new";
+        service.updateUserId(oldUserId, newUserId);
+    }
 }

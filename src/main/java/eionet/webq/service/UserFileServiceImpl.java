@@ -134,6 +134,13 @@ public class UserFileServiceImpl implements UserFileService {
         storage.remove(userId, fileIds);
     }
 
+    @Override
+    public void updateUserId(String oldUserId, String newUserId) {
+        if (userId().equals(newUserId)) {
+            storage.updateUserId(oldUserId, newUserId);
+        }
+    }
+
     /**
      * Set file content from remote location and saves it.
      * @param file file
