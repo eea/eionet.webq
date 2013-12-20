@@ -20,19 +20,18 @@
  */
 package eionet.webq.dao;
 
-import static org.hibernate.criterion.Restrictions.and;
-import static org.hibernate.criterion.Restrictions.eq;
-import static org.hibernate.criterion.Restrictions.in;
+import eionet.webq.dao.orm.UserFile;
+import org.apache.commons.lang3.ArrayUtils;
+import org.hibernate.criterion.Restrictions;
+import org.springframework.stereotype.Repository;
 
 import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.Date;
 
-import org.apache.commons.lang3.ArrayUtils;
-import org.hibernate.criterion.Restrictions;
-import org.springframework.stereotype.Repository;
-
-import eionet.webq.dao.orm.UserFile;
+import static org.hibernate.criterion.Restrictions.and;
+import static org.hibernate.criterion.Restrictions.eq;
+import static org.hibernate.criterion.Restrictions.in;
 
 /**
  * {@link eionet.webq.dao.UserFileStorage} implementation.
@@ -71,6 +70,14 @@ public class UserFileStorageImpl extends AbstractDao<UserFile> implements UserFi
     @Override
     public void remove(final String userId, final int... ids) {
         removeByCriterion(and(eq("userId", userId), in("id", ArrayUtils.toObject(ids))));
+    }
+
+    @Override
+    public void updateUserId(String oldUserId, String newUserId) {
+        getCurrentSession().createQuery("UPDATE UserFile SET userId=:newId WHERE userId=:oldId")
+                .setString("newId", newUserId)
+                .setString("oldId", oldUserId)
+                .executeUpdate();
     }
 
     @Override

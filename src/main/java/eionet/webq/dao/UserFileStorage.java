@@ -68,4 +68,11 @@ public interface UserFileStorage {
      * @param ids file ids
      */
     void remove(String userId, int... ids);
+
+    /**
+     * Updates userId for all files which belongs to oldUserId.
+     * @param oldUserId old user id
+     * @param newUserId new user id
+     */
+    void updateUserId(String oldUserId, String newUserId);
 }
