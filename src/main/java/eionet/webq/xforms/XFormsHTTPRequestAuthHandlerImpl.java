@@ -21,11 +21,11 @@
 
 package eionet.webq.xforms;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.Collection;
-import java.util.Map;
-
+import eionet.webq.dao.orm.KnownHost;
+import eionet.webq.dao.orm.UserFile;
+import eionet.webq.dto.KnownHostAuthenticationMethod;
+import eionet.webq.service.KnownHostsService;
+import eionet.webq.service.UserFileService;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.net.util.Base64;
 import org.apache.http.client.methods.HttpRequestBase;
@@ -33,11 +33,10 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import eionet.webq.dao.orm.KnownHost;
-import eionet.webq.dao.orm.UserFile;
-import eionet.webq.dto.KnownHostAuthenticationMethod;
-import eionet.webq.service.KnownHostsService;
-import eionet.webq.service.UserFileService;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.Collection;
+import java.util.Map;
 
 /**
  * Service handles HTTP requests done through XForms engine and adds auth info to request header if needed.
@@ -58,7 +57,7 @@ public class XFormsHTTPRequestAuthHandlerImpl implements HTTPRequestAuthHandler 
     /**
      * The logger.
      */
-    private static Logger LOGGER = Logger.getLogger(XFormsHTTPRequestAuthHandlerImpl.class);
+    private static final Logger LOGGER = Logger.getLogger(XFormsHTTPRequestAuthHandlerImpl.class);
 
     @Override
     public void addAuthToHttpRequest(HttpRequestBase httpRequestBase, Map<?, ?> context) {
