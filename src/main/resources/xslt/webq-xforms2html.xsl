@@ -157,10 +157,12 @@
         <link rel="stylesheet" type="text/css" href="{$webq-protocol}://www.eionet.europa.eu/styles/eionet2007/handheld.css" media="handheld" />
         <style type="text/css">
             #bfLoading{
-                top:155px;
+                position: fixed;
+                top:5px;
             }
             #betterformMessageToaster{
-                top:155px;
+                position: fixed;
+                top:5px;
             }
         </style>
     </xsl:template>
