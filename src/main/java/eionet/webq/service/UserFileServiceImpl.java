@@ -79,6 +79,8 @@ public class UserFileServiceImpl implements UserFileService {
     @Override
     public int save(UserFile file) {
         String userAgent = request != null ? request.getHeader("user-agent") : null;
+        file.setUserAgent(userAgent);
+
         LOGGER.info("Saving uploaded file=" + file + ", user agent=" + userAgent);
         return storage.save(file, userId());
     }

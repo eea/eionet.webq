@@ -34,6 +34,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.Arrays;
 import java.util.Collection;
 
@@ -57,6 +58,8 @@ public class UserFileServiceImplTest {
     private RemoteFileService remoteFileService;
     @Mock
     private UserIdProvider userIdProvider;
+    @Mock
+    private HttpServletRequest request;
 
     private final String userId = "userId";
     private static final int FILE_ID = 1;
@@ -177,5 +180,19 @@ public class UserFileServiceImplTest {
         String oldUserId = "old";
         String newUserId = "new";
         service.updateUserId(oldUserId, newUserId);
+    }
+
+    @Test
+    public void userAgentIsSetForFileOnSave() throws Exception {
+        String expectedUserAgent = "IE 11";
+        String userAgentHeaderName = "user-agent";
+        when(request.getHeader(userAgentHeaderName)).thenReturn(expectedUserAgent);
+
+        UserFile file = new UserFile();
+        service.save(file);
+
+        assertThat(file.getUserAgent(), equalTo(expectedUserAgent));
+        verify(request).getHeader(userAgentHeaderName);
+        verify(storage).save(eq(file), anyString());
     }
 }
