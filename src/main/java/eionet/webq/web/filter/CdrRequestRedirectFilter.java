@@ -47,7 +47,7 @@ public class CdrRequestRedirectFilter implements Filter {
         HttpSession session = httpRequest.getSession(true);
 
         // SessionId received from WebQMenu or WebQEdit request.
-        String initialSessionId = httpRequest.getParameter("jsessionid");
+        String initialSessionId = httpRequest.getParameter("sessionid");
         String current = DigestUtils.md5Hex(session.getId());
 
         LOGGER.debug("Current JSESSIONID:" + current);

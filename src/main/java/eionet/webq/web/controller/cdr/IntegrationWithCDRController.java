@@ -220,7 +220,7 @@ public class IntegrationWithCDRController {
                 + parameters.getContextPath()
                 + "&envelope=" + StringUtils.defaultString(parameters.getEnvelopeUrl())
                 + StringUtils.defaultString(parameters.getAdditionalParametersAsQueryString())
-                + "&jsessionid=" + md5Hex(parameters.getSessionId());
+                + "&sessionid=" + md5Hex(parameters.getSessionId());
     }
 
     /**
@@ -281,7 +281,7 @@ public class IntegrationWithCDRController {
                 + fileId
                 + "&base_uri=" + request.getContextPath() + envelopeParam
                 + request.getAdditionalParametersAsQueryString()
-                + "&jsessionid=" + md5Hex(request.getSessionId());
+                + "&sessionid=" + md5Hex(request.getSessionId());
     }
 
     /**
