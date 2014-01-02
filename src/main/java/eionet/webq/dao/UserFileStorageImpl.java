@@ -75,9 +75,10 @@ public class UserFileStorageImpl extends AbstractDao<UserFile> implements UserFi
 
     @Override
     public void updateUserId(UserFileIdUpdate updateData) {
-        getCurrentSession().createQuery("UPDATE UserFile SET userId=:newId WHERE userId=:oldId")
+        getCurrentSession().createQuery("UPDATE UserFile SET userId=:newId WHERE userId=:oldId AND userAgent=:userAgent")
                 .setString("newId", updateData.getNewUserId())
                 .setString("oldId", updateData.getOldUserId())
+                .setString("userAgent", updateData.getUserAgent())
                 .executeUpdate();
     }
 
