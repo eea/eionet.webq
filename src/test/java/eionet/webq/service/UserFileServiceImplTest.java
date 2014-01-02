@@ -64,11 +64,14 @@ public class UserFileServiceImplTest {
 
     private final String userId = "userId";
     private static final int FILE_ID = 1;
+    private final String userAgentHeaderName = "user-agent";
+    private final String expectedUserAgent = "IE 11";
 
     @Before
     public void prepare() {
         MockitoAnnotations.initMocks(this);
         Mockito.when(userIdProvider.getUserId()).thenReturn(userId);
+        when(request.getHeader(userAgentHeaderName)).thenReturn(expectedUserAgent);
     }
 
     @After
@@ -190,15 +193,21 @@ public class UserFileServiceImplTest {
 
     @Test
     public void userAgentIsSetForFileOnSave() throws Exception {
-        String expectedUserAgent = "IE 11";
-        String userAgentHeaderName = "user-agent";
-        when(request.getHeader(userAgentHeaderName)).thenReturn(expectedUserAgent);
-
         UserFile file = new UserFile();
         service.save(file);
 
         assertThat(file.getUserAgent(), equalTo(expectedUserAgent));
         verify(request).getHeader(userAgentHeaderName);
         verify(storage).save(eq(file), anyString());
+    }
+
+    @Test
+    public void whenUpdatingUserId_sendUserAgentInUpdateData() throws Exception {
+        service.updateUserId("oldUserId", userId);
+        ArgumentCaptor<UserFileIdUpdate> updateDataCaptor = ArgumentCaptor.forClass(UserFileIdUpdate.class);
+        verify(storage).updateUserId(updateDataCaptor.capture());
+
+        UserFileIdUpdate updateData = updateDataCaptor.getValue();
+        assertThat(updateData.getUserAgent(), equalTo(expectedUserAgent));
     }
 }

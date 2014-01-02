@@ -79,7 +79,7 @@ public class UserFileServiceImpl implements UserFileService {
 
     @Override
     public int save(UserFile file) {
-        String userAgent = request != null ? request.getHeader("user-agent") : null;
+        String userAgent = getUserAgent();
         file.setUserAgent(userAgent);
 
         LOGGER.info("Saving uploaded file=" + file + ", user agent=" + userAgent);
@@ -144,6 +144,7 @@ public class UserFileServiceImpl implements UserFileService {
             UserFileIdUpdate updateData = new UserFileIdUpdate();
             updateData.setNewUserId(newUserId);
             updateData.setOldUserId(oldUserId);
+            updateData.setUserAgent(getUserAgent());
             storage.updateUserId(updateData);
         }
     }
@@ -166,5 +167,9 @@ public class UserFileServiceImpl implements UserFileService {
      */
     String userId() {
         return userIdProvider.getUserId();
+   }
+
+    private String getUserAgent() {
+        return request != null ? request.getHeader("user-agent") : null;
     }
 }
