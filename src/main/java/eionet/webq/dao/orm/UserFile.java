@@ -20,8 +20,8 @@
  */
 package eionet.webq.dao.orm;
 
-import java.util.Collection;
-import java.util.Date;
+import eionet.webq.dto.Conversion;
+import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.persistence.Column;
 import javax.persistence.Embedded;
@@ -33,10 +33,8 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Transient;
-
-import org.hibernate.validator.constraints.NotEmpty;
-
-import eionet.webq.dto.Conversion;
+import java.util.Collection;
+import java.util.Date;
 
 /**
  * Data transfer object to pass uploaded file data across application.
@@ -116,6 +114,11 @@ public class UserFile {
      */
     @Temporal(TemporalType.TIMESTAMP)
     private Date updated = new Date();
+    /**
+     * User agent on upload time.
+     */
+    @Column
+    private String userAgent;
     /**
      * Last download date.
      */
@@ -303,6 +306,14 @@ public class UserFile {
 
     public void setUserId(String userId) {
         this.userId = userId;
+    }
+
+    public String getUserAgent() {
+        return userAgent;
+    }
+
+    public void setUserAgent(String userAgent) {
+        this.userAgent = userAgent;
     }
 
     @Override

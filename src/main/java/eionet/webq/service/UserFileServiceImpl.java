@@ -28,7 +28,7 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.servlet.http.HttpSession;
+import javax.servlet.http.HttpServletRequest;
 import java.util.Arrays;
 import java.util.Collection;
 
@@ -46,10 +46,10 @@ public class UserFileServiceImpl implements UserFileService {
     @Autowired
     UserFileStorage storage;
     /**
-     * Current http session.
+     * Current http request.
      */
-    @Autowired
-    HttpSession session;
+    @Autowired(required = false)
+    HttpServletRequest request;
     /**
      * User id provider.
      */
@@ -78,7 +78,8 @@ public class UserFileServiceImpl implements UserFileService {
 
     @Override
     public int save(UserFile file) {
-        LOGGER.info("Saving uploaded file=" + file);
+        String userAgent = request != null ? request.getHeader("user-agent") : null;
+        LOGGER.info("Saving uploaded file=" + file + ", user agent=" + userAgent);
         return storage.save(file, userId());
     }
 

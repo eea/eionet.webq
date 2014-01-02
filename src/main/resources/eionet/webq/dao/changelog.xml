@@ -252,4 +252,14 @@
         </addColumn>
         <sql>update project_file set remote_form=0;</sql>
     </changeSet>
+    <changeSet id="15" author="dmitrant">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="user_xml" columnName="user_agent"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="user_xml">
+            <column name="user_agent" type="varchar(1000)"/>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

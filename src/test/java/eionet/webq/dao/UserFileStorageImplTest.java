@@ -74,6 +74,7 @@ public class UserFileStorageImplTest {
         UserFile userFile =
                 new UserFile(new UploadedFile("name", "test_content".getBytes()), "xmlSchema");
         userFile.setFromCdr(true);
+        userFile.setUserAgent("Mozilla");
 
         storage.save(userFile, userId);
 
@@ -85,6 +86,7 @@ public class UserFileStorageImplTest {
         assertThat(fileFromDb.getSizeInBytes(), equalTo(userFile.getSizeInBytes()));
         assertThat(fileFromDb.getXmlSchema(), equalTo(userFile.getXmlSchema()));
         assertThat(fileFromDb.isFromCdr(), equalTo(userFile.isFromCdr()));
+        assertThat(fileFromDb.getUserAgent(), equalTo(userFile.getUserAgent()));
         assertNotNull(fileFromDb.getCreated());
         assertNotNull(fileFromDb.getUpdated());
     }
