@@ -24,6 +24,7 @@ import eionet.webq.dao.UserFileDownload;
 import eionet.webq.dao.UserFileStorage;
 import eionet.webq.dao.orm.ProjectFile;
 import eionet.webq.dao.orm.UserFile;
+import eionet.webq.dto.UserFileIdUpdate;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -140,7 +141,10 @@ public class UserFileServiceImpl implements UserFileService {
     @Override
     public void updateUserId(String oldUserId, String newUserId) {
         if (userId().equals(newUserId)) {
-            storage.updateUserId(oldUserId, newUserId);
+            UserFileIdUpdate updateData = new UserFileIdUpdate();
+            updateData.setNewUserId(newUserId);
+            updateData.setOldUserId(oldUserId);
+            storage.updateUserId(updateData);
         }
     }
 

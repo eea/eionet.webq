@@ -23,6 +23,7 @@ package eionet.webq.dao;
 import configuration.ApplicationTestContextWithMockSession;
 import eionet.webq.dao.orm.UploadedFile;
 import eionet.webq.dao.orm.UserFile;
+import eionet.webq.dto.UserFileIdUpdate;
 import org.hibernate.FlushMode;
 import org.hibernate.LazyInitializationException;
 import org.hibernate.Session;
@@ -284,7 +285,11 @@ public class UserFileStorageImplTest {
         assertThat(storage.findAllUserFiles(userId).size(), equalTo(1));
         assertThat(storage.findAllUserFiles(newUserId).size(), equalTo(0));
 
-        storage.updateUserId(userId, newUserId);
+        UserFileIdUpdate updateData = new UserFileIdUpdate();
+        updateData.setOldUserId(userId);
+        updateData.setNewUserId(newUserId);
+
+        storage.updateUserId(updateData);
 
         assertThat(storage.findAllUserFiles(userId).size(), equalTo(0));
         assertThat(storage.findAllUserFiles(newUserId).size(), equalTo(1));

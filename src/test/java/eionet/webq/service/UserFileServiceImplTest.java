@@ -25,6 +25,7 @@ import eionet.webq.dao.UserFileDownload;
 import eionet.webq.dao.UserFileStorage;
 import eionet.webq.dao.orm.ProjectFile;
 import eionet.webq.dao.orm.UserFile;
+import eionet.webq.dto.UserFileIdUpdate;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -172,7 +173,12 @@ public class UserFileServiceImplTest {
         String oldUserId = "old";
         service.updateUserId(oldUserId, userId);
 
-        verify(storage).updateUserId(oldUserId, userId);
+        ArgumentCaptor<UserFileIdUpdate> updateDataCaptor = ArgumentCaptor.forClass(UserFileIdUpdate.class);
+        verify(storage).updateUserId(updateDataCaptor.capture());
+        UserFileIdUpdate updateData = updateDataCaptor.getValue();
+
+        assertThat(updateData.getOldUserId(), equalTo(oldUserId));
+        assertThat(updateData.getNewUserId(), equalTo(userId));
     }
 
     @Test

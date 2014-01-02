@@ -21,6 +21,7 @@
 package eionet.webq.dao;
 
 import eionet.webq.dao.orm.UserFile;
+import eionet.webq.dto.UserFileIdUpdate;
 import org.apache.commons.lang3.ArrayUtils;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
@@ -73,10 +74,10 @@ public class UserFileStorageImpl extends AbstractDao<UserFile> implements UserFi
     }
 
     @Override
-    public void updateUserId(String oldUserId, String newUserId) {
+    public void updateUserId(UserFileIdUpdate updateData) {
         getCurrentSession().createQuery("UPDATE UserFile SET userId=:newId WHERE userId=:oldId")
-                .setString("newId", newUserId)
-                .setString("oldId", oldUserId)
+                .setString("newId", updateData.getNewUserId())
+                .setString("oldId", updateData.getOldUserId())
                 .executeUpdate();
     }
 
