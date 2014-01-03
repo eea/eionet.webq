@@ -8,12 +8,12 @@
     <form:errors path="*" element="div" cssClass="error-msg"/>
     <table class="datatable">
         <tr>
-            <th scope="row"><label for="hostURL">Host URL</label></th>
-            <td><form:input path="hostURL" style="width:500px"/></td>
-        </tr>
-        <tr>
             <th scope="row"><label for="hostName">Host name</label></th>
             <td><form:input path="hostName" style="width:500px"/></td>
+        </tr>
+        <tr>
+            <th scope="row"><label for="hostURL">Host URL</label></th>
+            <td><form:input path="hostURL" style="width:500px"/></td>
         </tr>
         <tr>
             <th scope="row"><label for="authenticationMethod">Auth. method</label></th>
