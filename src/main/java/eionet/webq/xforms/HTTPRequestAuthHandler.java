@@ -38,6 +38,6 @@ public interface HTTPRequestAuthHandler {
      * @param httpRequestBase Get, post, delete or put HTTP request method.
      * @param context Map of context parameters.
      */
-    void addAuthToHttpRequest(HttpRequestBase httpRequestBase, Map<?, ?> context);
+    public void addAuthToHttpRequest(HttpRequestBase httpRequestBase, Map<?, ?> context);
 
 }

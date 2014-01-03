@@ -55,10 +55,8 @@ public class XFormsHTTPRequestAuthHandlerImpl implements HTTPRequestAuthHandler 
     @Autowired
     KnownHostsService knownHostsService;
 
-    /**
-     * The logger.
-     */
-    private static Logger LOGGER = Logger.getLogger(XFormsHTTPRequestAuthHandlerImpl.class);
+    /** The logger. */
+    private static final Logger LOGGER = Logger.getLogger(XFormsHTTPRequestAuthHandlerImpl.class);
 
     @Override
     public void addAuthToHttpRequest(HttpRequestBase httpRequestBase, Map<?, ?> context) {
@@ -67,7 +65,7 @@ public class XFormsHTTPRequestAuthHandlerImpl implements HTTPRequestAuthHandler 
 
         String instance = null;
         String envelope = null;
-        String requestURL = null;
+        String requestURLHost = null;
         Integer fileId = null;
         String basicAuth = null;
         String sessionId = null;
@@ -79,7 +77,12 @@ public class XFormsHTTPRequestAuthHandlerImpl implements HTTPRequestAuthHandler 
             instance = (String) context.get("envelope");
         }
         if (context.get("requestURL") != null) {
-            requestURL = (String) context.get("requestURL");
+            try {
+                URI requestURI = new URI((String) context.get("requestURL"));
+                requestURLHost = StringUtils.substringBefore(requestURI.toString(), requestURI.getHost()) + requestURI.getHost();
+            } catch (URISyntaxException e) {
+                LOGGER.warn("requestURL is not valid URL: " + context.get("requestURL"));
+            }
         }
         if (context.get("fileId") != null) {
             fileId = Integer.valueOf((String) context.get("fileId"));
@@ -87,10 +90,8 @@ public class XFormsHTTPRequestAuthHandlerImpl implements HTTPRequestAuthHandler 
         if (context.get("jsessionid") != null) {
             sessionId = (String) context.get("jsessionid");
         }
-
-        // TODO cover the logic with unittests
         // add auth info only for URIs that are not on the same host.
-        if (!uri.startsWith(requestURL)) {
+        if (!uri.startsWith(requestURLHost)) {
             if (fileId != null && sessionId != null) {
                 // check if user is logged in
                 UserFile userFile = userFileService.getByIdAndUser(fileId, sessionId);
