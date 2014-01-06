@@ -141,8 +141,9 @@
                                 <c:forEach items="${file.availableConversions}" var="conversion">
                                     <li><a href="<c:url value="/download/convert?fileId=${file.id}&amp;conversionId=${conversion.id}"/>">${conversion.description}</a></li>
                                 </c:forEach>
-                                <li><a href="#" onclick="showJson('${downloadLink}')">View as JSON</a></li>
-                                <li><a href="#" onclick="showJsonToXml('${downloadLink}')">View as XML</a></li>
+                                <c:url value="/download/converted_user_file?fileId=${file.id}" var="conversionDownloadLink"/>
+                                <li><a href="#" onclick="showJson('${conversionDownloadLink}')">View as JSON</a></li>
+                                <li><a href="#" onclick="showJsonToXml('${conversionDownloadLink}')">View as XML</a></li>
                                 </ul>
                             </div>
                             </c:if>

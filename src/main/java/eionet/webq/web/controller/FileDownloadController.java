@@ -101,7 +101,7 @@ public class FileDownloadController {
     @Autowired
     JsonXMLBidirectionalConverter jsonXMLConverter;
 
-    @RequestMapping(value = "/user_file", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.GET)
+    @RequestMapping(value = "/converted_user_file", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.GET)
     @Transactional
     public void downloadUserFileJson(@RequestParam int fileId, HttpServletResponse response) {
         UserFile file = userFileService.download(fileId);
@@ -110,7 +110,7 @@ public class FileDownloadController {
         writeToResponse(response, json);
     }
 
-    @RequestMapping(value = "/user_file", produces = MediaType.APPLICATION_XML_VALUE, method = RequestMethod.GET)
+    @RequestMapping(value = "/converted_user_file", produces = MediaType.APPLICATION_XML_VALUE, method = RequestMethod.GET)
     @Transactional
     public void downloadUserFileJsonToXml(@RequestParam int fileId, HttpServletResponse response) {
         UserFile file = userFileService.download(fileId);

@@ -20,6 +20,10 @@
  */
 package eionet.webq.web.controller;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
+
 import eionet.webq.dao.MergeModules;
 import eionet.webq.dao.UserFileStorage;
 import eionet.webq.dao.orm.MergeModule;
@@ -27,6 +31,7 @@ import eionet.webq.dao.orm.MergeModuleXmlSchema;
 import eionet.webq.dao.orm.UploadedFile;
 import eionet.webq.dao.orm.UserFile;
 import eionet.webq.web.AbstractContextControllerTests;
+import java.util.Arrays;
 import org.hamcrest.core.IsEqual;
 import org.hibernate.FlushMode;
 import org.hibernate.SessionFactory;
@@ -40,12 +45,6 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Arrays;
-
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @Transactional
@@ -90,7 +89,7 @@ public class FileDownloadControllerIntegrationTest extends AbstractContextContro
     public void whenAskingForUserFileJson_returnsResponseInJsonFormat() throws Exception {
         int id = userFileStorage.save(new UserFile(new UploadedFile("test.xml",
                 ("<?xml version=\"1.0\"?><html><head>headText</head><body>bodyText</body></html>").getBytes()), "someSchema"), session.getId());
-        request(get("/download/user_file?fileId={id}", id)
+        request(get("/download/converted_user_file?fileId={id}", id)
                 .accept(MediaType.APPLICATION_JSON)
                 .session(session))
                 .andExpect(jsonPath("$.html.head", IsEqual.equalTo("headText")))
@@ -102,7 +101,7 @@ public class FileDownloadControllerIntegrationTest extends AbstractContextContro
     public void convertsFileToJsonAndThanToXml() throws Exception {
         String xml = "<?xml version=\"1.0\"?><html><head>headText</head><body>bodyText</body></html>";
         int id = userFileStorage.save(new UserFile(new UploadedFile("test.xml", xml.getBytes()), "someSchema"), session.getId());
-        request(get("/download/user_file?fileId={id}", id)
+        request(get("/download/converted_user_file?fileId={id}", id)
                 .accept(MediaType.APPLICATION_XML)
                 .session(session))
                 .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_XML))
