@@ -292,6 +292,7 @@
                 <xf:send submission="load-instance" name="xforms-submit"/>
                 <xf:send submission="load-emptyinstance" name="xforms-submit"/>
                 <xf:setvalue ref="/derogations/@country" value="instance('countries')/data[lower-code=lower-case(bf:appContext('country'))]/code" if="string-length(/derogations/@country) = 0" />
+                <xf:setvalue ref="instance('context')/user" value="instance('default')/derogation/@userIdentity" if="count(/derogations/derogation) &gt; 0"/>
 
                 <!-- Load footer buttons -->
                 <xf:load show="embed" targetid="footerButtonsWithFileInfo" resource="{$base_uri}/download/project/common/file/SaveButtonsWithFileInfo.xhtml">
