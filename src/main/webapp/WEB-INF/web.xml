@@ -37,11 +37,11 @@
 
     <filter>
         <description>CDR requests come from another domain. The filter is responsible of keeping the user's sessions.</description>
-        <filter-name>CdrRequestRedirectFilter</filter-name>
-        <filter-class>eionet.webq.web.filter.CdrRequestRedirectFilter</filter-class>
+        <filter-name>cdrRequestRedirectFilter</filter-name>
+        <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
     </filter>
     <filter-mapping>
-        <filter-name>CdrRequestRedirectFilter</filter-name>
+        <filter-name>cdrRequestRedirectFilter</filter-name>
         <url-pattern>/xform/*</url-pattern>
     </filter-mapping>
 
@@ -241,6 +241,9 @@
         <listener-class>
             org.springframework.web.context.ContextLoaderListener
         </listener-class>
+    </listener>
+    <listener>
+        <listener-class>org.springframework.web.context.request.RequestContextListener</listener-class>
     </listener>
 
     <!-- HTTP Session timeout in minutes -->
