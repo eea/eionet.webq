@@ -252,9 +252,9 @@
         </dependency>
         <!--JSON-->
         <dependency>
-            <groupId>org.json</groupId>
-            <artifactId>json</artifactId>
-            <version>20131018</version>
+            <groupId>de.odysseus.staxon</groupId>
+            <artifactId>staxon-gson</artifactId>
+            <version>1.2</version>
         </dependency>
 
         <!-- Test -->

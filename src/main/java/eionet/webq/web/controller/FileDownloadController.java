@@ -23,6 +23,7 @@ package eionet.webq.web.controller;
 import com.google.common.base.Function;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableSet;
+import eionet.webq.converter.JsonXMLBidirectionalConverter;
 import eionet.webq.dao.MergeModules;
 import eionet.webq.dao.orm.MergeModule;
 import eionet.webq.dao.orm.ProjectFile;
@@ -33,8 +34,18 @@ import eionet.webq.service.ProjectFileService;
 import eionet.webq.service.ProjectService;
 import eionet.webq.service.UserFileMergeService;
 import eionet.webq.service.UserFileService;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletResponse;
+import javax.xml.transform.TransformerException;
 import org.apache.commons.io.IOUtils;
-import org.json.XML;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -47,18 +58,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
-
-import javax.servlet.ServletOutputStream;
-import javax.servlet.http.HttpServletResponse;
-import javax.xml.transform.TransformerException;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * Spring controller for WebQ file download.
@@ -96,32 +95,30 @@ public class FileDownloadController {
      */
     @Autowired
     private UserFileMergeService mergeService;
+    /**
+     * Json to XML converter.
+     */
+    @Autowired
+    JsonXMLBidirectionalConverter jsonXMLConverter;
 
     @RequestMapping(value = "/user_file", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.GET)
     @Transactional
-    public void downloadUserFileJson(@RequestParam int fileId, HttpServletResponse response) throws UnsupportedEncodingException {
+    public void downloadUserFileJson(@RequestParam int fileId, HttpServletResponse response) {
         UserFile file = userFileService.download(fileId);
-        byte[] json = toJson(file);
+        byte[] json = jsonXMLConverter.convertXmlToJson(file.getContent());
         setContentType(response, MediaType.APPLICATION_JSON);
         writeToResponse(response, json);
     }
 
     @RequestMapping(value = "/user_file", produces = MediaType.APPLICATION_XML_VALUE, method = RequestMethod.GET)
     @Transactional
-    public void downloadUserFileJsonToXml(@RequestParam int fileId, HttpServletResponse response) throws UnsupportedEncodingException {
+    public void downloadUserFileJsonToXml(@RequestParam int fileId, HttpServletResponse response) {
         UserFile file = userFileService.download(fileId);
-        byte[] xml = convertJsonToXml(file);
+        byte[] xml = jsonXMLConverter.convertJsonToXml(jsonXMLConverter.convertXmlToJson(file.getContent()));
 
         writeXmlFileToResponse("json.xml", xml, response);
     }
 
-    private byte[] toJson(UserFile file) throws UnsupportedEncodingException {
-        return XML.toJSONObject(new String(file.getContent())).toString().getBytes("UTF-8");
-    }
-
-    private byte[] convertJsonToXml(UserFile file) throws UnsupportedEncodingException {
-        return XML.toString(toJson(file)).getBytes("UTF-8");
-    }
 
     /**
      * Download uploaded file action.
