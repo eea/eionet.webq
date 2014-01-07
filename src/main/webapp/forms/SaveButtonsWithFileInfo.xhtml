@@ -105,7 +105,7 @@ This subform can be embedded in parent XForm like this:
                     <xf:hint>Go back to WebQ front page.</xf:hint>
                     <xf:dispatch targetid="fileinfo-model" name="update-fileinfo-content-modified"/>
                     <bfc:show dialog="closeConfirmationDialog" ev:event="DOMActivate" if="instance('fileinfo-helper')/contentModified=1"/>
-                    <xf:load resource="{$base_uri}" show="replace" if="instance('fileinfo-helper')/contentModified=0"/>
+                    <xf:load resource="{$base_uri}/" show="replace" if="instance('fileinfo-helper')/contentModified=0"/>
                 </xf:trigger>
             </xf:group>
         </div>
@@ -127,7 +127,7 @@ This subform can be embedded in parent XForm like this:
                 <xf:hint>Saves the changes into XML file and opens the front page of WebQ</xf:hint>
                 <xf:action ev:event="DOMActivate">
                     <xf:send submission="savexml" name="xforms-submit"/>
-                    <xf:load ev:event="xforms-submit-done" resource="{$base_uri}" show="replace" if="instance('saveresult')/code=1"/>
+                    <xf:load ev:event="xforms-submit-done" resource="{$base_uri}/" show="replace" if="instance('saveresult')/code=1"/>
                 </xf:action>
             </xf:trigger>
             <xf:trigger id="tr_close">
@@ -135,7 +135,7 @@ This subform can be embedded in parent XForm like this:
                 <xf:hint>Go back to WebQ front page.</xf:hint>
                 <xf:dispatch targetid="fileinfo-model" name="update-fileinfo-content-modified"/>
                 <bfc:show dialog="closeConfirmationDialog" ev:event="DOMActivate" if="instance('fileinfo-helper')/contentModified=1"/>
-                <xf:load resource="{$base_uri}" show="replace" if="instance('fileinfo-helper')/contentModified=0"/>
+                <xf:load resource="{$base_uri}/" show="replace" if="instance('fileinfo-helper')/contentModified=0"/>
             </xf:trigger>
           </div>
         </xf:group>
@@ -147,7 +147,7 @@ This subform can be embedded in parent XForm like this:
                     <xf:trigger>
                         <xf:label>Delete file</xf:label>
                         <xf:send submission="deleteXml" name="xforms-submit"/>
-                        <xf:load resource="{$base_uri}" show="replace"/>
+                        <xf:load resource="{$base_uri}/" show="replace"/>
                     </xf:trigger>
                     <xf:trigger>
                         <xf:label>Cancel</xf:label>
@@ -168,7 +168,7 @@ This subform can be embedded in parent XForm like this:
                 </xf:trigger>
                 <xf:trigger>
                     <xf:label>Close without saving</xf:label>
-                    <xf:load resource="{$base_uri}" show="replace"/>
+                    <xf:load resource="{$base_uri}/" show="replace"/>
                 </xf:trigger>
                 </div>
             </xf:group>
