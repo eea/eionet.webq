@@ -21,14 +21,13 @@
 
 package eionet.webq.xforms;
 
+import de.betterform.connector.URIResolver;
+import de.betterform.connector.http.HTTPURIResolver;
+import de.betterform.xml.xforms.exception.XFormsException;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
-
-import de.betterform.connector.URIResolver;
-import de.betterform.connector.http.HTTPURIResolver;
-import de.betterform.xml.xforms.exception.XFormsException;
 
 /**
  * Resolve URIs called from XForms. Add authentication info if available in context or in known hosts table.
@@ -37,7 +36,9 @@ import de.betterform.xml.xforms.exception.XFormsException;
  */
 @Configurable
 public class XFormsHTTPURIResolver extends HTTPURIResolver implements URIResolver {
-
+    /**
+     * Http request auth handler.
+     */
     @Autowired
     HTTPRequestAuthHandler httpRequestAuthHandler;
 

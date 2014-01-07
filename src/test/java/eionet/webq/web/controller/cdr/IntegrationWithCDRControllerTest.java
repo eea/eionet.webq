@@ -20,24 +20,15 @@
  */
 package eionet.webq.web.controller.cdr;
 
-import static org.hamcrest.core.IsEqual.equalTo;
-import static org.hamcrest.core.StringStartsWith.startsWith;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyCollectionOf;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
-import javax.servlet.http.HttpServletRequest;
-
+import eionet.webq.converter.CdrRequestConverter;
+import eionet.webq.dao.orm.ProjectFile;
+import eionet.webq.dao.orm.UserFile;
+import eionet.webq.dto.CdrRequest;
+import eionet.webq.service.CDREnvelopeService;
+import eionet.webq.service.CDREnvelopeService.XmlFile;
+import eionet.webq.service.FileNotAvailableException;
+import eionet.webq.service.UserFileService;
+import eionet.webq.service.WebFormService;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -50,15 +41,22 @@ import org.springframework.ui.Model;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
-import eionet.webq.converter.CdrRequestConverter;
-import eionet.webq.dao.orm.ProjectFile;
-import eionet.webq.dao.orm.UserFile;
-import eionet.webq.dto.CdrRequest;
-import eionet.webq.service.CDREnvelopeService;
-import eionet.webq.service.CDREnvelopeService.XmlFile;
-import eionet.webq.service.FileNotAvailableException;
-import eionet.webq.service.UserFileService;
-import eionet.webq.service.WebFormService;
+import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
+import static org.hamcrest.core.IsEqual.equalTo;
+import static org.hamcrest.core.StringStartsWith.startsWith;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyCollectionOf;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  */
@@ -83,6 +81,7 @@ public class IntegrationWithCDRControllerTest {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         when(converter.convert(any(HttpServletRequest.class))).thenReturn(cdrRequest);
+        cdrRequest.setSessionId("sessionId");
     }
 
     @Test

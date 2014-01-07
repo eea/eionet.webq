@@ -25,6 +25,7 @@ import eionet.webq.dao.UserFileDownload;
 import eionet.webq.dao.UserFileStorage;
 import eionet.webq.dao.orm.ProjectFile;
 import eionet.webq.dao.orm.UserFile;
+import eionet.webq.dto.UserFileIdUpdate;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -34,7 +35,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
-import javax.servlet.http.HttpSession;
+import javax.servlet.http.HttpServletRequest;
 import java.util.Arrays;
 import java.util.Collection;
 
@@ -53,24 +54,30 @@ public class UserFileServiceImplTest {
     @Mock
     private UserFileStorage storage;
     @Mock
-    HttpSession mockSession;
+    private UserFileDownload userFileDownload;
     @Mock
-    UserFileDownload userFileDownload;
+    private RemoteFileService remoteFileService;
     @Mock
-    RemoteFileService remoteFileService;
+    private UserIdProvider userIdProvider;
+    @Mock
+    private HttpServletRequest request;
+
     private final String userId = "userId";
     private static final int FILE_ID = 1;
+    private final String userAgentHeaderName = "user-agent";
+    private final String expectedUserAgent = "IE 11";
 
     @Before
     public void prepare() {
         MockitoAnnotations.initMocks(this);
-        Mockito.when(mockSession.getId()).thenReturn(userId);
+        Mockito.when(userIdProvider.getUserId()).thenReturn(userId);
+        when(request.getHeader(userAgentHeaderName)).thenReturn(expectedUserAgent);
     }
 
     @After
     public void verifyGeneralMockCalls() {
-        verify(mockSession).getId();
-        verifyNoMoreInteractions(mockSession, storage, userFileDownload);
+        verify(userIdProvider).getUserId();
+        verifyNoMoreInteractions(userIdProvider, storage, userFileDownload);
     }
 
     @Test
@@ -162,5 +169,45 @@ public class UserFileServiceImplTest {
         assertThat(userFile.getContent(), equalTo(fileContent));
         verify(remoteFileService).fileContent(webForm.getEmptyInstanceUrl());
         verify(storage).save(eq(userFile), anyString());
+    }
+
+    @Test
+    public void allowToUpdateFilesUserIdIfNewUserIsCurrentOne() throws Exception {
+        String oldUserId = "old";
+        service.updateUserId(oldUserId, userId);
+
+        ArgumentCaptor<UserFileIdUpdate> updateDataCaptor = ArgumentCaptor.forClass(UserFileIdUpdate.class);
+        verify(storage).updateUserId(updateDataCaptor.capture());
+        UserFileIdUpdate updateData = updateDataCaptor.getValue();
+
+        assertThat(updateData.getOldUserId(), equalTo(oldUserId));
+        assertThat(updateData.getNewUserId(), equalTo(userId));
+    }
+
+    @Test
+    public void doNotUpdateFilesUserIdIfUserIsNotCurrentOne() throws Exception {
+        String oldUserId = "old";
+        String newUserId = "new";
+        service.updateUserId(oldUserId, newUserId);
+    }
+
+    @Test
+    public void userAgentIsSetForFileOnSave() throws Exception {
+        UserFile file = new UserFile();
+        service.save(file);
+
+        assertThat(file.getUserAgent(), equalTo(expectedUserAgent));
+        verify(request).getHeader(userAgentHeaderName);
+        verify(storage).save(eq(file), anyString());
+    }
+
+    @Test
+    public void whenUpdatingUserId_sendUserAgentInUpdateData() throws Exception {
+        service.updateUserId("oldUserId", userId);
+        ArgumentCaptor<UserFileIdUpdate> updateDataCaptor = ArgumentCaptor.forClass(UserFileIdUpdate.class);
+        verify(storage).updateUserId(updateDataCaptor.capture());
+
+        UserFileIdUpdate updateData = updateDataCaptor.getValue();
+        assertThat(updateData.getUserAgent(), equalTo(expectedUserAgent));
     }
 }

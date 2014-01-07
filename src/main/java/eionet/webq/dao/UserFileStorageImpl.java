@@ -20,25 +20,30 @@
  */
 package eionet.webq.dao;
 
-import static org.hibernate.criterion.Restrictions.and;
-import static org.hibernate.criterion.Restrictions.eq;
-import static org.hibernate.criterion.Restrictions.in;
+import eionet.webq.dao.orm.UserFile;
+import eionet.webq.dto.UserFileIdUpdate;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.log4j.Logger;
+import org.hibernate.criterion.Restrictions;
+import org.springframework.stereotype.Repository;
 
 import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.Date;
 
-import org.apache.commons.lang3.ArrayUtils;
-import org.hibernate.criterion.Restrictions;
-import org.springframework.stereotype.Repository;
-
-import eionet.webq.dao.orm.UserFile;
+import static org.hibernate.criterion.Restrictions.and;
+import static org.hibernate.criterion.Restrictions.eq;
+import static org.hibernate.criterion.Restrictions.in;
 
 /**
  * {@link eionet.webq.dao.UserFileStorage} implementation.
  */
 @Repository
 public class UserFileStorageImpl extends AbstractDao<UserFile> implements UserFileDownload, UserFileStorage {
+    /**
+     * This class logger.
+     */
+    private static final Logger LOGGER = Logger.getLogger(UserFileStorageImpl.class);
 
     @Override
     public int save(final UserFile file, final String userId) {
@@ -71,6 +76,17 @@ public class UserFileStorageImpl extends AbstractDao<UserFile> implements UserFi
     @Override
     public void remove(final String userId, final int... ids) {
         removeByCriterion(and(eq("userId", userId), in("id", ArrayUtils.toObject(ids))));
+    }
+
+    @Override
+    public void updateUserId(UserFileIdUpdate updateData) {
+        if (updateData.getUserAgent() != null) {
+            getCurrentSession().createQuery("UPDATE UserFile SET userId=:newId WHERE userId=:oldId AND userAgent=:userAgent")
+                    .setString("newId", updateData.getNewUserId()).setString("oldId", updateData.getOldUserId())
+                    .setString("userAgent", updateData.getUserAgent()).executeUpdate();
+        } else {
+            LOGGER.warn("No user agent set in user file id update data.");
+        }
     }
 
     @Override

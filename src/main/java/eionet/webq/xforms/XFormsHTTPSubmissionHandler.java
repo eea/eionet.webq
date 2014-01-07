@@ -21,9 +21,10 @@
 
 package eionet.webq.xforms;
 
-import java.io.UnsupportedEncodingException;
-import java.util.Map;
-
+import de.betterform.connector.SubmissionHandler;
+import de.betterform.connector.http.HTTPSubmissionHandler;
+import de.betterform.xml.xforms.exception.XFormsException;
+import de.betterform.xml.xforms.model.submission.Submission;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
@@ -36,10 +37,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
 import org.w3c.dom.Node;
 
-import de.betterform.connector.SubmissionHandler;
-import de.betterform.connector.http.HTTPSubmissionHandler;
-import de.betterform.xml.xforms.exception.XFormsException;
-import de.betterform.xml.xforms.model.submission.Submission;
+import java.io.UnsupportedEncodingException;
+import java.util.Map;
 
 /**
  * Submission handler to proxy http GET, POST, DELETE and PUT request executed through XForm submission element.
@@ -48,7 +47,9 @@ import de.betterform.xml.xforms.model.submission.Submission;
  */
 @Configurable
 public class XFormsHTTPSubmissionHandler extends HTTPSubmissionHandler implements SubmissionHandler {
-
+    /**
+     * Http request auth handler.
+     */
     @Autowired
     HTTPRequestAuthHandler httpRequestAuthHandler;
 

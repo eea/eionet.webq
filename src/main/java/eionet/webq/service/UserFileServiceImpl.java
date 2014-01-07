@@ -20,22 +20,21 @@
  */
 package eionet.webq.service;
 
-import static org.apache.commons.lang3.StringUtils.defaultIfEmpty;
-import static org.apache.commons.lang3.StringUtils.isNotEmpty;
-
-import java.util.Arrays;
-import java.util.Collection;
-
-import javax.servlet.http.HttpSession;
-
-import org.apache.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import eionet.webq.dao.UserFileDownload;
 import eionet.webq.dao.UserFileStorage;
 import eionet.webq.dao.orm.ProjectFile;
 import eionet.webq.dao.orm.UserFile;
+import eionet.webq.dto.UserFileIdUpdate;
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import javax.servlet.http.HttpServletRequest;
+import java.util.Arrays;
+import java.util.Collection;
+
+import static org.apache.commons.lang3.StringUtils.defaultIfEmpty;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 /**
  * {@link UserFileService} implementation.
@@ -48,10 +47,15 @@ public class UserFileServiceImpl implements UserFileService {
     @Autowired
     UserFileStorage storage;
     /**
-     * Current http session.
+     * Current http request.
+     */
+    @Autowired(required = false)
+    HttpServletRequest request;
+    /**
+     * User id provider.
      */
     @Autowired
-    HttpSession session;
+    UserIdProvider userIdProvider;
     /**
      * Service for getting conversion available for file.
      */
@@ -75,7 +79,10 @@ public class UserFileServiceImpl implements UserFileService {
 
     @Override
     public int save(UserFile file) {
-        LOGGER.info("Saving uploaded file=" + file);
+        String userAgent = getUserAgent();
+        file.setUserAgent(userAgent);
+
+        LOGGER.info("Saving uploaded file=" + file + ", user agent=" + userAgent);
         return storage.save(file, userId());
     }
 
@@ -131,6 +138,17 @@ public class UserFileServiceImpl implements UserFileService {
         storage.remove(userId, fileIds);
     }
 
+    @Override
+    public void updateUserId(String oldUserId, String newUserId) {
+        if (userId().equals(newUserId)) {
+            UserFileIdUpdate updateData = new UserFileIdUpdate();
+            updateData.setNewUserId(newUserId);
+            updateData.setOldUserId(oldUserId);
+            updateData.setUserAgent(getUserAgent());
+            storage.updateUserId(updateData);
+        }
+    }
+
     /**
      * Set file content from remote location and saves it.
      * @param file file
@@ -147,7 +165,11 @@ public class UserFileServiceImpl implements UserFileService {
      *
      * @return current http session id
      */
-    private String userId() {
-        return session.getId();
+    String userId() {
+        return userIdProvider.getUserId();
+   }
+
+    private String getUserAgent() {
+        return request != null ? request.getHeader("user-agent") : null;
     }
 }

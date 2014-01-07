@@ -20,16 +20,10 @@
  */
 package eionet.webq.dao;
 
-import static eionet.webq.dao.FileContentUtil.getFileContentRowsCount;
-import static junit.framework.TestCase.assertNotNull;
-import static org.hamcrest.core.IsEqual.equalTo;
-import static org.junit.Assert.assertThat;
-
-import java.util.Collection;
-import java.util.Iterator;
-
-import javax.validation.ConstraintViolationException;
-
+import configuration.ApplicationTestContextWithMockSession;
+import eionet.webq.dao.orm.UploadedFile;
+import eionet.webq.dao.orm.UserFile;
+import eionet.webq.dto.UserFileIdUpdate;
 import org.hibernate.FlushMode;
 import org.hibernate.LazyInitializationException;
 import org.hibernate.Session;
@@ -43,14 +37,21 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
-import configuration.ApplicationTestContextWithMockSession;
-import eionet.webq.dao.orm.UploadedFile;
-import eionet.webq.dao.orm.UserFile;
+import javax.validation.ConstraintViolationException;
+import java.util.Collection;
+import java.util.Iterator;
+
+import static eionet.webq.dao.FileContentUtil.getFileContentRowsCount;
+import static junit.framework.TestCase.assertNotNull;
+import static org.hamcrest.core.IsEqual.equalTo;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertThat;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {ApplicationTestContextWithMockSession.class})
 @Transactional
 public class UserFileStorageImplTest {
+    private final String defaultUserAgent = "Mozilla";
     @Autowired
     private UserFileStorage storage;
     @Autowired
@@ -75,6 +76,7 @@ public class UserFileStorageImplTest {
         UserFile userFile =
                 new UserFile(new UploadedFile("name", "test_content".getBytes()), "xmlSchema");
         userFile.setFromCdr(true);
+        userFile.setUserAgent("Mozilla");
 
         storage.save(userFile, userId);
 
@@ -86,6 +88,7 @@ public class UserFileStorageImplTest {
         assertThat(fileFromDb.getSizeInBytes(), equalTo(userFile.getSizeInBytes()));
         assertThat(fileFromDb.getXmlSchema(), equalTo(userFile.getXmlSchema()));
         assertThat(fileFromDb.isFromCdr(), equalTo(userFile.isFromCdr()));
+        assertThat(fileFromDb.getUserAgent(), equalTo(userFile.getUserAgent()));
         assertNotNull(fileFromDb.getCreated());
         assertNotNull(fileFromDb.getUpdated());
     }
@@ -273,6 +276,55 @@ public class UserFileStorageImplTest {
         assertThat(getFileContentRowsCount(sessionFactory), equalTo(0));
     }
 
+    @Test
+    public void allowToUpdateUserIdForFiles() throws Exception {
+        saveAndGetBackSavedFileForDefaultUser();
+
+        assertThat(storage.findAllUserFiles(userId).size(), equalTo(1));
+        assertThat(storage.findAllUserFiles(otherUserId).size(), equalTo(0));
+
+        UserFileIdUpdate updateData = createUserFileIdUpdateData(userId, otherUserId);
+
+        storage.updateUserId(updateData);
+
+        assertThat(storage.findAllUserFiles(userId).size(), equalTo(0));
+        assertThat(storage.findAllUserFiles(otherUserId).size(), equalTo(1));
+    }
+
+    @Test
+    public void whenUserAgentNotSet_doNotUpdateUserFileId() throws Exception {
+        saveAndGetBackSavedFileForDefaultUser();
+
+        UserFileIdUpdate userFileIdUpdateData = createUserFileIdUpdateData(userId, otherUserId);
+        userFileIdUpdateData.setUserAgent(null);
+        storage.updateUserId(userFileIdUpdateData);
+
+        assertThat(storage.findAllUserFiles(userId).size(), equalTo(1));
+        assertThat(storage.findAllUserFiles(otherUserId).size(), equalTo(0));
+    }
+
+    @Test
+    public void whenUpdatingFileId_andUserAgentIsDifferent_doNotUpdateUserFileId() throws Exception {
+        UserFile userFile = saveAndGetBackSavedFileForDefaultUser();
+
+        UserFileIdUpdate userFileIdUpdateData = createUserFileIdUpdateData(userId, otherUserId);
+        userFileIdUpdateData.setUserAgent("IE 11");
+        assertNotEquals(userFileIdUpdateData.getUserAgent(), userFile.getUserAgent());
+
+        storage.updateUserId(userFileIdUpdateData);
+
+        assertThat(storage.findAllUserFiles(userId).size(), equalTo(1));
+        assertThat(storage.findAllUserFiles(otherUserId).size(), equalTo(0));
+    }
+
+    private UserFileIdUpdate createUserFileIdUpdateData(String oldUserId, String newUserId) {
+        UserFileIdUpdate updateData = new UserFileIdUpdate();
+        updateData.setOldUserId(oldUserId);
+        updateData.setNewUserId(newUserId);
+        updateData.setUserAgent(defaultUserAgent);
+        return updateData;
+    }
+
     private UserFile saveAndGetBackSavedFileForDefaultUser() {
         uploadSingleFileFor(userId);
         return getFirstUploadedFileAndAssertThatItIsTheOnlyOneAvailableFor(userId);
@@ -302,6 +354,7 @@ public class UserFileStorageImplTest {
     }
 
     private void saveFileForUser(String userId, UserFile file) {
+        file.setUserAgent(defaultUserAgent);
         storage.save(file, userId);
     }
 

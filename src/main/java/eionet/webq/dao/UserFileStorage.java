@@ -21,6 +21,7 @@
 package eionet.webq.dao;
 
 import eionet.webq.dao.orm.UserFile;
+import eionet.webq.dto.UserFileIdUpdate;
 
 import java.util.Collection;
 
@@ -68,4 +69,10 @@ public interface UserFileStorage {
      * @param ids file ids
      */
     void remove(String userId, int... ids);
+
+    /**
+     * Updates userId for all files which belongs to {@link UserFileIdUpdate#oldUserId}.
+     * @param updateData update data
+     */
+    void updateUserId(UserFileIdUpdate updateData);
 }
