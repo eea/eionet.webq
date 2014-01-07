@@ -27,8 +27,16 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import eionet.webq.converter.JsonXMLBidirectionalConverter;
+import eionet.webq.dao.orm.ProjectFile;
+import eionet.webq.dao.orm.UploadedFile;
+import eionet.webq.dao.orm.UserFile;
+import eionet.webq.dto.UploadForm;
+import eionet.webq.service.CDREnvelopeService;
+import eionet.webq.service.RemoteFileService;
+import eionet.webq.service.UserFileService;
+import eionet.webq.service.WebFormService;
 import java.util.Arrays;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
@@ -38,15 +46,6 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-
-import eionet.webq.dao.orm.ProjectFile;
-import eionet.webq.dao.orm.UploadedFile;
-import eionet.webq.dao.orm.UserFile;
-import eionet.webq.dto.UploadForm;
-import eionet.webq.service.CDREnvelopeService;
-import eionet.webq.service.RemoteFileService;
-import eionet.webq.service.UserFileService;
-import eionet.webq.service.WebFormService;
 
 /**
  */
@@ -67,6 +66,8 @@ public class PublicPageControllerTest {
     private BindingResult bindingResult;
     @Mock
     private Model model;
+    @Mock
+    private JsonXMLBidirectionalConverter jsonXMLConverter;
 
     @Before
     public void setUp() throws Exception {
@@ -150,6 +151,20 @@ public class PublicPageControllerTest {
 
         verify(userFileService).save(file1);
         verify(userFileService).save(file2);
+    }
+
+    @Test
+    public void whenUploadingEditToExistingFileInJsonFormat_convertToXmlAndSaveToStorage() throws Exception {
+        int fileId = 1;
+        UserFile file = new UserFile();
+        when(jsonXMLConverter.convertJsonToXml(any(byte[].class)))
+                .thenReturn("xml content".getBytes());
+        when(userFileService.getById(fileId)).thenReturn(file);
+
+        publicPageController.saveJsonAsXml(fileId, requestWillHaveContent(), model);
+
+        verify(jsonXMLConverter).convertJsonToXml(any(byte[].class));
+        verify(userFileService).updateContent(file);
     }
 
     private UserFile userFileServiceWillReturnUserFileFromCdr() {

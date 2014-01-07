@@ -20,31 +20,7 @@
  */
 package eionet.webq.web.controller;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.Arrays;
-import java.util.Collection;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-import javax.validation.Valid;
-
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.stereotype.Controller;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-
+import eionet.webq.converter.JsonXMLBidirectionalConverter;
 import eionet.webq.converter.UserFileToFileInfoConverter;
 import eionet.webq.dao.orm.ProjectFile;
 import eionet.webq.dao.orm.UserFile;
@@ -56,6 +32,30 @@ import eionet.webq.service.ConversionService;
 import eionet.webq.service.FileNotAvailableException;
 import eionet.webq.service.UserFileService;
 import eionet.webq.service.WebFormService;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.Arrays;
+import java.util.Collection;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import javax.validation.Valid;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.MediaType;
+import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
  * Base controller for front page actions.
@@ -66,16 +66,19 @@ import eionet.webq.service.WebFormService;
 @RequestMapping
 public class PublicPageController {
     /**
+     * Logger for this class.
+     */
+    public static final Logger LOGGER = Logger.getLogger(PublicPageController.class);
+    /**
      * Service for user uploaded files.
      */
     @Autowired
-    UserFileService userFileService;
+    private UserFileService userFileService;
     /**
      * File conversion service.
      */
     @Autowired
     private ConversionService conversionService;
-
     /**
      * WebForms storage.
      */
@@ -87,12 +90,16 @@ public class PublicPageController {
      */
     @Autowired
     private CDREnvelopeService envelopeService;
-
     /**
      * Converts user xml metadata to file info object.
      */
     @Autowired
     private UserFileToFileInfoConverter fileInfoConverter;
+    /**
+     * Json to XML converter.
+     */
+    @Autowired
+    private JsonXMLBidirectionalConverter jsonToXMLConverter;
 
     /**
      * Action to be performed on http GET method and path '/'.
@@ -236,27 +243,29 @@ public class PublicPageController {
     @ResponseBody
     @Transactional
     public XmlSaveResult saveXml(@RequestParam int fileId, HttpServletRequest request) {
-        UserFile file = userFileService.getById(fileId);
-        XmlSaveResult saveResult = XmlSaveResult.valueOfSuccess();
-        InputStream input = null;
         try {
-            input = request.getInputStream();
-            byte[] fileContent = IOUtils.toByteArray(input);
-            file.setContent(fileContent);
-            if (file.isFromCdr()) {
-                String restricted = request.getParameter("restricted");
-                file.setApplyRestriction(StringUtils.isNotEmpty(restricted));
-                file.setRestricted(Boolean.valueOf(restricted));
-                file.setConversionId(request.getParameter("xsl"));
-                return envelopeService.pushXmlFile(file);
-            }
-            userFileService.updateContent(file);
+            byte[] fileContent = getContentFromRequest(request);
+            return updateFileContent(fileId, request, fileContent);
         } catch (Exception e) {
-            saveResult = XmlSaveResult.valueOfError(e.toString());
-        } finally {
-            IOUtils.closeQuietly(input);
+            return XmlSaveResult.valueOfError(e.toString());
         }
-        return saveResult;
+    }
+
+    /**
+     * Update file content converting json back to XML.
+     *
+     * @param fileId file id to update
+     * @param request current request
+     * @param model holder for model attributes
+     * @return redirect string
+     */
+    @RequestMapping(value = "/saveXml", consumes = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.POST)
+    @Transactional
+    public String saveJsonAsXml(@RequestParam int fileId, HttpServletRequest request, Model model) {
+        byte[] xml = jsonToXMLConverter.convertJsonToXml(getContentFromRequest(request));
+        XmlSaveResult xmlSaveResult = updateFileContent(fileId, request, xml);
+        LOGGER.info("Converting json to XML ended up with result=" + xmlSaveResult);
+        return welcome(model);
     }
 
     /**
@@ -325,6 +334,46 @@ public class PublicPageController {
             fileInfo = fileInfoConverter.convert(userFile);
         }
         return fileInfo;
+    }
+
+    /**
+     * Updates file content in storage.
+     *
+     * @param fileId file id to update
+     * @param request current request
+     * @param fileContent new file content
+     * @return save result
+     */
+    private XmlSaveResult updateFileContent(int fileId, HttpServletRequest request, byte[] fileContent) {
+        UserFile file = userFileService.getById(fileId);
+        file.setContent(fileContent);
+        if (file.isFromCdr()) {
+            String restricted = request.getParameter("restricted");
+            file.setApplyRestriction(StringUtils.isNotEmpty(restricted));
+            file.setRestricted(Boolean.valueOf(restricted));
+            file.setConversionId(request.getParameter("xsl"));
+            return envelopeService.pushXmlFile(file);
+        }
+        userFileService.updateContent(file);
+        return XmlSaveResult.valueOfSuccess();
+    }
+
+    /**
+     * Gets content from request.
+     *
+     * @param request request to get content from
+     * @return content as byte array
+     */
+    private byte[] getContentFromRequest(HttpServletRequest request) {
+        InputStream input = null;
+        try {
+            input = request.getInputStream();
+            return IOUtils.toByteArray(input);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        } finally {
+            IOUtils.closeQuietly(input);
+        }
     }
 
     /**
