@@ -79,7 +79,8 @@
                             <tr>
                                 <th scope="row">File</th>
                                 <td>
-                                    <a href="<c:url var="downloadLink" value="/download/project/${projectEntry.projectId}/file/${projectFile.fileName}"/>">${projectFile.fileName}</a>
+                                    <c:url var="downloadLink" value="/download/project/${projectEntry.projectId}/file/${projectFile.fileName}"/>
+                                    <a href="${downloadLink}">${projectFile.fileName}</a>
                                     <button onclick="viewFileSource('${downloadLink}');">View Source</button>
                                 </td>
                             </tr>
