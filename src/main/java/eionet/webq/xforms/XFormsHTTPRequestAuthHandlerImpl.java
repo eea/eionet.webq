@@ -93,6 +93,7 @@ public class XFormsHTTPRequestAuthHandlerImpl implements HTTPRequestAuthHandler 
         // add auth info only for URIs that are not on the same host.
         if (!uri.startsWith(requestURLHost)) {
             if (fileId != null && sessionId != null) {
+                LOGGER.debug("Check if user is logged in to get file: " + fileId);
                 // check if user is logged in
                 UserFile userFile = userFileService.getByIdAndUser(fileId, sessionId);
                 if (userFile != null) {
@@ -100,6 +101,7 @@ public class XFormsHTTPRequestAuthHandlerImpl implements HTTPRequestAuthHandler 
                 }
                 // add auth info only if user is logged in
                 if (StringUtils.isNotEmpty(basicAuth)) {
+                    LOGGER.debug("User is logged in to get file: " + fileId);
 
                     // if the URI starts with instance or envelope URI, then we can use the basic auth retrieved from CDR.
                     if (((StringUtils.isNotBlank(instance) && uri.startsWith(instance)) || (StringUtils.isNotBlank(envelope) && uri
