@@ -28,7 +28,6 @@ import java.util.Collection;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -108,7 +107,7 @@ public class UserFileServiceImpl implements UserFileService {
 
     @Override
     public UserFile getByIdAndUser(int id, String userId) {
-        UserFile userFile = storage.findFile(id, DigestUtils.md5Hex(userId));
+        UserFile userFile = storage.findFile(id, userId);
         LOGGER.info("Loaded user file=" + userFile);
         return userFile;
     }

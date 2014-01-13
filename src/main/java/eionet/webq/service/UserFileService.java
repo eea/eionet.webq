@@ -20,10 +20,10 @@
  */
 package eionet.webq.service;
 
+import java.util.Collection;
+
 import eionet.webq.dao.orm.ProjectFile;
 import eionet.webq.dao.orm.UserFile;
-
-import java.util.Collection;
 
 /**
  * Service for storing uploaded files.
@@ -61,7 +61,7 @@ public interface UserFileService {
      * {@link eionet.webq.dao.orm.UserFile#getName()} and {@link eionet.webq.dao.orm.UserFile#getContent()} will be set.
      *
      * @param id file id
-     * @param userId user id
+     * @param userId user id md5 hash of jsessionid
      * @return uploaded file
      */
     UserFile getByIdAndUser(int id, String userId);

@@ -26,6 +26,7 @@ import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.Map;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.net.util.Base64;
 import org.apache.http.client.methods.HttpRequestBase;
@@ -87,9 +88,15 @@ public class XFormsHTTPRequestAuthHandlerImpl implements HTTPRequestAuthHandler 
         if (context.get("fileId") != null) {
             fileId = Integer.valueOf((String) context.get("fileId"));
         }
-        if (context.get("jsessionid") != null) {
-            sessionId = (String) context.get("jsessionid");
+        // md5 hash of session ID
+        if (context.get("sessionid") != null) {
+            sessionId = (String) context.get("sessionid");
         }
+        // betterform http session attribute
+        if (sessionId == null && context.get("httpSessionId") != null) {
+            sessionId = DigestUtils.md5Hex((String) context.get("httpSessionId"));
+        }
+
         // add auth info only for URIs that are not on the same host.
         if (!uri.startsWith(requestURLHost)) {
             if (fileId != null && sessionId != null) {

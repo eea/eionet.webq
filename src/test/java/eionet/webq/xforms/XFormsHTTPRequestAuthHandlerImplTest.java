@@ -195,7 +195,7 @@ public class XFormsHTTPRequestAuthHandlerImplTest {
     static Map<String, String> createParamsMap() {
         Map<String, String> params = new HashMap<String, String>();
         params.put("fileId", "1");
-        params.put("jsessionid", "12345");
+        params.put("sessionid", "12345");
         params.put("requestURL", BASE_URI + "/xform");
         return params;
     }
