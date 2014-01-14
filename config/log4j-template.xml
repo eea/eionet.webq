@@ -21,8 +21,12 @@
         </layout>
     </appender>
 
+    <category name="eionet.webq">
+        <priority value="INFO"/>
+    </category>
+
     <category name="org.directwebremoting">
-        <priority value="ERROR"/>
+        <priority value="FATAL"/>
     </category>
 
     <!-- custom log level -->
