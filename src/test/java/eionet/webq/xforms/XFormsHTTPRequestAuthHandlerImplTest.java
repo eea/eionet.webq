@@ -22,6 +22,8 @@
 package eionet.webq.xforms;
 
 import static org.hamcrest.core.IsEqual.equalTo;
+import static org.hamcrest.core.IsNot.not;
+import static org.hamcrest.core.StringContains.containsString;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
@@ -46,6 +48,9 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import configuration.ApplicationTestContextWithMockSession;
+import de.betterform.connector.http.AbstractHTTPConnector;
+import de.betterform.xml.xforms.model.submission.RequestHeader;
+import de.betterform.xml.xforms.model.submission.RequestHeaders;
 import eionet.webq.dao.orm.KnownHost;
 import eionet.webq.dao.orm.UserFile;
 import eionet.webq.dto.KnownHostAuthenticationMethod;
@@ -71,6 +76,8 @@ public class XFormsHTTPRequestAuthHandlerImplTest {
     private static final String REQUEST_PARAM_KNOWN_HOST_URL = "http://requestparam.host";
     private static final String KEY = "key";
     private static final String TICKET = "ticket";
+    private static final String oldSessionId = "91F327440B3E82146E7384E54EFB99DD";
+    private static final String newSessionId = "B41DDE22E96CC895DD1F0DF328C08527";
 
     @Before
     public void setUp() throws Exception {
@@ -82,8 +89,10 @@ public class XFormsHTTPRequestAuthHandlerImplTest {
 
         HttpRequestBase httpRequest = new HttpGet(BASE_URI + "/resource");
 
-        requestAuthHandler.addAuthToHttpRequest(httpRequest, createParamsMap());
+        Map<String, Object> context = createBfContextMap();
+        requestAuthHandler.addAuthToHttpRequest(httpRequest, context);
         assertThatRequestIsNotChanged(httpRequest, BASE_URI + "/resource");
+        assertThatRequestHeaderContainsValidSessionId(context);
         verify(userFileService, never()).getByIdAndUser(anyInt(), anyString());
     }
 
@@ -92,7 +101,7 @@ public class XFormsHTTPRequestAuthHandlerImplTest {
 
         HttpRequestBase httpRequest = new HttpGet(BASIC_AUTH_KNOWN_HOST_URL);
         when(userFileService.getByIdAndUser(anyInt(), anyString())).thenReturn(createUserFile());
-        requestAuthHandler.addAuthToHttpRequest(httpRequest, createParamsMap());
+        requestAuthHandler.addAuthToHttpRequest(httpRequest, createBfContextMap());
         assertThatRequestIsNotChanged(httpRequest, BASIC_AUTH_KNOWN_HOST_URL);
         verify(userFileService, atLeastOnce()).getByIdAndUser(anyInt(), anyString());
     }
@@ -100,13 +109,13 @@ public class XFormsHTTPRequestAuthHandlerImplTest {
     @Test
     public void addBasicAuthIfSameHostAsInstance() {
         HttpRequestBase httpRequest = new HttpGet(BASIC_AUTH_KNOWN_HOST_URL + "/resource.xml");
-        Map<String, String> params = createParamsMap();
-        params.put("instance", BASIC_AUTH_KNOWN_HOST_URL + "/instance.xml");
+        Map<String, Object> context = createBfContextMap();
+        context.put("instance", BASIC_AUTH_KNOWN_HOST_URL + "/instance.xml");
         UserFile userFile = createUserFileWithAuth();
 
         when(userFileService.getByIdAndUser(anyInt(), anyString())).thenReturn(userFile);
         when(knownHostsService.findAll()).thenReturn(Arrays.asList(createBasicAuthKnownHost()));
-        requestAuthHandler.addAuthToHttpRequest(httpRequest, params);
+        requestAuthHandler.addAuthToHttpRequest(httpRequest, context);
 
         assertThat(httpRequest.getURI().toString(), equalTo(BASIC_AUTH_KNOWN_HOST_URL + "/resource.xml"));
         assertThat(httpRequest.getHeaders("Authorization")[0].getValue().trim(), equalTo(userFile.getAuthorization()));
@@ -116,13 +125,13 @@ public class XFormsHTTPRequestAuthHandlerImplTest {
     @Test
     public void addRequestParamAuthIfSameHostAsInstance() {
         HttpRequestBase httpRequest = new HttpGet(REQUEST_PARAM_KNOWN_HOST_URL + "/resource.xml");
-        Map<String, String> params = createParamsMap();
-        params.put("instance", REQUEST_PARAM_KNOWN_HOST_URL + "/instance.xml");
+        Map<String, Object> context = createBfContextMap();
+        context.put("instance", REQUEST_PARAM_KNOWN_HOST_URL + "/instance.xml");
         UserFile userFile = createUserFileWithAuth();
 
         when(userFileService.getByIdAndUser(anyInt(), anyString())).thenReturn(userFile);
         when(knownHostsService.findAll()).thenReturn(Arrays.asList(createRequestParamKnownHost()));
-        requestAuthHandler.addAuthToHttpRequest(httpRequest, params);
+        requestAuthHandler.addAuthToHttpRequest(httpRequest, context);
 
         assertThat(httpRequest.getURI().toString(), equalTo(REQUEST_PARAM_KNOWN_HOST_URL + "/resource.xml?key=ticket"));
     }
@@ -131,13 +140,13 @@ public class XFormsHTTPRequestAuthHandlerImplTest {
     public void noAuthIfDifferentHostAsInstance() {
         String resourceUrl = "http://resource.xml";
         HttpRequestBase httpRequest = new HttpGet(resourceUrl);
-        Map<String, String> params = createParamsMap();
-        params.put("instance", REQUEST_PARAM_KNOWN_HOST_URL + "/instance.xml");
+        Map<String, Object> context = createBfContextMap();
+        context.put("instance", REQUEST_PARAM_KNOWN_HOST_URL + "/instance.xml");
         UserFile userFile = createUserFileWithAuth();
 
         when(userFileService.getByIdAndUser(anyInt(), anyString())).thenReturn(userFile);
         when(knownHostsService.findAll()).thenReturn(Arrays.asList(createRequestParamKnownHost()));
-        requestAuthHandler.addAuthToHttpRequest(httpRequest, params);
+        requestAuthHandler.addAuthToHttpRequest(httpRequest, context);
 
         assertThat(httpRequest.getURI().toString(), equalTo(resourceUrl));
         assertThat(httpRequest.getHeaders("Authorization").length, equalTo(0));
@@ -154,6 +163,56 @@ public class XFormsHTTPRequestAuthHandlerImplTest {
                 XFormsHTTPRequestAuthHandlerImpl.getUrlWithAuthParam(REQUEST_PARAM_KNOWN_HOST_URL + "?1=1",
                         createRequestParamKnownHost());
         assertThat(safeUrlWithParams, equalTo(REQUEST_PARAM_KNOWN_HOST_URL + "?1=1&key=ticket"));
+    }
+
+    @Test
+    public void validateRequestHeaderIfInvalidSessionId() {
+        Map<Object, Object> bfContext = new HashMap<Object, Object>();
+        RequestHeaders httpRequestHeaders = new RequestHeaders();
+        String initialCookie = "JSESSIONID=" + oldSessionId + "; DWRSESSIONID=YEG6zYlxfPqHQHZwt3wC0L9Dgek";
+        httpRequestHeaders.addHeader(new RequestHeader("cookie", initialCookie));
+        bfContext.put(AbstractHTTPConnector.HTTP_REQUEST_HEADERS, httpRequestHeaders);
+        XFormsHTTPRequestAuthHandlerImpl.validateSessionIdInRequestHeader(bfContext, newSessionId);
+        assertThatRequestHeaderContainsValidSessionId(bfContext);
+    }
+
+    @Test
+    public void validateRequestHeaderIfInvalidSessionIdInDifferentOrder() {
+        Map<Object, Object> bfContext = new HashMap<Object, Object>();
+        RequestHeaders httpRequestHeaders = new RequestHeaders();
+        String initialCookie = "DWRSESSIONID=YEG6zYlxfPqHQHZwt3wC0L9Dgek;JSESSIONID=" + oldSessionId;
+        httpRequestHeaders.addHeader(new RequestHeader("cookie", initialCookie));
+        bfContext.put(AbstractHTTPConnector.HTTP_REQUEST_HEADERS, httpRequestHeaders);
+        XFormsHTTPRequestAuthHandlerImpl.validateSessionIdInRequestHeader(bfContext, newSessionId);
+        assertThatRequestHeaderContainsValidSessionId(bfContext);
+    }
+
+    @Test
+    public void validateRequestHeaderIfMissingCookie() {
+        Map<Object, Object> bfContext = new HashMap<Object, Object>();
+        RequestHeaders httpRequestHeaders = new RequestHeaders();
+        bfContext.put(AbstractHTTPConnector.HTTP_REQUEST_HEADERS, httpRequestHeaders);
+        XFormsHTTPRequestAuthHandlerImpl.validateSessionIdInRequestHeader(bfContext, newSessionId);
+        assertThatRequestHeaderContainsValidSessionId(bfContext);
+    }
+
+    @Test
+    public void validateRequestHeaderIfMissingSessionId() {
+        Map<Object, Object> bfContext = new HashMap<Object, Object>();
+        RequestHeaders httpRequestHeaders = new RequestHeaders();
+        String initialCookie = "DWRSESSIONID=YEG6zYlxfPqHQHZwt3wC0L9Dgek";
+        httpRequestHeaders.addHeader(new RequestHeader("cookie", initialCookie));
+        bfContext.put(AbstractHTTPConnector.HTTP_REQUEST_HEADERS, httpRequestHeaders);
+        XFormsHTTPRequestAuthHandlerImpl.validateSessionIdInRequestHeader(bfContext, newSessionId);
+        assertThatRequestHeaderContainsValidSessionId(bfContext);
+    }
+
+    private void assertThatRequestHeaderContainsValidSessionId(Map<?, ?> bfContext) {
+        RequestHeaders requestHeaders = (RequestHeaders) bfContext.get(AbstractHTTPConnector.HTTP_REQUEST_HEADERS);
+        RequestHeader cookieHeader = requestHeaders.getRequestHeader("cookie");
+        assertThat(cookieHeader.getValue(), containsString("JSESSIONID=" + newSessionId));
+        assertThat(cookieHeader.getValue(), not(containsString("JSESSIONID=" + oldSessionId)));
+
     }
 
     private void assertThatRequestIsNotChanged(HttpRequestBase httpRequest, String requestUri) {
@@ -192,11 +251,16 @@ public class XFormsHTTPRequestAuthHandlerImplTest {
         return userFile;
     }
 
-    static Map<String, String> createParamsMap() {
-        Map<String, String> params = new HashMap<String, String>();
-        params.put("fileId", "1");
-        params.put("sessionid", "12345");
-        params.put("requestURL", BASE_URI + "/xform");
-        return params;
+    static Map<String, Object> createBfContextMap() {
+        Map<String, Object> bfContext = new HashMap<String, Object>();
+        bfContext.put("fileId", "1");
+        bfContext.put("httpSessionId", newSessionId);
+        bfContext.put("requestURL", BASE_URI + "/xform");
+
+        RequestHeaders httpRequestHeaders = new RequestHeaders();
+        String initialCookie = "JSESSIONID=" + oldSessionId;
+        httpRequestHeaders.addHeader(new RequestHeader("cookie", initialCookie));
+        bfContext.put(AbstractHTTPConnector.HTTP_REQUEST_HEADERS, httpRequestHeaders);
+        return bfContext;
     }
 }

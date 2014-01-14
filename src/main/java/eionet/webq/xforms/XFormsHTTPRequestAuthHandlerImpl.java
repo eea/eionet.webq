@@ -34,6 +34,9 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import de.betterform.connector.http.AbstractHTTPConnector;
+import de.betterform.xml.xforms.model.submission.RequestHeader;
+import de.betterform.xml.xforms.model.submission.RequestHeaders;
 import eionet.webq.dao.orm.KnownHost;
 import eionet.webq.dao.orm.UserFile;
 import eionet.webq.dto.KnownHostAuthenticationMethod;
@@ -47,6 +50,18 @@ import eionet.webq.service.UserFileService;
  */
 @Component
 public class XFormsHTTPRequestAuthHandlerImpl implements HTTPRequestAuthHandler {
+
+    /** Session id attribute name stored in HTTP request header. */
+    public static final String HTTP_JSESSIONID_ATTRIBUTE = "JSESSIONID=";
+
+    /** Cookie attribute name stored in HTTP request header. */
+    public static final String HTTP_COOKIE_ATTRIBUTE = "cookie";
+
+    /** Request base URL attribute in bf context. */
+    public static final String BF_REQUEST_URL_ATTRIBUTE = "requestURL";
+
+    /** HTTP session id attribute in bf context. */
+    public static final String BF_HTTP_SESSION_ATTRIBUTE = "httpSessionId";
 
     /** User XML file service. */
     @Autowired
@@ -70,6 +85,7 @@ public class XFormsHTTPRequestAuthHandlerImpl implements HTTPRequestAuthHandler 
         Integer fileId = null;
         String basicAuth = null;
         String sessionId = null;
+        String sessionIdHash = null;
 
         if (context.get("instance") != null) {
             instance = (String) context.get("instance");
@@ -77,38 +93,42 @@ public class XFormsHTTPRequestAuthHandlerImpl implements HTTPRequestAuthHandler 
         if (context.get("envelope") != null) {
             instance = (String) context.get("envelope");
         }
-        if (context.get("requestURL") != null) {
+        if (context.get(BF_REQUEST_URL_ATTRIBUTE) != null) {
             try {
-                URI requestURI = new URI((String) context.get("requestURL"));
-                requestURLHost = StringUtils.substringBefore(requestURI.toString(), requestURI.getHost()) + requestURI.getHost();
+                URI requestURI = new URI((String) context.get(BF_REQUEST_URL_ATTRIBUTE));
+                requestURLHost =
+                            StringUtils.substringBefore(requestURI.toString(), requestURI.getHost()) + requestURI.getHost();
             } catch (URISyntaxException e) {
-                LOGGER.warn("requestURL is not valid URL: " + context.get("requestURL"));
+                LOGGER.warn("requestURL is not valid URL: " + context.get(BF_REQUEST_URL_ATTRIBUTE));
             }
         }
         if (context.get("fileId") != null) {
             fileId = Integer.valueOf((String) context.get("fileId"));
         }
-        // md5 hash of session ID
-        if (context.get("sessionid") != null) {
-            sessionId = (String) context.get("sessionid");
-        }
-        // betterform http session attribute
-        if (sessionId == null && context.get("httpSessionId") != null) {
-            sessionId = DigestUtils.md5Hex((String) context.get("httpSessionId"));
+        // http session attribute stored in betterform context
+        if (context.get(BF_HTTP_SESSION_ATTRIBUTE) != null) {
+            sessionId = (String) context.get(BF_HTTP_SESSION_ATTRIBUTE);
+            sessionIdHash = DigestUtils.md5Hex(sessionId);
         }
 
-        // add auth info only for URIs that are not on the same host.
-        if (!uri.startsWith(requestURLHost)) {
+        LOGGER.debug("Get resource from XForm: " + uri);
+        if (uri.startsWith(requestURLHost)) {
+            // check if requests on the same (webq) host is done in the same session. Fix session id if not.
+            if (sessionId != null) {
+                validateSessionIdInRequestHeader(context, sessionId);
+            }
+        } else {
+            // add auth info only for URIs that are not on the same host.
             if (fileId != null && sessionId != null) {
-                LOGGER.debug("Check if user is logged in to get file: " + fileId);
+                LOGGER.debug("Check if user is logged in to get resource for fileId=" + fileId);
                 // check if user is logged in
-                UserFile userFile = userFileService.getByIdAndUser(fileId, sessionId);
+                UserFile userFile = userFileService.getByIdAndUser(fileId, sessionIdHash);
                 if (userFile != null) {
                     basicAuth = userFile.getAuthorization();
                 }
                 // add auth info only if user is logged in
                 if (StringUtils.isNotEmpty(basicAuth)) {
-                    LOGGER.debug("User is logged in to get file: " + fileId);
+                    LOGGER.debug("User is logged in to get resource for fileId=" + fileId);
 
                     // if the URI starts with instance or envelope URI, then we can use the basic auth retrieved from CDR.
                     if (((StringUtils.isNotBlank(instance) && uri.startsWith(instance)) || (StringUtils.isNotBlank(envelope) && uri
@@ -149,6 +169,39 @@ public class XFormsHTTPRequestAuthHandlerImpl implements HTTPRequestAuthHandler 
     }
 
     /**
+     * Betterform engine forwards the cookie attribute found from initial request header (sent by browser) to the destination uri.
+     * The jsessionid in cookie could be invalid if Tomcat has created a new session. This methods validates the cookie header and
+     * replaces or adds the correct jsessionid if needed. Otherwise saveXml will not work if the session id is invalid.
+     *
+     * @param context Map of context parameters
+     * @param sessionId jsessionid stored in request header.
+     */
+    public static void validateSessionIdInRequestHeader(Map<?, ?> context, String sessionId) {
+        RequestHeaders httpRequestHeaders = (RequestHeaders) context.get(AbstractHTTPConnector.HTTP_REQUEST_HEADERS);
+        RequestHeader cookieHeader = httpRequestHeaders.getRequestHeader(HTTP_COOKIE_ATTRIBUTE);
+        String newCookieHeaderValue = null;
+
+        if (cookieHeader == null || cookieHeader.getValue() == null) {
+            newCookieHeaderValue = HTTP_JSESSIONID_ATTRIBUTE + sessionId;
+            LOGGER.debug("Add new cookie: " + newCookieHeaderValue);
+        } else if (!cookieHeader.getValue().contains(HTTP_JSESSIONID_ATTRIBUTE)) {
+            newCookieHeaderValue = cookieHeader.getValue() + "; " + HTTP_JSESSIONID_ATTRIBUTE + sessionId;
+            LOGGER.debug("Append jsessionid to cookie: " + newCookieHeaderValue);
+        } else if (cookieHeader.getValue().contains(HTTP_JSESSIONID_ATTRIBUTE)
+                && !cookieHeader.getValue().contains(HTTP_JSESSIONID_ATTRIBUTE + sessionId)) {
+            newCookieHeaderValue =
+                    cookieHeader.getValue().replaceAll(HTTP_JSESSIONID_ATTRIBUTE + "([^;]*)",
+                            HTTP_JSESSIONID_ATTRIBUTE + sessionId);
+            LOGGER.debug("Found wrong JSESSIONID from request header: " + cookieHeader.getValue());
+            LOGGER.debug("Change jsessionid in cookie: " + newCookieHeaderValue);
+        }
+        if (newCookieHeaderValue != null) {
+            httpRequestHeaders.removeHeader(HTTP_COOKIE_ATTRIBUTE);
+            httpRequestHeaders.addHeader(new RequestHeader(HTTP_COOKIE_ATTRIBUTE, newCookieHeaderValue));
+        }
+    }
+
+    /**
      * Get authorization info for known hosts.
      *
      * @param uri URL to look for authorisation.
@@ -183,5 +236,4 @@ public class XFormsHTTPRequestAuthHandlerImpl implements HTTPRequestAuthHandler 
         }
         return authUrl;
     }
-
 }
