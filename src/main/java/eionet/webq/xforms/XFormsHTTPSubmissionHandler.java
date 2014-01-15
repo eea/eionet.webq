@@ -21,10 +21,9 @@
 
 package eionet.webq.xforms;
 
-import de.betterform.connector.SubmissionHandler;
-import de.betterform.connector.http.HTTPSubmissionHandler;
-import de.betterform.xml.xforms.exception.XFormsException;
-import de.betterform.xml.xforms.model.submission.Submission;
+import java.io.UnsupportedEncodingException;
+import java.util.Map;
+
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
@@ -37,8 +36,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
 import org.w3c.dom.Node;
 
-import java.io.UnsupportedEncodingException;
-import java.util.Map;
+import de.betterform.connector.SubmissionHandler;
+import de.betterform.connector.http.HTTPSubmissionHandler;
+import de.betterform.xml.xforms.exception.XFormsException;
+import de.betterform.xml.xforms.model.submission.Submission;
 
 /**
  * Submission handler to proxy http GET, POST, DELETE and PUT request executed through XForm submission element.
@@ -59,6 +60,7 @@ public class XFormsHTTPSubmissionHandler extends HTTPSubmissionHandler implement
         return super.submit(submission, instance);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     protected void get(String uri) throws XFormsException {
         HttpRequestBase httpRequestBase = new HttpGet(uri);
@@ -72,6 +74,7 @@ public class XFormsHTTPSubmissionHandler extends HTTPSubmissionHandler implement
         }
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     protected void post(String uri, String body, String type, String encoding) throws XFormsException {
         HttpEntityEnclosingRequestBase httpMethod = new HttpPost(uri);
@@ -88,6 +91,7 @@ public class XFormsHTTPSubmissionHandler extends HTTPSubmissionHandler implement
         }
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     protected void put(String uri, String body, String type, String encoding) throws XFormsException {
         HttpEntityEnclosingRequestBase httpMethod = new HttpPut(uri);
@@ -104,6 +108,7 @@ public class XFormsHTTPSubmissionHandler extends HTTPSubmissionHandler implement
         }
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     protected void delete(String uri) throws XFormsException {
         HttpRequestBase httpMethod = new HttpDelete(uri);

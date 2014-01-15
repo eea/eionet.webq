@@ -21,6 +21,7 @@
 
 package eionet.webq.xforms;
 
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collection;
@@ -90,12 +91,16 @@ public class XFormsHTTPRequestAuthHandlerImpl implements HTTPRequestAuthHandler 
         String sessionId = null;
         String sessionIdHash = null;
 
+        if (uri == null) {
+            return;
+        }
+
         // load bf context attributes
         if (context.get("instance") != null) {
             instance = (String) context.get("instance");
         }
         if (context.get("envelope") != null) {
-            instance = (String) context.get("envelope");
+            envelope = (String) context.get("envelope");
         }
         if (context.get(BF_REQUEST_URL_ATTRIBUTE) != null) {
             try {
@@ -115,7 +120,7 @@ public class XFormsHTTPRequestAuthHandlerImpl implements HTTPRequestAuthHandler 
             sessionIdHash = DigestUtils.md5Hex(sessionId);
         }
 
-        LOGGER.debug("Get resource from XForm: " + uri);
+        LOGGER.info("Get resource from XForm: " + uri);
         if (uri.startsWith(requestURLHost)) {
             // check if the request on the same (webq) host is done in the same session. Fix session id if required.
             if (sessionId != null) {
@@ -154,7 +159,7 @@ public class XFormsHTTPRequestAuthHandlerImpl implements HTTPRequestAuthHandler 
                             if (knownHost.getAuthenticationMethod() == KnownHostAuthenticationMethod.REQUEST_PARAMETER) {
                                 LOGGER.debug("Add ticket parameter from known hosts to URL: " + uri);
                                 uri = getUrlWithAuthParam(uri, knownHost);
-                                if (!uri.equals(httpRequestBase.getURI())) {
+                                if (!uri.equals(httpRequestBase.getURI().toString())) {
                                     try {
                                         httpRequestBase.setURI(new URI(uri));
                                     } catch (URISyntaxException e) {
@@ -164,12 +169,13 @@ public class XFormsHTTPRequestAuthHandlerImpl implements HTTPRequestAuthHandler 
                                 }
                             } else if (knownHost.getAuthenticationMethod() == KnownHostAuthenticationMethod.BASIC) {
                                 // Add basic authorisation if needed
-                                httpRequestBase.addHeader(
-                                        "Authorization",
-                                        "Basic "
-                                                +
-                                                Base64.encodeBase64String((new String(knownHost.getKey() + ":"
-                                                        + knownHost.getTicket())).getBytes()));
+                                try {
+                                    httpRequestBase.addHeader(
+                                            "Authorization", "Basic " + Base64.encodeBase64String((knownHost.getKey() + ":"
+                                                    + knownHost.getTicket()).getBytes("utf-8")));
+                                } catch (UnsupportedEncodingException e) {
+                                    LOGGER.warn("UnsupportedEncodingException: utf-8");
+                                }
                                 LOGGER.debug("Add basic auth from known hosts to URL: " + uri);
                             }
                         }
