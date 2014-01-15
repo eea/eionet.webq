@@ -21,9 +21,9 @@
 
 package eionet.webq.xforms;
 
-import org.apache.http.client.methods.HttpRequestBase;
-
 import java.util.Map;
+
+import org.apache.http.client.methods.HttpRequestBase;
 
 /**
  * Service handles HTTP requests done through XForms engine and adds authorisation info to request header if needed.
@@ -39,6 +39,6 @@ public interface HTTPRequestAuthHandler {
      * @param httpRequestBase Get, post, delete or put HTTP request method.
      * @param context Map of context parameters.
      */
-    public void addAuthToHttpRequest(HttpRequestBase httpRequestBase, Map<?, ?> context);
+    public void addAuthToHttpRequest(HttpRequestBase httpRequestBase, Map<Object, Object> context);
 
 }

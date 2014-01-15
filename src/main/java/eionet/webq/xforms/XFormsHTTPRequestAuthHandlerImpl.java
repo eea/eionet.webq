@@ -63,6 +63,9 @@ public class XFormsHTTPRequestAuthHandlerImpl implements HTTPRequestAuthHandler 
     /** HTTP session id attribute in bf context. */
     public static final String BF_HTTP_SESSION_ATTRIBUTE = "httpSessionId";
 
+    /** WebQ authorisation attribute in bf context. */
+    public static final String WEBQ_AUTH_ATTRIBUTE = "webqAuth";
+
     /** User XML file service. */
     @Autowired
     UserFileService userFileService;
@@ -75,7 +78,7 @@ public class XFormsHTTPRequestAuthHandlerImpl implements HTTPRequestAuthHandler 
     private static final Logger LOGGER = Logger.getLogger(XFormsHTTPRequestAuthHandlerImpl.class);
 
     @Override
-    public void addAuthToHttpRequest(HttpRequestBase httpRequestBase, Map<?, ?> context) {
+    public void addAuthToHttpRequest(HttpRequestBase httpRequestBase, Map<Object, Object> context) {
 
         String uri = httpRequestBase.getURI().toString();
 
@@ -87,6 +90,7 @@ public class XFormsHTTPRequestAuthHandlerImpl implements HTTPRequestAuthHandler 
         String sessionId = null;
         String sessionIdHash = null;
 
+        // load bf context attributes
         if (context.get("instance") != null) {
             instance = (String) context.get("instance");
         }
@@ -113,7 +117,7 @@ public class XFormsHTTPRequestAuthHandlerImpl implements HTTPRequestAuthHandler 
 
         LOGGER.debug("Get resource from XForm: " + uri);
         if (uri.startsWith(requestURLHost)) {
-            // check if requests on the same (webq) host is done in the same session. Fix session id if not.
+            // check if the request on the same (webq) host is done in the same session. Fix session id if required.
             if (sessionId != null) {
                 validateSessionIdInRequestHeader(context, sessionId);
             }
@@ -121,10 +125,17 @@ public class XFormsHTTPRequestAuthHandlerImpl implements HTTPRequestAuthHandler 
             // add auth info only for URIs that are not on the same host.
             if (fileId != null && sessionId != null) {
                 LOGGER.debug("Check if user is logged in to get resource for fileId=" + fileId);
-                // check if user is logged in
-                UserFile userFile = userFileService.getByIdAndUser(fileId, sessionIdHash);
-                if (userFile != null) {
-                    basicAuth = userFile.getAuthorization();
+                if (!context.containsKey(WEBQ_AUTH_ATTRIBUTE)) {
+                    // check if user is logged in - ask auth info from user_xml file table
+                    UserFile userFile = userFileService.getByIdAndUser(fileId, sessionIdHash);
+                    if (userFile != null) {
+                        basicAuth = userFile.getAuthorization();
+                    }
+                    context.put(WEBQ_AUTH_ATTRIBUTE, basicAuth);
+                    LOGGER.debug("Store basic auth info in context for fileId=" + fileId);
+                } else {
+                    // auth info stored in context
+                    basicAuth = context.get(WEBQ_AUTH_ATTRIBUTE) != null ? (String) context.get(WEBQ_AUTH_ATTRIBUTE) : null;
                 }
                 // add auth info only if user is logged in
                 if (StringUtils.isNotEmpty(basicAuth)) {

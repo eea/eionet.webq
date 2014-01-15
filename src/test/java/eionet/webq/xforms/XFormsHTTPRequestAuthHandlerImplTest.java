@@ -89,7 +89,7 @@ public class XFormsHTTPRequestAuthHandlerImplTest {
 
         HttpRequestBase httpRequest = new HttpGet(BASE_URI + "/resource");
 
-        Map<String, Object> context = createBfContextMap();
+        Map<Object, Object> context = createBfContextMap();
         requestAuthHandler.addAuthToHttpRequest(httpRequest, context);
         assertThatRequestIsNotChanged(httpRequest, BASE_URI + "/resource");
         assertThatRequestHeaderContainsValidSessionId(context);
@@ -109,7 +109,7 @@ public class XFormsHTTPRequestAuthHandlerImplTest {
     @Test
     public void addBasicAuthIfSameHostAsInstance() {
         HttpRequestBase httpRequest = new HttpGet(BASIC_AUTH_KNOWN_HOST_URL + "/resource.xml");
-        Map<String, Object> context = createBfContextMap();
+        Map<Object, Object> context = createBfContextMap();
         context.put("instance", BASIC_AUTH_KNOWN_HOST_URL + "/instance.xml");
         UserFile userFile = createUserFileWithAuth();
 
@@ -125,7 +125,7 @@ public class XFormsHTTPRequestAuthHandlerImplTest {
     @Test
     public void addRequestParamAuthIfSameHostAsInstance() {
         HttpRequestBase httpRequest = new HttpGet(REQUEST_PARAM_KNOWN_HOST_URL + "/resource.xml");
-        Map<String, Object> context = createBfContextMap();
+        Map<Object, Object> context = createBfContextMap();
         context.put("instance", REQUEST_PARAM_KNOWN_HOST_URL + "/instance.xml");
         UserFile userFile = createUserFileWithAuth();
 
@@ -140,7 +140,7 @@ public class XFormsHTTPRequestAuthHandlerImplTest {
     public void noAuthIfDifferentHostAsInstance() {
         String resourceUrl = "http://resource.xml";
         HttpRequestBase httpRequest = new HttpGet(resourceUrl);
-        Map<String, Object> context = createBfContextMap();
+        Map<Object, Object> context = createBfContextMap();
         context.put("instance", REQUEST_PARAM_KNOWN_HOST_URL + "/instance.xml");
         UserFile userFile = createUserFileWithAuth();
 
@@ -150,8 +150,22 @@ public class XFormsHTTPRequestAuthHandlerImplTest {
 
         assertThat(httpRequest.getURI().toString(), equalTo(resourceUrl));
         assertThat(httpRequest.getHeaders("Authorization").length, equalTo(0));
-
     }
+
+    @Test
+    public void useAuthInfoFromContextAndNotFromDb() {
+
+        HttpRequestBase httpRequest = new HttpGet(REQUEST_PARAM_KNOWN_HOST_URL + "/resource.xml");
+        Map<Object, Object> context = createBfContextMap();
+        context.put("instance", REQUEST_PARAM_KNOWN_HOST_URL + "/instance.xml");
+        context.put("webqAuth", "Basic auth");
+
+        requestAuthHandler.addAuthToHttpRequest(httpRequest, context);
+
+        assertThat((String)context.get("webqAuth"), equalTo("Basic auth"));
+        verify(userFileService, never()).getByIdAndUser(anyInt(), anyString());
+    }
+
 
     @Test
     public void testUrlWithAuthParam() {
@@ -251,8 +265,8 @@ public class XFormsHTTPRequestAuthHandlerImplTest {
         return userFile;
     }
 
-    static Map<String, Object> createBfContextMap() {
-        Map<String, Object> bfContext = new HashMap<String, Object>();
+    static Map<Object, Object> createBfContextMap() {
+        Map<Object, Object> bfContext = new HashMap<Object, Object>();
         bfContext.put("fileId", "1");
         bfContext.put("httpSessionId", newSessionId);
         bfContext.put("requestURL", BASE_URI + "/xform");
