@@ -20,8 +20,7 @@
  */
 package eionet.webq.dao.orm;
 
-import org.hibernate.annotations.Generated;
-import org.hibernate.validator.constraints.NotEmpty;
+import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Embedded;
@@ -34,7 +33,10 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-import java.util.Date;
+import javax.persistence.Transient;
+
+import org.hibernate.annotations.Generated;
+import org.hibernate.validator.constraints.NotEmpty;
 
 /**
  * DTO for web form upload.
@@ -65,7 +67,7 @@ public class ProjectFile {
     private UploadedFile file = new UploadedFile();
     /**
      * Remote file location(typically VCS link).
-      */
+     */
     private String remoteFileUrl;
     /**
      * New xml file name for web form.
@@ -117,6 +119,18 @@ public class ProjectFile {
      */
     @Temporal(TemporalType.TIMESTAMP)
     private Date updated;
+
+    /**
+     * Link to open webform from UI.
+     */
+    @Transient
+    private String webformLink;
+
+    /**
+     * Related project textual identifier.
+     */
+    @Transient
+    private String projectIdentifier;
 
     public int getId() {
         return id;
@@ -290,6 +304,34 @@ public class ProjectFile {
 
     public void setFileType(ProjectFileType fileType) {
         this.fileType = fileType;
+    }
+
+    /**
+     * @return the webformLink
+     */
+    public String getWebformLink() {
+        return webformLink;
+    }
+
+    /**
+     * @param webformLink the webformLink to set
+     */
+    public void setWebformLink(String webformLink) {
+        this.webformLink = webformLink;
+    }
+
+    /**
+     * @return the projectIdentifier
+     */
+    public String getProjectIdentifier() {
+        return projectIdentifier;
+    }
+
+    /**
+     * @param projectIdentifier the projectIdentifier to set
+     */
+    public void setProjectIdentifier(String projectIdentifier) {
+        this.projectIdentifier = projectIdentifier;
     }
 
     @Override

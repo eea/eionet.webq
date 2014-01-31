@@ -20,9 +20,9 @@
  */
 package eionet.webq.dao;
 
-import eionet.webq.dao.orm.ProjectEntry;
-
 import java.util.Collection;
+
+import eionet.webq.dao.orm.ProjectEntry;
 
 /**
  * Interface for database interaction on project folders.
@@ -64,4 +64,12 @@ public interface ProjectFolders {
      * @return project from storage
      */
     ProjectEntry getByProjectId(String projectId);
+
+    /**
+     * Returns project stored with specified project numeric id.
+     *
+     * @param id project numeric id
+     * @return project from storage
+     */
+    ProjectEntry getById(int id);
 }

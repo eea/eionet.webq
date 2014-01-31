@@ -20,27 +20,17 @@
  */
 package eionet.webq.web.controller;
 
-import eionet.webq.converter.JsonXMLBidirectionalConverter;
-import eionet.webq.converter.UserFileToFileInfoConverter;
-import eionet.webq.dao.orm.ProjectFile;
-import eionet.webq.dao.orm.UserFile;
-import eionet.webq.dto.FileInfo;
-import eionet.webq.dto.UploadForm;
-import eionet.webq.dto.XmlSaveResult;
-import eionet.webq.service.CDREnvelopeService;
-import eionet.webq.service.ConversionService;
-import eionet.webq.service.FileNotAvailableException;
-import eionet.webq.service.UserFileService;
-import eionet.webq.service.WebFormService;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.Collection;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
@@ -56,6 +46,20 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import eionet.webq.converter.JsonXMLBidirectionalConverter;
+import eionet.webq.converter.UserFileToFileInfoConverter;
+import eionet.webq.dao.orm.ProjectFile;
+import eionet.webq.dao.orm.UserFile;
+import eionet.webq.dto.FileInfo;
+import eionet.webq.dto.UploadForm;
+import eionet.webq.dto.XmlSaveResult;
+import eionet.webq.service.CDREnvelopeService;
+import eionet.webq.service.ConversionService;
+import eionet.webq.service.FileNotAvailableException;
+import eionet.webq.service.ProjectService;
+import eionet.webq.service.UserFileService;
+import eionet.webq.service.WebFormService;
 
 /**
  * Base controller for front page actions.
@@ -74,6 +78,11 @@ public class PublicPageController {
      */
     @Autowired
     private UserFileService userFileService;
+    /**
+     * Service for webform projects.
+     */
+    @Autowired
+    private ProjectService projectService;
     /**
      * File conversion service.
      */
@@ -204,10 +213,11 @@ public class PublicPageController {
                         webFormService.findWebFormsForSchemas(Arrays.asList(file.getXmlSchema()));
                 if (availableWebForms.size() == 1) {
                     int fileId = file.getId();
-                    int formId = availableWebForms.iterator().next().getId();
+                    ProjectFile webform = availableWebForms.iterator().next();
+                    String webformPath = getWebformPath(webform);
                     String contextPath = request.getContextPath();
                     String downloadUrl = contextPath + "/download/user_file?fileId=" + fileId;
-                    return "redirect:/xform/?formId=" + formId + "&fileId=" + fileId + "&instance=" + downloadUrl
+                    return "redirect:" + webformPath + "fileId=" + fileId + "&instance=" + downloadUrl
                             + "&base_uri=" + contextPath;
                 }
                 model.addAttribute("message", "File '" + file.getName() + "' uploaded successfully");
@@ -288,8 +298,10 @@ public class PublicPageController {
         } else {
             baseUri += request.getContextPath();
         }
+        ProjectFile webform = webFormService.findWebFormById(formId);
+        String webformPath = getWebformPath(webform);
 
-        return "redirect:" + absolutePath + "/xform/?formId=" + formId + "&fileId=" + fileId + baseUri;
+        return "redirect:" + absolutePath + webformPath + "fileId=" + fileId + baseUri;
     }
 
     /**
@@ -307,7 +319,7 @@ public class PublicPageController {
         ProjectFile webForm = webFormService.findWebFormById(formId);
         byte[] fileContent = webForm.getFileContent();
         response.setContentLength(fileContent.length);
-        response.setContentType("application/xhtml+html");
+        response.setContentType("application/xhtml+xml;charset=utf-8");
         OutputStream outputStream = response.getOutputStream();
         IOUtils.write(fileContent, outputStream);
         outputStream.flush();
@@ -406,6 +418,35 @@ public class PublicPageController {
      * @return collection of active webforms.
      */
     private Collection<ProjectFile> allWebForms() {
-        return webFormService.getAllActiveWebForms();
+
+        Collection<ProjectFile> allWebforms = webFormService.getAllActiveWebForms();
+        if (allWebforms != null) {
+            for (ProjectFile webform : allWebforms) {
+                webform.setWebformLink(getWebformPath(webform));
+            }
+        }
+        return allWebforms;
+    }
+
+    /**
+     * Creates webform file URL depending on webform type. If it is a xform, then the request is forwarded to betterForm URL,
+     * otherwise plain HTML is used.
+     *
+     * @param webform Project file
+     * @return path to webform
+     */
+    private String getWebformPath(ProjectFile webform) {
+        String webformPath = null;
+        if (webform.getFileName().endsWith(".html") || webform.getFileName().endsWith(".htm")) {
+            if (StringUtils.isEmpty(webform.getProjectIdentifier())) {
+                webform.setProjectIdentifier(projectService.getById(webform.getProjectId()).getProjectId());
+            }
+            webformPath =
+                    "/webform/project/" + webform.getProjectIdentifier() + "/file/"
+                            + webform.getFileName() + "?";
+        } else {
+            webformPath = "/xform/?formId=" + webform.getId() + "&";
+        }
+        return webformPath;
     }
 }

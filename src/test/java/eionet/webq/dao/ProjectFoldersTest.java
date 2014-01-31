@@ -20,8 +20,13 @@
  */
 package eionet.webq.dao;
 
-import configuration.ApplicationTestContextWithMockSession;
-import eionet.webq.dao.orm.ProjectEntry;
+import static org.hamcrest.core.IsEqual.equalTo;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
+
+import java.util.Collection;
+import java.util.Iterator;
+
 import org.hibernate.exception.ConstraintViolationException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -30,12 +35,8 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collection;
-import java.util.Iterator;
-
-import static org.hamcrest.core.IsEqual.equalTo;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
+import configuration.ApplicationTestContextWithMockSession;
+import eionet.webq.dao.orm.ProjectEntry;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @Transactional
@@ -113,6 +114,16 @@ public class ProjectFoldersTest {
         assertThat(entry.getProjectId(), equalTo(projectId));
         assertNotNull(entry.getCreated());
         assertNotNull(entry.getId());
+    }
+
+    @Test
+    public void allowToFetchProjectEntryById() throws Exception {
+        String projectId = "projectId";
+        folders.save(projectEntry(projectId));
+        ProjectEntry entry1 = folders.getByProjectId(projectId);
+
+        ProjectEntry entry2 = folders.getById(entry1.getId());
+        assertThat(entry1.getProjectId(), equalTo(entry2.getProjectId()));
     }
 
     @Test

@@ -20,7 +20,8 @@
  */
 package eionet.webq.dao;
 
-import eionet.webq.dao.orm.ProjectEntry;
+import java.util.Collection;
+
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
@@ -28,7 +29,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collection;
+import eionet.webq.dao.orm.ProjectEntry;
 
 /**
  * Project folders interface implementation.
@@ -67,6 +68,11 @@ public class ProjectFoldersImpl extends AbstractDao<ProjectEntry> implements Pro
     @Override
     public ProjectEntry getByProjectId(String projectId) {
         return (ProjectEntry) getCriteria().add(Restrictions.eq("projectId", projectId)).uniqueResult();
+    }
+
+    @Override
+    public ProjectEntry getById(int id) {
+        return (ProjectEntry) getCriteria().add(Restrictions.eq("id", id)).uniqueResult();
     }
 
     @Override
