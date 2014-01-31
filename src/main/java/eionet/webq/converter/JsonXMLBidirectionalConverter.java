@@ -20,21 +20,24 @@
  */
 package eionet.webq.converter;
 
-import de.odysseus.staxon.json.JsonXMLConfig;
-import de.odysseus.staxon.json.JsonXMLConfigBuilder;
-import de.odysseus.staxon.json.JsonXMLInputFactory;
-import de.odysseus.staxon.json.JsonXMLOutputFactory;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLEventWriter;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
+
+import de.odysseus.staxon.json.JsonXMLConfig;
+import de.odysseus.staxon.json.JsonXMLConfigBuilder;
+import de.odysseus.staxon.json.JsonXMLInputFactory;
+import de.odysseus.staxon.json.JsonXMLOutputFactory;
 
 /**
  * Converter for performing bi-directional conversion between XML and json.
@@ -70,7 +73,10 @@ public class JsonXMLBidirectionalConverter {
      * @return xml as byte array.
      */
     public byte[] convertJsonToXml(byte[] json) {
-        JsonXMLConfig config = new JsonXMLConfigBuilder().prettyPrint(true).multiplePI(false).build();
+        JsonXMLConfig config = new JsonXMLConfigBuilder()
+            .prettyPrint(true)
+            .multiplePI(false)
+            .build();
         XMLInputFactory reader = new JsonXMLInputFactory(config);
         XMLOutputFactory writer = XMLOutputFactory.newInstance();
         return convert(reader, writer, json);
@@ -90,7 +96,7 @@ public class JsonXMLBidirectionalConverter {
         ByteArrayOutputStream output = new ByteArrayOutputStream();
         try {
             XMLEventReader reader = inputFactory.createXMLEventReader(input);
-            XMLEventWriter writer = outputFactory.createXMLEventWriter(output);
+            XMLEventWriter writer = outputFactory.createXMLEventWriter(output, "utf-8");
             writer.add(reader);
             closeQuietly(reader, writer);
             return output.toByteArray();
