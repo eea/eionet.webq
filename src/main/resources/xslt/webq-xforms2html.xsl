@@ -258,4 +258,43 @@
         </xsl:for-each>
     </xsl:template>
 
+
+    <!-- from repeat-ui.xsl -->
+    <xsl:template
+            match="xf:input|xf:output|xf:range|xf:secret|xf:select|xf:select1|xf:textarea|xf:upload|xf:trigger|xf:submit"
+            mode="repeated-full-prototype"
+            priority="20">
+        <xsl:variable name="id" select="@id"/>
+        <xsl:variable name="control-classes">
+            <xsl:call-template name="assemble-control-classes">
+                <xsl:with-param name="appearance" select="@appearance"/>
+            </xsl:call-template>
+        </xsl:variable>
+        <xsl:variable name="label-classes"><xsl:call-template name="assemble-label-classes"/></xsl:variable>
+
+        <xsl:element name="span">
+            <xsl:attribute name="id" select="$id"/>
+            <xsl:attribute name="data-bf-class" select="$control-classes"/>
+
+            <xsl:if test="exists(@mediatype)">
+                <xsl:attribute name="mediatype" select="@mediatype"/>
+            </xsl:if>
+            <!-- WEBQ fixed label -->
+            <xsl:if test="local-name() != 'trigger' and local-name() != 'submit'">
+                <label for="{$id}-value" id="{$id}-label" class="{$label-classes} test">
+                    <xsl:call-template name="create-label">
+                        <xsl:with-param name="label-elements" select="xf:label"/>
+                    </xsl:call-template>
+                </label>
+            </xsl:if>
+
+            <!--<xsl:apply-templates select="xf:alert"/>-->
+            <span class="widgetContainer">
+                <xsl:call-template name="buildControl"/>
+                <xsl:apply-templates select="xf:alert"/>
+                <xsl:apply-templates select="xf:hint"/>
+                <xsl:apply-templates select="xf:help"/>
+            </span>
+        </xsl:element>
+    </xsl:template>
 </xsl:stylesheet>
