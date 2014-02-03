@@ -20,9 +20,9 @@
  */
 package eionet.webq.service;
 
-import eionet.webq.dao.orm.ProjectEntry;
-
 import java.util.Collection;
+
+import eionet.webq.dao.orm.ProjectEntry;
 
 /**
  * Service for operations on projects.
@@ -49,6 +49,14 @@ public interface ProjectService {
      * @return project from storage
      */
     ProjectEntry getByProjectId(String projectId);
+
+    /**
+     * Retrieves storage data by project numeric id.
+     *
+     * @param id project numeric id
+     * @return project from storage
+     */
+    ProjectEntry getById(int id);
 
     /**
      * Saves or updates project depending whether {@link ProjectEntry#id} is set.

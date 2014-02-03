@@ -20,13 +20,14 @@
  */
 package eionet.webq.service;
 
-import eionet.webq.dao.ProjectFolders;
-import eionet.webq.dao.orm.ProjectEntry;
+import java.util.Collection;
+
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Collection;
+import eionet.webq.dao.ProjectFolders;
+import eionet.webq.dao.orm.ProjectEntry;
 
 /**
  * Project service implementation.
@@ -59,6 +60,13 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public ProjectEntry getByProjectId(String projectId) {
         ProjectEntry byProjectId = folders.getByProjectId(projectId);
+        LOGGER.info("Loaded project=" + byProjectId);
+        return byProjectId;
+    }
+
+    @Override
+    public ProjectEntry getById(int id) {
+        ProjectEntry byProjectId = folders.getById(id);
         LOGGER.info("Loaded project=" + byProjectId);
         return byProjectId;
     }

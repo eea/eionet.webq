@@ -20,9 +20,41 @@
  */
 package eionet.webq.web.controller;
 
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.activation.MimetypesFileTypeMap;
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.xml.transform.TransformerException;
+
+import org.apache.commons.io.IOUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.mail.javamail.ConfigurableMimeFileTypeMap;
+import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.ModelAndView;
+
 import com.google.common.base.Function;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableSet;
+
+import eionet.webq.converter.JsonXMLBidirectionalConverter;
 import eionet.webq.dao.MergeModules;
 import eionet.webq.dao.orm.MergeModule;
 import eionet.webq.dao.orm.ProjectFile;
@@ -33,36 +65,12 @@ import eionet.webq.service.ProjectFileService;
 import eionet.webq.service.ProjectService;
 import eionet.webq.service.UserFileMergeService;
 import eionet.webq.service.UserFileService;
-import org.apache.commons.io.IOUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.servlet.ModelAndView;
-
-import javax.servlet.ServletOutputStream;
-import javax.servlet.http.HttpServletResponse;
-import javax.xml.transform.TransformerException;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * Spring controller for WebQ file download.
  */
 @Controller
-@RequestMapping("download")
+@RequestMapping(value = {"download", "webform"})
 public class FileDownloadController {
     /**
      * Service for getting user file content from storage.
@@ -94,6 +102,29 @@ public class FileDownloadController {
      */
     @Autowired
     private UserFileMergeService mergeService;
+    /**
+     * Json to XML converter.
+     */
+    @Autowired
+    JsonXMLBidirectionalConverter jsonXMLConverter;
+
+    @RequestMapping(value = "/converted_user_file", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.GET)
+    @Transactional
+    public void downloadUserFileJson(@RequestParam int fileId, HttpServletResponse response) {
+        UserFile file = userFileService.download(fileId);
+        byte[] json = jsonXMLConverter.convertXmlToJson(file.getContent());
+        setContentType(response, MediaType.APPLICATION_JSON);
+        writeToResponse(response, json);
+    }
+
+    @RequestMapping(value = "/converted_user_file", produces = MediaType.APPLICATION_XML_VALUE, method = RequestMethod.GET)
+    @Transactional
+    public void downloadUserFileJsonToXml(@RequestParam int fileId, HttpServletResponse response) {
+        UserFile file = userFileService.download(fileId);
+        byte[] xml = jsonXMLConverter.convertJsonToXml(jsonXMLConverter.convertXmlToJson(file.getContent()));
+
+        writeXmlFileToResponse("json.xml", xml, response);
+    }
 
     /**
      * Download uploaded file action.
@@ -117,9 +148,11 @@ public class FileDownloadController {
      */
     @RequestMapping(value = "/project/{projectId}/file/{fileName:.*}")
     @Transactional
-    public void downloadProjectFile(@PathVariable String projectId, @PathVariable String fileName, HttpServletResponse response) {
+    public void downloadProjectFile(@PathVariable String projectId, @PathVariable String fileName, HttpServletRequest request,
+            HttpServletResponse response) {
         ProjectFile projectFile = projectFileService.fileContentBy(fileName, projectService.getByProjectId(projectId));
-        writeXmlFileToResponse(fileName, projectFile.getFileContent(), response);
+        String disposition = request.getServletPath().contains("/download/") ? "attachment" : "inline";
+        writeProjectFileToResponse(fileName, projectFile, response, disposition);
     }
 
     /**
@@ -188,12 +221,12 @@ public class FileDownloadController {
     }
 
     /**
-     * Handler for case where automatic merge could not be performed.
-     * Such cases are:
+     * Handler for case where automatic merge could not be performed. Such cases are:
      * <ul>
-     *     <li>Multiple modules found</li>
-     *     <li>No modules found</li>
+     * <li>Multiple modules found</li>
+     * <li>No modules found</li>
      * </ul>
+     *
      * @param e custom exception, holding modules and selected files
      * @return model and view
      */
@@ -210,8 +243,8 @@ public class FileDownloadController {
     }
 
     /**
-     * Performs conversion of specified {@link eionet.webq.dao.orm.UserFile} to specific format.
-     * Format is defined by conversionId.
+     * Performs conversion of specified {@link eionet.webq.dao.orm.UserFile} to specific format. Format is defined by conversionId.
+     *
      * @param fileId file id or xsl name, which will be used to convert file
      * @param conversionId id of conversion to be used
      * @param response object where conversion result will be written
@@ -240,6 +273,44 @@ public class FileDownloadController {
                             MergeModule mergeModule, HttpServletResponse response) throws TransformerException, IOException {
         byte[] mergeResult = mergeService.mergeFiles(userFiles, mergeModule);
         writeXmlFileToResponse("merged_files.xml", mergeResult, response);
+    }
+
+    /**
+     * Writes project file to response.
+     *
+     * @param name file name
+     * @param projetFile project file object
+     * @param response http response
+     * @param disposition inline or attachment
+     */
+    private void
+            writeProjectFileToResponse(String name, ProjectFile projectFile, HttpServletResponse response, String disposition) {
+
+        ConfigurableMimeFileTypeMap mimeTypesMap = new ConfigurableMimeFileTypeMap();
+        String contentType = mimeTypesMap.getContentType(name);
+
+        if (MimetypesFileTypeMap.getDefaultFileTypeMap().equals(contentType)) {
+            if (name.endsWith(".xhtml")) {
+                contentType = MediaType.APPLICATION_XHTML_XML_VALUE;
+            } else if (name.endsWith(".js")) {
+                contentType = "application/javascript";
+            } else {
+                contentType = MediaType.APPLICATION_XML_VALUE;
+            }
+            // TODO check if there are more missing mime types
+        }
+
+        if (contentType.startsWith("text")) {
+            contentType += ";charset=UTF-8";
+        }
+        response.setContentType(contentType);
+        setContentDisposition(response, disposition + ";filename=" + name);
+        if (projectFile.getUpdated() != null) {
+            response.setDateHeader("Last-Modified", projectFile.getUpdated().getTime());
+        } else if (projectFile.getCreated() != null) {
+            response.setDateHeader("Last-Modified", projectFile.getCreated().getTime());
+        }
+        writeToResponse(response, projectFile.getFileContent());
     }
 
     /**
@@ -286,6 +357,7 @@ public class FileDownloadController {
     private void setContentType(HttpServletResponse response, MediaType contentType) {
         if (contentType != null) {
             response.setContentType(contentType.toString());
+            response.setCharacterEncoding("utf-8");
         }
     }
 
@@ -305,6 +377,7 @@ public class FileDownloadController {
 
     /**
      * Writes specified content to http response.
+     *
      * @param response http response
      * @param data content to be written to response
      */
@@ -338,6 +411,7 @@ public class FileDownloadController {
 
         /**
          * Initializes this object with user files and modules.
+         *
          * @param userFiles user files
          * @param mergeModules merge modules
          */

@@ -33,8 +33,10 @@ import javax.validation.Valid;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
@@ -45,6 +47,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import eionet.webq.converter.JsonXMLBidirectionalConverter;
 import eionet.webq.converter.UserFileToFileInfoConverter;
 import eionet.webq.dao.orm.ProjectFile;
 import eionet.webq.dao.orm.UserFile;
@@ -54,6 +57,7 @@ import eionet.webq.dto.XmlSaveResult;
 import eionet.webq.service.CDREnvelopeService;
 import eionet.webq.service.ConversionService;
 import eionet.webq.service.FileNotAvailableException;
+import eionet.webq.service.ProjectService;
 import eionet.webq.service.UserFileService;
 import eionet.webq.service.WebFormService;
 
@@ -66,16 +70,24 @@ import eionet.webq.service.WebFormService;
 @RequestMapping
 public class PublicPageController {
     /**
+     * Logger for this class.
+     */
+    public static final Logger LOGGER = Logger.getLogger(PublicPageController.class);
+    /**
      * Service for user uploaded files.
      */
     @Autowired
-    UserFileService userFileService;
+    private UserFileService userFileService;
+    /**
+     * Service for webform projects.
+     */
+    @Autowired
+    private ProjectService projectService;
     /**
      * File conversion service.
      */
     @Autowired
     private ConversionService conversionService;
-
     /**
      * WebForms storage.
      */
@@ -87,12 +99,16 @@ public class PublicPageController {
      */
     @Autowired
     private CDREnvelopeService envelopeService;
-
     /**
      * Converts user xml metadata to file info object.
      */
     @Autowired
     private UserFileToFileInfoConverter fileInfoConverter;
+    /**
+     * Json to XML converter.
+     */
+    @Autowired
+    private JsonXMLBidirectionalConverter jsonToXMLConverter;
 
     /**
      * Action to be performed on http GET method and path '/'.
@@ -197,10 +213,11 @@ public class PublicPageController {
                         webFormService.findWebFormsForSchemas(Arrays.asList(file.getXmlSchema()));
                 if (availableWebForms.size() == 1) {
                     int fileId = file.getId();
-                    int formId = availableWebForms.iterator().next().getId();
+                    ProjectFile webform = availableWebForms.iterator().next();
+                    String webformPath = getWebformPath(webform);
                     String contextPath = request.getContextPath();
                     String downloadUrl = contextPath + "/download/user_file?fileId=" + fileId;
-                    return "redirect:/xform/?formId=" + formId + "&fileId=" + fileId + "&instance=" + downloadUrl
+                    return "redirect:" + webformPath + "fileId=" + fileId + "&instance=" + downloadUrl
                             + "&base_uri=" + contextPath;
                 }
                 model.addAttribute("message", "File '" + file.getName() + "' uploaded successfully");
@@ -236,27 +253,29 @@ public class PublicPageController {
     @ResponseBody
     @Transactional
     public XmlSaveResult saveXml(@RequestParam int fileId, HttpServletRequest request) {
-        UserFile file = userFileService.getById(fileId);
-        XmlSaveResult saveResult = XmlSaveResult.valueOfSuccess();
-        InputStream input = null;
         try {
-            input = request.getInputStream();
-            byte[] fileContent = IOUtils.toByteArray(input);
-            file.setContent(fileContent);
-            if (file.isFromCdr()) {
-                String restricted = request.getParameter("restricted");
-                file.setApplyRestriction(StringUtils.isNotEmpty(restricted));
-                file.setRestricted(Boolean.valueOf(restricted));
-                file.setConversionId(request.getParameter("xsl"));
-                return envelopeService.pushXmlFile(file);
-            }
-            userFileService.updateContent(file);
+            byte[] fileContent = getContentFromRequest(request);
+            return updateFileContent(fileId, request, fileContent);
         } catch (Exception e) {
-            saveResult = XmlSaveResult.valueOfError(e.toString());
-        } finally {
-            IOUtils.closeQuietly(input);
+            return XmlSaveResult.valueOfError(e.toString());
         }
-        return saveResult;
+    }
+
+    /**
+     * Update file content converting json back to XML.
+     *
+     * @param fileId file id to update
+     * @param request current request
+     * @param model holder for model attributes
+     * @return redirect string
+     */
+    @RequestMapping(value = "/saveXml", consumes = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.POST)
+    @Transactional
+    public String saveJsonAsXml(@RequestParam int fileId, HttpServletRequest request, Model model) {
+        byte[] xml = jsonToXMLConverter.convertJsonToXml(getContentFromRequest(request));
+        XmlSaveResult xmlSaveResult = updateFileContent(fileId, request, xml);
+        LOGGER.info("Converting json to XML ended up with result=" + xmlSaveResult);
+        return welcome(model);
     }
 
     /**
@@ -279,8 +298,10 @@ public class PublicPageController {
         } else {
             baseUri += request.getContextPath();
         }
+        ProjectFile webform = webFormService.findWebFormById(formId);
+        String webformPath = getWebformPath(webform);
 
-        return "redirect:" + absolutePath + "/xform/?formId=" + formId + "&fileId=" + fileId + baseUri;
+        return "redirect:" + absolutePath + webformPath + "fileId=" + fileId + baseUri;
     }
 
     /**
@@ -298,7 +319,7 @@ public class PublicPageController {
         ProjectFile webForm = webFormService.findWebFormById(formId);
         byte[] fileContent = webForm.getFileContent();
         response.setContentLength(fileContent.length);
-        response.setContentType("application/xhtml+html");
+        response.setContentType("application/xhtml+xml;charset=utf-8");
         OutputStream outputStream = response.getOutputStream();
         IOUtils.write(fileContent, outputStream);
         outputStream.flush();
@@ -325,6 +346,46 @@ public class PublicPageController {
             fileInfo = fileInfoConverter.convert(userFile);
         }
         return fileInfo;
+    }
+
+    /**
+     * Updates file content in storage.
+     *
+     * @param fileId file id to update
+     * @param request current request
+     * @param fileContent new file content
+     * @return save result
+     */
+    private XmlSaveResult updateFileContent(int fileId, HttpServletRequest request, byte[] fileContent) {
+        UserFile file = userFileService.getById(fileId);
+        file.setContent(fileContent);
+        if (file.isFromCdr()) {
+            String restricted = request.getParameter("restricted");
+            file.setApplyRestriction(StringUtils.isNotEmpty(restricted));
+            file.setRestricted(Boolean.valueOf(restricted));
+            file.setConversionId(request.getParameter("xsl"));
+            return envelopeService.pushXmlFile(file);
+        }
+        userFileService.updateContent(file);
+        return XmlSaveResult.valueOfSuccess();
+    }
+
+    /**
+     * Gets content from request.
+     *
+     * @param request request to get content from
+     * @return content as byte array
+     */
+    private byte[] getContentFromRequest(HttpServletRequest request) {
+        InputStream input = null;
+        try {
+            input = request.getInputStream();
+            return IOUtils.toByteArray(input);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        } finally {
+            IOUtils.closeQuietly(input);
+        }
     }
 
     /**
@@ -357,6 +418,35 @@ public class PublicPageController {
      * @return collection of active webforms.
      */
     private Collection<ProjectFile> allWebForms() {
-        return webFormService.getAllActiveWebForms();
+
+        Collection<ProjectFile> allWebforms = webFormService.getAllActiveWebForms();
+        if (allWebforms != null) {
+            for (ProjectFile webform : allWebforms) {
+                webform.setWebformLink(getWebformPath(webform));
+            }
+        }
+        return allWebforms;
+    }
+
+    /**
+     * Creates webform file URL depending on webform type. If it is a xform, then the request is forwarded to betterForm URL,
+     * otherwise plain HTML is used.
+     *
+     * @param webform Project file
+     * @return path to webform
+     */
+    private String getWebformPath(ProjectFile webform) {
+        String webformPath = null;
+        if (webform.getFileName().endsWith(".html") || webform.getFileName().endsWith(".htm")) {
+            if (StringUtils.isEmpty(webform.getProjectIdentifier())) {
+                webform.setProjectIdentifier(projectService.getById(webform.getProjectId()).getProjectId());
+            }
+            webformPath =
+                    "/webform/project/" + webform.getProjectIdentifier() + "/file/"
+                            + webform.getFileName() + "?";
+        } else {
+            webformPath = "/xform/?formId=" + webform.getId() + "&";
+        }
+        return webformPath;
     }
 }

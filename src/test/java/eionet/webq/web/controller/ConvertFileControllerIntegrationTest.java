@@ -20,10 +20,19 @@
  */
 package eionet.webq.web.controller;
 
-import eionet.webq.dao.orm.UserFile;
-import eionet.webq.dto.Conversion;
-import eionet.webq.dto.ListConversionResponse;
-import eionet.webq.web.AbstractContextControllerTests;
+import static org.hamcrest.core.IsEqual.equalTo;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.when;
+import static org.springframework.http.MediaType.APPLICATION_XML;
+import static org.springframework.http.MediaType.APPLICATION_XML_VALUE;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+
+import java.util.Arrays;
+import java.util.List;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -37,20 +46,12 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestOperations;
+
 import util.CacheCleaner;
-
-import java.util.Arrays;
-import java.util.List;
-
-import static org.hamcrest.core.IsEqual.equalTo;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.when;
-import static org.springframework.http.MediaType.APPLICATION_XML;
-import static org.springframework.http.MediaType.APPLICATION_XML_VALUE;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import eionet.webq.dao.orm.UserFile;
+import eionet.webq.dto.Conversion;
+import eionet.webq.dto.ListConversionResponse;
+import eionet.webq.web.AbstractContextControllerTests;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @Transactional
@@ -89,7 +90,7 @@ public class ConvertFileControllerIntegrationTest extends AbstractContextControl
 
         request(get("/download/convert?fileId={fileId}&conversionId={convId}", userFile.getId(), 1).session(mockHttpSession))
                 .andExpect(MockMvcResultMatchers.content().bytes(conversionResponse))
-                .andExpect(MockMvcResultMatchers.header().string("Content-Type", APPLICATION_XML_VALUE))
+                .andExpect(MockMvcResultMatchers.header().string("Content-Type", APPLICATION_XML_VALUE + ";charset=utf-8"))
                 .andExpect(MockMvcResultMatchers.header().string(contentDispositionHeaderName, contentDispositionValue));
     }
 
@@ -98,7 +99,7 @@ public class ConvertFileControllerIntegrationTest extends AbstractContextControl
         ListConversionResponse listOfConversions = new ListConversionResponse();
         listOfConversions.setConversions(Arrays.asList(new Conversion()));
         returnListOfConversionsFromRestApi(listOfConversions);
-        
+
         uploadFile(createMockMultipartFile("file.xml", FILE_CONTENT));
 
         MvcResult mvcResult = request(get("/").session(mockHttpSession)).andReturn();

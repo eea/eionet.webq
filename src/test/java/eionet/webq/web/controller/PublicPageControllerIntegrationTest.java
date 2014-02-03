@@ -20,35 +20,6 @@
  */
 package eionet.webq.web.controller;
 
-import eionet.webq.dao.orm.ProjectEntry;
-import eionet.webq.dao.orm.ProjectFile;
-import eionet.webq.dao.orm.ProjectFileType;
-import eionet.webq.dao.orm.UserFile;
-import eionet.webq.dto.Conversion;
-import eionet.webq.dto.ListConversionResponse;
-import eionet.webq.service.ProjectFileService;
-import eionet.webq.service.UserFileService;
-import eionet.webq.web.AbstractContextControllerTests;
-import org.hamcrest.BaseMatcher;
-import org.hamcrest.Description;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
-import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.RestOperations;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
@@ -59,10 +30,43 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.fileUpload;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+
+import org.hamcrest.BaseMatcher;
+import org.hamcrest.Description;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockHttpSession;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestOperations;
+
+import eionet.webq.dao.orm.ProjectEntry;
+import eionet.webq.dao.orm.ProjectFile;
+import eionet.webq.dao.orm.ProjectFileType;
+import eionet.webq.dao.orm.UploadedFile;
+import eionet.webq.dao.orm.UserFile;
+import eionet.webq.dto.Conversion;
+import eionet.webq.dto.ListConversionResponse;
+import eionet.webq.service.ProjectFileService;
+import eionet.webq.service.UserFileService;
+import eionet.webq.web.AbstractContextControllerTests;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @Transactional
@@ -70,7 +74,7 @@ public class PublicPageControllerIntegrationTest extends AbstractContextControll
     private final String XML_SCHEMA = "xml-schema";
     private final String FILE_CONTENT_STRING = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
             + "<foo xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\""
-            + " xsi:noNamespaceSchemaLocation=\""+ XML_SCHEMA + "\" />";
+            + " xsi:noNamespaceSchemaLocation=\"" + XML_SCHEMA + "\" />";
     private final byte[] FILE_CONTENT = FILE_CONTENT_STRING.getBytes();
 
     @Autowired
@@ -79,6 +83,8 @@ public class PublicPageControllerIntegrationTest extends AbstractContextControll
     ProjectFileService projectFileService;
     @Autowired
     UserFileService userFileService;
+    @Autowired
+    MockHttpSession session;
 
     @Before
     public void mockConversionServiceApiCall() {
@@ -110,8 +116,10 @@ public class PublicPageControllerIntegrationTest extends AbstractContextControll
     @Test
     public void whenUploadingFile_ifThereIsOnlyOneFormAvailableForThisFile_redirectToThisForm() throws Exception {
         saveActiveWebForm();
-        MvcResult result = mvc().perform(fileUpload("/uploadXmlWithRedirect").file(createMockMultipartFile("file.name")).session(mockHttpSession))
-                .andExpect(status().isFound()).andReturn();
+        MvcResult result =
+                mvc().perform(
+                        fileUpload("/uploadXmlWithRedirect").file(createMockMultipartFile("file.name")).session(mockHttpSession))
+                        .andExpect(status().isFound()).andReturn();
         String viewName = result.getModelAndView().getViewName();
         assertTrue(viewName.matches("redirect:/xform/\\?formId=\\d+&fileId=\\d+&instance=.*&base_uri=.*"));
     }
@@ -147,8 +155,7 @@ public class PublicPageControllerIntegrationTest extends AbstractContextControll
     public void allowFileContentUpdateInStorage() throws Exception {
         UserFile userFile = uploadFileAndTakeFirstUploadedFile();
         String newContent = FILE_CONTENT_STRING.replace("/>", "><foobar></foobar></bar>");
-        request(
-                postWithMockSession("/saveXml").param("fileId", Integer.toString(userFile.getId()))
+        request(postWithMockSession("/saveXml").param("fileId", Integer.toString(userFile.getId()))
                         .content(newContent.getBytes()));
 
         downloadFile(userFile.getId()).andExpect(content().string(newContent));
@@ -182,7 +189,8 @@ public class PublicPageControllerIntegrationTest extends AbstractContextControll
         requestIndexPage().andExpect(model().attribute("allWebForms", new BaseMatcher<Collection<ProjectFile>>() {
             @Override
             public boolean matches(Object o) {
-                @SuppressWarnings("unchecked") Collection<ProjectFile> files = (Collection<ProjectFile>) o;
+                @SuppressWarnings("unchecked")
+                Collection<ProjectFile> files = (Collection<ProjectFile>) o;
                 ProjectFile file = files.iterator().next();
                 return files.size() == 1 && file.getId() > 0 && file.getTitle().equals(testFile.getTitle());
             }
@@ -203,6 +211,7 @@ public class PublicPageControllerIntegrationTest extends AbstractContextControll
         testFile.setTitle("test-title");
         testFile.setFileType(ProjectFileType.WEBFORM);
         testFile.setUserName("test-user");
+        testFile.setFileName("webform.xhtml");
 
         projectFileService.saveOrUpdate(testFile, project);
         return testFile;
@@ -216,6 +225,18 @@ public class PublicPageControllerIntegrationTest extends AbstractContextControll
     @Test
     public void logoutReturnsLogoutAllAppsView() throws Exception {
         request(get("/logout")).andExpect(view().name("logout_all_apps"));
+    }
+
+    @Test
+    public void whenUpdatingFileContentWithJson_callSpecificHandler() throws Exception {
+        UserFile file = new UserFile(new UploadedFile("file.xml", "xml-content".getBytes()), "http://schema.url");
+        userFileService.save(file);
+        request(post("/saveXml")
+                .session(session)
+                .param("fileId", String.valueOf(file.getId()))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"foo\": 1, \"bar\": {\"baz\": 2}}"))
+                .andExpect(MockMvcResultMatchers.handler().methodName("saveJsonAsXml"));
     }
 
     private ResultActions requestIndexPage() throws Exception {

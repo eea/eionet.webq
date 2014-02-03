@@ -1,5 +1,5 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<script type="text/javascript" src="<c:url value="/js/jquery-1.10.2.min.js"/>"></script>
+<jsp:include page="popup_setup.jsp"/>
 
 <script type="text/javascript">
     function getSelectedFileValue() {
@@ -64,6 +64,13 @@
 
     $(init);
 
+    function showJson(downloadLink) {
+        viewFileSource(downloadLink, {headers: {Accept: "application/json"}});
+    }
+
+    function showJsonToXml(downloadLink) {
+        viewFileSource(downloadLink, {headers: {Accept: "application/xml"}});
+    }
 </script>
 <style type="text/css">
     .container {

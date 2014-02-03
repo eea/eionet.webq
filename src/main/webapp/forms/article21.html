@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html ng-app="article21" ng-controller="questionnaire">
+<head>
+    <title>Article 21</title>
+    <meta name="Publisher" content="EEA, The European Environment Agency" />
+    <link type="text/css" rel="stylesheet" media="screen" href="http://www.eionet.europa.eu/styles/eionet2007/screen.css" title="Eionet 2007 style" />
+    <!-- EIONET 2007 styles -->
+    <link rel="stylesheet" type="text/css" href="http://www.eionet.europa.eu/styles/eionet2007/print.css" media="print" />
+    <link rel="stylesheet" type="text/css" href="http://www.eionet.europa.eu/styles/eionet2007/handheld.css" media="handheld" />
+    <link href="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-combined.min.css" rel="stylesheet">
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.4/angular.js"></script>
+    <script src="http://angular-ui.github.io/bootstrap/ui-bootstrap-tpls-0.7.0.js"></script>
+
+	<style type="text/css">
+		.css-form input.ng-invalid.ng-dirty {
+			background-color: #FA787E;
+		}
+		.css-form input.ng-valid.ng-dirty {
+			background-color: #78FA89;
+		}
+		.validation-msg{
+			color:red;
+		}
+		#workarea ul {
+			list-style-image: none;
+			list-style-type: none;
+		}
+</style>
+    <script type="text/javascript">
+        var app = angular.module("article21", ['ui.bootstrap']);
+        app.controller("questionnaire", function ($scope) {
+            $scope.article = {"responsibleAuthorities" : {
+                "implementers" : [{}],
+                "tasks" : [
+                    {"label": "Issuance of permits",  "aviationDisabled": true},
+                    {"label": "Free allocation to stationary installations pursuant to Article 10a of Directive 2003/87/EC",
+                          "aviationDisabled": true},
+                    {"label": "Free allocation pursuant to Article 3e and 3f of Directive 2003/87/EC",
+                         "installationDisabled": true},
+                    {"label": "Activities related to auctioning (the auctioneer mentioned in Commission Regulation (EU) No 1031/2010)" },
+                    {"label": "Financial measures with respect to indirect carbon leakage"},
+                    {"label": "Issuance of allowances"},
+                    {"label": "Approval of the monitoring plan and significant changes to the monitoring plan" },
+                    {"label": "Receiving and assessing verified emissions reports and verification reports" },
+                    {"label": "Making a conservative estimation of emissions according to Article 70 of Commission Regulation (EU) No 601/2012" },
+                    {"label": "Approval of improvement reports according to Article 69 of Commission Regulation (EU) No 601/2012" },
+                    {"label": "Approval of the operator’s application to waive a verifier’s site visit pursuant to Article 31(1) of Commission Regulation (EU) No 600/2012",
+                          "aviationDisabled": true},
+                    {"label": "Inspection and enforcement"},
+                    {"label": "Information to the public"},
+                    {"label": "Administration of unilateral inclusion of activities and gases under Article 24 of Directive 2003/87/EC [*]",
+                          "aviationDisabled": true},
+                    {"label": "Administration of installations excluded under Article 27 of Directive 2003/87/EC [**]",
+                          "aviationDisabled": true}
+                ],
+                "activityMeasures": [
+                    {"label" : "Does national legislation require a central competent authority to review and " +
+                            "provide binding instructions on monitoring plans, notifications of changes to the " +
+                            "monitoring plan or emissions reports? "},
+                    {"label" : "Does a central competent authority steer local and/or regional competent " +
+                            "authorities by giving binding instructions and guidance? "},
+                    {"label" : "Does a central competent authority review and provide advice on monitoring plans," +
+                            " notifications and emissions reports on a voluntary basis? "},
+                    {"label" : "Are regular working groups or meetings organised with the competent authorities?"},
+                    {"label" : "Is common training organised for all competent authorities to " +
+                            "ensure consistent implementation of requirements? "},
+                    {"label" : "Are IT systems or tools used to ensure common approaches to monitoring " +
+                            "and reporting issues?"},
+                    {"label" : "Is a coordination group established, with competent authority staff, which discusses " +
+                            "monitoring and reporting issues and develops common approaches? "}
+                ],
+                "informationExchange": [
+                    {"label" : "Are regular meetings organised between the national " +
+                            "accreditation body/ national certification authority (if relevant) " +
+                            "and the competent authority responsible for the coordination? "},
+                    {"label" : "Has a working group been established where the " +
+                            "national accreditation body/ national certification authority (if relevant), " +
+                            "the competent authority and verifiers discuss accreditation and verification issues?"},
+                    {"label" : "Can the competent authority accompany the national " +
+                            "accreditation body in accreditation activities as an observer?"}
+
+                ]
+            }};
+			$scope.yesno = ['yes', 'no']
+            $scope.addItem = function(path) {
+                var tokens = path.split(".");
+                var result = $scope.article;
+                while(tokens.length) {
+                    result = result[tokens.shift()];
+                }
+                result.push({"customItem": true });
+            };
+			$scope.remove = function(array, index){
+				array.splice(index, 1);
+			}
+        });
+    </script>
+</head>
+<body class="fullscreen">
+        <div id="container">
+            <div id="toolribbon">
+                <div id="lefttools">
+                    <a id="eealink" href="http://www.eea.europa.eu/">EEA</a>
+                    <a id="ewlink" href="http://www.ewindows.eu.org/">EnviroWindows</a>
+                </div>
+                <div id="righttools">
+                    <a id="printlink" title="Print this page" href="javascript:this.print();"><span>Print</span></a>
+                </div>
+            </div> <!-- toolribbon -->
+
+            <div id="pagehead">
+                <a href="/" accesskey="1"><img src="/images/eea-print-logo.gif" alt="Logo" id="logo" /></a>
+                <div id="networktitle">Eionet</div>
+                <div id="sitetitle">European Environment Information and Observation Network</div>
+                <div id="sitetagline">Web questionnaires</div>
+            </div>  <!-- page head -->
+
+            <div id="menuribbon"></div>
+
+            <div class="breadcrumbtrail">
+                <div class="breadcrumbhead">You are here:</div>
+                <div class="breadcrumbitem eionetaccronym"><a href="http://www.eionet.europa.eu/">Eionet</a></div>
+                <div class="breadcrumbitem">CDR</div>
+                <div class="breadcrumbitemlast">WebForm</div>
+                <div class="breadcrumbtail"></div>
+            </div>
+            <div id="workarea">
+			
+			<div class="row span10">
+    <tabset>
+        <tab heading="Question 1">
+            <h1>1. Details of institution submitting the report</h1>
+			<form name="form" novalidate class="css-form">
+            <div class="row">
+                <div class="span4">
+                    <label for="organization">Name and department of organisation: </label>
+                </div>
+                <div class="span6">
+                    <input id="organization" type="text" name="uOrg" ng-model="article.institution.organization" required/>
+                </div>
+            </div>
+            <div class="row">
+				<div class="offset4 span6 validation-msg" ng-show="form.$dirty && form.uOrg.$invalid">Invalid:
+					<span ng-show="form.uOrg.$error.required">This is required field.</span>
+				</div>
+			</div>
+            <div class="row">
+                <div class="span4">
+                    <label for="contact-person">Name of contact person: </label>
+                </div>
+                <div class="span6">
+                    <input id="contact-person" type="text" ng-model="article.institution.contact.person" required/>
+                </div>
+            </div>
+            <div class="row">
+                <div class="span4">
+                    <label for="job-title">Job title of contact person: </label>
+                </div>
+                <div class="span6">
+                    <input id="job-title" type="text" ng-model="article.institution.contact.jobTitle"/>
+                </div>
+            </div>
+            <div class="row">
+                <div class="span4">
+                    <label for="contact-person-address">Address: </label>
+                </div>
+                <div class="span6">
+                    <input id="contact-person-address" type="text" ng-model="article.institution.contact.address"/>
+                </div>
+            </div>
+            <div class="row">
+                <div class="span4">
+                    <label for="int-phone-number">International telephone number: </label>
+                </div>
+                <div class="span6">
+                    <input id="int-phone-number" type="text" ng-model="article.institution.contact.phone"/>
+                </div>
+            </div>
+            <div class="row">
+                <div class="span4">
+                    <label for="e-mail">E-mail: </label>
+                </div>
+                <div class="span6">
+                    <input id="e-mail" type="email" ng-model="article.institution.contact.email" name="uEmail" required />
+                </div>
+			</div>
+            <div class="row">
+				<div class="offset4 span6 validation-msg" ng-show="form.uEmail.$dirty && form.uEmail.$invalid">Invalid:
+					<span ng-show="form.uEmail.$error.required">Tell us your email.</span>
+					<span ng-show="form.uEmail.$error.email">This is not a valid email.</span>
+				</div>
+			</div>
+		</form>
+        </tab>
+        <tab heading="Question 2">
+            <h1>2. Responsible authorities in the emissions trading scheme (EU ETS) and coordination between authorities</h1>
+            <h6>Questions in this section 2 are to be answered in the report due by 30 June 2014
+                and in subsequent reports if changes have occurred during the reporting period.</h6>
+            <h4>2.1 In the table below, please state the name, abbreviation and contact details of
+                the competent authorities involved in the implementation of EU ETS for installations
+                and aviation in your Member State. Add further rows if necessary.
+            </h4>
+            <div class="row">
+                <div class="span2">Name</div>
+                <div class="span1">Abbreviation</div>
+                <div class="span2">Telephone number</div>
+                <div class="span2">Email address</div>
+                <div class="span2">Website</div>
+				<div class="span1"></div>
+            </div>
+            <div class="row" ng-repeat="p in article.responsibleAuthorities.implementers">
+                <div class="span2"><input class="input-medium" type="text" ng-model="p.name"/></div>
+                <div class="span1"><input class="input-mini" type="text" ng-model="p.abbreviation"/></div>
+                <div class="span2"><input class="input-medium" type="text" ng-model="p.phone"/></div>
+                <div class="span2"><input class="input-medium" type="text" ng-model="p.email"/></div>
+                <div class="span2"><input class="input-medium" type="text" ng-model="p.website"/></div>
+				<div class="span1"><button type="button" class="btn btn-mini" ng-click="remove(article.responsibleAuthorities.implementers, $index)">Remove</button></div>
+            </div>
+            <div class="row">
+                <div class="span2"><input type="button" ng-click="addItem('responsibleAuthorities.implementers')" value="Add row" class="btn btn-small btn-primary"/></div>
+            </div>
+
+            <h4>In the table below, please state name, abbreviation and contact details
+                of the national accreditation body appointed pursuant to Article 4(1) of
+                Regulation (EC) No 765/2008. </h4>
+            <div class="row">
+                <div class="span2">Name</div>
+                <div class="span2">Abbreviation</div>
+                <div class="span2">Telephone number</div>
+                <div class="span2">Email address</div>
+                <div class="span2">Website</div>
+            </div>
+            <div class="row">
+                <div class="span2"><input class="input-medium" type="text" ng-model="article.responsibleAuthorities.nationalAccreditationBody.name"/></div>
+                <div class="span2"><input class="input-medium" type="text" ng-model="article.responsibleAuthorities.nationalAccreditationBody.abbreviation"/></div>
+                <div class="span2"><input class="input-medium" type="text" ng-model="article.responsibleAuthorities.nationalAccreditationBody.phone"/></div>
+                <div class="span2"><input class="input-medium" type="text" ng-model="article.responsibleAuthorities.nationalAccreditationBody.email"/></div>
+                <div class="span2"><input class="input-medium" type="text" ng-model="article.responsibleAuthorities.nationalAccreditationBody.website"/></div>
+            </div>
+
+            <h4>
+                Have you set up a national certification authority to certify verifiers
+                pursuant to Article 54(2) of Commission Regulation (EU) No 600/2012? Yes/No
+            </h4>
+			<div class="row">
+				<div class="span11"><select ng-model="article.responsibleAuthorities.nationalCertificationAuthority.yesno" ng-options="yn for yn in yesno"></select></div>
+			</div>
+            <h4 ng-show="article.responsibleAuthorities.nationalCertificationAuthority.yesno == 'yes'">
+                If yes, please state the name, abbreviation and contact details of the
+                national certification authority using the table below.
+            </h4>
+            <div class="row" ng-show="article.responsibleAuthorities.nationalCertificationAuthority.yesno == 'yes'">
+                <div class="span2">Name</div>
+                <div class="span2">Abbreviation</div>
+                <div class="span2">Telephone number</div>
+                <div class="span2">Email address</div>
+                <div class="span2">Website</div>
+            </div>
+            <div class="row" ng-show="article.responsibleAuthorities.nationalCertificationAuthority.yesno == 'yes'">
+                <div class="span2"><input class="input-medium" type="text" ng-model="article.responsibleAuthorities.nationalCertificationAuthority.name"/></div>
+                <div class="span2"><input class="input-medium" type="text" ng-model="article.responsibleAuthorities.nationalCertificationAuthority.abbreviation"/></div>
+                <div class="span2"><input class="input-medium" type="text" ng-model="article.responsibleAuthorities.nationalCertificationAuthority.phone"/></div>
+                <div class="span2"><input class="input-medium" type="text" ng-model="article.responsibleAuthorities.nationalCertificationAuthority.email"/></div>
+                <div class="span2"><input class="input-medium" type="text" ng-model="article.responsibleAuthorities.nationalCertificationAuthority.website"/></div>
+            </div>
+            <h4>
+                In the table below, please state the name, abbreviation and
+                contact details of the registry administrator in your Member State.
+            </h4>
+            <div class="row">
+                <div class="span2">Name</div>
+                <div class="span2">Abbreviation</div>
+                <div class="span2">Telephone number</div>
+                <div class="span2">Email address</div>
+                <div class="span2">Website</div>
+            </div>
+            <div class="row">
+                <div class="span2"><input class="input-medium" type="text" ng-model="article.responsibleAuthorities.registryAdministrator.name"/></div>
+                <div class="span2"><input class="input-medium" type="text" ng-model="article.responsibleAuthorities.registryAdministrator.abbreviation"/></div>
+                <div class="span2"><input class="input-medium" type="text" ng-model="article.responsibleAuthorities.registryAdministrator.phone"/></div>
+                <div class="span2"><input class="input-medium" type="text" ng-model="article.responsibleAuthorities.registryAdministrator.email"/></div>
+                <div class="span2"><input class="input-medium" type="text" ng-model="article.responsibleAuthorities.registryAdministrator.website"/></div>
+            </div>
+
+            <h4>In the table below, please indicate which competent authority
+                is responsible for the following tasks, using their abbreviation.
+                Add further rows if necessary.
+            </h4>
+            <div class="row">
+                <div class="span3">Competent authority in charge of:</div>
+                <div class="span3">Installations</div>
+                <div class="span3">Aviation</div>
+            </div>
+            <div class="row" ng-repeat="task in article.responsibleAuthorities.tasks">
+                <div class="span3"><input type="text" ng-if="task.customItem" ng-model="task.label"/><p ng-if="!task.customItem">{{task.label}}</p></div>
+                <div class="span3"><input type="text" ng-disabled="task.installationDisabled" ng-model="task.installations"/></div>
+                <div class="span3"><input type="text" ng-disabled="task.aviationDisabled"  ng-model="task.aviation"/></div>
+            </div>
+            <div class="row">
+                <div class="span2"><input type="button" ng-click="addItem('responsibleAuthorities.tasks')" value="Add row" class="btn btn-small btn-primary"//></div>
+            </div>
+            <div class="row">
+                <div class="span10">
+                <p>
+                    <small>[*] This box needs only to be completed if the Member State has
+                        included activities or gases under Article 24 of Directive 2003/87/ EC.</small>
+                </p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="span10">
+                    <p>
+                        <small>[**] This box needs only to be completed if the Member State has
+                            excluded activities or gases under Article 27 of Directive 2003/87/ EC.
+                        </small>
+                    </p>
+                </div>
+            </div>
+
+            <h4>
+                2.3 If more than one competent authority is designated in your Member State pursuant to Article 18
+                of Directive 2003/87/EC, which competent authority is your focal point referred to in Article 69(2)
+                of Commission Regulation 600/2012? Please answer using the abbreviation concerned in the table below.
+            </h4>
+            
+            <div class="row">
+                <div class="span5">Name of the competent authority that is the focal point 
+                    referred to in Article 69(2) of Commission Regulation (EU) No 600/2012
+                </div>
+                <div class="span5">Abbreviation</div>
+            </div>
+            <div class="row">
+                <div class="span5"><input type="text" ng-model="article.responsibleAuthorities.focalPointAuthority.name"/></div>
+                <div class="span5"><input type="text" ng-model="article.responsibleAuthorities.focalPointAuthority.abbreviation"/></div>
+            </div>
+
+            <h4>
+                If more than one competent authority is designated in your Member State to carry out the activities
+                in Commission Regulation (EU) No 601/2012, what measures have been taken to coordinate the work of
+                those competent authorities in accordance with Article 10 of Commission Regulation (EU) No 601/2012?
+                Please answer using the table below. Add further rows if necessary.
+            </h4>
+            <div class="row">
+                <div class="span5">Coordination of activities with respect to Article 10 
+                    of Commission Regulation (EU) No 601/2012</div>
+                <div class="span1">Yes/No</div>
+                <div class="span4">Comments(Optional)</div>
+            </div>
+            <div class="row" ng-repeat="measure in article.responsibleAuthorities.activityMeasures">
+                <div class="span5"><input type="text" ng-if="measure.customItem" ng-model="measure.label"/><p ng-if="!measure.customItem">{{measure.label}}</p></div>
+                <div class="span1"><input type="checkbox" ng-true-value="true" ng-false-value="false" ng-model="measure.taken"/></div>
+                <div class="span4"><input type="text" ng-model="measure.comment"/></div>
+            </div>
+            <div class="row">
+                <div class="span2"><input type="button" ng-click="addItem('responsibleAuthorities.activityMeasures')" value="Add row" class="btn btn-small btn-primary"//></div>
+            </div>
+
+            <h4>2.4 What effective exchange of information and cooperation has been established in accordance
+                with Article 69(1) of Commission Regulation (EU) No 600/2012 between the national accreditation body or,
+                if relevant, the national certification authority and the competent authority within your Member State?
+                Please answer using the table below. Add further rows if necessary.
+            </h4>
+
+            <div class="row">
+                <div class="span5">Coordination of activities with respect
+                    to Article 69(1) of Commission Regulation (EU) No 600/2012</div>
+                <div class="span1">Yes/No</div>
+                <div class="span4">Comments(Optional)</div>
+            </div>
+            <div class="row" ng-repeat="exchange in article.responsibleAuthorities.informationExchange">
+                <div class="span5"><input type="text" ng-if="exchange.customItem" ng-model="exchange.label"/>
+                    <p ng-if="!exchange.customItem">{{exchange.label}}</p>
+                </div>
+                <div class="span1"><input type="checkbox" ng-true-value="true" ng-false-value="false" ng-model="exchange.established"/></div>
+                <div class="span4"><input type="text" ng-model="exchange.comment"/></div>
+            </div>
+            <div class="row">
+                <div class="span2"><input type="button" ng-click="addItem('responsibleAuthorities.informationExchange')" value="Add row" class="btn btn-small btn-primary"//></div>
+            </div>
+        </tab>
+        <tab heading="Q 3">
+		</tab>
+        <tab heading="Q 4">
+		</tab>
+        <tab heading="Q 5">
+		</tab>
+    </tabset>
+</div>
+<div class="row span2">{{article | json}}</div>
+            </div>
+        </div> <!-- container -->
+        <div id="pagefoot">
+            <p><a href="http://www.eea.europa.eu/"><b>European Environment Agency</b></a>
+            <br/>Kgs. Nytorv 6, DK-1050 Copenhagen K, Denmark - Phone: +45 3336 7100</p>
+        </div>
+</body>
+</html>

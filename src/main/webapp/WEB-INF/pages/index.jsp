@@ -2,6 +2,7 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib prefix="s" uri="http://www.springframework.org/tags" %>
+<%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags"%>
 
 <c:set value="${sessionScope.isCoordinator}" var="isCoordinator"/>
 
@@ -129,18 +130,31 @@
                             </a>
                             </div>
                             <c:forEach var="webForm" items="${allWebForms}">
+
                                 <c:if test="${file.xmlSchema eq webForm.xmlSchema}">
-                                    <div class="action"><strong><a href="<c:url value="/xform/?formId=${webForm.id}&amp;instance=${downloadLink}&amp;fileId=${file.id}&amp;base_uri=${pageContext.request.contextPath}"/>">Edit
+                                    <div class="action"><strong><a href="<c:url value="${webForm.webformLink}&amp;instance=${downloadLink}&amp;fileId=${file.id}&amp;base_uri=${pageContext.request.contextPath}"/>">Edit
                                         with '${webForm.title}' web form</a></strong></div>
                                 </c:if>
                             </c:forEach>
-                            <c:if test="${not empty file.availableConversions}">
+                            <sec:authorize access="hasRole('DEVELOPER')" var="isDeveloper"/>
+                            <sec:authorize access="hasRole('ADMIN')" var="isAdmin"/>
+                            <c:set var="developerOrAdmin" value="${isAdmin or isDeveloper}"/>
+
+
+                            <c:if test="${not empty file.availableConversions or developerOrAdmin}">
                             <div class="action">
                                 View file as:
                                 <ul>
-                                <c:forEach items="${file.availableConversions}" var="conversion">
-                                    <li><a href="<c:url value="/download/convert?fileId=${file.id}&amp;conversionId=${conversion.id}"/>">${conversion.description}</a></li>
-                                </c:forEach>
+                                <c:if test="${not empty file.availableConversions}">
+                                    <c:forEach items="${file.availableConversions}" var="conversion">
+                                        <li><a href="<c:url value="/download/convert?fileId=${file.id}&amp;conversionId=${conversion.id}"/>">${conversion.description}</a></li>
+                                    </c:forEach>
+                                </c:if>
+                                <c:url value="/download/converted_user_file?fileId=${file.id}" var="conversionDownloadLink"/>
+                                <c:if test="${developerOrAdmin}">
+                                    <li><a href="#" onclick="showJson('${conversionDownloadLink}')">View as JSON</a></li>
+                                    <li><a href="#" onclick="showJsonToXml('${conversionDownloadLink}')">View as XML</a></li>
+                                </c:if>
                                 </ul>
                             </div>
                             </c:if>

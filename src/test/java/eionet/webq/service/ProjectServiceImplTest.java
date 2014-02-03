@@ -20,22 +20,22 @@
  */
 package eionet.webq.service;
 
-import eionet.webq.dao.ProjectFolders;
-import eionet.webq.dao.orm.ProjectEntry;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.Mockito;
-
-import java.util.Collections;
-
 import static org.mockito.Mockito.only;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Collections;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.Mockito;
+
+import eionet.webq.dao.ProjectFolders;
+import eionet.webq.dao.orm.ProjectEntry;
+
 public class ProjectServiceImplTest {
     private ProjectService service;
     private ProjectFolders folders;
-
 
     @Before
     public void createService() {
@@ -55,20 +55,30 @@ public class ProjectServiceImplTest {
 
     @Test
     public void allowToFetchAllProject() throws Exception {
-        when(folders.getAllFolders()).thenReturn(Collections.<ProjectEntry>emptyList());
+        when(folders.getAllFolders()).thenReturn(Collections.<ProjectEntry> emptyList());
         service.getAllFolders();
 
         verifyOnly().getAllFolders();
     }
 
     @Test
-    public void allowToGetById() throws Exception {
+    public void allowToGetByProjectId() throws Exception {
         String projectId = "projectId";
         when(folders.getByProjectId(projectId)).thenReturn(new ProjectEntry());
 
         service.getByProjectId(projectId);
 
         verifyOnly().getByProjectId(projectId);
+    }
+
+    @Test
+    public void allowToGetById() throws Exception {
+        int id = 1;
+        when(folders.getById(id)).thenReturn(new ProjectEntry());
+
+        service.getById(id);
+
+        verifyOnly().getById(id);
     }
 
     @Test
