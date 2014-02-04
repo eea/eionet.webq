@@ -29,7 +29,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.activation.MimetypesFileTypeMap;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -289,7 +288,8 @@ public class FileDownloadController {
         ConfigurableMimeFileTypeMap mimeTypesMap = new ConfigurableMimeFileTypeMap();
         String contentType = mimeTypesMap.getContentType(name);
 
-        if (MimetypesFileTypeMap.getDefaultFileTypeMap().equals(contentType)) {
+        //check if default
+        if (mimeTypesMap.getContentType("").equals(contentType)) {
             if (name.endsWith(".xhtml")) {
                 contentType = MediaType.APPLICATION_XHTML_XML_VALUE;
             } else if (name.endsWith(".js")) {
