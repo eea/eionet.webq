@@ -69,7 +69,7 @@ import eionet.webq.service.UserFileService;
  * Spring controller for WebQ file download.
  */
 @Controller
-@RequestMapping(value = {"download", "webform"})
+@RequestMapping(value = {"download", "webform" })
 public class FileDownloadController {
     /**
      * Service for getting user file content from storage.
@@ -107,6 +107,12 @@ public class FileDownloadController {
     @Autowired
     JsonXMLBidirectionalConverter jsonXMLConverter;
 
+    /**
+     * Convert and download the user XML file in JSON format if request header Accept content type is application/json.
+     *
+     * @param fileId user file id.
+     * @param response http response to write file
+     */
     @RequestMapping(value = "/converted_user_file", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.GET)
     @Transactional
     public void downloadUserFileJson(@RequestParam int fileId, HttpServletResponse response) {
@@ -116,6 +122,13 @@ public class FileDownloadController {
         writeToResponse(response, json);
     }
 
+    /**
+     * Convert the user XML file into JSON format and then back to XML format to be able to evaluate the conversion. The method is
+     * called when request header Accept content type is text/xml.
+     *
+     * @param fileId user file id.
+     * @param response http response to write file
+     */
     @RequestMapping(value = "/converted_user_file", produces = MediaType.APPLICATION_XML_VALUE, method = RequestMethod.GET)
     @Transactional
     public void downloadUserFileJsonToXml(@RequestParam int fileId, HttpServletResponse response) {
@@ -143,6 +156,7 @@ public class FileDownloadController {
      *
      * @param projectId project id for file download
      * @param fileName requested file name
+     * @param request http request
      * @param response http response to write file
      */
     @RequestMapping(value = "/project/{projectId}/file/{fileName:.*}")
@@ -278,7 +292,7 @@ public class FileDownloadController {
      * Writes project file to response.
      *
      * @param name file name
-     * @param projetFile project file object
+     * @param projectFile project file object
      * @param response http response
      * @param disposition inline or attachment
      */
@@ -288,7 +302,7 @@ public class FileDownloadController {
         ConfigurableMimeFileTypeMap mimeTypesMap = new ConfigurableMimeFileTypeMap();
         String contentType = mimeTypesMap.getContentType(name);
 
-        //check if default
+        // check if default
         if (mimeTypesMap.getContentType("").equals(contentType)) {
             if (name.endsWith(".xhtml")) {
                 contentType = MediaType.APPLICATION_XHTML_XML_VALUE;
