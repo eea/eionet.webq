@@ -86,11 +86,20 @@ This subform can be embedded in parent XForm like this:
         <div class="section bottom-buttons">
             <xf:group appearance="minimal">
                 <xf:trigger id="tr_savelocal">
-                    <xf:label>Save to disk</xf:label>
+                    <xf:label>Save to disk (opens new window!)</xf:label>
                     <xf:hint>Saves the current status of the data to local computer.</xf:hint>
                     <xf:action ev:event="DOMActivate">
                         <xf:send submission="savexml" name="xforms-submit"/>
                         <xf:load resource="{$base_uri}{ instance('fileinfo')/downloadLink }" show="new"/>
+                        <xf:send submission="reload-fileinfo" name="xforms-submit"/>
+                        <!--  TODO replace fileinfo instance -->
+                    </xf:action>
+                </xf:trigger>
+                <xf:trigger id="tr_savesession">
+                    <xf:label>Save session</xf:label>
+                    <xf:hint>Saves the current status of the data in session.</xf:hint>
+                    <xf:action ev:event="DOMActivate">
+                        <xf:send submission="savexml" name="xforms-submit"/>
                         <xf:send submission="reload-fileinfo" name="xforms-submit"/>
                         <!--  TODO replace fileinfo instance -->
                     </xf:action>
@@ -102,7 +111,7 @@ This subform can be embedded in parent XForm like this:
                 </xf:trigger>
                 <xf:trigger id="tr_close_localfile">
                     <xf:label>Close and go back to start page</xf:label>
-                    <xf:hint>Go back to WebQ front page.</xf:hint>
+                    <xf:hint>Go back to webforms front page.</xf:hint>
                     <xf:dispatch targetid="fileinfo-model" name="update-fileinfo-content-modified"/>
                     <bfc:show dialog="closeConfirmationDialog" ev:event="DOMActivate" if="instance('fileinfo-helper')/contentModified=1"/>
                     <xf:load resource="{$base_uri}/" show="replace" if="instance('fileinfo-helper')/contentModified=0"/>
@@ -123,8 +132,8 @@ This subform can be embedded in parent XForm like this:
                 </xf:action>
             </xf:trigger>
             <xf:trigger id="tr_finish">
-                <xf:label>Save &amp; Close</xf:label>
-                <xf:hint>Saves the changes into XML file and opens the front page of WebQ</xf:hint>
+                <xf:label>Save &amp; close</xf:label>
+                <xf:hint>Saves the changes into XML file and opens the front page of Webforms</xf:hint>
                 <xf:action ev:event="DOMActivate">
                     <xf:send submission="savexml" name="xforms-submit"/>
                     <xf:load ev:event="xforms-submit-done" resource="{$base_uri}/" show="replace" if="instance('saveresult')/code=1"/>
@@ -132,7 +141,7 @@ This subform can be embedded in parent XForm like this:
             </xf:trigger>
             <xf:trigger id="tr_close">
                 <xf:label>Close</xf:label>
-                <xf:hint>Go back to WebQ front page.</xf:hint>
+                <xf:hint>Go back to Webforms front page.</xf:hint>
                 <xf:dispatch targetid="fileinfo-model" name="update-fileinfo-content-modified"/>
                 <bfc:show dialog="closeConfirmationDialog" ev:event="DOMActivate" if="instance('fileinfo-helper')/contentModified=1"/>
                 <xf:load resource="{$base_uri}/" show="replace" if="instance('fileinfo-helper')/contentModified=0"/>
