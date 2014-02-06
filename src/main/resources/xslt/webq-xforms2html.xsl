@@ -281,7 +281,7 @@
             </xsl:if>
             <!-- WEBQ fixed label -->
             <xsl:if test="local-name() != 'trigger' and local-name() != 'submit'">
-                <label for="{$id}-value" id="{$id}-label" class="{$label-classes} test">
+                <label for="{$id}-value" id="{$id}-label" class="{$label-classes}">
                     <xsl:call-template name="create-label">
                         <xsl:with-param name="label-elements" select="xf:label"/>
                     </xsl:call-template>
