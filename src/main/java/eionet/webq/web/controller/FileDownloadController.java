@@ -399,6 +399,7 @@ public class FileDownloadController {
         ServletOutputStream output = null;
         try {
             response.setContentLength(data.length);
+            response.addHeader("Cache-control", "no-cache");
 
             output = response.getOutputStream();
             IOUtils.write(data, output);
