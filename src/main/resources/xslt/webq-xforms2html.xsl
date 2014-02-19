@@ -297,4 +297,29 @@
             </span>
         </xsl:element>
     </xsl:template>
+
+
+    <!-- from html-form-controls.xsl -->
+    <!-- Put hint into title attribute instead of placeholder. -->
+    <xsl:template name="InputDefault">
+        <xsl:param name="id"/>
+        <xsl:param name="name"/>
+        <xsl:param name="navindex"/>
+        <xsl:param name="classes"/>
+        <input id="{$id}-value"
+                name="{$name}"
+                type="text"
+                class="{$classes}"
+                tabindex="{$navindex}"
+                title="{xf:hint}"
+                value="{bf:data/text()}">
+            <xsl:if test="bf:data/@bf:readonly='true'">
+                <xsl:attribute name="disabled">disabled</xsl:attribute>
+            </xsl:if>
+            <xsl:for-each select="@*[not(local-name(.) = 'ref' or local-name(.) = 'style' or local-name(.) = 'id' or local-name(.) = 'class' or local-name(.) = 'title')]">
+                <xsl:copy/>
+            </xsl:for-each>
+        </input>
+    </xsl:template>
+
 </xsl:stylesheet>
