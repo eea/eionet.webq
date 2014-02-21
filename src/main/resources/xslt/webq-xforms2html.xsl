@@ -213,6 +213,14 @@
                         <xsl:value-of select="$cdrName"/>
                     </xsl:element>
                 </div>
+				<xsl:if test="string-length($envelope) &gt; 0">
+					<div class="breadcrumbitem">
+						<xsl:element name="a">
+							<xsl:attribute name="href"><xsl:value-of select="$envelope"/></xsl:attribute>
+							Envelope
+						</xsl:element>
+					</div>
+				</xsl:if>
                 <div class="breadcrumbitemlast">WebForm</div>
                 <div class="breadcrumbtail"></div>
             </div>
