@@ -30,6 +30,7 @@ import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 
+import de.odysseus.staxon.xml.util.PrettyXMLEventWriter;
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
@@ -97,6 +98,7 @@ public class JsonXMLBidirectionalConverter {
         try {
             XMLEventReader reader = inputFactory.createXMLEventReader(input);
             XMLEventWriter writer = outputFactory.createXMLEventWriter(output, "utf-8");
+            writer = new PrettyXMLEventWriter(writer);
             writer.add(reader);
             closeQuietly(reader, writer);
             return output.toByteArray();
