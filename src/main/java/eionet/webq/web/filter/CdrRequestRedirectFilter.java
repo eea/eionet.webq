@@ -54,7 +54,9 @@ public class CdrRequestRedirectFilter implements Filter {
         LOGGER.debug("Initial JSESSIONID:" + initialSessionId);
 
         if (StringUtils.isNotEmpty(initialSessionId) && !current.equals(initialSessionId)) {
+            LOGGER.info("Update sessionid hash: " + initialSessionId + " -> " + current);
             userFileService.updateUserId(initialSessionId, current);
+            LOGGER.info("User session updated successfully");
         }
         chain.doFilter(httpRequest, httpResponse);
     }

@@ -120,7 +120,9 @@ public class XFormsHTTPRequestAuthHandlerImpl implements HTTPRequestAuthHandler 
             sessionIdHash = DigestUtils.md5Hex(sessionId);
         }
 
-        LOGGER.info("Get resource from XForm: " + uri);
+        String logSessionId = (sessionIdHash != null) ? "no session id found" : "sessionIdHash=" + sessionIdHash;
+        LOGGER.info("Get resource from XForm (" + logSessionId + "): " + uri);
+
         if (uri.startsWith(requestURLHost)) {
             // check if the request on the same (webq) host is done in the same session. Fix session id if required.
             if (sessionId != null) {
@@ -200,17 +202,17 @@ public class XFormsHTTPRequestAuthHandlerImpl implements HTTPRequestAuthHandler 
 
         if (cookieHeader == null || cookieHeader.getValue() == null) {
             newCookieHeaderValue = HTTP_JSESSIONID_ATTRIBUTE + sessionId;
-            LOGGER.debug("Add new cookie: " + newCookieHeaderValue);
+            LOGGER.info("Add new cookie: " + newCookieHeaderValue);
         } else if (!cookieHeader.getValue().contains(HTTP_JSESSIONID_ATTRIBUTE)) {
             newCookieHeaderValue = cookieHeader.getValue() + "; " + HTTP_JSESSIONID_ATTRIBUTE + sessionId;
-            LOGGER.debug("Append jsessionid to cookie: " + newCookieHeaderValue);
+            LOGGER.info("Append jsessionid to cookie: " + newCookieHeaderValue);
         } else if (cookieHeader.getValue().contains(HTTP_JSESSIONID_ATTRIBUTE)
                 && !cookieHeader.getValue().contains(HTTP_JSESSIONID_ATTRIBUTE + sessionId)) {
             newCookieHeaderValue =
                     cookieHeader.getValue().replaceAll(HTTP_JSESSIONID_ATTRIBUTE + "([^;]*)",
                             HTTP_JSESSIONID_ATTRIBUTE + sessionId);
-            LOGGER.debug("Found wrong JSESSIONID from request header: " + cookieHeader.getValue());
-            LOGGER.debug("Change jsessionid in cookie: " + newCookieHeaderValue);
+            LOGGER.info("Found wrong JSESSIONID from request header: " + cookieHeader.getValue());
+            LOGGER.info("Change jsessionid in cookie: " + newCookieHeaderValue);
         }
         if (newCookieHeaderValue != null) {
             httpRequestHeaders.removeHeader(HTTP_COOKIE_ATTRIBUTE);

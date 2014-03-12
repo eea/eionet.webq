@@ -105,7 +105,7 @@ public class IntegrationWithCDRController {
             throws FileNotAvailableException {
         CdrRequest parameters = convertAndPutResultIntoSession(request);
 
-        LOGGER.debug("Received WebQMenu request with parameters:" + parameters.toString());
+        LOGGER.info("Received WebQMenu request with parameters:" + parameters.toString());
 
         MultiValueMap<String, XmlFile> xmlFiles = envelopeService.getXmlFiles(parameters);
         Collection<String> requiredSchemas =
@@ -135,7 +135,7 @@ public class IntegrationWithCDRController {
     public String webQEdit(HttpServletRequest request, Model model) throws FileNotAvailableException {
         CdrRequest parameters = convertAndPutResultIntoSession(request);
 
-        LOGGER.debug("Received WebQEdit request with parameters:" + parameters.toString());
+        LOGGER.info("Received WebQEdit request with parameters:" + parameters.toString());
 
         String schema = parameters.getSchema();
         if (StringUtils.isEmpty(schema)) {
@@ -214,13 +214,18 @@ public class IntegrationWithCDRController {
         int fileId =
                 userFileService.saveBasedOnWebForm(userFileBasedOn(parameters), webFormService.findActiveWebFormById(formId));
 
-        LOGGER.debug("Add new file file with CdrRequest:" + parameters.toString());
+        LOGGER.info("Received ADD NEW file request from CDR with parameters: " + parameters.toString() +
+                "; sessionid=" + md5Hex(parameters.getSessionId()));
 
-        return "redirect:/xform/?formId=" + formId + "&fileId=" + fileId + "&base_uri="
+        String redirect = "redirect:/xform/?formId=" + formId + "&fileId=" + fileId + "&base_uri="
                 + parameters.getContextPath()
                 + "&envelope=" + StringUtils.defaultString(parameters.getEnvelopeUrl())
                 + StringUtils.defaultString(parameters.getAdditionalParametersAsQueryString())
                 + "&sessionid=" + md5Hex(parameters.getSessionId());
+
+        LOGGER.info("Redirect to: " + redirect);
+
+        return redirect;
     }
 
     /**
@@ -275,13 +280,18 @@ public class IntegrationWithCDRController {
         int fileId = userFileService.save(userFile);
         String envelopeParam = (request.getEnvelopeUrl() != null) ? "&envelope=" + request.getEnvelopeUrl() : "";
 
-        LOGGER.debug("Edit file with CdrRequest:" + request.toString());
+        LOGGER.info("Received EDIT file request from CDR with parameters: " + request.toString() +
+                "; sessionid=" + md5Hex(request.getSessionId()));
 
-        return "redirect:/xform/?formId=" + webForm.getId() + "&instance=" + remoteFileUrl + "&fileId="
+        String redirect = "redirect:/xform/?formId=" + webForm.getId() + "&instance=" + remoteFileUrl + "&fileId="
                 + fileId
                 + "&base_uri=" + request.getContextPath() + envelopeParam
                 + request.getAdditionalParametersAsQueryString()
                 + "&sessionid=" + md5Hex(request.getSessionId());
+
+        LOGGER.info("Redirect to: " + redirect);
+
+        return redirect;
     }
 
     /**

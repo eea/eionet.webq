@@ -31,6 +31,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
@@ -254,9 +255,12 @@ public class PublicPageController {
     @Transactional
     public XmlSaveResult saveXml(@RequestParam int fileId, HttpServletRequest request) {
         try {
+            LOGGER.info("/saveXml fileId=" + fileId + "; sessionid=" + DigestUtils.md5Hex(request.getSession().getId()));
+
             byte[] fileContent = getContentFromRequest(request);
             return updateFileContent(fileId, request, fileContent);
         } catch (Exception e) {
+            LOGGER.error("Unable to save file: " + e.toString(), e);
             return XmlSaveResult.valueOfError(e.toString());
         }
     }
