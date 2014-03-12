@@ -362,6 +362,14 @@ public class PublicPageController {
      */
     private XmlSaveResult updateFileContent(int fileId, HttpServletRequest request, byte[] fileContent) {
         UserFile file = userFileService.getById(fileId);
+
+        if (file == null && request.getParameter("sessionid") != null){
+            LOGGER.info("Could not find file by HTTP session ID. Let's try by sessionid parameter.");
+            file = userFileService.getByIdAndUser(fileId, request.getParameter("sessionid"));
+        }
+        if (file == null){
+            LOGGER.error("Could not find file reference from database for session=" + request.getSession().getId());
+        }
         file.setContent(fileContent);
         if (file.isFromCdr()) {
             String restricted = request.getParameter("restricted");

@@ -107,6 +107,7 @@ public class XFormsHTTPRequestAuthHandlerImpl implements HTTPRequestAuthHandler 
                 URI requestURI = new URI((String) context.get(BF_REQUEST_URL_ATTRIBUTE));
                 requestURLHost =
                             StringUtils.substringBefore(requestURI.toString(), requestURI.getHost()) + requestURI.getHost();
+                LOGGER.info("bF requestURLHost= " + requestURLHost);
             } catch (URISyntaxException e) {
                 LOGGER.warn("requestURL is not valid URL: " + context.get(BF_REQUEST_URL_ATTRIBUTE));
             }
@@ -120,13 +121,24 @@ public class XFormsHTTPRequestAuthHandlerImpl implements HTTPRequestAuthHandler 
             sessionIdHash = DigestUtils.md5Hex(sessionId);
         }
 
-        String logSessionId = (sessionIdHash != null) ? "no session id found" : "sessionIdHash=" + sessionIdHash;
+        String logSessionId = (sessionIdHash != null) ? "sessionIdHash=" + sessionIdHash : "no session id found";
         LOGGER.info("Get resource from XForm (" + logSessionId + "): " + uri);
 
         if (uri.startsWith(requestURLHost)) {
             // check if the request on the same (webq) host is done in the same session. Fix session id if required.
             if (sessionId != null) {
                 validateSessionIdInRequestHeader(context, sessionId);
+
+                // add session id hash as request parameter for irequests on the same host.
+                uri += (uri.contains("?")) ? "&" : "?";
+                uri += "sessionid=" + sessionIdHash;
+                try {
+                    httpRequestBase.setURI(new URI(uri));
+                } catch (URISyntaxException e) {
+                    LOGGER.error("Unable change URI:" + uri);
+                    e.printStackTrace();
+                }
+                LOGGER.info("Get resource from: " + uri);
             }
         } else {
             // add auth info only for URIs that are not on the same host.
@@ -152,14 +164,14 @@ public class XFormsHTTPRequestAuthHandlerImpl implements HTTPRequestAuthHandler 
                     if (((StringUtils.isNotBlank(instance) && uri.startsWith(instance)) || (StringUtils.isNotBlank(envelope) && uri
                             .startsWith(envelope)))) {
                         httpRequestBase.addHeader("Authorization", basicAuth);
-                        LOGGER.debug("Add basic auth from session to URL: " + uri);
+                        LOGGER.info("Add basic auth from session to URL: " + uri);
                     } else {
                         // check if we have known host in db
                         KnownHost knownHost = getKnownHost(uri);
                         if (knownHost != null) {
                             // add ticket parameter to request URI if needed
                             if (knownHost.getAuthenticationMethod() == KnownHostAuthenticationMethod.REQUEST_PARAMETER) {
-                                LOGGER.debug("Add ticket parameter from known hosts to URL: " + uri);
+                                LOGGER.info("Add ticket parameter from known hosts to URL: " + uri);
                                 uri = getUrlWithAuthParam(uri, knownHost);
                                 if (!uri.equals(httpRequestBase.getURI().toString())) {
                                     try {
@@ -178,7 +190,7 @@ public class XFormsHTTPRequestAuthHandlerImpl implements HTTPRequestAuthHandler 
                                 } catch (UnsupportedEncodingException e) {
                                     LOGGER.warn("UnsupportedEncodingException: utf-8");
                                 }
-                                LOGGER.debug("Add basic auth from known hosts to URL: " + uri);
+                                LOGGER.info("Add basic auth from known hosts to URL: " + uri);
                             }
                         }
                     }

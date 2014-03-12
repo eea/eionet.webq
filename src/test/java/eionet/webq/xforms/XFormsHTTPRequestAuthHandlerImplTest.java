@@ -24,6 +24,7 @@ package eionet.webq.xforms;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.hamcrest.core.IsNot.not;
 import static org.hamcrest.core.StringContains.containsString;
+import static org.hamcrest.core.StringStartsWith.startsWith;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
@@ -230,7 +231,7 @@ public class XFormsHTTPRequestAuthHandlerImplTest {
     }
 
     private void assertThatRequestIsNotChanged(HttpRequestBase httpRequest, String requestUri) {
-        assertThat(httpRequest.getURI().toString(), equalTo(requestUri));
+        assertThat(httpRequest.getURI().toString(), startsWith(requestUri));
         assertThat(httpRequest.getHeaders("Authorization").length, equalTo(0));
     }
 
