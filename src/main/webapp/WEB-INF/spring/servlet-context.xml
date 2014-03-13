@@ -40,6 +40,7 @@
     <!-- resources exclusions from servlet mapping -->
     <mvc:resources mapping="/bfResources/**" location="/bfResources/" />
     <mvc:resources mapping="/*.html" location="/*.html" />
+    <mvc:resources mapping="/*.ico" location="/*.ico" />
     <mvc:resources mapping="/forms/**" location="/forms/" />
     <mvc:resources mapping="/js/**" location="/js/" />
     <mvc:resources mapping="/css/**" location="/css/" />
