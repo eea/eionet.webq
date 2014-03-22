@@ -7,12 +7,7 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
+import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -55,6 +50,7 @@ public class CdrRequestRedirectFilter implements Filter {
 
         if (StringUtils.isNotEmpty(initialSessionId) && !current.equals(initialSessionId)) {
             LOGGER.info("Update sessionid hash: " + initialSessionId + " -> " + current);
+            LOGGER.info("Check if user agent is changed: " + httpRequest.getHeader("user-agent"));
             userFileService.updateUserId(initialSessionId, current);
             LOGGER.info("User session updated successfully");
         }
