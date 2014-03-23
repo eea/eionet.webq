@@ -51,7 +51,10 @@ import static org.junit.Assert.assertThat;
 @ContextConfiguration(classes = {ApplicationTestContextWithMockSession.class})
 @Transactional
 public class UserFileStorageImplTest {
-    private final String defaultUserAgent = "Mozilla";
+    private final String defaultUserAgent =
+            "Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.1; Trident/6.0;)";
+    private final String changedUserAgent =
+            "Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.1; Trident/6.0; xs-OXnogDT8wvA;Ct4-Zs)";
     @Autowired
     private UserFileStorage storage;
     @Autowired
@@ -283,7 +286,22 @@ public class UserFileStorageImplTest {
         assertThat(storage.findAllUserFiles(userId).size(), equalTo(1));
         assertThat(storage.findAllUserFiles(otherUserId).size(), equalTo(0));
 
-        UserFileIdUpdate updateData = createUserFileIdUpdateData(userId, otherUserId);
+        UserFileIdUpdate updateData = createUserFileIdUpdateData(userId, otherUserId, null);
+
+        storage.updateUserId(updateData);
+
+        assertThat(storage.findAllUserFiles(userId).size(), equalTo(0));
+        assertThat(storage.findAllUserFiles(otherUserId).size(), equalTo(1));
+    }
+
+    @Test
+    public void allowToUpdateUserIdForFilesIfUserAgentEndingChanges() throws Exception {
+        saveAndGetBackSavedFileForDefaultUser();
+
+        assertThat(storage.findAllUserFiles(userId).size(), equalTo(1));
+        assertThat(storage.findAllUserFiles(otherUserId).size(), equalTo(0));
+
+        UserFileIdUpdate updateData = createUserFileIdUpdateData(userId, otherUserId, changedUserAgent);
 
         storage.updateUserId(updateData);
 
@@ -295,7 +313,7 @@ public class UserFileStorageImplTest {
     public void whenUserAgentNotSet_doNotUpdateUserFileId() throws Exception {
         saveAndGetBackSavedFileForDefaultUser();
 
-        UserFileIdUpdate userFileIdUpdateData = createUserFileIdUpdateData(userId, otherUserId);
+        UserFileIdUpdate userFileIdUpdateData = createUserFileIdUpdateData(userId, otherUserId, null);
         userFileIdUpdateData.setUserAgent(null);
         storage.updateUserId(userFileIdUpdateData);
 
@@ -307,7 +325,7 @@ public class UserFileStorageImplTest {
     public void whenUpdatingFileId_andUserAgentIsDifferent_doNotUpdateUserFileId() throws Exception {
         UserFile userFile = saveAndGetBackSavedFileForDefaultUser();
 
-        UserFileIdUpdate userFileIdUpdateData = createUserFileIdUpdateData(userId, otherUserId);
+        UserFileIdUpdate userFileIdUpdateData = createUserFileIdUpdateData(userId, otherUserId, null);
         userFileIdUpdateData.setUserAgent("IE 11");
         assertNotEquals(userFileIdUpdateData.getUserAgent(), userFile.getUserAgent());
 
@@ -317,11 +335,15 @@ public class UserFileStorageImplTest {
         assertThat(storage.findAllUserFiles(otherUserId).size(), equalTo(0));
     }
 
-    private UserFileIdUpdate createUserFileIdUpdateData(String oldUserId, String newUserId) {
+    private UserFileIdUpdate createUserFileIdUpdateData(String oldUserId, String newUserId, String userAgent) {
+
+        if (userAgent == null){
+            userAgent = defaultUserAgent;
+        }
         UserFileIdUpdate updateData = new UserFileIdUpdate();
         updateData.setOldUserId(oldUserId);
         updateData.setNewUserId(newUserId);
-        updateData.setUserAgent(defaultUserAgent);
+        updateData.setUserAgent(userAgent);
         return updateData;
     }
 
