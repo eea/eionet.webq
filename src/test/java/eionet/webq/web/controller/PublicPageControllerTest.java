@@ -29,6 +29,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
 
+import eionet.webq.web.controller.util.WebformUrlProvider;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
@@ -70,10 +71,13 @@ public class PublicPageControllerTest {
     private Model model;
     @Mock
     private JsonXMLBidirectionalConverter jsonXMLConverter;
+    @Mock
+    WebformUrlProvider webformUrlProvider;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
+        when(webformUrlProvider.getWebformPath(any(ProjectFile.class))).thenReturn("/xform/");
     }
 
     @Test

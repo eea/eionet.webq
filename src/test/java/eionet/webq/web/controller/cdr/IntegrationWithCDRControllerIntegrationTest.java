@@ -57,17 +57,11 @@ import java.util.regex.Pattern;
 import static java.util.Collections.singletonMap;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.hamcrest.core.StringContains.containsString;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyList;
-import static org.mockito.Matchers.anyString;
+import static org.junit.Assert.*;
+import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
  */
@@ -90,6 +84,8 @@ public class IntegrationWithCDRControllerIntegrationTest extends AbstractContext
 
     private static final String ENVELOPE_URL = "http://cdr.envelope.eu";
     private static final String XML_SCHEMA = "cdr-specific-schema";
+
+    private int fileNameCounter = 0;
 
     @Before
     public void setUp() throws Exception {
@@ -206,6 +202,7 @@ public class IntegrationWithCDRControllerIntegrationTest extends AbstractContext
         file.setActive(true);
         file.setRemoteForm(true);
         file.setTitle("web form");
+        file.setFileName((fileNameCounter++) + "-xform.xhtml");
         file.setFileContent("content".getBytes());
         file.setFileType(ProjectFileType.WEBFORM);
         projectFileService.saveOrUpdate(file, new ProjectEntry());
@@ -214,13 +211,13 @@ public class IntegrationWithCDRControllerIntegrationTest extends AbstractContext
 
     private void rpcClientWillReturnFileForSchema(String xmlSchema) throws XmlRpcException {
         when(xmlRpcClient.execute(any(XmlRpcClientConfig.class), anyString(), anyList()))
-                .thenReturn(singletonMap(xmlSchema, new Object[] {new Object[] {"file.url", "file name"}}));
+                .thenReturn(singletonMap(xmlSchema, new Object[]{new Object[]{"file.url", "file name"}}));
     }
 
     private void rpcClientWillReturnSeveralFilesButOnlyOneForSchema(String xmlSchema) throws XmlRpcException {
         Map<String, Object[]> cdrXmlFiles = new HashMap<String, Object[]>();
-        cdrXmlFiles.put(xmlSchema, new Object[] {new Object[] {"file.url", "file name"}});
-        cdrXmlFiles.put("schema2", new Object[] {new Object[] {"file2.url", "file name2"}});
+        cdrXmlFiles.put(xmlSchema, new Object[]{new Object[]{"file.url", "file name"}});
+        cdrXmlFiles.put("schema2", new Object[]{new Object[]{"file2.url", "file name2"}});
 
         when(xmlRpcClient.execute(any(XmlRpcClientConfig.class), anyString(), anyList()))
                 .thenReturn(cdrXmlFiles);

@@ -29,6 +29,7 @@ import eionet.webq.service.CDREnvelopeService.XmlFile;
 import eionet.webq.service.FileNotAvailableException;
 import eionet.webq.service.UserFileService;
 import eionet.webq.service.WebFormService;
+import eionet.webq.web.controller.util.WebformUrlProvider;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -51,10 +52,7 @@ import static org.hamcrest.core.IsEqual.equalTo;
 import static org.hamcrest.core.StringStartsWith.startsWith;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyCollectionOf;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.eq;
+import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -75,6 +73,8 @@ public class IntegrationWithCDRControllerTest {
     CdrRequestConverter converter;
     @Mock
     Model model;
+    @Mock
+    WebformUrlProvider webformUrlProvider;
     CdrRequest cdrRequest = new CdrRequest();
 
     @Before
@@ -82,6 +82,7 @@ public class IntegrationWithCDRControllerTest {
         MockitoAnnotations.initMocks(this);
         when(converter.convert(any(HttpServletRequest.class))).thenReturn(cdrRequest);
         cdrRequest.setSessionId("sessionId");
+        when(webformUrlProvider.getWebformPath(any(ProjectFile.class))).thenReturn("/xform/");
     }
 
     @Test
@@ -96,7 +97,7 @@ public class IntegrationWithCDRControllerTest {
     public void throwsExceptionIfWebFormsAmountIsZero() throws Exception {
         getXmlFilesWillReturnFilesAmountOf(1);
         when(webFormService.findWebFormsForSchemas(anyCollectionOf(String.class))).thenReturn(
-                Collections.<ProjectFile> emptyList());
+                Collections.<ProjectFile>emptyList());
 
         controller.webQMenu(mockRequest, model);
     }

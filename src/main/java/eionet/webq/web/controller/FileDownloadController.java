@@ -34,6 +34,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.transform.TransformerException;
 
+import eionet.webq.service.*;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -59,11 +60,6 @@ import eionet.webq.dao.orm.MergeModule;
 import eionet.webq.dao.orm.ProjectFile;
 import eionet.webq.dao.orm.UploadedFile;
 import eionet.webq.dao.orm.UserFile;
-import eionet.webq.service.ConversionService;
-import eionet.webq.service.ProjectFileService;
-import eionet.webq.service.ProjectService;
-import eionet.webq.service.UserFileMergeService;
-import eionet.webq.service.UserFileService;
 
 /**
  * Spring controller for WebQ file download.
@@ -108,15 +104,24 @@ public class FileDownloadController {
     JsonXMLBidirectionalConverter jsonXMLConverter;
 
     /**
+     * Service for downloading remote files.
+     */
+    @Autowired
+    RemoteFileService remoteFileService;
+    /**
      * Convert and download the user XML file in JSON format if request header Accept content type is application/json.
      *
      * @param fileId user file id.
      * @param response http response to write file
      */
-    @RequestMapping(value = "/converted_user_file", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.GET)
+    @RequestMapping(value = {"/converted_user_file", "user_file"}, produces = MediaType.APPLICATION_JSON_VALUE,
+            method = RequestMethod.GET)
     @Transactional
-    public void downloadUserFileJson(@RequestParam int fileId, HttpServletResponse response) {
+    public void downloadUserFileJson(@RequestParam int fileId, HttpServletResponse response) throws FileNotAvailableException {
         UserFile file = userFileService.download(fileId);
+        if (file.isFromCdr() && file.getContent() == null){
+            file.setContent(remoteFileService.fileContent(file.getEnvelope() + "/" + file.getName()));
+        }
         byte[] json = jsonXMLConverter.convertXmlToJson(file.getContent());
         setContentType(response, MediaType.APPLICATION_JSON);
         writeToResponse(response, json);

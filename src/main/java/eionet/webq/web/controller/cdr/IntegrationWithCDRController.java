@@ -29,6 +29,7 @@ import eionet.webq.service.CDREnvelopeService.XmlFile;
 import eionet.webq.service.FileNotAvailableException;
 import eionet.webq.service.UserFileService;
 import eionet.webq.service.WebFormService;
+import eionet.webq.web.controller.util.WebformUrlProvider;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -87,6 +88,11 @@ public class IntegrationWithCDRController {
     @Autowired
     private UserFileService userFileService;
     /**
+     * Webform URL provider.
+     */
+    @Autowired
+    WebformUrlProvider webformUrlProvider;
+    /**
      * WebQ1 URL.
      */
     @Value("#{ws['webq1.url']}")
@@ -118,7 +124,7 @@ public class IntegrationWithCDRController {
             return redirectToEditWebForm(parameters, xmlFiles, webForms);
         }
         if (oneWebFormAndNoFilesButNewFileCreationIsAllowed(xmlFiles, webForms, parameters)) {
-            return startNewForm(parameters, webForms.iterator().next().getId());
+            return startNewForm(parameters, webForms.iterator().next());
         }
         return deliverMenu(webForms, xmlFiles, parameters, model);
     }
@@ -198,26 +204,30 @@ public class IntegrationWithCDRController {
     public String addWithWebForm(@RequestParam int formId, HttpServletRequest request)
             throws FileNotAvailableException {
         CdrRequest cdrRequest = (CdrRequest) request.getSession().getAttribute(LATEST_CDR_REQUEST);
-        return startNewForm(cdrRequest, formId);
+        ProjectFile webform = webFormService.findActiveWebFormById(formId);
+        return startNewForm(cdrRequest, webform);
     }
 
     /**
      * Start new web form.
      *
      * @param parameters cdr parameters
-     * @param formId web form id
+     * @param webform project web form
      * @return redirect string
      * @throws FileNotAvailableException if remote file not available
      */
-    private String startNewForm(CdrRequest parameters, int formId)
+    private String startNewForm(CdrRequest parameters, ProjectFile webform)
             throws FileNotAvailableException {
         int fileId =
-                userFileService.saveBasedOnWebForm(userFileBasedOn(parameters), webFormService.findActiveWebFormById(formId));
+                userFileService.saveBasedOnWebForm(userFileBasedOn(parameters), webFormService.findActiveWebFormById(webform.getId()));
 
         LOGGER.info("Received ADD NEW file request from CDR with parameters: " + parameters.toString() +
                 "; sessionid=" + md5Hex(parameters.getSessionId()));
 
-        String redirect = "redirect:/xform/?formId=" + formId + "&fileId=" + fileId + "&base_uri="
+        String webformPath = webformUrlProvider.getWebformPath(webform);
+
+
+        String redirect = "redirect:" + webformPath + "fileId=" + fileId + "&base_uri="
                 + parameters.getContextPath()
                 + "&envelope=" + StringUtils.defaultString(parameters.getEnvelopeUrl())
                 + StringUtils.defaultString(parameters.getAdditionalParametersAsQueryString())
@@ -280,10 +290,13 @@ public class IntegrationWithCDRController {
         int fileId = userFileService.save(userFile);
         String envelopeParam = (request.getEnvelopeUrl() != null) ? "&envelope=" + request.getEnvelopeUrl() : "";
 
-        LOGGER.info("Received EDIT file request from CDR with parameters: " + request.toString() +
-                "; sessionid=" + md5Hex(request.getSessionId()));
 
-        String redirect = "redirect:/xform/?formId=" + webForm.getId() + "&instance=" + remoteFileUrl + "&fileId="
+        LOGGER.info("Received EDIT file request from CDR with parameters: " + request.toString() +
+                ";  sessionid=" + md5Hex(request.getSessionId()));
+
+        String webformPath = webformUrlProvider.getWebformPath(webForm);
+
+        String redirect = "redirect:" + webformPath + "instance=" + remoteFileUrl + "&fileId="
                 + fileId
                 + "&base_uri=" + request.getContextPath() + envelopeParam
                 + request.getAdditionalParametersAsQueryString()

@@ -68,12 +68,12 @@ public class CDREnvelopeServiceImpl implements CDREnvelopeService {
     @Autowired
     private RestOperations restOperations;
     /**
-     *  Get envelope xml files remote method name.
+     * Get envelope xml files remote method name.
      */
     @Value("#{ws['cdr.envelope.get.xml.files']}")
     private String getEnvelopeXmlFilesMethod;
     /**
-     *  Save xml files to cdr method name.
+     * Save xml files to cdr method name.
      */
     @Value("#{ws['cdr.save.xml']}")
     String saveXmlFilesMethod;
