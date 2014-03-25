@@ -27,21 +27,27 @@ Minimum requirements are:
 
 ### Setup
 
-1. Do:
+###### 1. Do:
 ```sh
 $ cp config/application-template.properties config/local/application.properties
 $ cp config/log4j-template.xml config/local/log4j.xml
 ```
-Set all properties to your environment.
-Please _**do not commit**_ your local properties.
+Set all properties to your environment. Please _**do not commit**_ your local properties.
 
-1. Add the first admin user into the database:
+###### 2. Add the first admin user into the database:
 ```sql
 insert into users values ('username', '', 1);
 insert into authorities values ('username', 'ADMIN');
 ```
 
-1. To use EEA's Central Authentication Service (CAS), you need to register Eionet certificates in the JVM that runs the Tomcat. A small Java executable that does it, and a README on how to use it can be found here: https://svn.eionet.europa.eu/repositories/Reportnet/CASServer/contrib/installcert
+###### 3. To use EEA's Central Authentication Service (CAS), 
+you need to register Eionet certificates in the JVM that runs the Tomcat. A small Java executable that does it, and a README on how to use it can be found here: https://svn.eionet.europa.eu/repositories/Reportnet/CASServer/contrib/installcert
+
+###### 4. Increase the MySql _max_allowed_packet_ variable 
+to be able to store larger files than 1MB in database. For example, to set the limit to 16MB do:
+```sql
+SET GLOBAL max_allowed_packet=16777216;
+```
 
 ### Build
 
