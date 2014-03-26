@@ -313,6 +313,8 @@ public class FileDownloadController {
                 contentType = MediaType.APPLICATION_XHTML_XML_VALUE;
             } else if (name.endsWith(".js")) {
                 contentType = "application/javascript";
+            } else if (name.endsWith(".json")) {
+                contentType = MediaType.APPLICATION_JSON_VALUE;
             } else {
                 contentType = MediaType.APPLICATION_XML_VALUE;
             }
