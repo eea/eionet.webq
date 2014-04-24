@@ -20,10 +20,14 @@
  */
 package eionet.webq.service;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.ResponseStatus;
+
 /**
  * Exception signals that file request returned
- * NOT {@link org.springframework.http.HttpStatus.OK} code or response has no body attached.
+ * {@link org.springframework.http.HttpStatus.NOT_FOUND} code or response has no body attached.
  */
+@ResponseStatus(value = HttpStatus.NOT_FOUND)
 public class FileNotAvailableException extends Exception {
     /**
      * Constructs this exception with message.

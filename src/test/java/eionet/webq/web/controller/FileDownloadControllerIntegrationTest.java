@@ -20,12 +20,13 @@
  */
 package eionet.webq.web.controller;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
-
-import java.util.Arrays;
-
+import eionet.webq.dao.MergeModules;
+import eionet.webq.dao.orm.MergeModule;
+import eionet.webq.dao.orm.MergeModuleXmlSchema;
+import eionet.webq.dao.orm.UploadedFile;
+import eionet.webq.dao.orm.UserFile;
+import eionet.webq.service.UserFileService;
+import eionet.webq.web.AbstractContextControllerTests;
 import org.hamcrest.core.IsEqual;
 import org.hibernate.FlushMode;
 import org.hibernate.SessionFactory;
@@ -40,13 +41,11 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.transaction.annotation.Transactional;
 
-import eionet.webq.dao.MergeModules;
-import eionet.webq.dao.orm.MergeModule;
-import eionet.webq.dao.orm.MergeModuleXmlSchema;
-import eionet.webq.dao.orm.UploadedFile;
-import eionet.webq.dao.orm.UserFile;
-import eionet.webq.service.UserFileService;
-import eionet.webq.web.AbstractContextControllerTests;
+import java.util.Arrays;
+
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @Transactional
@@ -111,6 +110,35 @@ public class FileDownloadControllerIntegrationTest extends AbstractContextContro
                 .andExpect(MockMvcResultMatchers.handler().methodName("downloadUserFileJsonToXml"));
     }
 
+    @Test
+    public void whenRequestingMissingProjectFile_ReturnResponseCode404() throws Exception {
+        mvc().perform(MockMvcRequestBuilders.get("/project/22/file/unknown.xml"))
+                .andExpect(MockMvcResultMatchers.status().isNotFound());
+    }
+
+    @Test
+    public void whenRequestingMissingUserFile_ReturnResponseCode404() throws Exception {
+        mvc().perform(MockMvcRequestBuilders.get("/download/user_file?fileId={id}", 99999)
+                .session(session))
+                .andExpect(MockMvcResultMatchers.status().isNotFound());
+    }
+
+    @Test
+    public void whenRequestingMissingConvertUserJsonFile_ReturnResponseCode404() throws Exception {
+        mvc().perform(MockMvcRequestBuilders.get("/download/converted_user_file?fileId={id}", 99999)
+                .accept(MediaType.APPLICATION_JSON)
+                .session(session))
+                .andExpect(MockMvcResultMatchers.status().isNotFound());
+    }
+
+    @Test
+    public void whenRequestingMissingConvertUserXmlFile_ReturnResponseCode404() throws Exception {
+        mvc().perform(MockMvcRequestBuilders.get("/download/converted_user_file?fileId={id}", 99999)
+                .accept(MediaType.APPLICATION_XML)
+                .session(session))
+                .andExpect(MockMvcResultMatchers.status().isNotFound());
+    }
+
     private int saveUserFile() {
         return userFileService.save(new UserFile(new UploadedFile(), XML_SCHEMA));
     }
@@ -118,7 +146,7 @@ public class FileDownloadControllerIntegrationTest extends AbstractContextContro
     private MergeModule saveMergeModule(String fileName) {
         MergeModule module = new MergeModule();
         module.setXmlSchemas(Arrays.asList(new MergeModuleXmlSchema(XML_SCHEMA)));
-        UploadedFile xslFile = new UploadedFile(fileName, "merge-file-content".getBytes());
+        UploadedFile xslFile = new UploadedFile(fileName, "merge-file-content" .getBytes());
         module.setXslFile(xslFile);
         modules.save(module);
         return module;

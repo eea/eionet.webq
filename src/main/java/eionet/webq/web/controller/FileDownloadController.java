@@ -20,20 +20,15 @@
  */
 package eionet.webq.web.controller;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.servlet.ServletOutputStream;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.xml.transform.TransformerException;
-
+import com.google.common.base.Function;
+import com.google.common.collect.Collections2;
+import com.google.common.collect.ImmutableSet;
+import eionet.webq.converter.JsonXMLBidirectionalConverter;
+import eionet.webq.dao.MergeModules;
+import eionet.webq.dao.orm.MergeModule;
+import eionet.webq.dao.orm.ProjectFile;
+import eionet.webq.dao.orm.UploadedFile;
+import eionet.webq.dao.orm.UserFile;
 import eionet.webq.service.*;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,29 +38,23 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.mail.javamail.ConfigurableMimeFileTypeMap;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
-import com.google.common.base.Function;
-import com.google.common.collect.Collections2;
-import com.google.common.collect.ImmutableSet;
-
-import eionet.webq.converter.JsonXMLBidirectionalConverter;
-import eionet.webq.dao.MergeModules;
-import eionet.webq.dao.orm.MergeModule;
-import eionet.webq.dao.orm.ProjectFile;
-import eionet.webq.dao.orm.UploadedFile;
-import eionet.webq.dao.orm.UserFile;
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.xml.transform.TransformerException;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.*;
 
 /**
  * Spring controller for WebQ file download.
  */
 @Controller
-@RequestMapping(value = {"download", "webform" })
+@RequestMapping(value = {"download", "webform"})
 public class FileDownloadController {
     /**
      * Service for getting user file content from storage.
@@ -108,18 +97,24 @@ public class FileDownloadController {
      */
     @Autowired
     RemoteFileService remoteFileService;
+
     /**
      * Convert and download the user XML file in JSON format if request header Accept content type is application/json.
      *
-     * @param fileId user file id.
+     * @param fileId   user file id.
      * @param response http response to write file
+     * @throws FileNotAvailableException if user file is not available for given id
      */
     @RequestMapping(value = {"/converted_user_file", "user_file"}, produces = MediaType.APPLICATION_JSON_VALUE,
             method = RequestMethod.GET)
     @Transactional
     public void downloadUserFileJson(@RequestParam int fileId, HttpServletResponse response) throws FileNotAvailableException {
         UserFile file = userFileService.download(fileId);
-        if (file.isFromCdr() && file.getContent() == null){
+
+        if (file == null) {
+            throw new FileNotAvailableException("The requested user file is not available with fileId: " + fileId);
+        }
+        if (file.isFromCdr() && file.getContent() == null) {
             file.setContent(remoteFileService.fileContent(file.getEnvelope() + "/" + file.getName()));
         }
         byte[] json = jsonXMLConverter.convertXmlToJson(file.getContent());
@@ -131,13 +126,17 @@ public class FileDownloadController {
      * Convert the user XML file into JSON format and then back to XML format to be able to evaluate the conversion. The method is
      * called when request header Accept content type is text/xml.
      *
-     * @param fileId user file id.
+     * @param fileId   user file id.
      * @param response http response to write file
+     * @throws FileNotAvailableException user file is not available for given id
      */
     @RequestMapping(value = "/converted_user_file", produces = MediaType.APPLICATION_XML_VALUE, method = RequestMethod.GET)
     @Transactional
-    public void downloadUserFileJsonToXml(@RequestParam int fileId, HttpServletResponse response) {
+    public void downloadUserFileJsonToXml(@RequestParam int fileId, HttpServletResponse response) throws FileNotAvailableException {
         UserFile file = userFileService.download(fileId);
+        if (file == null) {
+            throw new FileNotAvailableException("The requested user file is not available with fileId=" + fileId);
+        }
         byte[] xml = jsonXMLConverter.convertJsonToXml(jsonXMLConverter.convertXmlToJson(file.getContent()));
 
         writeXmlFileToResponse("json.xml", xml, response);
@@ -146,13 +145,17 @@ public class FileDownloadController {
     /**
      * Download uploaded file action.
      *
-     * @param fileId requested file id
+     * @param fileId   requested file id
      * @param response http response to write file
+     * @throws FileNotAvailableException if user file is not available for given id
      */
     @RequestMapping(value = "/user_file")
     @Transactional
-    public void downloadUserFile(@RequestParam int fileId, HttpServletResponse response) {
+    public void downloadUserFile(@RequestParam int fileId, HttpServletResponse response) throws FileNotAvailableException {
         UserFile file = userFileService.download(fileId);
+        if (file == null) {
+            throw new FileNotAvailableException("The requested user file is not available with fileId=" + fileId);
+        }
         writeXmlFileToResponse(file.getName(), file.getContent(), response);
     }
 
@@ -160,15 +163,20 @@ public class FileDownloadController {
      * Download uploaded file action.
      *
      * @param projectId project id for file download
-     * @param fileName requested file name
-     * @param request http request
-     * @param response http response to write file
+     * @param fileName  requested file name
+     * @param request   http request
+     * @param response  http response to write file
+     * @throws FileNotAvailableException if project file is not available for given id
      */
     @RequestMapping(value = "/project/{projectId}/file/{fileName:.*}")
     @Transactional
     public void downloadProjectFile(@PathVariable String projectId, @PathVariable String fileName, HttpServletRequest request,
-            HttpServletResponse response) {
+                                    HttpServletResponse response) throws FileNotAvailableException {
         ProjectFile projectFile = projectFileService.fileContentBy(fileName, projectService.getByProjectId(projectId));
+        if (projectFile == null) {
+            throw new FileNotAvailableException("The requested project file is not available with path: /project/" +
+                    projectId + "/file/" + fileName);
+        }
         String disposition = request.getServletPath().contains("/download/") ? "attachment" : "inline";
         writeProjectFileToResponse(fileName, projectFile, response, disposition);
     }
@@ -177,7 +185,7 @@ public class FileDownloadController {
      * Allows to download merge module file.
      *
      * @param moduleName module name.
-     * @param response http response to write file
+     * @param response   http response to write file
      */
     @RequestMapping("/merge/file/{moduleName:.*}")
     @Transactional
@@ -191,16 +199,17 @@ public class FileDownloadController {
      * Merge selected user files.
      *
      * @param selectedUserFile ids of user files
-     * @param mergeModule module required to merge files.
-     * @param response http response
-     * @throws TransformerException if transformation fails
-     * @throws IOException if content operations fail.
+     * @param mergeModule      module required to merge files.
+     * @param response         http response
+     * @throws TransformerException      if transformation fails
+     * @throws IOException               if content operations fail.
+     * @throws FileNotAvailableException if file is not available for given id
      */
     @RequestMapping("/merge/files")
     @Transactional
     public void mergeFiles(@RequestParam(required = false) List<Integer> selectedUserFile,
                            @RequestParam(required = false) Integer mergeModule, HttpServletResponse response)
-            throws TransformerException, IOException {
+            throws TransformerException, IOException, FileNotAvailableException {
         if (selectedUserFile == null || selectedUserFile.isEmpty()) {
             throw new IllegalArgumentException("No files selected");
         }
@@ -263,9 +272,9 @@ public class FileDownloadController {
     /**
      * Performs conversion of specified {@link eionet.webq.dao.orm.UserFile} to specific format. Format is defined by conversionId.
      *
-     * @param fileId file id or xsl name, which will be used to convert file
+     * @param fileId       file id or xsl name, which will be used to convert file
      * @param conversionId id of conversion to be used
-     * @param response object where conversion result will be written
+     * @param response     object where conversion result will be written
      */
     @RequestMapping("/convert")
     @Transactional
@@ -281,11 +290,11 @@ public class FileDownloadController {
     /**
      * Merge selected files.
      *
-     * @param userFiles list of selected files ids
+     * @param userFiles   list of selected files ids
      * @param mergeModule module used for merge
-     * @param response http response
+     * @param response    http response
      * @throws TransformerException if transformation fails.
-     * @throws IOException if content operations fail.
+     * @throws IOException          if content operations fail.
      */
     private void mergeFiles(Collection<UserFile> userFiles,
                             MergeModule mergeModule, HttpServletResponse response) throws TransformerException, IOException {
@@ -296,13 +305,13 @@ public class FileDownloadController {
     /**
      * Writes project file to response.
      *
-     * @param name file name
+     * @param name        file name
      * @param projectFile project file object
-     * @param response http response
+     * @param response    http response
      * @param disposition inline or attachment
      */
     private void
-            writeProjectFileToResponse(String name, ProjectFile projectFile, HttpServletResponse response, String disposition) {
+    writeProjectFileToResponse(String name, ProjectFile projectFile, HttpServletResponse response, String disposition) {
 
         ConfigurableMimeFileTypeMap mimeTypesMap = new ConfigurableMimeFileTypeMap();
         String contentType = mimeTypesMap.getContentType(name);
@@ -337,8 +346,8 @@ public class FileDownloadController {
     /**
      * Writes xml files to response.
      *
-     * @param name file name
-     * @param content file content
+     * @param name     file name
+     * @param content  file content
      * @param response http response
      */
     private void writeXmlFileToResponse(String name, byte[] content, HttpServletResponse response) {
@@ -360,7 +369,7 @@ public class FileDownloadController {
     /**
      * Sets content disposition to response.
      *
-     * @param response {@link HttpServletResponse}
+     * @param response           {@link HttpServletResponse}
      * @param contentDisposition content disposition header value.
      */
     private void setContentDisposition(HttpServletResponse response, String contentDisposition) {
@@ -372,7 +381,7 @@ public class FileDownloadController {
     /**
      * Sets content type header to response.
      *
-     * @param response http response
+     * @param response    http response
      * @param contentType content type
      */
     private void setContentType(HttpServletResponse response, MediaType contentType) {
@@ -400,7 +409,7 @@ public class FileDownloadController {
      * Writes specified content to http response.
      *
      * @param response http response
-     * @param data content to be written to response
+     * @param data     content to be written to response
      */
     private void writeToResponse(HttpServletResponse response, byte[] data) {
         ServletOutputStream output = null;
@@ -434,7 +443,7 @@ public class FileDownloadController {
         /**
          * Initializes this object with user files and modules.
          *
-         * @param userFiles user files
+         * @param userFiles    user files
          * @param mergeModules merge modules
          */
         public MergeModuleChoiceRequiredException(Collection<UserFile> userFiles, Collection<MergeModule> mergeModules) {
