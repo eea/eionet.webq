@@ -29,7 +29,13 @@ import eionet.webq.dao.orm.MergeModule;
 import eionet.webq.dao.orm.ProjectFile;
 import eionet.webq.dao.orm.UploadedFile;
 import eionet.webq.dao.orm.UserFile;
-import eionet.webq.service.*;
+import eionet.webq.service.ConversionService;
+import eionet.webq.service.FileNotAvailableException;
+import eionet.webq.service.ProjectFileService;
+import eionet.webq.service.ProjectService;
+import eionet.webq.service.RemoteFileService;
+import eionet.webq.service.UserFileMergeService;
+import eionet.webq.service.UserFileService;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -38,7 +44,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.mail.javamail.ConfigurableMimeFileTypeMap;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.ServletOutputStream;
@@ -48,7 +58,11 @@ import javax.xml.transform.TransformerException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Spring controller for WebQ file download.
@@ -171,7 +185,7 @@ public class FileDownloadController {
     @RequestMapping(value = "/project/{projectId}/file/{fileName:.*}")
     @Transactional
     public void downloadProjectFile(@PathVariable String projectId, @PathVariable String fileName, HttpServletRequest request,
-                                    HttpServletResponse response) throws FileNotAvailableException {
+            HttpServletResponse response) throws FileNotAvailableException {
         ProjectFile projectFile = projectFileService.fileContentBy(fileName, projectService.getByProjectId(projectId));
         if (projectFile == null) {
             throw new FileNotAvailableException("The requested project file is not available with path: /project/" +
@@ -208,7 +222,7 @@ public class FileDownloadController {
     @RequestMapping("/merge/files")
     @Transactional
     public void mergeFiles(@RequestParam(required = false) List<Integer> selectedUserFile,
-                           @RequestParam(required = false) Integer mergeModule, HttpServletResponse response)
+            @RequestParam(required = false) Integer mergeModule, HttpServletResponse response)
             throws TransformerException, IOException, FileNotAvailableException {
         if (selectedUserFile == null || selectedUserFile.isEmpty()) {
             throw new IllegalArgumentException("No files selected");
@@ -297,7 +311,7 @@ public class FileDownloadController {
      * @throws IOException          if content operations fail.
      */
     private void mergeFiles(Collection<UserFile> userFiles,
-                            MergeModule mergeModule, HttpServletResponse response) throws TransformerException, IOException {
+            MergeModule mergeModule, HttpServletResponse response) throws TransformerException, IOException {
         byte[] mergeResult = mergeService.mergeFiles(userFiles, mergeModule);
         writeXmlFileToResponse("merged_files.xml", mergeResult, response);
     }

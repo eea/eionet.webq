@@ -20,17 +20,14 @@
  */
 package eionet.webq.web.controller;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.Arrays;
-import java.util.Collection;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-import javax.validation.Valid;
-
+import eionet.webq.converter.JsonXMLBidirectionalConverter;
+import eionet.webq.converter.UserFileToFileInfoConverter;
+import eionet.webq.dao.orm.ProjectFile;
+import eionet.webq.dao.orm.UserFile;
+import eionet.webq.dto.FileInfo;
+import eionet.webq.dto.UploadForm;
+import eionet.webq.dto.XmlSaveResult;
+import eionet.webq.service.*;
 import eionet.webq.web.controller.util.WebformUrlProvider;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
@@ -43,25 +40,17 @@ import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
-import eionet.webq.converter.JsonXMLBidirectionalConverter;
-import eionet.webq.converter.UserFileToFileInfoConverter;
-import eionet.webq.dao.orm.ProjectFile;
-import eionet.webq.dao.orm.UserFile;
-import eionet.webq.dto.FileInfo;
-import eionet.webq.dto.UploadForm;
-import eionet.webq.dto.XmlSaveResult;
-import eionet.webq.service.CDREnvelopeService;
-import eionet.webq.service.ConversionService;
-import eionet.webq.service.FileNotAvailableException;
-import eionet.webq.service.ProjectService;
-import eionet.webq.service.UserFileService;
-import eionet.webq.service.WebFormService;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import javax.validation.Valid;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.Arrays;
+import java.util.Collection;
 
 /**
  * Base controller for front page actions.
@@ -80,11 +69,6 @@ public class PublicPageController {
      */
     @Autowired
     private UserFileService userFileService;
-    /**
-     * Service for webform projects.
-     */
-    @Autowired
-    private ProjectService projectService;
     /**
      * File conversion service.
      */
