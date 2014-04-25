@@ -43,6 +43,7 @@
     <filter-mapping>
         <filter-name>cdrRequestRedirectFilter</filter-name>
         <url-pattern>/xform/*</url-pattern>
+        <url-pattern>/webform/*</url-pattern>
     </filter-mapping>
 
     <!--  betterFORM XForms Filter -->
