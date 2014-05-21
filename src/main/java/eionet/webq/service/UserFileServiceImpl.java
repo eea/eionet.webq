@@ -102,14 +102,23 @@ public class UserFileServiceImpl implements UserFileService {
     @Override
     public UserFile getById(int id) {
         UserFile userFile = storage.findFile(id, userId());
-        LOGGER.info("Loaded user file=" + userFile);
+        if (userFile == null) {
+            LOGGER.error("Unable to load user file with id=" + id + " for user=" + userId());
+        } else {
+            LOGGER.info("Loaded user file=" + userFile);
+        }
+
         return userFile;
     }
 
     @Override
     public UserFile getByIdAndUser(int id, String userId) {
         UserFile userFile = storage.findFile(id, userId);
-        LOGGER.info("Loaded user file=" + userFile);
+        if (userFile == null) {
+            LOGGER.error("Unable to load user file with id=" + id + " for user=" + userId());
+        } else {
+            LOGGER.info("Loaded user file=" + userFile);
+        }
         return userFile;
     }
 
@@ -154,8 +163,9 @@ public class UserFileServiceImpl implements UserFileService {
 
     /**
      * Set file content from remote location and saves it.
+     *
      * @param file file
-     * @param url file content remote location
+     * @param url  file content remote location
      * @return file id in storage
      * @throws FileNotAvailableException if file not available from remote location
      */
@@ -163,6 +173,7 @@ public class UserFileServiceImpl implements UserFileService {
         file.setContent(remoteFileService.fileContent(url));
         return save(file);
     }
+
     /**
      * Provides current http session id.
      *
@@ -170,7 +181,7 @@ public class UserFileServiceImpl implements UserFileService {
      */
     String userId() {
         return userIdProvider.getUserId();
-   }
+    }
 
     private String getUserAgent() {
         return request != null ? request.getHeader("user-agent") : null;
