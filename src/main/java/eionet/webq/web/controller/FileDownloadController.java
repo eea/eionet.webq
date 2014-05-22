@@ -121,6 +121,7 @@ public class FileDownloadController {
      * Convert and download the user XML file in JSON format if request header Accept content type is application/json.
      *
      * @param fileId   user file id.
+     * @param request http request to write file
      * @param response http response to write file
      * @throws FileNotAvailableException if user file is not available for given id
      */
@@ -145,6 +146,7 @@ public class FileDownloadController {
      * called when request header Accept content type is text/xml.
      *
      * @param fileId   user file id.
+     * @param request http request to write file
      * @param response http response to write file
      * @throws FileNotAvailableException user file is not available for given id
      */
@@ -164,6 +166,7 @@ public class FileDownloadController {
      * Download uploaded file action.
      *
      * @param fileId   requested file id
+     * @param request http request to write file
      * @param response http response to write file
      * @throws FileNotAvailableException if user file is not available for given id
      */
@@ -218,6 +221,7 @@ public class FileDownloadController {
      *
      * @param selectedUserFile ids of user files
      * @param mergeModule      module required to merge files.
+     * @param request http request to write file
      * @param response         http response
      * @throws TransformerException      if transformation fails
      * @throws IOException               if content operations fail.
