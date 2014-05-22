@@ -37,6 +37,7 @@ import eionet.webq.service.RemoteFileService;
 import eionet.webq.service.UserFileMergeService;
 import eionet.webq.service.UserFileService;
 import org.apache.commons.io.IOUtils;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -70,6 +71,10 @@ import java.util.Set;
 @Controller
 @RequestMapping(value = {"download", "webform"})
 public class FileDownloadController {
+    /**
+     * Logger for this class.
+     */
+    public static final Logger LOGGER = Logger.getLogger(PublicPageController.class);
     /**
      * Service for getting user file content from storage.
      */
@@ -122,12 +127,11 @@ public class FileDownloadController {
     @RequestMapping(value = {"/converted_user_file", "user_file"}, produces = MediaType.APPLICATION_JSON_VALUE,
             method = RequestMethod.GET)
     @Transactional
-    public void downloadUserFileJson(@RequestParam int fileId, HttpServletResponse response) throws FileNotAvailableException {
-        UserFile file = userFileService.download(fileId);
+    public void downloadUserFileJson(@RequestParam int fileId, HttpServletRequest request, HttpServletResponse response)
+            throws FileNotAvailableException {
 
-        if (file == null) {
-            throw new FileNotAvailableException("The requested user file is not available with fileId: " + fileId);
-        }
+        UserFile file = getUserFile(fileId, request);
+
         if (file.isFromCdr() && file.getContent() == null) {
             file.setContent(remoteFileService.fileContent(file.getEnvelope() + "/" + file.getName()));
         }
@@ -146,11 +150,11 @@ public class FileDownloadController {
      */
     @RequestMapping(value = "/converted_user_file", produces = MediaType.APPLICATION_XML_VALUE, method = RequestMethod.GET)
     @Transactional
-    public void downloadUserFileJsonToXml(@RequestParam int fileId, HttpServletResponse response) throws FileNotAvailableException {
-        UserFile file = userFileService.download(fileId);
-        if (file == null) {
-            throw new FileNotAvailableException("The requested user file is not available with fileId=" + fileId);
-        }
+    public void downloadUserFileJsonToXml(@RequestParam int fileId, HttpServletRequest request, HttpServletResponse response)
+            throws FileNotAvailableException {
+
+        UserFile file = getUserFile(fileId, request);
+
         byte[] xml = jsonXMLConverter.convertJsonToXml(jsonXMLConverter.convertXmlToJson(file.getContent()));
 
         writeXmlFileToResponse("json.xml", xml, response);
@@ -165,11 +169,11 @@ public class FileDownloadController {
      */
     @RequestMapping(value = "/user_file")
     @Transactional
-    public void downloadUserFile(@RequestParam int fileId, HttpServletResponse response) throws FileNotAvailableException {
-        UserFile file = userFileService.download(fileId);
-        if (file == null) {
-            throw new FileNotAvailableException("The requested user file is not available with fileId=" + fileId);
-        }
+    public void downloadUserFile(@RequestParam int fileId, HttpServletRequest request, HttpServletResponse response)
+            throws FileNotAvailableException {
+
+        UserFile file = getUserFile(fileId, request);
+
         writeXmlFileToResponse(file.getName(), file.getContent(), response);
     }
 
@@ -222,13 +226,13 @@ public class FileDownloadController {
     @RequestMapping("/merge/files")
     @Transactional
     public void mergeFiles(@RequestParam(required = false) List<Integer> selectedUserFile,
-            @RequestParam(required = false) Integer mergeModule, HttpServletResponse response)
+            @RequestParam(required = false) Integer mergeModule, HttpServletRequest request, HttpServletResponse response)
             throws TransformerException, IOException, FileNotAvailableException {
         if (selectedUserFile == null || selectedUserFile.isEmpty()) {
             throw new IllegalArgumentException("No files selected");
         }
         if (selectedUserFile.size() == 1) {
-            downloadUserFile(selectedUserFile.get(0), response);
+            downloadUserFile(selectedUserFile.get(0), request, response);
             return;
         }
 
@@ -479,5 +483,30 @@ public class FileDownloadController {
         public Collection<MergeModule> getMergeModules() {
             return mergeModules;
         }
+    }
+
+    /**
+     * Get user file from database, using HTTP session jsessionid attribute or sessionid request paramater.
+     *
+     * @param fileId  file identifier
+     * @param request HTTP request
+     * @return UserFile object
+     * @throws FileNotAvailableException if file is not found from database
+     */
+    private UserFile getUserFile(int fileId, HttpServletRequest request) throws FileNotAvailableException {
+
+        UserFile file = userFileService.download(fileId);
+        if (file == null && request.getParameter("sessionid") != null) {
+            LOGGER.info("Could not find file by HTTP session ID. Let's try by sessionid parameter.");
+            file = userFileService.getByIdAndUser(fileId, request.getParameter("sessionid"));
+        }
+        if (file == null) {
+            LOGGER.error("Could not find file reference from database for session=" + request.getSession().getId());
+        }
+
+        if (file == null) {
+            throw new FileNotAvailableException("The requested user file is not available with fileId: " + fileId);
+        }
+        return file;
     }
 }

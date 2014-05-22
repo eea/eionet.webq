@@ -46,7 +46,7 @@ public class CdrRequestRedirectFilter implements Filter {
         String current = DigestUtils.md5Hex(session.getId());
 
         LOGGER.debug("Current JSESSIONID:" + current);
-        LOGGER.debug("Initial JSESSIONID:" + initialSessionId);
+        LOGGER.info("Initial JSESSIONID:" + initialSessionId);
 
         if (StringUtils.isNotEmpty(initialSessionId) && !current.equals(initialSessionId)) {
             LOGGER.info("Update sessionid hash: " + initialSessionId + " -> " + current);

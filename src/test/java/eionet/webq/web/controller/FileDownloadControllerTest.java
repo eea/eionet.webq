@@ -31,6 +31,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -65,12 +66,12 @@ public class FileDownloadControllerTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void whenMergingUserFiles_IfFileIdsListIsNull_throwsException() throws Exception {
-        controller.mergeFiles(null, null, new MockHttpServletResponse());
+        controller.mergeFiles(null, null, new MockHttpServletRequest(), new MockHttpServletResponse());
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void whenMergingUserFiles_IfFileIdsListIsEmpty_throwsException() throws Exception {
-        controller.mergeFiles(Collections.<Integer>emptyList(), null, new MockHttpServletResponse());
+        controller.mergeFiles(Collections.<Integer>emptyList(), null, new MockHttpServletRequest(), new MockHttpServletResponse());
     }
 
     @Test
@@ -85,7 +86,7 @@ public class FileDownloadControllerTest {
                 .thenReturn(mergeResult);
         MockHttpServletResponse response = new MockHttpServletResponse();
 
-        controller.mergeFiles(Arrays.asList(1,2), null, response);
+        controller.mergeFiles(Arrays.asList(1,2), null, new MockHttpServletRequest(), response);
 
         verify(userFileMergeService).mergeFiles(anyCollectionOf(UserFile.class), eq(mergeModule));
         assertThat(response.getContentAsByteArray(), equalTo(mergeResult));
@@ -96,11 +97,12 @@ public class FileDownloadControllerTest {
         int fileId = 1;
         controller = spy(controller);
         MockHttpServletResponse response = new MockHttpServletResponse();
-        doNothing().when(controller).downloadUserFile(fileId, response);
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        doNothing().when(controller).downloadUserFile(fileId, request, response);
 
-        controller.mergeFiles(Arrays.asList(fileId), null, response);
+        controller.mergeFiles(Arrays.asList(fileId), null, request, response);
 
-        verify(controller).downloadUserFile(fileId, response);
+        verify(controller).downloadUserFile(fileId, request, response);
         verifyNoMoreInteractions(userFileMergeService, mergeModules, userFileService);
     }
 
@@ -113,7 +115,7 @@ public class FileDownloadControllerTest {
         userFile2.setXmlSchema("schema2");
 
         when(userFileService.getById(anyInt())).thenReturn(userFile1, userFile2);
-        controller.mergeFiles(Arrays.asList(1, 2), null, new MockHttpServletResponse());
+        controller.mergeFiles(Arrays.asList(1, 2), null, new MockHttpServletRequest(), new MockHttpServletResponse());
     }
 
     @Test
@@ -126,7 +128,7 @@ public class FileDownloadControllerTest {
         when(userFileMergeService.mergeFiles(anyCollectionOf(UserFile.class), eq(mergeModule)))
                 .thenReturn("merge-result".getBytes());
 
-        controller.mergeFiles(Arrays.asList(1, 2), mergeModuleId, new MockHttpServletResponse());
+        controller.mergeFiles(Arrays.asList(1, 2), mergeModuleId, new MockHttpServletRequest(), new MockHttpServletResponse());
 
         verify(mergeModules).findById(mergeModuleId);
         verify(userFileMergeService).mergeFiles(anyCollectionOf(UserFile.class), eq(mergeModule));
