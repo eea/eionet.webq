@@ -67,8 +67,7 @@
         });
         disableActionButtonsIfNoFilesSelected();
         disableMergeButtonIfNoFilesSelected();
-        $('input[name=selectedUserFile]').change(disableActionButtonsIfNoFilesSelected);
-        $('input[name=selectedUserFile]').change(disableMergeButtonIfNoFilesSelected);
+        $('input[name=selectedUserFile]').change(disableActionButtonsIfNoFilesSelected, disableMergeButtonIfNoFilesSelected);
     };
 
     $(init);
