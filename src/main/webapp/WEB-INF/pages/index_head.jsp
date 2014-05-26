@@ -28,6 +28,9 @@
     function anyFileSelected() {
         return $('input[name=selectedUserFile]:checked').length > 0;
     }
+    function anyTwoFilesSelected() {
+        return $('input[name=selectedUserFile]:checked').length > 1;
+    }
 
     function showStartWebformArea() {
         $("#startWebformArea").show();
@@ -40,7 +43,11 @@
     }
 
     function disableActionButtonsIfNoFilesSelected() {
-        $("#mergeButton, #removeButton").prop('disabled', !anyFileSelected());
+        $("#removeButton").prop('disabled', !anyFileSelected());
+    }
+
+    function disableMergeButtonIfNoFilesSelected() {
+        $("#mergeButton").prop('disabled', !anyTwoFilesSelected());
     }
 
     var init = function() {
@@ -59,7 +66,9 @@
             actionForm.submit();
         });
         disableActionButtonsIfNoFilesSelected();
+        disableMergeButtonIfNoFilesSelected();
         $('input[name=selectedUserFile]').change(disableActionButtonsIfNoFilesSelected);
+        $('input[name=selectedUserFile]').change(disableMergeButtonIfNoFilesSelected);
     };
 
     $(init);
