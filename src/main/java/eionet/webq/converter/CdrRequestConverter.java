@@ -85,7 +85,7 @@ public class CdrRequestConverter implements Converter<HttpServletRequest, CdrReq
     /**
      * Set authorization details.
      *
-     * @param parameters parameters.
+     * @param parameters          parameters.
      * @param authorizationHeader authorization header.
      */
     private void setAuthorizationDetails(CdrRequest parameters, String authorizationHeader) {

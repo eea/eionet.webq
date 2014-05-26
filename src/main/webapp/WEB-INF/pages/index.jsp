@@ -43,7 +43,7 @@
         <div class="col1" id="startWebformArea">
         <fieldset>
             <p>
-                <label for="selectFile">Select web form:</label>
+                <label for="selectFile">Select file type:</label>
                 <select id="selectFile" name="selectFile" title="Select new webform">
                     <c:forEach var="form" items="${allWebForms}">
                         <option value="<c:url value="/startWebform?formId=${form.id}"/>">${form.title}</option>
@@ -165,9 +165,7 @@
             </tbody>
         </table>
         <input type="submit" id="removeButton" value="Delete selected files"/>
-        <c:if test="${isCoordinator}">
-            <input type="button" id="mergeButton" value="Merge selected files"/>
-        </c:if>
+        <input type="button" id="mergeButton" value="Merge selected files"/>
         </form>
 </div>
 </c:if>

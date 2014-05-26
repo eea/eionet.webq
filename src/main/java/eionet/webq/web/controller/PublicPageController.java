@@ -277,7 +277,7 @@ public class PublicPageController {
      *
      * @param formId  webform id
      * @param request current request
-     * @return redirection URL of webform with correct parameters
+     * @return redirection URL of webform. Keeps user one the same page.
      * @throws FileNotAvailableException if empty instance URL is filled for selected webform, but the resource is not available.
      */
     @RequestMapping(value = "/startWebform")
@@ -295,7 +295,7 @@ public class PublicPageController {
         ProjectFile webform = webFormService.findWebFormById(formId);
         String webformPath = webformUrlProvider.getWebformPath(webform);
 
-        return "redirect:" + absolutePath + webformPath + "fileId=" + fileId + baseUri;
+        return "redirect:" + absolutePath;
     }
 
     /**
