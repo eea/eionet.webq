@@ -100,18 +100,23 @@
                             </label>
                         </td>
                         <td>
-                            File size: ${humanReadableFileSize}<br/>
-                            Created: <fmt:formatDate pattern="dd MMM yyyy HH:mm:ss" value="${file.created}" /><br/>
-                            Updated: <fmt:formatDate pattern="dd MMM yyyy HH:mm:ss" value="${file.updated}" /><br/>
-                            Downloaded: <span id="${idPrefix}downloaded"><c:choose>
-                            <c:when test="${not empty file.downloaded}">
-                                <fmt:formatDate pattern="dd MMM yyyy HH:mm:ss" value="${file.downloaded}" />
-                            </c:when>
-                            <c:otherwise>
-                                never
-                            </c:otherwise>
-                            </c:choose>
-                            </span>
+                            <div class="info-container">
+                                Last modified: <fmt:formatDate pattern="dd MMM yyyy HH:mm:ss" value="${file.updated}" />
+                                <a class="info-toggle">i</a><br/>
+                                <div class="info-area">
+                                    File size: ${humanReadableFileSize}<br/>
+                                    Created: <fmt:formatDate pattern="dd MMM yyyy HH:mm:ss" value="${file.created}" /><br/>
+                                    Downloaded: <span id="${idPrefix}downloaded"><c:choose>
+                                    <c:when test="${not empty file.downloaded}">
+                                        <fmt:formatDate pattern="dd MMM yyyy HH:mm:ss" value="${file.downloaded}" />
+                                    </c:when>
+                                    <c:otherwise>
+                                        never
+                                    </c:otherwise>
+                                    </c:choose>
+                                    </span>
+                                </div>
+                            </div>
                         </td>
                         <td>
                             <div class="action">
