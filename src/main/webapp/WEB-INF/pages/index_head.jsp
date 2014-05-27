@@ -71,7 +71,7 @@
         var onSelectFile = function() {
             disableActionButtonsIfNoFilesSelected();
             disableMergeButtonIfNoFilesSelected();
-        }
+        };
         $('input[name=selectedUserFile]').change(onSelectFile);
     };
 
