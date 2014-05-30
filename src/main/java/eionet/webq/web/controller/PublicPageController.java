@@ -329,7 +329,6 @@ public class PublicPageController {
     @RequestMapping(value = "/startWebform")
     public String startWebFormSaveFile(@RequestParam int formId, HttpServletRequest request)
             throws FileNotAvailableException {
-        int fileId = userFileService.saveBasedOnWebForm(new UserFile(), webFormService.findActiveWebFormById(formId));
         String absolutePath = "";
         String baseUri = "&base_uri=";
         if (StringUtils.isNotEmpty(request.getParameter("base_uri"))) {
@@ -339,7 +338,6 @@ public class PublicPageController {
             baseUri += request.getContextPath();
         }
         ProjectFile webform = webFormService.findWebFormById(formId);
-        String webformPath = webformUrlProvider.getWebformPath(webform);
 
         return "redirect:" + absolutePath;
     }
