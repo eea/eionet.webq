@@ -62,7 +62,6 @@ public class UserFileStorageImpl extends AbstractDao<UserFile> implements UserFi
         UserFile userFile = (UserFile) getCriteria().add(Restrictions.idEq(file.getId())).uniqueResult();
         getCurrentSession().evict(userFile);
         if (userId.equals(userFile.getUserId())) {
-            file.setUpdated(new Timestamp(System.currentTimeMillis()));
             getCurrentSession().update(file);
         }
     }

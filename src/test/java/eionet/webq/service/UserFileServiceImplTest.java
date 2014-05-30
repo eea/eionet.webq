@@ -29,24 +29,20 @@ import eionet.webq.dto.UserFileIdUpdate;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
+import org.mockito.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Date;
 
 import static org.hamcrest.core.IsEqual.equalTo;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 public class UserFileServiceImplTest {
     @InjectMocks
@@ -118,9 +114,23 @@ public class UserFileServiceImplTest {
         UserFile fileToUpdate = new UserFile();
         doNothing().when(storage).update(fileToUpdate, userId);
 
+        Date lastDate = fileToUpdate.getUpdated();
         service.updateContent(fileToUpdate);
 
         verify(storage).update(fileToUpdate, userId);
+        assertNotEquals(lastDate, fileToUpdate.getUpdated());
+    }
+
+    @Test
+    public void testUpdate() throws Exception {
+        UserFile fileToUpdate = new UserFile();
+        doNothing().when(storage).update(fileToUpdate, userId);
+
+        Date lastDate = fileToUpdate.getUpdated();
+        service.update(fileToUpdate);
+
+        verify(storage).update(fileToUpdate, userId);
+        assertEquals(lastDate, fileToUpdate.getUpdated());
     }
 
     @Test

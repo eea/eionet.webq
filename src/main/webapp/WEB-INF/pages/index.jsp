@@ -6,6 +6,14 @@
 
 <c:set value="${sessionScope.isCoordinator}" var="isCoordinator"/>
 
+<c:if test="${!empty userFileList.userFiles}">
+    <script>
+        $(function () {
+            popup('edit-popup', 800, 600);
+        });
+    </script>
+</c:if>
+
 <c:choose>
     <c:when test="${isCoordinator}">
         <h1>Merge session files</h1>
@@ -102,8 +110,8 @@
                         <td>
                             <div class="info-container">
                                 Last modified: <fmt:formatDate pattern="dd MMM yyyy HH:mm:ss" value="${file.updated}" />
-                                <a class="info-toggle">i</a><br/>
-                                <div class="info-area">
+                                <a class="info-toggle" id="${file.id}"><img src="http://www.eionet.europa.eu/software/design/actionicons/info_icon.gif"></a><br/>
+                                <div class="info-area" id="info-area-${file.id}">
                                     File size: ${humanReadableFileSize}<br/>
                                     Created: <fmt:formatDate pattern="dd MMM yyyy HH:mm:ss" value="${file.created}" /><br/>
                                     Downloaded: <span id="${idPrefix}downloaded"><c:choose>
@@ -171,6 +179,26 @@
         </table>
         <input type="submit" id="removeButton" value="Delete selected files"/>
         <input type="button" id="mergeButton" value="Merge selected files"/>
+        <input type="button" id="editButton" value="Rename"/>
         </form>
 </div>
 </c:if>
+
+<div class="dialogTemplate" id="edit-popup">
+    <h2>Edit files</h2>
+    <c:url var="saveUrl" value="/save"/>
+    <f:form id="editUserFileForm" modelAttribute="userFileList" action="${saveUrl}" method="POST" enctype="multipart/form-data" class="renameForm">
+        <f:errors path="*" element="div" cssClass="error-msg"/>
+        <c:forEach items="${userFileList.userFiles}" varStatus="vs">
+            <table class="datatable">
+                <tr>
+                    <th scope="row"><label for="userFiles[${vs.index}].name">Name</label></th>
+                    <td><f:input path="userFiles[${vs.index}].name" style="width:500px" class="required fileName"/></td>
+                </tr>
+            </table>
+            <f:hidden path="userFiles[${vs.index}].id" />
+        </c:forEach>
+        <input type="submit" value="Save"/>
+        <input type="button" onclick="$('#edit-popup').dialog('close');" value="Close"/>
+    </f:form>
+</div>

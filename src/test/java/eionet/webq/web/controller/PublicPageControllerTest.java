@@ -20,26 +20,6 @@
  */
 package eionet.webq.web.controller;
 
-import static org.hamcrest.core.IsEqual.equalTo;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.util.Arrays;
-
-import eionet.webq.web.controller.util.WebformUrlProvider;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
-
 import eionet.webq.converter.JsonXMLBidirectionalConverter;
 import eionet.webq.dao.orm.ProjectFile;
 import eionet.webq.dao.orm.UploadedFile;
@@ -49,6 +29,27 @@ import eionet.webq.service.CDREnvelopeService;
 import eionet.webq.service.RemoteFileService;
 import eionet.webq.service.UserFileService;
 import eionet.webq.service.WebFormService;
+import eionet.webq.web.controller.util.UserFileList;
+import eionet.webq.web.controller.util.WebformUrlProvider;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.*;
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+
+import java.util.Arrays;
+import java.util.List;
+
+import static org.hamcrest.core.IsEqual.equalTo;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  */
@@ -173,6 +174,45 @@ public class PublicPageControllerTest {
 
         verify(jsonXMLConverter).convertJsonToXml(any(byte[].class));
         verify(userFileService).updateContent(file);
+    }
+
+    @Test
+    public void whenEditUserFileIsCalled_userCorrectFileListIsAddedToModel() {
+
+        ArgumentCaptor argument = ArgumentCaptor.forClass(UserFileList.class);
+        List<Integer> userFiles = Arrays.asList(1, 5);
+
+        UserFile file1 = Mockito.mock(UserFile.class);
+        UserFile file2 = Mockito.mock(UserFile.class);
+        UserFile file5 = Mockito.mock(UserFile.class);
+        when(userFileService.getById(1)).thenReturn(file1);
+        when(userFileService.getById(5)).thenReturn(file5);
+
+        publicPageController.editUserFile(userFiles, model);
+
+        verify(model).addAttribute(eq("userFileList"), argument.capture());
+        UserFileList fileList = (UserFileList) argument.getValue();
+
+        assertTrue(fileList.getUserFiles().containsAll(Arrays.asList(file1, file5)));
+    }
+
+    @Test
+    public void whenUserFileIsSaved_nameMustBeUpdated() {
+
+        int fileId = 1;
+        UserFile file1 = mock(UserFile.class);
+        when(file1.getId()).thenReturn(fileId);
+        when(userFileService.getById(fileId)).thenReturn(file1);
+
+        publicPageController.saveUserFile(new UserFileList(Arrays.asList(file1)), mock(BindingResult.class), model);
+
+        verify(userFileService).update(file1);
+
+        ArgumentCaptor captor = ArgumentCaptor.forClass(UserFileList.class);
+        verify(model).addAttribute(eq("userFileList"), captor.capture());
+
+        UserFileList list = (UserFileList) captor.getValue();
+        assertTrue(list.getUserFiles().isEmpty());
     }
 
     private UserFile userFileServiceWillReturnUserFileFromCdr() {

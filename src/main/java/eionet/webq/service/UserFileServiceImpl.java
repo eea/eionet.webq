@@ -20,23 +20,22 @@
  */
 package eionet.webq.service;
 
-import static org.apache.commons.lang3.StringUtils.defaultIfEmpty;
-import static org.apache.commons.lang3.StringUtils.isNotEmpty;
-
-import java.util.Arrays;
-import java.util.Collection;
-
-import javax.servlet.http.HttpServletRequest;
-
-import org.apache.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import eionet.webq.dao.UserFileDownload;
 import eionet.webq.dao.UserFileStorage;
 import eionet.webq.dao.orm.ProjectFile;
 import eionet.webq.dao.orm.UserFile;
 import eionet.webq.dto.UserFileIdUpdate;
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import javax.servlet.http.HttpServletRequest;
+import java.sql.Timestamp;
+import java.util.Arrays;
+import java.util.Collection;
+
+import static org.apache.commons.lang3.StringUtils.defaultIfEmpty;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 /**
  * {@link UserFileService} implementation.
@@ -129,6 +128,14 @@ public class UserFileServiceImpl implements UserFileService {
 
     @Override
     public void updateContent(UserFile file) {
+        String userId = userId();
+        LOGGER.info("Updating file content id=" + file.getId() + " for user=" + userId);
+        file.setUpdated(new Timestamp(System.currentTimeMillis()));
+        storage.update(file, userId);
+    }
+
+    @Override
+    public void update(UserFile file) {
         String userId = userId();
         LOGGER.info("Updating file id=" + file.getId() + " for user=" + userId);
         storage.update(file, userId);

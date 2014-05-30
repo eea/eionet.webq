@@ -28,6 +28,7 @@ import eionet.webq.dto.FileInfo;
 import eionet.webq.dto.UploadForm;
 import eionet.webq.dto.XmlSaveResult;
 import eionet.webq.service.*;
+import eionet.webq.web.controller.util.UserFileList;
 import eionet.webq.web.controller.util.WebformUrlProvider;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
@@ -51,6 +52,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
+import java.util.ArrayList;
 
 /**
  * Base controller for front page actions.
@@ -230,6 +233,47 @@ public class PublicPageController {
             userFileService.removeFilesById(selectedUserFile);
             model.addAttribute("message", "Selected files removed successfully");
         }
+        return welcome(model);
+    }
+
+    /**
+     * Populates model with user files that were selected to be changed.
+     *
+     * @param selectedUserFile ids of files to be edited
+     * @param model            holder for model attributes
+     * @return view name
+     */
+    @RequestMapping(value = "/edit")
+     public String editUserFile(@RequestParam(required = false) List<Integer> selectedUserFile, Model model) {
+        List<UserFile> userFiles = new ArrayList<UserFile>();
+
+        for (Integer fileId : selectedUserFile) {
+            userFiles.add(userFileService.getById(fileId));
+        }
+
+        model.addAttribute("userFileList", new UserFileList(userFiles));
+        return welcome(model);
+    }
+
+    /**
+     * Save edited user files to database.
+     *
+     * @param userFiles     list of user files to be persisted
+     * @param bindingResult validation errors
+     * @param model         holder for model attributes
+     * @return view name
+     */
+    @RequestMapping(value = "/save", method = RequestMethod.POST)
+    @Transactional
+    public String saveUserFile(@Valid @ModelAttribute UserFileList userFiles, BindingResult bindingResult, Model model) {
+
+        for (UserFile userFile : userFiles.getUserFiles()) {
+            UserFile file = userFileService.getById(userFile.getId());
+            file.setName(userFile.getName());
+            userFileService.update(file);
+        }
+        model.addAttribute("userFileList", new UserFileList());
+        model.addAttribute("message", "File(s) updated successfully");
         return welcome(model);
     }
 

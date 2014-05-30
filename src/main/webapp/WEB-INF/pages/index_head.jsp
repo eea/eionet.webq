@@ -1,7 +1,19 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <jsp:include page="popup_setup.jsp"/>
+<script type="text/javascript" src="<c:url value="/js/jquery.validate.min.js"/>"></script>
 
 <script type="text/javascript">
+
+    $.validator.addMethod("fileName", function(value, element) {
+        return this.optional(element) || /^[\w,\s-]+\.[A-Za-z]+$/.test(value);
+    }, "Invalid file name");
+
+    $.validator.addClassRules("fileName", {fileName: true});
+
+    $().ready(function() {
+        $("#editUserFileForm").validate();
+    });
+
     function getSelectedFileValue() {
         return $('#selectFile').val();
     }
@@ -43,7 +55,7 @@
     }
 
     function disableActionButtonsIfNoFilesSelected() {
-        $("#removeButton").prop('disabled', !anyFileSelected());
+        $("#removeButton, #editButton").prop('disabled', !anyFileSelected());
     }
 
     function disableMergeButtonIfNoFilesSelected() {
@@ -63,6 +75,11 @@
         $("#mergeButton").click(function () {
             var actionForm = $("form#actionForm");
             actionForm.attr("action", "<c:url value="/download/merge/files"/>");
+            actionForm.submit();
+        });
+        $("#editButton").click(function () {
+            var actionForm = $("form#actionForm");
+            actionForm.attr("action", "<c:url value="/edit"/>");
             actionForm.submit();
         });
         disableActionButtonsIfNoFilesSelected();
@@ -87,9 +104,9 @@
 
     $(document).ready(function(){
         $('.info-toggle').hover(function(){
-            $('.info-area').fadeIn(500)
+            $("#info-area-" + $(this).attr("id")).fadeIn(500);
         },function(){
-            $('.info-area').fadeOut(500)
+            $("#info-area-" + $(this).attr("id")).fadeOut(500);
         })
     });
 </script>
@@ -119,20 +136,14 @@
         display: none;
     }
     .info-toggle {
-        font-size: 16px;
-        font-family: "Times New Roman",Georgia,Serif;
-        text-align: center;
-        color: #85A3A3;
-        border: 1px solid #85A3A3;
-        width: 20px;
         cursor: default;
-        line-height: 20px;
-        background-color: #fff;
-        box-shadow: 2px 2px 2px #000;
-        border-radius: 5px;
         display: inline-block;
     }
     .info-area{
         display:none;
+    }
+
+    form.renameForm label.error, label.error {
+        color: red;
     }
 </style>
