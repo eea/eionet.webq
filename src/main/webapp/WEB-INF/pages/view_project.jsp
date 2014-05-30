@@ -60,7 +60,7 @@
                 <td>
                     <c:choose>
                         <c:when test="${not empty projectFile.remoteFileUrl}">
-                            <input type="button" onclick="window.location = '<c:url value="/projects/remote/check/updates/${projectEntry.projectId}/file/${projectFile.id}"/>'" value="Check for updates">
+                            <input type="button" title="${projectFile.remoteFileUrl}" onclick="window.location = '<c:url value="/projects/remote/check/updates/${projectEntry.projectId}/file/${projectFile.id}"/>'" value="Check for updates">
                         </c:when>
                         <c:otherwise>
                             No remote file URL

@@ -310,9 +310,11 @@ public class PublicPageController {
     @RequestMapping(value = "/saveXml", consumes = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.POST)
     @Transactional
     public String saveJsonAsXml(@RequestParam int fileId, HttpServletRequest request, Model model) {
+        LOGGER.info("/saveXml fileId=" + fileId + "; sessionid=" + DigestUtils.md5Hex(request.getSession().getId()));
         byte[] xml = jsonToXMLConverter.convertJsonToXml(getContentFromRequest(request));
         XmlSaveResult xmlSaveResult = updateFileContent(fileId, request, xml);
         LOGGER.info("Converting json to XML ended up with result=" + xmlSaveResult);
+        // FIXME convert xmlSaveResult to json and return it to client
         return welcome(model);
     }
 
