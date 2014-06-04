@@ -3,6 +3,7 @@
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib prefix="s" uri="http://www.springframework.org/tags" %>
 <%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags"%>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
 
 <c:set value="${sessionScope.isCoordinator}" var="isCoordinator"/>
 
@@ -22,8 +23,8 @@
     </c:when>
     <c:otherwise>
         <h1>Web Questionnaires</h1>
-        <p>This tool helps gather data for reporting obligations, using web questionnaires predefined by the EEA.<br />
-        Data entries are gathered in a session file (in XML format).<br />
+        <p>This tool helps gather data for reporting obligations, using web questionnaires predefined by the EEA.
+        Data entries are gathered in a session file (in XML format).<br /><br />
         You can:
         </p>
         <ul>
@@ -38,14 +39,7 @@
 
 
 <div class="container">
-    <c:choose>
-        <c:when test="${isCoordinator}">
-            <c:url var="uploadUrl" value="/uploadXml"/>
-        </c:when>
-        <c:otherwise>
-            <c:url var="uploadUrl" value="/uploadXmlWithRedirect"/>
-        </c:otherwise>
-    </c:choose>
+    <c:url var="uploadUrl" value="/uploadXml"/>
     <f:form modelAttribute="uploadForm" action="${uploadUrl}" method="POST" enctype="multipart/form-data">
         <f:errors path="*" element="div" cssClass="error-msg"/>
         <div class="col1" id="startWebformArea">
@@ -59,7 +53,7 @@
                 </select>
             </p>
             <p>
-                <input type="button" value="Start" onclick="window.location=getSelectedFileValue()"/>
+                <input type="button" value="Save file in session" onclick="window.location=getSelectedFileValue()"/>
             </p>
         </fieldset>
         </div>
@@ -75,12 +69,20 @@
         <div hidden="hidden" class="important-msg" id="not-downloaded-files-present"><strong>Note</strong><p>Please download your modified files!</p></div>
         <form id="actionForm" method="post" action="<c:url value="/remove/files"/>">
         <table class="datatable" style="width:100%">
+            <colgroup>
+                <col style="width:30px"/>
+                <col/>
+                <col/>
+                <col style="width:220px"/>
+                <col style="width:30px;text-align:center"/>
+            </colgroup>
             <thead>
             <tr>
                 <th scope="col"></th>
                 <th scope="col">File</th>
-                <th scope="col">File info</th>
                 <th scope="col">Actions</th>
+                <th scope="col">Last modified</th>
+                <th scope="col"></th>
             </tr>
             </thead>
             <tbody>
@@ -96,52 +98,33 @@
                         <td>
                             <input type="checkbox" name="selectedUserFile" value="${file.id}" id="chk-${file.id}"/>
                         </td>
-                        <td><label for="chk-${file.id}">
+                        <td>
                             <c:choose>
-                                <c:when test="${downloadNotificationsRequired}">
-                                    <strong>${file.name}</strong>
+                                <c:when test="${fn:endsWith(file.name, '.xml')}">
+                                    <c:set var="fileType" value="link-xml"/>
                                 </c:when>
                                 <c:otherwise>
-                                    ${file.name}
+                                    <c:set var="fileType" value="link-plain"/>
                                 </c:otherwise>
                             </c:choose>
-                            </label>
-                        </td>
-                        <td>
-                            <div class="info-container">
-                                Last modified: <fmt:formatDate pattern="dd MMM yyyy HH:mm:ss" value="${file.updated}" />
-                                <a class="info-toggle" id="${file.id}"><img src="http://www.eionet.europa.eu/software/design/actionicons/info_icon.gif"></a><br/>
-                                <div class="info-area" id="info-area-${file.id}">
-                                    File size: ${humanReadableFileSize}<br/>
-                                    Created: <fmt:formatDate pattern="dd MMM yyyy HH:mm:ss" value="${file.created}" /><br/>
-                                    Downloaded: <span id="${idPrefix}downloaded"><c:choose>
-                                    <c:when test="${not empty file.downloaded}">
-                                        <fmt:formatDate pattern="dd MMM yyyy HH:mm:ss" value="${file.downloaded}" />
-                                    </c:when>
-                                    <c:otherwise>
-                                        never
-                                    </c:otherwise>
-                                    </c:choose>
-                                    </span>
-                                </div>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="action">
+                            <span class="file-download ${fileType}">
                                 <c:choose>
                                     <c:when test="${downloadNotificationsRequired}">
-                                        <c:set var="updateNote" value="(NB! updated through web form)"/>
+                                        <c:set var="updateNote" value="(Updated through web form)"/>
                                     </c:when>
                                     <c:otherwise>
                                         <c:set var="updateNote" value=""/>
                                     </c:otherwise>
                                 </c:choose>
-                            <a href="${downloadLink}" onclick="hideNotDownloadedNote('${idPrefix}');" title="Download file">Download
-                                <c:if test="${not empty updateNote}">
-                                    <span id="${idPrefix}not-downloaded" class="not-downloaded" style="color:red;text-decoration:none"> ${updateNote}</span>
-                                </c:if>
-                            </a>
-                            </div>
+                                <a href="${downloadLink}" onclick="hideNotDownloadedNote('${idPrefix}');" title="Download file">
+                                    ${file.name}<img alt="Download" src="<c:url value='/images/download-file.png'/>">
+                                    <c:if test="${not empty updateNote}">
+                                        <br/><span id="${idPrefix}not-downloaded" class="not-downloaded" style="color:red;text-decoration:none"> ${updateNote}</span>
+                                    </c:if>
+                                </a>
+                            </span>
+                        </td>
+                        <td>
                             <c:forEach var="webForm" items="${allWebForms}">
 
                                 <c:if test="${file.xmlSchema eq webForm.xmlSchema}">
@@ -158,20 +141,45 @@
                             <div class="action">
                                 View file as:
                                 <ul>
-                                <c:if test="${not empty file.availableConversions}">
-                                    <c:forEach items="${file.availableConversions}" var="conversion">
-                                        <li><a href="<c:url value="/download/convert?fileId=${file.id}&amp;conversionId=${conversion.id}"/>">${conversion.description}</a></li>
-                                    </c:forEach>
-                                </c:if>
-                                <c:url value="/download/converted_user_file?fileId=${file.id}" var="conversionDownloadLink"/>
-                                <c:if test="${developerOrAdmin}">
-                                    <li><a href="#" onclick="showJson('${conversionDownloadLink}')">View as JSON</a></li>
-                                    <li><a href="#" onclick="showJsonToXml('${conversionDownloadLink}')">View as XML</a></li>
-                                </c:if>
+                                    <c:if test="${not empty file.availableConversions}">
+                                        <c:forEach items="${file.availableConversions}" var="conversion">
+                                            <li><a href="<c:url value="/download/convert?fileId=${file.id}&amp;conversionId=${conversion.id}"/>">${conversion.description}</a></li>
+                                        </c:forEach>
+                                    </c:if>
                                 </ul>
+                                <c:if test="${developerOrAdmin}">
+                                    <div class="advanced-conversions-toggle" id="act-${file.id}" title="Advanced conversions">...
+                                    <c:url value="/download/converted_user_file?fileId=${file.id}" var="conversionDownloadLink"/>
+                                    <div class="advanced-conversions" id="advanced-conversions-${file.id}">
+                                        <ul>
+                                            <li><a href="#" onclick="showJson('${conversionDownloadLink}')">View as JSON</a></li>
+                                            <li><a href="#" onclick="showJsonToXml('${conversionDownloadLink}')">View as XML</a></li>
+                                        </ul>
+                                    </div>
+                                    </div>
+                                </c:if>
                             </div>
                             </c:if>
                         </td>
+                        <td>
+                            <div class="info-container">
+                                <fmt:formatDate pattern="dd MMM yyyy HH:mm:ss" value="${file.updated}" />
+                                <div class="info-area" id="info-area-${file.id}">
+                                    File size: ${humanReadableFileSize}<br/>
+                                    Created: <fmt:formatDate pattern="dd MMM yyyy HH:mm:ss" value="${file.created}" /><br/>
+                                    Downloaded: <span id="${idPrefix}downloaded"><c:choose>
+                                    <c:when test="${not empty file.downloaded}">
+                                        <fmt:formatDate pattern="dd MMM yyyy HH:mm:ss" value="${file.downloaded}" />
+                                    </c:when>
+                                    <c:otherwise>
+                                        never
+                                    </c:otherwise>
+                                </c:choose>
+                                    </span>
+                                </div>
+                            </div>
+                        </td>
+                        <td><a class="info-toggle" id="${file.id}" title="File info"><img alt="File info" src="<c:url value='/images/info_icon.gif'/>"></a></td>
                     </tr>
                 </c:if>
             </c:forEach>
@@ -185,7 +193,7 @@
 </c:if>
 
 <div class="dialogTemplate" id="edit-popup">
-    <h2>Edit files</h2>
+    <h2>Rename file<c:if test="${fn:length(userFileList.userFiles) gt 1}">s</c:if></h2>
     <c:url var="saveUrl" value="/save"/>
     <f:form id="editUserFileForm" modelAttribute="userFileList" action="${saveUrl}" method="POST" enctype="multipart/form-data" class="renameForm">
         <f:errors path="*" element="div" cssClass="error-msg"/>

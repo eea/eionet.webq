@@ -24,6 +24,7 @@ import eionet.webq.dao.orm.UserFile;
 import eionet.webq.dto.UserFileIdUpdate;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.log4j.Logger;
+import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 
@@ -68,7 +69,7 @@ public class UserFileStorageImpl extends AbstractDao<UserFile> implements UserFi
     @SuppressWarnings("unchecked")
     @Override
     public Collection<UserFile> findAllUserFiles(String userId) {
-        return getCriteria().add(eq("userId", userId)).list();
+        return getCriteria().add(eq("userId", userId)).addOrder(Order.desc("updated")).list();
     }
 
     @Override

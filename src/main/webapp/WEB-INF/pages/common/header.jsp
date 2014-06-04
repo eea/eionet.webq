@@ -33,7 +33,7 @@
     </div>
 </div>
 
-<c:set var="appName" value="Web Questionnaire v2"/>
+<c:set var="appName" value="Web Questionnaires"/>
 
 <div id="pagehead">
     <a href="/"><img src="<c:url value="/images/eea-print-logo.gif"/>" alt="Logo" id="logo" /></a>
@@ -51,7 +51,9 @@
     <div class="breadcrumbitem eionetaccronym">
         <a href="http://www.eionet.europa.eu">Eionet</a>
     </div>
-    <div class="breadcrumbitemlast">${appName}</div>
+    <div class="breadcrumbitemlast">
+        <a href="<c:url value="/"/>">${appName}</a>
+    </div>
     <div class="breadcrumbtail"></div>
 </div>
 

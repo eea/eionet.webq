@@ -109,6 +109,13 @@
             $("#info-area-" + $(this).attr("id")).fadeOut(500);
         })
     });
+    $(document).ready(function(){
+        $('.advanced-conversions-toggle').hover(function(){
+            $("#advanced-conversions-" + $(this).attr("id").substring(4)).fadeIn(500);
+        },function(){
+            $("#advanced-conversions-" + $(this).attr("id").substring(4)).fadeOut(500);
+        })
+    });
 </script>
 <style type="text/css">
     .container {
@@ -140,6 +147,9 @@
         display: inline-block;
     }
     .info-area{
+        display:none;
+    }
+    .advanced-conversions{
         display:none;
     }
 

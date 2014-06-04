@@ -53,3 +53,5 @@ div#drop-operations:hover ul, .over ul {
 .datatable tr:hover td{
     background-color: #e4f1bc;
 }
+.file-download a {margin-left: 4px;}
+.file-download a img {margin-left: 4px;}
