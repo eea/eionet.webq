@@ -5,8 +5,6 @@
 <%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags"%>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
 
-<c:set value="${sessionScope.isCoordinator}" var="isCoordinator"/>
-
 <c:if test="${!empty userFileList.userFiles}">
     <script>
         $(function () {
@@ -15,27 +13,19 @@
     </script>
 </c:if>
 
-<c:choose>
-    <c:when test="${isCoordinator}">
-        <h1>Merge session files</h1>
-        <p>This tool helps you to merge multiple XML files. Either upload XML files separately or multiple files packed into a zip archive. The zip file will be uploaded and unwrapped.<br />
-        <p><input type="button" id="uploadButton" value="Upload session file"/></p>
-    </c:when>
-    <c:otherwise>
         <h1>Web Questionnaires</h1>
         <p>This tool helps gather data for reporting obligations, using web questionnaires predefined by the EEA.
-        Data entries are gathered in a session file (in XML format).<br /><br />
+        Data entries are gathered in a session file (in XML format).<br />
         You can:
         </p>
         <ul>
             <li>start a new session, or</li>
-            <li>upload a file from a previous session to edit it.</li>
+            <li>upload a file from a previous session to edit it, or</li>
+            <li>merge multiple XML files by either uploading XML files separately or multiple files packed into a zip archive.<br />
         </ul>
         <p>Do not forget to save your file on your computer, and to do that often! The data will disappear if the session expires or if you close your browser.</p>
 
         <p><input type="button" value="Start new session" onclick="showStartWebformArea()"/> or <input type="button" id="uploadButton" value="Upload session file"/></p>
-    </c:otherwise>
-</c:choose>
 
 
 <div class="container">
@@ -91,7 +81,7 @@
                     <c:url value="/download/user_file?fileId=${file.id}" var="downloadLink"/>
                     <s:eval expression="T(eionet.webq.dao.orm.util.UserFileInfo).isNotDownloadedAfterUpdateUsingForm(file)"
                         var="notDownloadedAfterUpdate"/>
-                    <c:set var="downloadNotificationsRequired" value="${not isCoordinator and notDownloadedAfterUpdate}"/>
+                    <c:set var="downloadNotificationsRequired" value="${notDownloadedAfterUpdate}"/>
                     <s:eval expression="T(org.apache.commons.io.FileUtils).byteCountToDisplaySize(file.sizeInBytes)" var="humanReadableFileSize"/>
                     <c:set var="idPrefix" value="${file.id}-"/>
                     <tr class="user_file">

@@ -128,22 +128,8 @@ public class PublicPageController {
      * @param session http session
      * @return view name
      */
-    @RequestMapping(value = "/coordinator")
-    public String coordinator(Model model, HttpSession session) {
-        session.setAttribute("isCoordinator", true);
-        return welcome(model);
-    }
-
-    /**
-     * Action to be performed on http GET method and path '/'.
-     *
-     * @param model   holder for model attributes
-     * @param session http session
-     * @return view name
-     */
     @RequestMapping(value = "/sessionfiles")
     public String sessionfiles(Model model, HttpSession session) {
-        session.setAttribute("isCoordinator", false);
         return welcome(model);
     }
 
