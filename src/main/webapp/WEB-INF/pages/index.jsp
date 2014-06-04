@@ -94,7 +94,7 @@
                                     <c:set var="fileType" value="link-xml"/>
                                 </c:when>
                                 <c:otherwise>
-                                    <c:set var="fileType" value="link-plain"/>
+                                    <c:set var="fileType" value="link-unknown"/>
                                 </c:otherwise>
                             </c:choose>
                             <span class="file-download ${fileType}">
