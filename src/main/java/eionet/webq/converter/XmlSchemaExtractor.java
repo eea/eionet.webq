@@ -66,8 +66,9 @@ public class XmlSchemaExtractor {
             while (xmlStreamReader.hasNext()) {
                 if (xmlStreamReader.next() == START_ELEMENT) {
                     return StringUtils.defaultString(
-                            xmlStreamReader.getAttributeValue(XSI_NAMESPACE_URI, "noNamespaceSchemaLocation"),
-                            xmlStreamReader.getAttributeValue(XSI_NAMESPACE_URI, "schemaLocation"));
+                            parseNoNamespaceSchemaLocation(xmlStreamReader.getAttributeValue(XSI_NAMESPACE_URI,
+                                    "noNamespaceSchemaLocation")),
+                            parseSchemaLocation(xmlStreamReader.getAttributeValue(XSI_NAMESPACE_URI, "schemaLocation")));
                 }
             }
         } catch (Exception e) {
@@ -83,5 +84,43 @@ public class XmlSchemaExtractor {
             }
         }
         return null;
+    }
+
+    /**
+     * Parse noNamespaceSchemaLocation attribute and extract space delimited schema URLs.
+     *
+     * @param noNamespaceSchemaLocation Schema location string
+     * @return Space delimited schema URLs
+     */
+    private String parseNoNamespaceSchemaLocation(String noNamespaceSchemaLocation) {
+
+        if (StringUtils.isBlank(noNamespaceSchemaLocation)) {
+            return noNamespaceSchemaLocation;
+        }
+
+        String[] split = StringUtils.split(noNamespaceSchemaLocation);
+        return StringUtils.join(split, ' ');
+    }
+
+    /**
+     * Parse schemaLocation attribute and extract schema URLs without namespace references.
+     *
+     * @param schemaLocation Schema location string containing space delimited namespace + schema URL pairs.
+     * @return Space delimited schema URLs without namespace references.
+     */
+    private String parseSchemaLocation(String schemaLocation) {
+
+        if (StringUtils.isBlank(schemaLocation)) {
+            return schemaLocation;
+        }
+
+        StringBuilder sb = new StringBuilder();
+        String[] split = StringUtils.split(schemaLocation);
+        for (int i = 0; i < split.length; i++) {
+            if (i % 2 != 0) {
+                sb.append(" ").append(split[i]);
+            }
+        }
+        return sb.toString().trim();
     }
 }
