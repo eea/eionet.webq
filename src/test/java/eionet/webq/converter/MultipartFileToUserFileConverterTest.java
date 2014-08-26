@@ -82,7 +82,7 @@ public class MultipartFileToUserFileConverterTest {
                 fileConverter.convert(createMultipartFile(xmlWithRootElementAttributes(rootAttributesDeclaration(schemaAttribute(
                         namespace, schemaLocation))))).iterator().next();
 
-        assertThat(result.getXmlSchema(), equalTo(namespace + " " + schemaLocation));
+        assertThat(result.getXmlSchema(), equalTo(schemaLocation));
     }
 
     @Test
