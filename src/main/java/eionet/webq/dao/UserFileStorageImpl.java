@@ -33,6 +33,8 @@ import org.apache.log4j.Logger;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
+import org.hibernate.type.IntegerType;
+import org.hibernate.type.Type;
 import org.springframework.stereotype.Repository;
 
 import eionet.webq.dao.orm.UserFile;
@@ -76,12 +78,26 @@ public class UserFileStorageImpl extends AbstractDao<UserFile> implements UserFi
     }
 
     @Override
-    public Number getUserWebFormFileCount(String userId, String xmlSchema) {
+    public Number getUserWebFormFileMaxNum(String userId, String xmlSchema, String fileName, char numDelim, char extensionDelim) {
+        String fileNameSearchCriteria;
+        String maxProjection;
+
+        int lastIndexOfDot = fileName.lastIndexOf(extensionDelim);
+        if (lastIndexOfDot > 0) {
+            fileNameSearchCriteria = fileName.substring(0, lastIndexOfDot) + numDelim + "%" + fileName.substring(lastIndexOfDot);
+            maxProjection =
+                    "MAX(CAST(SUBSTRING(file_name, LOCATE('" + numDelim + "', file_name) + 1, LOCATE('" + extensionDelim
+                            + "', file_name) - LOCATE('" + numDelim + "', file_name) - 1) AS SIGNED)) AS num";
+
+        } else {
+            fileNameSearchCriteria = fileName + numDelim + "%";
+            maxProjection = "MAX(CAST(SUBSTRING(file_name, LOCATE('" + numDelim + "', file_name) + 1) AS SIGNED)) AS num";
+        }
+
         return (Number) (getCriteria().add(eq("userId", userId)).add(like("xmlSchema", xmlSchema))
-                .setProjection(Projections.rowCount()).uniqueResult());
-        // return (Number) (getCriteria().add(eq("userId", userId)).add(like("xmlSchema",
-        // xmlSchema)).addOrder(Order.desc("updated"))
-        // .setProjection(Projections.rowCount()).uniqueResult());
+                .add(like("file.name", fileNameSearchCriteria))
+                .setProjection(Projections.sqlProjection(maxProjection, new String[] {"num"}, new Type[] {new IntegerType()}))
+                .uniqueResult());
     }
 
     @Override

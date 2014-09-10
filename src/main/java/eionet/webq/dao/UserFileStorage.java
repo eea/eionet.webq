@@ -68,9 +68,12 @@ public interface UserFileStorage {
      *
      * @param userId user id
      * @param xmlSchema schema name
-     * @return number of files
+     * @param fileName file name
+     * @param numDelim number delimeter
+     * @param extensionDelim file etension delimeter
+	 * @return maximum number
      */
-    Number getUserWebFormFileCount(String userId, String xmlSchema);
+    Number getUserWebFormFileMaxNum(String userId, String xmlSchema, String fileName, char numDelim, char extensionDelim);
 
     /**
      * Removes files which belongs to user by file id.

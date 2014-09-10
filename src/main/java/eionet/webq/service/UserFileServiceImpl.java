@@ -94,15 +94,20 @@ public class UserFileServiceImpl implements UserFileService {
     @Override
     public int saveBasedOnWebForm(UserFile file, ProjectFile webForm) throws FileNotAvailableException {
         String emptyInstanceUrl = webForm.getEmptyInstanceUrl();
-        // only query of file name is empty
+        // only query if file name is empty
         if (StringUtils.isEmpty(file.getName())) {
-            Number userWebFormFileCount = storage.getUserWebFormFileCount(userId(), webForm.getXmlSchema());
             String fn = defaultIfEmpty(webForm.getNewXmlFileName(), "new_form.xml");
-            int lastIndexOfDot = fn.lastIndexOf('.');
+            char numDelim = '_';
+            char extensionDelim = '.';
+            Number userWebFormFileCount =
+                    storage.getUserWebFormFileMaxNum(userId(), webForm.getXmlSchema(), fn, numDelim, extensionDelim);
+
+            int lastIndexOfDot = fn.lastIndexOf(extensionDelim);
+            long fileNum = (userWebFormFileCount != null) ? userWebFormFileCount.longValue() + 1 : 1;
             if (lastIndexOfDot > 0) {
-                fn = fn.substring(0, lastIndexOfDot) + "_" + (userWebFormFileCount.longValue() + 1) + fn.substring(lastIndexOfDot);
+                fn = fn.substring(0, lastIndexOfDot) + numDelim +fileNum + fn.substring(lastIndexOfDot);
             } else {
-                fn = fn + "_" + (userWebFormFileCount.longValue() + 1);
+                fn = fn + numDelim + fileNum;
             }
             file.setName(fn);
         }
