@@ -25,7 +25,7 @@
         </ul>
         <p>Do not forget to save your file on your computer, and to do that often! The data will disappear if the session expires or if you close your browser.</p>
 
-        <p><input type="button" value="Start new session" onclick="showStartWebformArea()"/> or <input type="button" id="uploadButton" value="Upload session file"/></p>
+        <p><input type="button" value="Create new session file" onclick="showStartWebformArea()"/> or <input type="button" id="uploadButton" value="Upload session file"/></p>
 
 
 <div class="container">

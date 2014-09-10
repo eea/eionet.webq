@@ -64,6 +64,15 @@ public interface UserFileStorage {
     Collection<UserFile> findAllUserFiles(String userId);
 
     /**
+     * Find the number of files created for user, in that schema.
+     *
+     * @param userId user id
+     * @param xmlSchema schema name
+     * @return number of files
+     */
+    Number getUserWebFormFileCount(String userId, String xmlSchema);
+
+    /**
      * Removes files which belongs to user by file id.
      * @param userId user id
      * @param ids file ids

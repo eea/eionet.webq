@@ -20,22 +20,25 @@
  */
 package eionet.webq.service;
 
+import static org.apache.commons.lang3.StringUtils.defaultIfEmpty;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
+
+import java.sql.Timestamp;
+import java.util.Arrays;
+import java.util.Collection;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import eionet.webq.dao.UserFileDownload;
 import eionet.webq.dao.UserFileStorage;
 import eionet.webq.dao.orm.ProjectFile;
 import eionet.webq.dao.orm.UserFile;
 import eionet.webq.dto.UserFileIdUpdate;
-import org.apache.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import javax.servlet.http.HttpServletRequest;
-import java.sql.Timestamp;
-import java.util.Arrays;
-import java.util.Collection;
-
-import static org.apache.commons.lang3.StringUtils.defaultIfEmpty;
-import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 /**
  * {@link UserFileService} implementation.
@@ -91,11 +94,20 @@ public class UserFileServiceImpl implements UserFileService {
     @Override
     public int saveBasedOnWebForm(UserFile file, ProjectFile webForm) throws FileNotAvailableException {
         String emptyInstanceUrl = webForm.getEmptyInstanceUrl();
-        file.setName(defaultIfEmpty(file.getName(), defaultIfEmpty(webForm.getNewXmlFileName(), "new_form.xml")));
+        // only query of file name is empty
+        if (StringUtils.isEmpty(file.getName())) {
+            Number userWebFormFileCount = storage.getUserWebFormFileCount(userId(), webForm.getXmlSchema());
+            String fn = defaultIfEmpty(webForm.getNewXmlFileName(), "new_form.xml");
+            int lastIndexOfDot = fn.lastIndexOf('.');
+            if (lastIndexOfDot > 0) {
+                fn = fn.substring(0, lastIndexOfDot) + "_" + (userWebFormFileCount.longValue() + 1) + fn.substring(lastIndexOfDot);
+            } else {
+                fn = fn + "_" + (userWebFormFileCount.longValue() + 1);
+            }
+            file.setName(fn);
+        }
         file.setXmlSchema(webForm.getXmlSchema());
-        return isNotEmpty(emptyInstanceUrl)
-                ? saveWithContentFromRemoteLocation(file, emptyInstanceUrl)
-                : save(file);
+        return isNotEmpty(emptyInstanceUrl) ? saveWithContentFromRemoteLocation(file, emptyInstanceUrl) : save(file);
     }
 
     @Override
@@ -171,10 +183,13 @@ public class UserFileServiceImpl implements UserFileService {
     /**
      * Set file content from remote location and saves it.
      *
-     * @param file file
-     * @param url  file content remote location
+     * @param file
+     *            file
+     * @param url
+     *            file content remote location
      * @return file id in storage
-     * @throws FileNotAvailableException if file not available from remote location
+     * @throws FileNotAvailableException
+     *             if file not available from remote location
      */
     private int saveWithContentFromRemoteLocation(UserFile file, String url) throws FileNotAvailableException {
         file.setContent(remoteFileService.fileContent(url));

@@ -20,20 +20,23 @@
  */
 package eionet.webq.dao;
 
-import eionet.webq.dao.orm.UserFile;
-import eionet.webq.dto.UserFileIdUpdate;
-import org.apache.commons.lang3.ArrayUtils;
-import org.apache.log4j.Logger;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
-import org.springframework.stereotype.Repository;
+import static org.hibernate.criterion.Restrictions.and;
+import static org.hibernate.criterion.Restrictions.eq;
+import static org.hibernate.criterion.Restrictions.in;
+import static org.hibernate.criterion.Restrictions.like;
 
 import java.util.Collection;
 import java.util.Date;
 
-import static org.hibernate.criterion.Restrictions.and;
-import static org.hibernate.criterion.Restrictions.eq;
-import static org.hibernate.criterion.Restrictions.in;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.log4j.Logger;
+import org.hibernate.criterion.Order;
+import org.hibernate.criterion.Projections;
+import org.hibernate.criterion.Restrictions;
+import org.springframework.stereotype.Repository;
+
+import eionet.webq.dao.orm.UserFile;
+import eionet.webq.dto.UserFileIdUpdate;
 
 /**
  * {@link eionet.webq.dao.UserFileStorage} implementation.
@@ -73,6 +76,15 @@ public class UserFileStorageImpl extends AbstractDao<UserFile> implements UserFi
     }
 
     @Override
+    public Number getUserWebFormFileCount(String userId, String xmlSchema) {
+        return (Number) (getCriteria().add(eq("userId", userId)).add(like("xmlSchema", xmlSchema))
+                .setProjection(Projections.rowCount()).uniqueResult());
+        // return (Number) (getCriteria().add(eq("userId", userId)).add(like("xmlSchema",
+        // xmlSchema)).addOrder(Order.desc("updated"))
+        // .setProjection(Projections.rowCount()).uniqueResult());
+    }
+
+    @Override
     public void remove(final String userId, final int... ids) {
         removeByCriterion(and(eq("userId", userId), in("id", ArrayUtils.toObject(ids))));
     }
@@ -80,10 +92,13 @@ public class UserFileStorageImpl extends AbstractDao<UserFile> implements UserFi
     @Override
     public void updateUserId(UserFileIdUpdate updateData) {
         if (updateData.getUserAgent() != null) {
-            int updateResult = getCurrentSession().createQuery("UPDATE UserFile SET userId=:newId WHERE userId=:oldId AND " +
-                    "(userAgent=:userAgent OR substring(userAgent, 1, 60) = substring(:userAgent, 1, 60))")
-                    .setString("newId", updateData.getNewUserId()).setString("oldId", updateData.getOldUserId())
-                    .setString("userAgent", updateData.getUserAgent()).executeUpdate();
+            int updateResult =
+                    getCurrentSession()
+                            .createQuery(
+                                    "UPDATE UserFile SET userId=:newId WHERE userId=:oldId AND "
+                                            + "(userAgent=:userAgent OR substring(userAgent, 1, 60) = substring(:userAgent, 1, 60))")
+                            .setString("newId", updateData.getNewUserId()).setString("oldId", updateData.getOldUserId())
+                            .setString("userAgent", updateData.getUserAgent()).executeUpdate();
             LOGGER.info(updateResult + " rows affected in update statement");
         } else {
             LOGGER.warn("No user agent set in user file id update data.");
