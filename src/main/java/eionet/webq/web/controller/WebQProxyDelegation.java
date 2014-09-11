@@ -27,12 +27,15 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.client.RestTemplate;
 
@@ -49,6 +52,12 @@ public class WebQProxyDelegation {
      * Logger for this class.
      */
     private static final Logger LOGGER = Logger.getLogger(WebQProxyDelegation.class);
+
+    /**
+     * Autowired restTemplate.
+     */
+    @Autowired
+    RestTemplate restTemplate;
 
     /**
      * This method delegates given uri to another instance.
@@ -74,10 +83,38 @@ public class WebQProxyDelegation {
         // create uri
         URI uri = new URI(uriStr);
         // call and return
-        RestTemplate restTemplate = new RestTemplate();
-        ResponseEntity<String> responseEntity =
-                restTemplate.exchange(uri, method == null ? HttpMethod.GET : method, new HttpEntity<String>(body), String.class);
-        return responseEntity;
+        return this.restTemplate.exchange(uri, method == null ? HttpMethod.GET : method, new HttpEntity<String>(body),
+                String.class);
     } // end of method delegate
+
+    /**
+     * This method also delegates but with a different approach. See:
+     * http://stackoverflow.com/questions/14595245/rest-service-pass-through-via-spring This method also works when a method is not
+     * defined.
+     *
+     * @param uri
+     *            uri
+     * @return result
+     */
+    @RequestMapping(value = "/restProxy", method = RequestMethod.GET)
+    public @ResponseBody String restProxyGet(@RequestParam("uri") String uri) {
+        LOGGER.info("/restProxy [GET] uri=" + uri);
+        return restTemplate.getForObject(uri, String.class);
+    } // end of method restProxyGet
+
+    /**
+     * This method also delegates but with a different approach.
+     *
+     * @param uri
+     *            uri
+     * @param body
+     *            body
+     * @return result
+     */
+    @RequestMapping(value = "/restProxy", method = RequestMethod.POST)
+    public @ResponseBody String restProxyPost(@RequestParam("uri") String uri, @RequestBody String body) {
+        LOGGER.info("/restProxy [POST] uri=" + uri);
+        return restTemplate.postForObject(uri, body, String.class);
+    } // end of method restProxyPost
 
 } // end of class WebQProxyDelegation
