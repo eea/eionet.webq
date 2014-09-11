@@ -60,34 +60,6 @@ public class WebQProxyDelegation {
     RestTemplate restTemplate;
 
     /**
-     * This method delegates given uri to another instance.
-     *
-     * @param body
-     *            body
-     * @param method
-     *            method
-     * @param request
-     *            request
-     * @param response
-     *            response
-     * @return delegated
-     * @throws URISyntaxException
-     */
-    @RequestMapping("/delegate")
-    @ResponseBody
-    public ResponseEntity<String> delegate(@RequestBody String body, HttpMethod method, HttpServletRequest request,
-            HttpServletResponse response) throws URISyntaxException {
-        // get uri parameter, it should have been escaped
-        String uriStr = request.getParameter("uri");
-        LOGGER.info("/delegate uri=" + uriStr + ". From: " + request.getRequestURI() + ", with Query: " + request.getQueryString());
-        // create uri
-        URI uri = new URI(uriStr);
-        // call and return
-        return this.restTemplate.exchange(uri, method == null ? HttpMethod.GET : method, new HttpEntity<String>(body),
-                String.class);
-    } // end of method delegate
-
-    /**
      * This method also delegates but with a different approach. See:
      * http://stackoverflow.com/questions/14595245/rest-service-pass-through-via-spring This method also works when a method is not
      * defined.
