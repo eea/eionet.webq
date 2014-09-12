@@ -110,10 +110,9 @@
         })
     });
     $(document).ready(function(){
-        $('.advanced-conversions-toggle').hover(function(){
-            $("#advanced-conversions-" + $(this).attr("id").substring(4)).fadeIn(500);
-        },function(){
-            $("#advanced-conversions-" + $(this).attr("id").substring(4)).fadeOut(500);
+        $('.advanced-conversions-toggle').click(function (){
+            //$("#advanced-conversions-" + $(this).attr("id").substring(4)).toggle(800);
+            $("#advanced-conversions-" + $(this).attr("id").substring(4)).slideToggle(500);
         })
     });
 </script>

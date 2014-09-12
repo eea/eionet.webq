@@ -23,11 +23,20 @@ package eionet.webq.dto;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import org.apache.commons.lang3.EnumUtils;
+
 /**
  * Class represents conversion for xml schema.
  */
 @XmlRootElement(name = "conversion")
 public class Conversion {
+    /**
+     * Basic types enum.
+     */
+    public static enum BASIC_TYPES {
+        HTML, EXCEL, ODS, CSV, TXT
+    };
+
     /**
      * Conversion id or xsl name.
      */
@@ -55,5 +64,9 @@ public class Conversion {
 
     public String getResultType() {
         return resultType;
+    }
+
+    public boolean isBasic() {
+        return EnumUtils.isValidEnum(BASIC_TYPES.class, this.resultType);
     }
 }

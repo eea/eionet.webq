@@ -125,7 +125,7 @@
                             <sec:authorize access="hasRole('DEVELOPER')" var="isDeveloper"/>
                             <sec:authorize access="hasRole('ADMIN')" var="isAdmin"/>
                             <c:set var="developerOrAdmin" value="${isAdmin or isDeveloper}"/>
-
+                            <c:set var="advancedConversionFound" value="${false}"/>
 
                             <c:if test="${not empty file.availableConversions or developerOrAdmin}">
                             <div class="action">
@@ -133,19 +133,39 @@
                                 <ul>
                                     <c:if test="${not empty file.availableConversions}">
                                         <c:forEach items="${file.availableConversions}" var="conversion">
-                                            <li><a href="<c:url value="/download/convert?fileId=${file.id}&amp;conversionId=${conversion.id}"/>">${conversion.description}</a></li>
+                                            <c:choose>
+                                                <c:when test="${conversion.basic}">
+                                                    <li><a href="<c:url value="/download/convert?fileId=${file.id}&amp;conversionId=${conversion.id}"/>">${conversion.description}</a></li>
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <c:set var="advancedConversionFound" value="${true}"/>
+                                                </c:otherwise>
+                                            </c:choose>
                                         </c:forEach>
                                     </c:if>
                                 </ul>
-                                <c:if test="${developerOrAdmin}">
+                                <c:if test="${developerOrAdmin or advancedConversionFound}">
                                     <div class="advanced-conversions-toggle" id="act-${file.id}" title="Advanced conversions">...
-                                    <c:url value="/download/converted_user_file?fileId=${file.id}" var="conversionDownloadLink"/>
-                                    <div class="advanced-conversions" id="advanced-conversions-${file.id}">
-                                        <ul>
-                                            <li><a href="#" onclick="showJson('${conversionDownloadLink}')">View as JSON</a></li>
-                                            <li><a href="#" onclick="showJsonToXml('${conversionDownloadLink}')">View as XML</a></li>
-                                        </ul>
-                                    </div>
+                                        <!-- iterate for advanced conversions first -->
+                                        <c:if test="${not empty file.availableConversions and advancedConversionFound}">
+                                            <c:forEach items="${file.availableConversions}" var="conversion">
+                                                <c:choose>
+                                                    <c:if test="${!conversion.basic}">
+                                                        <li><a href="<c:url value="/download/convert?fileId=${file.id}&amp;conversionId=${conversion.id}"/>">${conversion.description}</a></li>
+                                                    </c:if>
+                                                </c:choose>
+                                            </c:forEach>
+                                        </c:if>
+                                        <!-- add developer and admin options -->
+                                        <c:if test="${developerOrAdmin}">
+                                            <c:url value="/download/converted_user_file?fileId=${file.id}" var="conversionDownloadLink"/>
+                                            <div class="advanced-conversions" id="advanced-conversions-${file.id}">
+                                                <ul>
+                                                    <li><a href="#" onclick="showJson('${conversionDownloadLink}')">View as JSON</a></li>
+                                                    <li><a href="#" onclick="showJsonToXml('${conversionDownloadLink}')">View as XML</a></li>
+                                                </ul>
+                                            </div>
+                                        </c:if>
                                     </div>
                                 </c:if>
                             </div>
