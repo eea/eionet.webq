@@ -135,7 +135,7 @@
                                         <c:forEach items="${file.availableConversions}" var="conversion">
                                             <c:choose>
                                                 <c:when test="${conversion.basic}">
-                                                    <li><a href="<c:url value="/download/convert?fileId=${file.id}&amp;conversionId=${conversion.id}"/>">${conversion.description}</a></li>
+                                                    <li><a href="<c:url value="/download/convert?fileId=${file.id}&amp;conversionId=${conversion.id}"/>">${empty conversion.description ? conversion.resultType : conversion.description}</a></li>
                                                 </c:when>
                                                 <c:otherwise>
                                                     <c:set var="advancedConversionFound" value="${true}"/>
@@ -149,11 +149,9 @@
                                         <!-- iterate for advanced conversions first -->
                                         <c:if test="${not empty file.availableConversions and advancedConversionFound}">
                                             <c:forEach items="${file.availableConversions}" var="conversion">
-                                                <c:choose>
-                                                    <c:if test="${!conversion.basic}">
-                                                        <li><a href="<c:url value="/download/convert?fileId=${file.id}&amp;conversionId=${conversion.id}"/>">${conversion.description}</a></li>
-                                                    </c:if>
-                                                </c:choose>
+                                                <c:if test="${!conversion.basic}">
+                                                    <li><a href="<c:url value="/download/convert?fileId=${file.id}&amp;conversionId=${conversion.id}"/>">${empty conversion.description ? conversion.resultType : conversion.description}</a></li>
+                                                </c:if>
                                             </c:forEach>
                                         </c:if>
                                         <!-- add developer and admin options -->

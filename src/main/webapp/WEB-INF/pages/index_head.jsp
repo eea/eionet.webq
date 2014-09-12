@@ -111,7 +111,6 @@
     });
     $(document).ready(function(){
         $('.advanced-conversions-toggle').click(function (){
-            //$("#advanced-conversions-" + $(this).attr("id").substring(4)).toggle(800);
             $("#advanced-conversions-" + $(this).attr("id").substring(4)).slideToggle(500);
         })
     });
