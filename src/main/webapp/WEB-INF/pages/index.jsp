@@ -49,7 +49,6 @@
         </div>
         <div class="col2" id="uploadXmlArea">
             <f:input id="userFile" class="hidden" type="file" path="userFiles"/>
-            <input id="newFileSubmit" class="hidden" type="submit" value="Upload"/>
         </div>
     </f:form>
 </div>
@@ -63,6 +62,7 @@
                 <col style="width:30px"/>
                 <col/>
                 <col/>
+                <col style="width:75px"/>
                 <col style="width:220px"/>
                 <col style="width:30px;text-align:center"/>
             </colgroup>
@@ -71,6 +71,7 @@
                 <th scope="col"></th>
                 <th scope="col">File</th>
                 <th scope="col">Actions</th>
+                <th scope="col">File size</th>
                 <th scope="col">Last modified</th>
                 <th scope="col"></th>
             </tr>
@@ -115,13 +116,17 @@
                             </span>
                         </td>
                         <td>
+                            <c:set var="isWebformAvailableForFile" value="${false}"/>
                             <c:forEach var="webForm" items="${allWebForms}">
-
                                 <c:if test="${file.xmlSchema eq webForm.xmlSchema}">
                                     <div class="action"><strong><a href="<c:url value="${webForm.webformLink}&amp;instance=${downloadLink}&amp;fileId=${file.id}&amp;base_uri=${pageContext.request.contextPath}"/>">Edit
                                         with '${webForm.title}' web form</a></strong></div>
+                                    <c:set var="isWebformAvailableForFile" value="${true}"/>
                                 </c:if>
                             </c:forEach>
+                            <c:if test="${not isWebformAvailableForFile}">
+                                <div class="alert"><p><strong>No webforms available. Check the XML Schema of the file ['${file.xmlSchema}']</strong></p></div>
+                            </c:if>
                             <sec:authorize access="hasRole('DEVELOPER')" var="isDeveloper"/>
                             <sec:authorize access="hasRole('ADMIN')" var="isAdmin"/>
                             <c:set var="developerOrAdmin" value="${isAdmin or isDeveloper}"/>
@@ -171,9 +176,13 @@
                         </td>
                         <td>
                             <div class="info-container">
+                                ${humanReadableFileSize}
+                            </div>
+                        </td>
+                        <td>
+                            <div class="info-container">
                                 <fmt:formatDate pattern="dd MMM yyyy HH:mm:ss" value="${file.updated}" />
                                 <div class="info-area" id="info-area-${file.id}">
-                                    File size: ${humanReadableFileSize}<br/>
                                     Created: <fmt:formatDate pattern="dd MMM yyyy HH:mm:ss" value="${file.created}" /><br/>
                                     Downloaded: <span id="${idPrefix}downloaded"><c:choose>
                                     <c:when test="${not empty file.downloaded}">

@@ -34,7 +34,7 @@ public class Conversion {
      * Basic types enum.
      */
     public static enum BASIC_TYPES {
-        HTML, EXCEL, ODS, CSV, TXT
+        HTML, EXCEL, ODS, CSV, PDF
     };
 
     /**

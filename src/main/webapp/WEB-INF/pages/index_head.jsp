@@ -65,9 +65,10 @@
     var init = function() {
         $("#uploadButton").click(function () {
             $("#startWebformArea").hide();
-            $("#userFile").click().change(function () {
-                $("#newFileSubmit").click();
+            $("#userFile").on("change", function () {
+                $("#uploadForm").submit();
             });
+            $("#userFile").click();
         });
         hideFilesTableIfNoFilesPresent();
         $("#startWebformArea").hide();
