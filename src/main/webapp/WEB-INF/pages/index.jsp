@@ -151,24 +151,24 @@
                                 </ul>
                                 <c:if test="${developerOrAdmin or advancedConversionFound}">
                                     <div class="advanced-conversions-toggle" id="act-${file.id}" title="Advanced conversions">...
-                                        <!-- iterate for advanced conversions first -->
-                                        <c:if test="${not empty file.availableConversions and advancedConversionFound}">
-                                            <c:forEach items="${file.availableConversions}" var="conversion">
-                                                <c:if test="${!conversion.basic}">
-                                                    <li><a href="<c:url value="/download/convert?fileId=${file.id}&amp;conversionId=${conversion.id}"/>">${empty conversion.description ? conversion.resultType : conversion.description}</a></li>
+                                        <div class="advanced-conversions" id="advanced-conversions-${file.id}">
+                                            <ul>
+                                                <!-- iterate for advanced conversions first -->
+                                                <c:if test="${not empty file.availableConversions and advancedConversionFound}">
+                                                    <c:forEach items="${file.availableConversions}" var="conversion">
+                                                        <c:if test="${!conversion.basic}">
+                                                            <li><a href="<c:url value="/download/convert?fileId=${file.id}&amp;conversionId=${conversion.id}"/>">${empty conversion.description ? conversion.resultType : conversion.description}</a></li>
+                                                        </c:if>
+                                                    </c:forEach>
                                                 </c:if>
-                                            </c:forEach>
-                                        </c:if>
-                                        <!-- add developer and admin options -->
-                                        <c:if test="${developerOrAdmin}">
-                                            <c:url value="/download/converted_user_file?fileId=${file.id}" var="conversionDownloadLink"/>
-                                            <div class="advanced-conversions" id="advanced-conversions-${file.id}">
-                                                <ul>
+                                                <!-- add developer and admin options -->
+                                                <c:if test="${developerOrAdmin}">
+                                                    <c:url value="/download/converted_user_file?fileId=${file.id}" var="conversionDownloadLink"/>
                                                     <li><a href="#" onclick="showJson('${conversionDownloadLink}')">View as JSON</a></li>
                                                     <li><a href="#" onclick="showJsonToXml('${conversionDownloadLink}')">View as XML</a></li>
-                                                </ul>
-                                            </div>
-                                        </c:if>
+                                                </c:if>
+                                            </ul>
+                                        </div>
                                     </div>
                                 </c:if>
                             </div>
