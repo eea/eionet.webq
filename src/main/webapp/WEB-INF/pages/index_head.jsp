@@ -111,8 +111,10 @@
         })
     });
     $(document).ready(function(){
+        $(".arrow-up").hide();
         $('.advanced-conversions-toggle').click(function (){
             $("#advanced-conversions-" + $(this).attr("id").substring(4)).slideToggle(500);
+            $(this).find(".arrow-up, .arrow-down").toggle();
         })
     });
 </script>
@@ -151,6 +153,8 @@
     .advanced-conversions{
         display:none;
     }
+    .arrow-up{margin-left:10px;width:25px;display:inline-block;}
+    .arrow-down{margin-left:10px;width:25px;display:inline-block;}
 
     form.renameForm label.error, label.error {
         color: red;

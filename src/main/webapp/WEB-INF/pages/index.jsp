@@ -63,8 +63,7 @@
                 <col/>
                 <col/>
                 <col style="width:75px"/>
-                <col style="width:220px"/>
-                <col style="width:30px;text-align:center"/>
+                <col style="width:235px"/>
             </colgroup>
             <thead>
             <tr>
@@ -73,7 +72,6 @@
                 <th scope="col">Actions</th>
                 <th scope="col">File size</th>
                 <th scope="col">Last modified</th>
-                <th scope="col"></th>
             </tr>
             </thead>
             <tbody>
@@ -150,7 +148,13 @@
                                     </c:if>
                                 </ul>
                                 <c:if test="${developerOrAdmin or advancedConversionFound}">
-                                    <div class="advanced-conversions-toggle" id="act-${file.id}" title="Advanced conversions">...
+                                    <div class="advanced-conversions-toggle" id="act-${file.id}">
+                                        <div class="arrow-up">
+                                            <a class="info-toggle" title="Hide advanced conversions">&#9650;</a>
+                                        </div>
+                                        <div class="arrow-down">
+                                            <a class="info-toggle" title="Show advanced conversions">&#9660;</a>
+                                        </div>
                                         <div class="advanced-conversions" id="advanced-conversions-${file.id}">
                                             <ul>
                                                 <!-- iterate for advanced conversions first -->
@@ -182,6 +186,11 @@
                         <td>
                             <div class="info-container">
                                 <fmt:formatDate pattern="dd MMM yyyy HH:mm:ss" value="${file.updated}" />
+                                <div style="width:30px;text-align:center;float:right">
+                                    <a class="info-toggle" id="${file.id}" title="File info">
+                                        <img alt="File info" src="<c:url value='/images/info_icon.gif'/>">
+                                    </a>
+                                </div>
                                 <div class="info-area" id="info-area-${file.id}">
                                     Created: <fmt:formatDate pattern="dd MMM yyyy HH:mm:ss" value="${file.created}" /><br/>
                                     Downloaded: <span id="${idPrefix}downloaded"><c:choose>
@@ -196,7 +205,6 @@
                                 </div>
                             </div>
                         </td>
-                        <td><a class="info-toggle" id="${file.id}" title="File info"><img alt="File info" src="<c:url value='/images/info_icon.gif'/>"></a></td>
                     </tr>
                 </c:if>
             </c:forEach>
