@@ -33,7 +33,7 @@
     </div>
 </div>
 
-<c:set var="appName" value="Web Questionnaire v2"/>
+<c:set var="appName" value="Web Questionnaires"/>
 
 <div id="pagehead">
     <a href="/"><img src="<c:url value="/images/eea-print-logo.gif"/>" alt="Logo" id="logo" /></a>
@@ -51,14 +51,15 @@
     <div class="breadcrumbitem eionetaccronym">
         <a href="http://www.eionet.europa.eu">Eionet</a>
     </div>
-    <div class="breadcrumbitemlast">${appName}</div>
+    <div class="breadcrumbitemlast">
+        <a href="<c:url value="/"/>">${appName}</a>
+    </div>
     <div class="breadcrumbtail"></div>
 </div>
 
 <div id="leftcolumn" class="localnav">
     <ul>
         <li><a href="<c:url value="/sessionfiles"/>">My session files</a></li>
-        <li><a href="<c:url value="/coordinator"/>">Merge session files</a></li>
         <c:if test="${developerOrAdmin}">
             <li><a href="<c:url value="/projects/"/>">Webform projects</a></li>
             <li><a href="<c:url value="/merge/modules"/>">Merging modules</a></li>

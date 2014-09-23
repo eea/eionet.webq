@@ -23,11 +23,13 @@ package eionet.webq.service;
 import static org.apache.commons.lang3.StringUtils.defaultIfEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
+import java.sql.Timestamp;
 import java.util.Arrays;
 import java.util.Collection;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -92,11 +94,25 @@ public class UserFileServiceImpl implements UserFileService {
     @Override
     public int saveBasedOnWebForm(UserFile file, ProjectFile webForm) throws FileNotAvailableException {
         String emptyInstanceUrl = webForm.getEmptyInstanceUrl();
-        file.setName(defaultIfEmpty(file.getName(), defaultIfEmpty(webForm.getNewXmlFileName(), "new_form.xml")));
+        // only query if file name is empty
+        if (StringUtils.isEmpty(file.getName())) {
+            String fn = defaultIfEmpty(webForm.getNewXmlFileName(), "new_form.xml");
+            char numDelim = '_';
+            char extensionDelim = '.';
+            Number userWebFormFileCount =
+                    storage.getUserWebFormFileMaxNum(userId(), webForm.getXmlSchema(), fn, numDelim, extensionDelim);
+
+            int lastIndexOfDot = fn.lastIndexOf(extensionDelim);
+            long fileNum = (userWebFormFileCount != null) ? userWebFormFileCount.longValue() + 1 : 1;
+            if (lastIndexOfDot > 0) {
+                fn = fn.substring(0, lastIndexOfDot) + numDelim +fileNum + fn.substring(lastIndexOfDot);
+            } else {
+                fn = fn + numDelim + fileNum;
+            }
+            file.setName(fn);
+        }
         file.setXmlSchema(webForm.getXmlSchema());
-        return isNotEmpty(emptyInstanceUrl)
-                ? saveWithContentFromRemoteLocation(file, emptyInstanceUrl)
-                : save(file);
+        return isNotEmpty(emptyInstanceUrl) ? saveWithContentFromRemoteLocation(file, emptyInstanceUrl) : save(file);
     }
 
     @Override
@@ -139,6 +155,14 @@ public class UserFileServiceImpl implements UserFileService {
     @Override
     public void updateContent(UserFile file) {
         String userId = userId();
+        LOGGER.info("Updating file content id=" + file.getId() + " for user=" + userId);
+        file.setUpdated(new Timestamp(System.currentTimeMillis()));
+        storage.update(file, userId);
+    }
+
+    @Override
+    public void update(UserFile file) {
+        String userId = userId();
         LOGGER.info("Updating file id=" + file.getId() + " for user=" + userId);
         storage.update(file, userId);
     }
@@ -164,10 +188,13 @@ public class UserFileServiceImpl implements UserFileService {
     /**
      * Set file content from remote location and saves it.
      *
-     * @param file file
-     * @param url  file content remote location
+     * @param file
+     *            file
+     * @param url
+     *            file content remote location
      * @return file id in storage
-     * @throws FileNotAvailableException if file not available from remote location
+     * @throws FileNotAvailableException
+     *             if file not available from remote location
      */
     private int saveWithContentFromRemoteLocation(UserFile file, String url) throws FileNotAvailableException {
         file.setContent(remoteFileService.fileContent(url));

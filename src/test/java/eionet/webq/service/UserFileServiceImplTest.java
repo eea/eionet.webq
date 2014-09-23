@@ -21,11 +21,25 @@
 
 package eionet.webq.service;
 
-import eionet.webq.dao.UserFileDownload;
-import eionet.webq.dao.UserFileStorage;
-import eionet.webq.dao.orm.ProjectFile;
-import eionet.webq.dao.orm.UserFile;
-import eionet.webq.dto.UserFileIdUpdate;
+import static org.hamcrest.core.IsEqual.equalTo;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
+
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Date;
+
+import javax.servlet.http.HttpServletRequest;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -35,18 +49,11 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
-import javax.servlet.http.HttpServletRequest;
-import java.util.Arrays;
-import java.util.Collection;
-
-import static org.hamcrest.core.IsEqual.equalTo;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
+import eionet.webq.dao.UserFileDownload;
+import eionet.webq.dao.UserFileStorage;
+import eionet.webq.dao.orm.ProjectFile;
+import eionet.webq.dao.orm.UserFile;
+import eionet.webq.dto.UserFileIdUpdate;
 
 public class UserFileServiceImplTest {
     @InjectMocks
@@ -76,7 +83,7 @@ public class UserFileServiceImplTest {
 
     @After
     public void verifyGeneralMockCalls() {
-        verify(userIdProvider).getUserId();
+        verify(userIdProvider, atLeastOnce()).getUserId();
         verifyNoMoreInteractions(userIdProvider, storage, userFileDownload);
     }
 
@@ -118,9 +125,23 @@ public class UserFileServiceImplTest {
         UserFile fileToUpdate = new UserFile();
         doNothing().when(storage).update(fileToUpdate, userId);
 
+        Date lastDate = fileToUpdate.getUpdated();
         service.updateContent(fileToUpdate);
 
         verify(storage).update(fileToUpdate, userId);
+        assertNotEquals(lastDate, fileToUpdate.getUpdated());
+    }
+
+    @Test
+    public void testUpdate() throws Exception {
+        UserFile fileToUpdate = new UserFile();
+        doNothing().when(storage).update(fileToUpdate, userId);
+
+        Date lastDate = fileToUpdate.getUpdated();
+        service.update(fileToUpdate);
+
+        verify(storage).update(fileToUpdate, userId);
+        assertEquals(lastDate, fileToUpdate.getUpdated());
     }
 
     @Test
@@ -138,22 +159,94 @@ public class UserFileServiceImplTest {
         webForm.setEmptyInstanceUrl(url);
         byte[] fileContent = "remote-file-content".getBytes();
         when(remoteFileService.fileContent(url)).thenReturn(fileContent);
+        when(storage.getUserWebFormFileMaxNum(eq(userId), eq(webForm.getXmlSchema()), anyString(), eq('_'), eq('.'))).thenReturn(
+                new Integer(0));
         service.saveBasedOnWebForm(new UserFile(), webForm);
 
         ArgumentCaptor<UserFile> userFileArgument = ArgumentCaptor.forClass(UserFile.class);
+        verify(storage).getUserWebFormFileMaxNum(eq(userId), eq(webForm.getXmlSchema()), anyString(), eq('_'), eq('.'));
         verify(storage).save(userFileArgument.capture(), anyString());
         assertThat(userFileArgument.getValue().getContent(), equalTo(fileContent));
     }
 
     @Test
-    public void whenSavingBasedOnWebFormSetFileNameFromWebFormIfItIsNotSet() throws Exception {
+     public void whenSavingBasedOnWebFormSetFileNameFromWebFormIfItIsNotSet() throws Exception {
+        String fileName = "new file name";
         ProjectFile webForm = new ProjectFile();
-        webForm.setNewXmlFileName("new file name");
+        webForm.setNewXmlFileName(fileName);
         UserFile userFile = new UserFile();
+        when(storage.getUserWebFormFileMaxNum(eq(userId), eq(webForm.getXmlSchema()), anyString(), eq('_'), eq('.'))).thenReturn(
+                new Integer(0));
         service.saveBasedOnWebForm(userFile, webForm);
 
+        verify(storage).getUserWebFormFileMaxNum(eq(userId), eq(webForm.getXmlSchema()), anyString(), eq('_'), eq('.'));
         verify(storage).save(eq(userFile), anyString());
-        assertThat(userFile.getName(), equalTo(webForm.getNewXmlFileName()));
+        assertThat(userFile.getName(), equalTo(fileName + "_" + 1));
+    }
+
+    @Test
+    public void whenSavingMultipleWebFormInASessionWithoutFileExtension() throws Exception {
+        String fileName = "multiple web form file name";
+        ProjectFile webForm = new ProjectFile();
+        webForm.setNewXmlFileName(fileName);
+        when(storage.getUserWebFormFileMaxNum(eq(userId), eq(webForm.getXmlSchema()), anyString(), eq('_'), eq('.'))).thenReturn(
+                new Integer(0));
+        UserFile userFile = new UserFile();
+        service.saveBasedOnWebForm(userFile, webForm);
+        //check first file
+        assertThat(userFile.getName(), equalTo(fileName + "_" + 1));
+        verify(storage).save(eq(userFile), anyString());
+
+        when(storage.getUserWebFormFileMaxNum(eq(userId), eq(webForm.getXmlSchema()), anyString(), eq('_'), eq('.'))).thenReturn(
+                new Integer(1));
+        userFile = new UserFile();
+        service.saveBasedOnWebForm(userFile, webForm);
+        //check second file
+        assertThat(userFile.getName(), equalTo(fileName + "_" + 2));
+
+        verify(storage, times(2)).getUserWebFormFileMaxNum(eq(userId), eq(webForm.getXmlSchema()), anyString(), eq('_'), eq('.'));
+        verify(storage).save(eq(userFile), anyString());
+    }
+
+    @Test
+    public void whenSavingMultipleWebFormInASessionWithFileExtension() throws Exception {
+        String fileName = "multiple web form file name";
+        String fileExtension = ".xml";
+        ProjectFile webForm = new ProjectFile();
+        webForm.setNewXmlFileName(fileName+ fileExtension);
+        when(storage.getUserWebFormFileMaxNum(eq(userId), eq(webForm.getXmlSchema()), anyString(), eq('_'), eq('.'))).thenReturn(
+                new Integer(0));
+        UserFile userFile = new UserFile();
+        service.saveBasedOnWebForm(userFile, webForm);
+        //check first file
+        assertThat(userFile.getName(), equalTo(fileName + "_" + 1 + fileExtension));
+        verify(storage).save(eq(userFile), anyString());
+
+        when(storage.getUserWebFormFileMaxNum(eq(userId), eq(webForm.getXmlSchema()), anyString(), eq('_'), eq('.'))).thenReturn(
+                new Integer(1));
+        userFile = new UserFile();
+        service.saveBasedOnWebForm(userFile, webForm);
+        //check second file
+        assertThat(userFile.getName(), equalTo(fileName + "_" + 2 + fileExtension));
+
+        verify(storage, times(2)).getUserWebFormFileMaxNum(eq(userId), eq(webForm.getXmlSchema()), anyString(), eq('_'), eq('.'));
+        verify(storage).save(eq(userFile), anyString());
+    }
+
+    @Test
+    public void whenSavingWebFormInASessionWithFileExtensionWhichDoesNotExistBefore() throws Exception {
+        String fileName = "multiple web form file name";
+        String fileExtension = ".xml";
+        ProjectFile webForm = new ProjectFile();
+        webForm.setNewXmlFileName(fileName+ fileExtension);
+        when(storage.getUserWebFormFileMaxNum(eq(userId), eq(webForm.getXmlSchema()), anyString(), eq('_'), eq('.'))).thenReturn(
+                null);
+        UserFile userFile = new UserFile();
+        service.saveBasedOnWebForm(userFile, webForm);
+        //check file
+        assertThat(userFile.getName(), equalTo(fileName + "_" + 1 + fileExtension));
+        verify(storage).save(eq(userFile), anyString());
+        verify(storage).getUserWebFormFileMaxNum(eq(userId), eq(webForm.getXmlSchema()), anyString(), eq('_'), eq('.'));
     }
 
     @Test
@@ -164,10 +257,13 @@ public class UserFileServiceImplTest {
         webForm.setEmptyInstanceUrl("empty.instance");
         UserFile userFile = new UserFile();
         when(remoteFileService.fileContent(anyString())).thenReturn(fileContent);
+        when(storage.getUserWebFormFileMaxNum(eq(userId), eq(webForm.getXmlSchema()), anyString(), eq('_'), eq('.'))).thenReturn(
+                new Integer(0));
         service.saveBasedOnWebForm(userFile, webForm);
 
         assertThat(userFile.getContent(), equalTo(fileContent));
         verify(remoteFileService).fileContent(webForm.getEmptyInstanceUrl());
+        verify(storage).getUserWebFormFileMaxNum(eq(userId), eq(webForm.getXmlSchema()), anyString(), eq('_'), eq('.'));
         verify(storage).save(eq(userFile), anyString());
     }
 

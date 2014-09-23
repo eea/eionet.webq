@@ -64,6 +64,18 @@ public interface UserFileStorage {
     Collection<UserFile> findAllUserFiles(String userId);
 
     /**
+     * Find the number of files created for user, in that schema.
+     *
+     * @param userId user id
+     * @param xmlSchema schema name
+     * @param fileName file name
+     * @param numDelim number delimeter
+     * @param extensionDelim file etension delimeter
+	 * @return maximum number
+     */
+    Number getUserWebFormFileMaxNum(String userId, String xmlSchema, String fileName, char numDelim, char extensionDelim);
+
+    /**
      * Removes files which belongs to user by file id.
      * @param userId user id
      * @param ids file ids

@@ -28,6 +28,7 @@ import eionet.webq.dto.FileInfo;
 import eionet.webq.dto.UploadForm;
 import eionet.webq.dto.XmlSaveResult;
 import eionet.webq.service.*;
+import eionet.webq.web.controller.util.UserFileList;
 import eionet.webq.web.controller.util.WebformUrlProvider;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
@@ -51,6 +52,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
+import java.util.ArrayList;
 
 /**
  * Base controller for front page actions.
@@ -125,22 +128,8 @@ public class PublicPageController {
      * @param session http session
      * @return view name
      */
-    @RequestMapping(value = "/coordinator")
-    public String coordinator(Model model, HttpSession session) {
-        session.setAttribute("isCoordinator", true);
-        return welcome(model);
-    }
-
-    /**
-     * Action to be performed on http GET method and path '/'.
-     *
-     * @param model   holder for model attributes
-     * @param session http session
-     * @return view name
-     */
     @RequestMapping(value = "/sessionfiles")
     public String sessionfiles(Model model, HttpSession session) {
-        session.setAttribute("isCoordinator", false);
         return welcome(model);
     }
 
@@ -234,6 +223,47 @@ public class PublicPageController {
     }
 
     /**
+     * Populates model with user files that were selected to be changed.
+     *
+     * @param selectedUserFile ids of files to be edited
+     * @param model            holder for model attributes
+     * @return view name
+     */
+    @RequestMapping(value = "/edit")
+     public String editUserFile(@RequestParam(required = false) List<Integer> selectedUserFile, Model model) {
+        List<UserFile> userFiles = new ArrayList<UserFile>();
+
+        for (Integer fileId : selectedUserFile) {
+            userFiles.add(userFileService.getById(fileId));
+        }
+
+        model.addAttribute("userFileList", new UserFileList(userFiles));
+        return welcome(model);
+    }
+
+    /**
+     * Save edited user files to database.
+     *
+     * @param userFiles     list of user files to be persisted
+     * @param bindingResult validation errors
+     * @param model         holder for model attributes
+     * @return view name
+     */
+    @RequestMapping(value = "/save", method = RequestMethod.POST)
+    @Transactional
+    public String saveUserFile(@Valid @ModelAttribute UserFileList userFiles, BindingResult bindingResult, Model model) {
+
+        for (UserFile userFile : userFiles.getUserFiles()) {
+            UserFile file = userFileService.getById(userFile.getId());
+            file.setName(userFile.getName());
+            userFileService.update(file);
+        }
+        model.addAttribute("userFileList", new UserFileList());
+        model.addAttribute("message", "File(s) updated successfully");
+        return welcome(model);
+    }
+
+    /**
      * Update file content action. The action is called from XForms and it returns XML formatted result.
      *
      * @param fileId  file id to update
@@ -279,13 +309,13 @@ public class PublicPageController {
      *
      * @param formId  webform id
      * @param request current request
-     * @return redirection URL of webform with correct parameters
+     * @return redirection URL of webform. Keeps user one the same page.
      * @throws FileNotAvailableException if empty instance URL is filled for selected webform, but the resource is not available.
      */
     @RequestMapping(value = "/startWebform")
     public String startWebFormSaveFile(@RequestParam int formId, HttpServletRequest request)
             throws FileNotAvailableException {
-        int fileId = userFileService.saveBasedOnWebForm(new UserFile(), webFormService.findActiveWebFormById(formId));
+        userFileService.saveBasedOnWebForm(new UserFile(), webFormService.findActiveWebFormById(formId));
         String absolutePath = "";
         String baseUri = "&base_uri=";
         if (StringUtils.isNotEmpty(request.getParameter("base_uri"))) {
@@ -294,10 +324,8 @@ public class PublicPageController {
         } else {
             baseUri += request.getContextPath();
         }
-        ProjectFile webform = webFormService.findWebFormById(formId);
-        String webformPath = webformUrlProvider.getWebformPath(webform);
 
-        return "redirect:" + absolutePath + webformPath + "fileId=" + fileId + baseUri;
+        return "redirect:" + absolutePath;
     }
 
     /**

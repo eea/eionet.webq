@@ -42,6 +42,7 @@ import java.util.Collection;
 import java.util.Iterator;
 
 import static eionet.webq.dao.FileContentUtil.getFileContentRowsCount;
+import static junit.framework.Assert.assertNull;
 import static junit.framework.TestCase.assertNotNull;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertNotEquals;
@@ -260,13 +261,13 @@ public class UserFileStorageImplTest {
     }
 
     @Test
-    public void updatedTimeIsChangedAfterRecordUpdateInStorage() throws Exception {
+    public void updatedTimeIsNotChangedAfterRecordUpdateInStorage() throws Exception {
         UserFile userFile = saveAndGetBackSavedFileForDefaultUser();
         userFile.setUpdated(null);
 
         storage.update(userFile, userFile.getUserId());
 
-        assertNotNull(storage.findFile(userFile.getId(), userId).getUpdated());
+        assertNull(storage.findFile(userFile.getId(), userId).getUpdated());
     }
 
     @Test

@@ -41,7 +41,7 @@ public class UploadedFile {
     /**
      * File name.
      */
-    @Column(name = "file_name", updatable = false)
+    @Column(name = "file_name")
     private String name;
     /**
      * File content bytes.
