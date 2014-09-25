@@ -29,13 +29,7 @@ import eionet.webq.dao.orm.MergeModule;
 import eionet.webq.dao.orm.ProjectFile;
 import eionet.webq.dao.orm.UploadedFile;
 import eionet.webq.dao.orm.UserFile;
-import eionet.webq.service.ConversionService;
-import eionet.webq.service.FileNotAvailableException;
-import eionet.webq.service.ProjectFileService;
-import eionet.webq.service.ProjectService;
-import eionet.webq.service.RemoteFileService;
-import eionet.webq.service.UserFileMergeService;
-import eionet.webq.service.UserFileService;
+import eionet.webq.service.*;
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,11 +39,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.mail.javamail.ConfigurableMimeFileTypeMap;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.ServletOutputStream;
@@ -59,11 +49,7 @@ import javax.xml.transform.TransformerException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Spring controller for WebQ file download.
@@ -75,6 +61,16 @@ public class FileDownloadController {
      * Logger for this class.
      */
     public static final Logger LOGGER = Logger.getLogger(PublicPageController.class);
+    /**
+     * Json to XML converter.
+     */
+    @Autowired
+    JsonXMLBidirectionalConverter jsonXMLConverter;
+    /**
+     * Service for downloading remote files.
+     */
+    @Autowired
+    RemoteFileService remoteFileService;
     /**
      * Service for getting user file content from storage.
      */
@@ -105,23 +101,12 @@ public class FileDownloadController {
      */
     @Autowired
     private UserFileMergeService mergeService;
-    /**
-     * Json to XML converter.
-     */
-    @Autowired
-    JsonXMLBidirectionalConverter jsonXMLConverter;
-
-    /**
-     * Service for downloading remote files.
-     */
-    @Autowired
-    RemoteFileService remoteFileService;
 
     /**
      * Convert and download the user XML file in JSON format if request header Accept content type is application/json.
      *
      * @param fileId   user file id.
-     * @param request http request to write file
+     * @param request  http request to write file
      * @param response http response to write file
      * @throws FileNotAvailableException if user file is not available for given id
      */
@@ -146,7 +131,7 @@ public class FileDownloadController {
      * called when request header Accept content type is text/xml.
      *
      * @param fileId   user file id.
-     * @param request http request to write file
+     * @param request  http request to write file
      * @param response http response to write file
      * @throws FileNotAvailableException user file is not available for given id
      */
@@ -166,7 +151,7 @@ public class FileDownloadController {
      * Download uploaded file action.
      *
      * @param fileId   requested file id
-     * @param request http request to write file
+     * @param request  http request to write file
      * @param response http response to write file
      * @throws FileNotAvailableException if user file is not available for given id
      */
@@ -185,13 +170,15 @@ public class FileDownloadController {
      *
      * @param projectId project id for file download
      * @param fileName  requested file name
+     * @param format    if format=json, then convert XML file to json format
      * @param request   http request
      * @param response  http response to write file
      * @throws FileNotAvailableException if project file is not available for given id
      */
     @RequestMapping(value = "/project/{projectId}/file/{fileName:.*}")
     @Transactional
-    public void downloadProjectFile(@PathVariable String projectId, @PathVariable String fileName, HttpServletRequest request,
+    public void downloadProjectFile(@PathVariable String projectId, @PathVariable String fileName,
+            @RequestParam(required = false) String format, HttpServletRequest request,
             HttpServletResponse response) throws FileNotAvailableException {
         ProjectFile projectFile = projectFileService.fileContentBy(fileName, projectService.getByProjectId(projectId));
         if (projectFile == null) {
@@ -199,7 +186,7 @@ public class FileDownloadController {
                     projectId + "/file/" + fileName);
         }
         String disposition = request.getServletPath().contains("/download/") ? "attachment" : "inline";
-        writeProjectFileToResponse(fileName, projectFile, response, disposition);
+        writeProjectFileToResponse(fileName, projectFile, response, disposition, format);
     }
 
     /**
@@ -221,7 +208,7 @@ public class FileDownloadController {
      *
      * @param selectedUserFile ids of user files
      * @param mergeModule      module required to merge files.
-     * @param request http request to write file
+     * @param request          http request to write file
      * @param response         http response
      * @throws TransformerException      if transformation fails
      * @throws IOException               if content operations fail.
@@ -333,7 +320,8 @@ public class FileDownloadController {
      * @param disposition inline or attachment
      */
     private void
-    writeProjectFileToResponse(String name, ProjectFile projectFile, HttpServletResponse response, String disposition) {
+    writeProjectFileToResponse(String name, ProjectFile projectFile, HttpServletResponse response, String disposition,
+            String format) {
 
         ConfigurableMimeFileTypeMap mimeTypesMap = new ConfigurableMimeFileTypeMap();
         String contentType = mimeTypesMap.getContentType(name);
@@ -352,7 +340,15 @@ public class FileDownloadController {
             // TODO check if there are more missing mime types
         }
 
-        if (contentType.startsWith("text")) {
+        byte[] fileContent = projectFile.getFileContent();
+
+        if ("json".equals(format)) {
+            fileContent = jsonXMLConverter.convertXmlToJson(projectFile.getFileContent());
+            contentType = MediaType.APPLICATION_JSON_VALUE;
+            disposition = "inline";
+        }
+
+        if (contentType.startsWith("text") || contentType.startsWith("application")) {
             contentType += ";charset=UTF-8";
         }
         response.setContentType(contentType);
@@ -362,7 +358,7 @@ public class FileDownloadController {
         } else if (projectFile.getCreated() != null) {
             response.setDateHeader("Last-Modified", projectFile.getCreated().getTime());
         }
-        writeToResponse(response, projectFile.getFileContent());
+        writeToResponse(response, fileContent);
     }
 
     /**
@@ -457,6 +453,31 @@ public class FileDownloadController {
     }
 
     /**
+     * Get user file from database, using HTTP session jsessionid attribute or sessionid request paramater.
+     *
+     * @param fileId  file identifier
+     * @param request HTTP request
+     * @return UserFile object
+     * @throws FileNotAvailableException if file is not found from database
+     */
+    private UserFile getUserFile(int fileId, HttpServletRequest request) throws FileNotAvailableException {
+
+        UserFile file = userFileService.download(fileId);
+        if (file == null && request.getParameter("sessionid") != null) {
+            LOGGER.info("Could not find file by HTTP session ID. Let's try by sessionid parameter.");
+            file = userFileService.getByIdAndUser(fileId, request.getParameter("sessionid"));
+        }
+        if (file == null) {
+            LOGGER.error("Could not find file reference from database for session=" + request.getSession().getId());
+        }
+
+        if (file == null) {
+            throw new FileNotAvailableException("The requested user file is not available with fileId: " + fileId);
+        }
+        return file;
+    }
+
+    /**
      * Exception indicating that merge module choice is required.
      */
     public static class MergeModuleChoiceRequiredException extends RuntimeException {
@@ -487,30 +508,5 @@ public class FileDownloadController {
         public Collection<MergeModule> getMergeModules() {
             return mergeModules;
         }
-    }
-
-    /**
-     * Get user file from database, using HTTP session jsessionid attribute or sessionid request paramater.
-     *
-     * @param fileId  file identifier
-     * @param request HTTP request
-     * @return UserFile object
-     * @throws FileNotAvailableException if file is not found from database
-     */
-    private UserFile getUserFile(int fileId, HttpServletRequest request) throws FileNotAvailableException {
-
-        UserFile file = userFileService.download(fileId);
-        if (file == null && request.getParameter("sessionid") != null) {
-            LOGGER.info("Could not find file by HTTP session ID. Let's try by sessionid parameter.");
-            file = userFileService.getByIdAndUser(fileId, request.getParameter("sessionid"));
-        }
-        if (file == null) {
-            LOGGER.error("Could not find file reference from database for session=" + request.getSession().getId());
-        }
-
-        if (file == null) {
-            throw new FileNotAvailableException("The requested user file is not available with fileId: " + fileId);
-        }
-        return file;
     }
 }
