@@ -69,7 +69,12 @@
         <property name="validationMessageSource" ref="messageSource"/>
     </bean>
 
-    <bean id="marshallingConverter" class="org.springframework.http.converter.xml.MarshallingHttpMessageConverter">
+    <bean id="jsonMessageConverter"
+          class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
+        <property name="supportedMediaTypes" value="application/json" />
+    </bean>
+
+    <bean id="jaxbHttpMessageConverter" class="org.springframework.http.converter.xml.MarshallingHttpMessageConverter">
         <constructor-arg ref="jaxbMarshaller" index="0"/>
         <constructor-arg ref="jaxbMarshaller" index="1"/>
         <property name="supportedMediaTypes">
