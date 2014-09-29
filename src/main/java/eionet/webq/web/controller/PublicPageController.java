@@ -50,10 +50,10 @@ import javax.validation.Valid;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.ArrayList;
 
 /**
  * Base controller for front page actions.
@@ -67,6 +67,11 @@ public class PublicPageController {
      * Logger for this class.
      */
     public static final Logger LOGGER = Logger.getLogger(PublicPageController.class);
+    /**
+     * Webform URL provider.
+     */
+    @Autowired
+    WebformUrlProvider webformUrlProvider;
     /**
      * Service for user uploaded files.
      */
@@ -98,11 +103,6 @@ public class PublicPageController {
      */
     @Autowired
     private JsonXMLBidirectionalConverter jsonToXMLConverter;
-    /**
-     * Webform URL provider.
-     */
-    @Autowired
-    WebformUrlProvider webformUrlProvider;
 
     /**
      * Action to be performed on http GET method and path '/'.
@@ -183,7 +183,7 @@ public class PublicPageController {
      */
     @RequestMapping(value = "/uploadXmlWithRedirect", method = RequestMethod.POST)
     public String uploadWithRedirectToWebForm(@Valid @ModelAttribute UploadForm uploadForm, BindingResult result, Model model,
-                                              HttpServletRequest request) {
+            HttpServletRequest request) {
         if (!result.hasErrors()) {
             saveFiles(uploadForm);
             Collection<UserFile> files = uploadForm.getUserFiles();
@@ -230,7 +230,7 @@ public class PublicPageController {
      * @return view name
      */
     @RequestMapping(value = "/edit")
-     public String editUserFile(@RequestParam(required = false) List<Integer> selectedUserFile, Model model) {
+    public String editUserFile(@RequestParam(required = false) List<Integer> selectedUserFile, Model model) {
         List<UserFile> userFiles = new ArrayList<UserFile>();
 
         for (Integer fileId : selectedUserFile) {
@@ -294,14 +294,21 @@ public class PublicPageController {
      * @return redirect string
      */
     @RequestMapping(value = "/saveXml", consumes = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.POST)
+    @ResponseBody
     @Transactional
-    public String saveJsonAsXml(@RequestParam int fileId, HttpServletRequest request, Model model) {
-        LOGGER.info("/saveXml fileId=" + fileId + "; sessionid=" + DigestUtils.md5Hex(request.getSession().getId()));
-        byte[] xml = jsonToXMLConverter.convertJsonToXml(getContentFromRequest(request));
-        XmlSaveResult xmlSaveResult = updateFileContent(fileId, request, xml);
-        LOGGER.info("Converting json to XML ended up with result=" + xmlSaveResult);
-        // FIXME convert xmlSaveResult to json and return it to client
-        return welcome(model);
+    public XmlSaveResult saveJsonAsXml(@RequestParam int fileId, HttpServletRequest request, Model model) {
+
+        try {
+            LOGGER.info("/saveXml fileId=" + fileId + "; sessionid=" + DigestUtils.md5Hex(request.getSession().getId()));
+
+            byte[] xml = jsonToXMLConverter.convertJsonToXml(getContentFromRequest(request));
+            XmlSaveResult xmlSaveResult = updateFileContent(fileId, request, xml);
+            LOGGER.info("Converting json to XML ended up with result=" + xmlSaveResult);
+            return xmlSaveResult;
+        } catch (Exception e) {
+            LOGGER.error("Unable to save file: " + e.toString(), e);
+            return XmlSaveResult.valueOfError(e.toString());
+        }
     }
 
     /**
