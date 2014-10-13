@@ -21,6 +21,26 @@
 
 package eionet.webq.service;
 
+import eionet.webq.dao.UserFileDownload;
+import eionet.webq.dao.UserFileStorage;
+import eionet.webq.dao.orm.ProjectFile;
+import eionet.webq.dao.orm.UserFile;
+import eionet.webq.dto.UserFileIdUpdate;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
+
+import javax.servlet.http.HttpServletRequest;
+import java.sql.Timestamp;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Date;
+
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
@@ -34,28 +54,11 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Date;
-
-import javax.servlet.http.HttpServletRequest;
-
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
-
-import eionet.webq.dao.UserFileDownload;
-import eionet.webq.dao.UserFileStorage;
-import eionet.webq.dao.orm.ProjectFile;
-import eionet.webq.dao.orm.UserFile;
-import eionet.webq.dto.UserFileIdUpdate;
-
 public class UserFileServiceImplTest {
+    private static final int FILE_ID = 1;
+    private final String userId = "userId";
+    private final String userAgentHeaderName = "user-agent";
+    private final String expectedUserAgent = "IE 11";
     @InjectMocks
     private UserFileServiceImpl service;
     @Mock
@@ -68,11 +71,6 @@ public class UserFileServiceImplTest {
     private UserIdProvider userIdProvider;
     @Mock
     private HttpServletRequest request;
-
-    private final String userId = "userId";
-    private static final int FILE_ID = 1;
-    private final String userAgentHeaderName = "user-agent";
-    private final String expectedUserAgent = "IE 11";
 
     @Before
     public void prepare() {
@@ -123,6 +121,8 @@ public class UserFileServiceImplTest {
     @Test
     public void testUpdateContent() throws Exception {
         UserFile fileToUpdate = new UserFile();
+        // set file last modified date to past.
+        fileToUpdate.setUpdated(new Timestamp(System.currentTimeMillis() - 1));
         doNothing().when(storage).update(fileToUpdate, userId);
 
         Date lastDate = fileToUpdate.getUpdated();
@@ -170,7 +170,7 @@ public class UserFileServiceImplTest {
     }
 
     @Test
-     public void whenSavingBasedOnWebFormSetFileNameFromWebFormIfItIsNotSet() throws Exception {
+    public void whenSavingBasedOnWebFormSetFileNameFromWebFormIfItIsNotSet() throws Exception {
         String fileName = "new file name";
         ProjectFile webForm = new ProjectFile();
         webForm.setNewXmlFileName(fileName);
@@ -213,7 +213,7 @@ public class UserFileServiceImplTest {
         String fileName = "multiple web form file name";
         String fileExtension = ".xml";
         ProjectFile webForm = new ProjectFile();
-        webForm.setNewXmlFileName(fileName+ fileExtension);
+        webForm.setNewXmlFileName(fileName + fileExtension);
         when(storage.getUserWebFormFileMaxNum(eq(userId), eq(webForm.getXmlSchema()), anyString(), eq('_'), eq('.'))).thenReturn(
                 new Integer(0));
         UserFile userFile = new UserFile();
@@ -238,7 +238,7 @@ public class UserFileServiceImplTest {
         String fileName = "multiple web form file name";
         String fileExtension = ".xml";
         ProjectFile webForm = new ProjectFile();
-        webForm.setNewXmlFileName(fileName+ fileExtension);
+        webForm.setNewXmlFileName(fileName + fileExtension);
         when(storage.getUserWebFormFileMaxNum(eq(userId), eq(webForm.getXmlSchema()), anyString(), eq('_'), eq('.'))).thenReturn(
                 null);
         UserFile userFile = new UserFile();
