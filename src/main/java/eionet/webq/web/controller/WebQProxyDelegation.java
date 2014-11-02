@@ -29,6 +29,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.client.RestTemplate;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.net.URISyntaxException;
+
 /**
  * Base controller for WebQ proxy delegations.
  *
@@ -47,29 +51,28 @@ public class WebQProxyDelegation {
      * http://stackoverflow.com/questions/14595245/rest-service-pass-through-via-spring This method also works when a method is not
      * defined.
      *
-     * @param uri
-     *            uri
+     * @param uri uri
      * @return result
      */
     @RequestMapping(value = "/restProxy", method = RequestMethod.GET)
-    public @ResponseBody String restProxyGet(@RequestParam("uri") String uri) {
+    public @ResponseBody String restProxyGet(@RequestParam("uri") String uri)
+            throws UnsupportedEncodingException, URISyntaxException {
         LOGGER.info("/restProxy [GET] uri=" + uri);
-        return new RestTemplate().getForObject(uri, String.class);
+        return new RestTemplate().getForObject(new URI(uri), String.class);
     } // end of method restProxyGet
 
     /**
      * This method also delegates but with a different approach.
      *
-     * @param uri
-     *            uri
-     * @param body
-     *            body
+     * @param uri  uri
+     * @param body body
      * @return result
      */
     @RequestMapping(value = "/restProxy", method = RequestMethod.POST)
-    public @ResponseBody String restProxyPost(@RequestParam("uri") String uri, @RequestBody String body) {
+    public @ResponseBody String restProxyPost(@RequestParam("uri") String uri, @RequestBody String body)
+            throws URISyntaxException {
         LOGGER.info("/restProxy [POST] uri=" + uri);
-        return new RestTemplate().postForObject(uri, body, String.class);
+        return new RestTemplate().postForObject(new URI(uri), body, String.class);
     } // end of method restProxyPost
 
 } // end of class WebQProxyDelegation
