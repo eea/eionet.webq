@@ -20,8 +20,8 @@
  */
 package eionet.webq.dao;
 
-import java.util.Collection;
-
+import eionet.webq.dao.orm.ProjectEntry;
+import eionet.webq.dao.orm.ProjectFile;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
@@ -29,7 +29,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import eionet.webq.dao.orm.ProjectEntry;
+import java.util.Collection;
+
+import static org.hibernate.criterion.Restrictions.and;
+import static org.hibernate.criterion.Restrictions.eq;
 
 /**
  * Project folders interface implementation.
@@ -51,8 +54,13 @@ public class ProjectFoldersImpl extends AbstractDao<ProjectEntry> implements Pro
 
     @Override
     public void remove(String projectId) {
+        ProjectEntry projectEntry = getByProjectId(projectId);
+
         String hql = "DELETE from ProjectEntry where projectId=:projectId";
         getCurrentSession().createQuery(hql).setString("projectId", projectId).executeUpdate();
+
+        // delete project files
+        removeEntitiesByCriterion(ProjectFile.class, and(eq("projectId", projectEntry.getId())));
     }
 
     @Override
@@ -75,8 +83,7 @@ public class ProjectFoldersImpl extends AbstractDao<ProjectEntry> implements Pro
         return (ProjectEntry) getCriteria().add(Restrictions.eq("id", id)).uniqueResult();
     }
 
-    @Override
-    Class<ProjectEntry> getEntityClass() {
+    @Override Class<ProjectEntry> getEntityClass() {
         return ProjectEntry.class;
     }
 }

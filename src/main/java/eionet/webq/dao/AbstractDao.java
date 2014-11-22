@@ -55,6 +55,20 @@ public abstract class AbstractDao<E> {
     }
 
     /**
+     * Removes the list of entities by given criteria.
+     *
+     * @param entityClass entity class
+     * @param criterion   criterion to search entities
+     */
+    protected void removeEntitiesByCriterion(Class<?> entityClass, Criterion criterion) {
+        Session currentSession = getCurrentSession();
+        List files = currentSession.createCriteria(entityClass).add(criterion).list();
+        for (Object fileId : files) {
+            currentSession.delete(fileId);
+        }
+    }
+
+    /**
      * Return dto class.
      *
      * @return dto class
