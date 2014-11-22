@@ -66,11 +66,11 @@ public class RemoveExpiredUserFilesTask {
     public void removeExpiredUserFiles() {
         Integer hoursAgo = getExpirationHours();
         Date allowedDate = DateUtils.addHours(new Date(), -hoursAgo);
-        LOGGER.info("Removing user files created before " + allowedDate + "(in storage more than " + hoursAgo + " hours). ");
+        LOGGER.info("Removing user files last modified before " + allowedDate + "(in storage more than " + hoursAgo + " hours). ");
 
         Session currentSession = factory.getCurrentSession();
         List rowsAffected = currentSession.createCriteria(UserFile.class)
-                .add(Restrictions.le("created", new Timestamp(allowedDate.getTime())))
+                .add(Restrictions.le("updated", new Timestamp(allowedDate.getTime())))
                 .list();
         for (Object row : rowsAffected) {
             currentSession.delete(row);

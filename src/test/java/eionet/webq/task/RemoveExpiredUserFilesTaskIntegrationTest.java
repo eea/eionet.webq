@@ -94,7 +94,7 @@ public class RemoveExpiredUserFilesTaskIntegrationTest {
 
     private void setFileAsExpired() {
         Date expired = DateUtils.addSeconds(DateUtils.addHours(new Date(), -task.getExpirationHours()), -1);
-        factory.getCurrentSession().createQuery("UPDATE UserFile SET created=:created")
-                .setTimestamp("created", new Timestamp(expired.getTime())).executeUpdate();
+        factory.getCurrentSession().createQuery("UPDATE UserFile SET updated=:updated")
+                .setTimestamp("updated", new Timestamp(expired.getTime())).executeUpdate();
     }
 }
