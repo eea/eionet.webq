@@ -20,6 +20,7 @@
  */
 package eionet.webq.web.controller.util;
 
+import eionet.webq.dao.orm.ProjectEntry;
 import eionet.webq.dao.orm.ProjectFile;
 import eionet.webq.service.ProjectService;
 import org.apache.commons.lang3.StringUtils;
@@ -42,7 +43,10 @@ public class WebformUrlProviderImpl implements WebformUrlProvider {
         String webformPath = null;
         if (webform.getFileName().endsWith(".html") || webform.getFileName().endsWith(".htm")) {
             if (StringUtils.isEmpty(webform.getProjectIdentifier())) {
-                webform.setProjectIdentifier(projectService.getById(webform.getProjectId()).getProjectId());
+                ProjectEntry project = projectService.getById(webform.getProjectId());
+                if (project != null) {
+                    webform.setProjectIdentifier(project.getProjectId());
+                }
             }
             webformPath =
                     "/webform/project/" + webform.getProjectIdentifier() + "/file/"
