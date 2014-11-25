@@ -262,4 +262,15 @@
             <column name="user_agent" type="varchar(1000)"/>
         </addColumn>
     </changeSet>
+    <changeSet id="16" author="kasperen">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="user_xml" columnName="authorized"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="user_xml">
+            <column name="authorized" type="boolean" defaultValueBoolean="false"/>
+            <column name="cookies" type="varchar(1000)"/>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

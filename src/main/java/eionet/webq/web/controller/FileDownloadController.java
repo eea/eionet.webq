@@ -29,7 +29,15 @@ import eionet.webq.dao.orm.MergeModule;
 import eionet.webq.dao.orm.ProjectFile;
 import eionet.webq.dao.orm.UploadedFile;
 import eionet.webq.dao.orm.UserFile;
-import eionet.webq.service.*;
+import eionet.webq.service.CDREnvelopeService;
+import eionet.webq.service.ConversionService;
+import eionet.webq.service.FileNotAvailableException;
+import eionet.webq.service.ProjectFileService;
+import eionet.webq.service.ProjectService;
+import eionet.webq.service.RemoteFileService;
+import eionet.webq.service.UserFileMergeService;
+import eionet.webq.service.UserFileService;
+import eionet.webq.web.controller.util.UserFileHelper;
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,7 +47,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.mail.javamail.ConfigurableMimeFileTypeMap;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.ServletOutputStream;
@@ -48,8 +60,13 @@ import javax.servlet.http.HttpServletResponse;
 import javax.xml.transform.TransformerException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.URISyntaxException;
 import java.net.URLEncoder;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Spring controller for WebQ file download.
@@ -71,6 +88,11 @@ public class FileDownloadController {
      */
     @Autowired
     RemoteFileService remoteFileService;
+    /**
+     * Helper web layer service to match request parameters and UserFle object in database.
+     */
+    @Autowired
+    UserFileHelper userFileHelper;
     /**
      * Service for getting user file content from storage.
      */
@@ -101,6 +123,11 @@ public class FileDownloadController {
      */
     @Autowired
     private UserFileMergeService mergeService;
+    /**
+     * Cdr envelope service.
+     */
+    @Autowired
+    private CDREnvelopeService envelopeService;
 
     /**
      * Convert and download the user XML file in JSON format if request header Accept content type is application/json.
@@ -114,12 +141,12 @@ public class FileDownloadController {
             method = RequestMethod.GET)
     @Transactional
     public void downloadUserFileJson(@RequestParam int fileId, HttpServletRequest request, HttpServletResponse response)
-            throws FileNotAvailableException {
+            throws FileNotAvailableException, URISyntaxException {
 
-        UserFile file = getUserFile(fileId, request);
+        UserFile file = userFileHelper.downloadUserFile(fileId, request);
 
         if (file.isFromCdr() && file.getContent() == null) {
-            file.setContent(remoteFileService.fileContent(file.getEnvelope() + "/" + file.getName()));
+            file.setContent(envelopeService.fetchFileFromCdr(file, file.getEnvelope() + "/" + file.getName()).getBody());
         }
         byte[] json = jsonXMLConverter.convertXmlToJson(file.getContent());
         setContentType(response, MediaType.APPLICATION_JSON);
@@ -140,7 +167,7 @@ public class FileDownloadController {
     public void downloadUserFileJsonToXml(@RequestParam int fileId, HttpServletRequest request, HttpServletResponse response)
             throws FileNotAvailableException {
 
-        UserFile file = getUserFile(fileId, request);
+        UserFile file = userFileHelper.downloadUserFile(fileId, request);
 
         byte[] xml = jsonXMLConverter.convertJsonToXml(jsonXMLConverter.convertXmlToJson(file.getContent()));
 
@@ -160,7 +187,7 @@ public class FileDownloadController {
     public void downloadUserFile(@RequestParam int fileId, HttpServletRequest request, HttpServletResponse response)
             throws FileNotAvailableException {
 
-        UserFile file = getUserFile(fileId, request);
+        UserFile file = userFileHelper.downloadUserFile(fileId, request);
 
         writeXmlFileToResponse(file.getName(), file.getContent(), response);
     }
@@ -450,31 +477,6 @@ public class FileDownloadController {
         } finally {
             IOUtils.closeQuietly(output);
         }
-    }
-
-    /**
-     * Get user file from database, using HTTP session jsessionid attribute or sessionid request paramater.
-     *
-     * @param fileId  file identifier
-     * @param request HTTP request
-     * @return UserFile object
-     * @throws FileNotAvailableException if file is not found from database
-     */
-    private UserFile getUserFile(int fileId, HttpServletRequest request) throws FileNotAvailableException {
-
-        UserFile file = userFileService.download(fileId);
-        if (file == null && request.getParameter("sessionid") != null) {
-            LOGGER.info("Could not find file by HTTP session ID. Let's try by sessionid parameter.");
-            file = userFileService.getByIdAndUser(fileId, request.getParameter("sessionid"));
-        }
-        if (file == null) {
-            LOGGER.error("Could not find file reference from database for session=" + request.getSession().getId());
-        }
-
-        if (file == null) {
-            throw new FileNotAvailableException("The requested user file is not available with fileId: " + fileId);
-        }
-        return file;
     }
 
     /**

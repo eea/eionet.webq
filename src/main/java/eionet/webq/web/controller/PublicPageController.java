@@ -27,7 +27,12 @@ import eionet.webq.dao.orm.UserFile;
 import eionet.webq.dto.FileInfo;
 import eionet.webq.dto.UploadForm;
 import eionet.webq.dto.XmlSaveResult;
-import eionet.webq.service.*;
+import eionet.webq.service.CDREnvelopeService;
+import eionet.webq.service.ConversionService;
+import eionet.webq.service.FileNotAvailableException;
+import eionet.webq.service.UserFileService;
+import eionet.webq.service.WebFormService;
+import eionet.webq.web.controller.util.UserFileHelper;
 import eionet.webq.web.controller.util.UserFileList;
 import eionet.webq.web.controller.util.WebformUrlProvider;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -41,7 +46,11 @@ import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -72,6 +81,11 @@ public class PublicPageController {
      */
     @Autowired
     WebformUrlProvider webformUrlProvider;
+    /**
+     * Helper web layer service to match request parameters and UserFle object in database.
+     */
+    @Autowired
+    UserFileHelper userFileHelper;
     /**
      * Service for user uploaded files.
      */
@@ -388,14 +402,10 @@ public class PublicPageController {
      * @return save result
      */
     private XmlSaveResult updateFileContent(int fileId, HttpServletRequest request, byte[] fileContent) {
-        UserFile file = userFileService.getById(fileId);
+        UserFile file = userFileHelper.getUserFile(fileId, request);
 
-        if (file == null && request.getParameter("sessionid") != null) {
-            LOGGER.info("Could not find file by HTTP session ID. Let's try by sessionid parameter.");
-            file = userFileService.getByIdAndUser(fileId, request.getParameter("sessionid"));
-        }
         if (file == null) {
-            LOGGER.error("Could not find file reference from database for session=" + request.getSession().getId());
+            return XmlSaveResult.valueOfError("File is not available.");
         }
         file.setContent(fileContent);
         if (file.isFromCdr()) {

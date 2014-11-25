@@ -21,6 +21,29 @@
 
 package eionet.webq.xforms;
 
+import configuration.ApplicationTestContextWithMockSession;
+import de.betterform.connector.http.AbstractHTTPConnector;
+import de.betterform.xml.xforms.model.submission.RequestHeader;
+import de.betterform.xml.xforms.model.submission.RequestHeaders;
+import eionet.webq.dao.orm.KnownHost;
+import eionet.webq.dao.orm.UserFile;
+import eionet.webq.dto.KnownHostAuthenticationMethod;
+import eionet.webq.service.KnownHostsService;
+import eionet.webq.service.UserFileService;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpRequestBase;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+
+import java.util.HashMap;
+import java.util.Map;
+
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.hamcrest.core.IsNot.not;
 import static org.hamcrest.core.StringContains.containsString;
@@ -33,44 +56,12 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpRequestBase;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-
-import configuration.ApplicationTestContextWithMockSession;
-import de.betterform.connector.http.AbstractHTTPConnector;
-import de.betterform.xml.xforms.model.submission.RequestHeader;
-import de.betterform.xml.xforms.model.submission.RequestHeaders;
-import eionet.webq.dao.orm.KnownHost;
-import eionet.webq.dao.orm.UserFile;
-import eionet.webq.dto.KnownHostAuthenticationMethod;
-import eionet.webq.service.KnownHostsService;
-import eionet.webq.service.UserFileService;
-
 /**
  * @author Enriko Käsper
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {ApplicationTestContextWithMockSession.class})
 public class XFormsHTTPRequestAuthHandlerImplTest {
-
-    @Mock
-    UserFileService userFileService;
-    @Mock
-    private KnownHostsService knownHostsService;
-    @InjectMocks
-    XFormsHTTPRequestAuthHandlerImpl requestAuthHandler = new XFormsHTTPRequestAuthHandlerImpl();
 
     private static final String BASE_URI = "http://webq2.eionet.europe.eu";
     private static final String BASIC_AUTH_KNOWN_HOST_URL = "http://basicauth.host";
@@ -79,6 +70,57 @@ public class XFormsHTTPRequestAuthHandlerImplTest {
     private static final String TICKET = "ticket";
     private static final String oldSessionId = "91F327440B3E82146E7384E54EFB99DD";
     private static final String newSessionId = "B41DDE22E96CC895DD1F0DF328C08527";
+    @Mock
+    UserFileService userFileService;
+    @InjectMocks
+    XFormsHTTPRequestAuthHandlerImpl requestAuthHandler = new XFormsHTTPRequestAuthHandlerImpl();
+    @Mock
+    private KnownHostsService knownHostsService;
+
+    static KnownHost createBasicAuthKnownHost() {
+        KnownHost host = new KnownHost();
+        host.setHostURL(BASIC_AUTH_KNOWN_HOST_URL);
+        host.setTicket(TICKET);
+        host.setKey(KEY);
+        host.setAuthenticationMethod(KnownHostAuthenticationMethod.BASIC);
+        return host;
+    }
+
+    static KnownHost createRequestParamKnownHost() {
+        KnownHost host = new KnownHost();
+        host.setHostURL(REQUEST_PARAM_KNOWN_HOST_URL);
+        host.setTicket(TICKET);
+        host.setKey(KEY);
+        host.setAuthenticationMethod(KnownHostAuthenticationMethod.REQUEST_PARAMETER);
+        return host;
+    }
+
+    static UserFile createUserFileWithAuth() {
+        UserFile userFile = createUserFile();
+        userFile.setAuthorization("Basic a2V5OnRpY2tldA==");
+        userFile.setAuthorized(true);
+        return userFile;
+    }
+
+    static UserFile createUserFile() {
+        UserFile userFile = new UserFile();
+        userFile.setId(1);
+        userFile.setUserId("12345");
+        return userFile;
+    }
+
+    static Map<Object, Object> createBfContextMap() {
+        Map<Object, Object> bfContext = new HashMap<Object, Object>();
+        bfContext.put("fileId", "1");
+        bfContext.put("httpSessionId", newSessionId);
+        bfContext.put("requestURL", BASE_URI + "/xform");
+
+        RequestHeaders httpRequestHeaders = new RequestHeaders();
+        String initialCookie = "JSESSIONID=" + oldSessionId;
+        httpRequestHeaders.addHeader(new RequestHeader("cookie", initialCookie));
+        bfContext.put(AbstractHTTPConnector.HTTP_REQUEST_HEADERS, httpRequestHeaders);
+        return bfContext;
+    }
 
     @Before
     public void setUp() throws Exception {
@@ -115,7 +157,7 @@ public class XFormsHTTPRequestAuthHandlerImplTest {
         UserFile userFile = createUserFileWithAuth();
 
         when(userFileService.getByIdAndUser(anyInt(), anyString())).thenReturn(userFile);
-        when(knownHostsService.findAll()).thenReturn(Arrays.asList(createBasicAuthKnownHost()));
+        when(knownHostsService.getKnownHost(anyString())).thenReturn(createBasicAuthKnownHost());
         requestAuthHandler.addAuthToHttpRequest(httpRequest, context);
 
         assertThat(httpRequest.getURI().toString(), equalTo(BASIC_AUTH_KNOWN_HOST_URL + "/resource.xml"));
@@ -131,7 +173,7 @@ public class XFormsHTTPRequestAuthHandlerImplTest {
         UserFile userFile = createUserFileWithAuth();
 
         when(userFileService.getByIdAndUser(anyInt(), anyString())).thenReturn(userFile);
-        when(knownHostsService.findAll()).thenReturn(Arrays.asList(createRequestParamKnownHost()));
+        when(knownHostsService.getKnownHost(anyString())).thenReturn(createRequestParamKnownHost());
         requestAuthHandler.addAuthToHttpRequest(httpRequest, context);
 
         assertThat(httpRequest.getURI().toString(), equalTo(REQUEST_PARAM_KNOWN_HOST_URL + "/resource.xml?key=ticket"));
@@ -146,7 +188,7 @@ public class XFormsHTTPRequestAuthHandlerImplTest {
         UserFile userFile = createUserFileWithAuth();
 
         when(userFileService.getByIdAndUser(anyInt(), anyString())).thenReturn(userFile);
-        when(knownHostsService.findAll()).thenReturn(Arrays.asList(createRequestParamKnownHost()));
+        when(knownHostsService.getKnownHost(anyString())).thenReturn(null);
         requestAuthHandler.addAuthToHttpRequest(httpRequest, context);
 
         assertThat(httpRequest.getURI().toString(), equalTo(resourceUrl));
@@ -163,10 +205,9 @@ public class XFormsHTTPRequestAuthHandlerImplTest {
 
         requestAuthHandler.addAuthToHttpRequest(httpRequest, context);
 
-        assertThat((String)context.get("webqAuth"), equalTo("Basic auth"));
+        assertThat((String) context.get("webqAuth"), equalTo("Basic auth"));
         verify(userFileService, never()).getByIdAndUser(anyInt(), anyString());
     }
-
 
     @Test
     public void testUrlWithAuthParam() {
@@ -233,49 +274,5 @@ public class XFormsHTTPRequestAuthHandlerImplTest {
     private void assertThatRequestIsNotChanged(HttpRequestBase httpRequest, String requestUri) {
         assertThat(httpRequest.getURI().toString(), startsWith(requestUri));
         assertThat(httpRequest.getHeaders("Authorization").length, equalTo(0));
-    }
-
-    static KnownHost createBasicAuthKnownHost() {
-        KnownHost host = new KnownHost();
-        host.setHostURL(BASIC_AUTH_KNOWN_HOST_URL);
-        host.setTicket(TICKET);
-        host.setKey(KEY);
-        host.setAuthenticationMethod(KnownHostAuthenticationMethod.BASIC);
-        return host;
-    }
-
-    static KnownHost createRequestParamKnownHost() {
-        KnownHost host = new KnownHost();
-        host.setHostURL(REQUEST_PARAM_KNOWN_HOST_URL);
-        host.setTicket(TICKET);
-        host.setKey(KEY);
-        host.setAuthenticationMethod(KnownHostAuthenticationMethod.REQUEST_PARAMETER);
-        return host;
-    }
-
-    static UserFile createUserFileWithAuth() {
-        UserFile userFile = createUserFile();
-        userFile.setAuthorization("Basic a2V5OnRpY2tldA==");
-        return userFile;
-    }
-
-    static UserFile createUserFile() {
-        UserFile userFile = new UserFile();
-        userFile.setId(1);
-        userFile.setUserId("12345");
-        return userFile;
-    }
-
-    static Map<Object, Object> createBfContextMap() {
-        Map<Object, Object> bfContext = new HashMap<Object, Object>();
-        bfContext.put("fileId", "1");
-        bfContext.put("httpSessionId", newSessionId);
-        bfContext.put("requestURL", BASE_URI + "/xform");
-
-        RequestHeaders httpRequestHeaders = new RequestHeaders();
-        String initialCookie = "JSESSIONID=" + oldSessionId;
-        httpRequestHeaders.addHeader(new RequestHeader("cookie", initialCookie));
-        bfContext.put(AbstractHTTPConnector.HTTP_REQUEST_HEADERS, httpRequestHeaders);
-        return bfContext;
     }
 }

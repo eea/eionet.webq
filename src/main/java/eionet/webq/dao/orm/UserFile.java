@@ -23,16 +23,7 @@ package eionet.webq.dao.orm;
 import eionet.webq.dto.Conversion;
 import org.hibernate.validator.constraints.NotEmpty;
 
-import javax.persistence.Column;
-import javax.persistence.Embedded;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.persistence.Transient;
+import javax.persistence.*;
 import java.util.Collection;
 import java.util.Date;
 
@@ -81,6 +72,16 @@ public class UserFile {
      */
     @Column
     private String authorization;
+    /**
+     * Is request authorized in CDR.
+     */
+    @Column
+    private boolean authorized;
+    /**
+     * Cdr cookies.
+     */
+    @Column
+    private String cookies;
     /**
      * Whether restriction should be applied on this file.
      */
@@ -133,7 +134,7 @@ public class UserFile {
     /**
      * Shorthand for file uploaded by user creation.
      *
-     * @param file uploaded file
+     * @param file      uploaded file
      * @param xmlSchema xml schema extracted from file
      */
     public UserFile(UploadedFile file, String xmlSchema) {
@@ -147,6 +148,11 @@ public class UserFile {
     public UserFile() {
     }
 
+    /**
+     * Get user file ID.
+     *
+     * @return user file unique ID
+     */
     public int getId() {
         return id;
     }
@@ -314,6 +320,22 @@ public class UserFile {
 
     public void setUserAgent(String userAgent) {
         this.userAgent = userAgent;
+    }
+
+    public boolean isAuthorized() {
+        return authorized;
+    }
+
+    public void setAuthorized(boolean authorized) {
+        this.authorized = authorized;
+    }
+
+    public String getCookies() {
+        return cookies;
+    }
+
+    public void setCookies(String cookies) {
+        this.cookies = cookies;
     }
 
     @Override

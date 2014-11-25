@@ -20,13 +20,13 @@
  */
 package eionet.webq.service;
 
-import static java.util.Collections.emptyList;
-
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.Map;
-
+import eionet.webq.converter.CookiesToStringBidirectionalConverter;
+import eionet.webq.dao.orm.KnownHost;
+import eionet.webq.dao.orm.UserFile;
+import eionet.webq.dto.CdrRequest;
+import eionet.webq.dto.XmlSaveResult;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.client.utils.URIUtils;
 import org.apache.log4j.Logger;
 import org.apache.xmlrpc.XmlRpcException;
 import org.apache.xmlrpc.client.XmlRpcClient;
@@ -36,6 +36,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -43,11 +44,18 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestOperations;
+import org.springframework.web.client.RestTemplate;
 
-import eionet.webq.dao.orm.UserFile;
-import eionet.webq.dto.CdrRequest;
-import eionet.webq.dto.XmlSaveResult;
+import javax.servlet.http.Cookie;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.util.Map;
+
+import static java.util.Collections.emptyList;
 
 /**
  */
@@ -57,6 +65,16 @@ public class CDREnvelopeServiceImpl implements CDREnvelopeService {
      * Logger for this class.
      */
     private static final Logger LOGGER = Logger.getLogger(CDREnvelopeServiceImpl.class);
+    /**
+     * Save xml files to cdr method name.
+     */
+    @Value("#{ws['cdr.save.xml']}")
+    String saveXmlFilesMethod;
+    /**
+     * Convert cookie objects to string and vice versa.
+     */
+    @Autowired
+    CookiesToStringBidirectionalConverter cookiesConverter;
     /**
      * XML-RPC client.
      */
@@ -73,15 +91,15 @@ public class CDREnvelopeServiceImpl implements CDREnvelopeService {
     @Value("#{ws['cdr.envelope.get.xml.files']}")
     private String getEnvelopeXmlFilesMethod;
     /**
-     * Save xml files to cdr method name.
-     */
-    @Value("#{ws['cdr.save.xml']}")
-    String saveXmlFilesMethod;
-    /**
      * Conversion service.
      */
     @Autowired
     private ConversionService conversionService;
+    /**
+     * Known hosts service.
+     */
+    @Autowired
+    private KnownHostsService knownHostsService;
 
     @Override
     public MultiValueMap<String, XmlFile> getXmlFiles(CdrRequest parameters) {
@@ -114,6 +132,40 @@ public class CDREnvelopeServiceImpl implements CDREnvelopeService {
         return XmlSaveResult.valueOf(responseBody);
     }
 
+    @Override
+    public ResponseEntity<byte[]> fetchFileFromCdr(UserFile file, String remoteFileUrl)
+            throws FileNotAvailableException, URISyntaxException {
+
+        HttpHeaders authorization = new HttpHeaders();
+        // use user provided auth info only when the remote file is in the same host as UserFile.
+        if (URIUtils.extractHost(new URI(remoteFileUrl)).equals(URIUtils.extractHost(new URI(file.getEnvelope())))) {
+            authorization = getAuthorizationHeader(file);
+        }
+        ResponseEntity<byte[]> download = null;
+        try {
+            download = restOperations
+                    .exchange(new URI(remoteFileUrl), HttpMethod.GET, new HttpEntity<Object>(authorization), byte[].class);
+        } catch (RestClientException e) {
+            LOGGER.error("Unable to download remote file.", e);
+        }
+        if (download == null || !download.hasBody()) {
+            throw new FileNotAvailableException("Response is not OK or body not attached for " + remoteFileUrl);
+        }
+        return download;
+    }
+
+    @Override
+    public String submitRequest(UserFile file, String uri, String body) throws URISyntaxException {
+        HttpHeaders authorization = new HttpHeaders();
+        // use user provided auth info only when the remote file is in the same host as UserFile.
+        LOGGER.info(URIUtils.extractHost(new URI(uri)));
+        if (URIUtils.extractHost(new URI(uri)).equals(URIUtils.extractHost(new URI(file.getEnvelope())))) {
+            authorization = getAuthorizationHeader(file);
+        }
+        HttpEntity<String> httpEntity = new HttpEntity<String>(body, authorization);
+        return new RestTemplate().postForObject(new URI(uri), httpEntity, String.class);
+    }
+
     /**
      * Prepares parameters for saveXml remote method.
      *
@@ -121,11 +173,8 @@ public class CDREnvelopeServiceImpl implements CDREnvelopeService {
      * @return http entity representing request
      */
     HttpEntity<MultiValueMap<String, Object>> prepareXmlSaveRequestParameters(UserFile file) {
-        HttpHeaders authorization = new HttpHeaders();
-        String authorizationInfo = file.getAuthorization();
-        if (StringUtils.isNotEmpty(authorizationInfo)) {
-            authorization.add("Authorization", authorizationInfo);
-        }
+
+        HttpHeaders authorization = getAuthorizationHeader(file);
 
         HttpHeaders fileHeaders = new HttpHeaders();
         fileHeaders.setContentDispositionFormData("file", file.getName());
@@ -145,6 +194,27 @@ public class CDREnvelopeServiceImpl implements CDREnvelopeService {
         }
 
         return new HttpEntity<MultiValueMap<String, Object>>(request, authorization);
+    }
+
+    @Override
+    public HttpHeaders getAuthorizationHeader(UserFile file) {
+        HttpHeaders authorization = new HttpHeaders();
+        if (file.isAuthorized()) {
+            String authorizationInfo = file.getAuthorization();
+            if (StringUtils.isNotEmpty(authorizationInfo)) {
+                authorization.add("Authorization", authorizationInfo);
+                LOGGER.info("Use basic auth for file: " + file.getId());
+            }
+            String cookiesInfo = file.getCookies();
+            if (StringUtils.isNotEmpty(cookiesInfo)) {
+                Cookie[] cookies = cookiesConverter.convertStringToCookies(cookiesInfo);
+                for (Cookie cookie : cookies) {
+                    authorization.add("Cookie", cookie.getName() + "=" + cookie.getValue());
+                    LOGGER.info("User cookie auth for file: " + file.getId());
+                }
+            }
+        }
+        return authorization;
     }
 
     /**
@@ -186,8 +256,16 @@ public class CDREnvelopeServiceImpl implements CDREnvelopeService {
         XmlRpcClientConfigImpl config = new XmlRpcClientConfigImpl();
         config.setServerURL(createUrlFromString(parameters.getEnvelopeUrl()));
         if (parameters.isAuthorizationSet()) {
-            config.setBasicUserName(parameters.getUserName());
-            config.setBasicPassword(parameters.getPassword());
+            if (StringUtils.isNotEmpty(parameters.getUserName())) {
+                config.setBasicUserName(parameters.getUserName());
+                config.setBasicPassword(parameters.getPassword());
+            } else {
+                KnownHost knownHost = knownHostsService.getKnownHost(parameters.getEnvelopeUrl());
+                if (knownHost != null) {
+                    config.setBasicUserName(knownHost.getKey());
+                    config.setBasicPassword(knownHost.getTicket());
+                }
+            }
         }
         return config;
     }

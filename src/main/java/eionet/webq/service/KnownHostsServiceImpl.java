@@ -61,4 +61,19 @@ public class KnownHostsServiceImpl implements KnownHostsService {
     public void remove(int id) {
         knownHosts.remove(id);
     }
+
+    @Override
+    public KnownHost getKnownHost(String uri) {
+
+        KnownHost knownHost = null;
+        Collection<KnownHost> hosts = findAll();
+        for (KnownHost host : hosts) {
+            if (uri.startsWith(host.getHostURL())) {
+                knownHost = host;
+                break;
+            }
+        }
+        return knownHost;
+    }
+
 }

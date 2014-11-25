@@ -67,6 +67,16 @@ public class IntegrationWithCDRController {
      */
     private static final Logger LOGGER = Logger.getLogger(IntegrationWithCDRController.class);
     /**
+     * Webform URL provider.
+     */
+    @Autowired
+    WebformUrlProvider webformUrlProvider;
+    /**
+     * WebQ1 URL.
+     */
+    @Value("#{ws['webq1.url']}")
+    String webQFallBackUrl;
+    /**
      * Converts request to CdrRequest.
      */
     @Autowired
@@ -87,22 +97,12 @@ public class IntegrationWithCDRController {
      */
     @Autowired
     private UserFileService userFileService;
-    /**
-     * Webform URL provider.
-     */
-    @Autowired
-    WebformUrlProvider webformUrlProvider;
-    /**
-     * WebQ1 URL.
-     */
-    @Value("#{ws['webq1.url']}")
-    String webQFallBackUrl;
 
     /**
      * Deliver with WebForms.
      *
      * @param request parameters of this action
-     * @param model model
+     * @param model   model
      * @return view name
      * @throws eionet.webq.service.FileNotAvailableException if one redirect to xform remote file not found.
      */
@@ -133,7 +133,7 @@ public class IntegrationWithCDRController {
      * WebQEdit request handler.
      *
      * @param request current request
-     * @param model model
+     * @param model   model
      * @return view name
      * @throws FileNotAvailableException if remote file not available.
      */
@@ -166,7 +166,7 @@ public class IntegrationWithCDRController {
      * IllegalArgumentException handler for this class. If request parameters cannot be handled by this application, redirect to
      * webQ1.
      *
-     * @param request current request
+     * @param request  current request
      * @param response http response
      */
     @ExceptionHandler(IllegalArgumentException.class)
@@ -178,16 +178,16 @@ public class IntegrationWithCDRController {
     /**
      * Edit envelope file with web form.
      *
-     * @param formId web form id
-     * @param fileName file name
+     * @param formId        web form id
+     * @param fileName      file name
      * @param remoteFileUrl remote file url
-     * @param request current request
+     * @param request       current request
      * @return view name
      * @throws eionet.webq.service.FileNotAvailableException if remote file not available
      */
     @RequestMapping("/cdr/edit/file")
     public String editWithWebForm(@RequestParam int formId, @RequestParam String fileName,
-                                  @RequestParam String remoteFileUrl, HttpServletRequest request) throws FileNotAvailableException {
+            @RequestParam String remoteFileUrl, HttpServletRequest request) throws FileNotAvailableException {
         CdrRequest cdrRequest = (CdrRequest) request.getSession().getAttribute(LATEST_CDR_REQUEST);
         return editFile(webFormService.findActiveWebFormById(formId), fileName, remoteFileUrl, cdrRequest);
     }
@@ -195,7 +195,7 @@ public class IntegrationWithCDRController {
     /**
      * Add new envelope file with web form.
      *
-     * @param formId web form id
+     * @param formId  web form id
      * @param request current request
      * @return view name
      * @throws eionet.webq.service.FileNotAvailableException if remote file not available
@@ -212,20 +212,20 @@ public class IntegrationWithCDRController {
      * Start new web form.
      *
      * @param parameters cdr parameters
-     * @param webform project web form
+     * @param webform    project web form
      * @return redirect string
      * @throws FileNotAvailableException if remote file not available
      */
     private String startNewForm(CdrRequest parameters, ProjectFile webform)
             throws FileNotAvailableException {
         int fileId =
-                userFileService.saveBasedOnWebForm(userFileBasedOn(parameters), webFormService.findActiveWebFormById(webform.getId()));
+                userFileService
+                        .saveBasedOnWebForm(userFileBasedOn(parameters), webFormService.findActiveWebFormById(webform.getId()));
 
         LOGGER.info("Received ADD NEW file request from CDR with parameters: " + parameters.toString() +
                 "; sessionid=" + md5Hex(parameters.getSessionId()));
 
         String webformPath = webformUrlProvider.getWebformPath(webform);
-
 
         String redirect = "redirect:" + webformPath + "fileId=" + fileId + "&base_uri="
                 + parameters.getContextPath()
@@ -250,6 +250,8 @@ public class IntegrationWithCDRController {
         userFile.setName(parameters.getNewFileName());
         userFile.setEnvelope(parameters.getEnvelopeUrl());
         userFile.setAuthorization(parameters.getBasicAuthorization());
+        userFile.setAuthorized(parameters.isAuthorizationSet());
+        userFile.setCookies(parameters.getCookies());
         userFile.setTitle(parameters.getInstanceTitle());
         return userFile;
     }
@@ -257,10 +259,10 @@ public class IntegrationWithCDRController {
     /**
      * Sets passed parameters to model attributes and returns view name.
      *
-     * @param webForms web forms
-     * @param xmlFiles xml files
+     * @param webForms   web forms
+     * @param xmlFiles   xml files
      * @param parameters cdr parameters
-     * @param model model
+     * @param model      model
      * @return view name
      */
     private String deliverMenu(Collection<ProjectFile> webForms, MultiValueMap<String, XmlFile> xmlFiles, CdrRequest parameters,
@@ -274,10 +276,10 @@ public class IntegrationWithCDRController {
     /**
      * Saves new user file to db and returns redirect url to web form edit.
      *
-     * @param webForm web form to be used for edit.
-     * @param fileName new file name
+     * @param webForm       web form to be used for edit.
+     * @param fileName      new file name
      * @param remoteFileUrl remote file url
-     * @param request current request
+     * @param request       current request
      * @return redirect url
      * @throws FileNotAvailableException if remote file not available
      */
@@ -289,7 +291,6 @@ public class IntegrationWithCDRController {
 
         int fileId = userFileService.save(userFile);
         String envelopeParam = (request.getEnvelopeUrl() != null) ? "&envelope=" + request.getEnvelopeUrl() : "";
-
 
         LOGGER.info("Received EDIT file request from CDR with parameters: " + request.toString() +
                 ";  sessionid=" + md5Hex(request.getSessionId()));
@@ -310,8 +311,8 @@ public class IntegrationWithCDRController {
     /**
      * Check whether there is only 1 file and 1 schema available and their xml schemas match.
      *
-     * @param xmlFiles xml files
-     * @param webForms web forms
+     * @param xmlFiles   xml files
+     * @param webForms   web forms
      * @param parameters request parameters
      * @return true iff there are only 1 file and schema with equal xml schema
      */
@@ -329,8 +330,8 @@ public class IntegrationWithCDRController {
     /**
      * Check whether there is no files and only one form available. Adding new files must be allowed.
      *
-     * @param xmlFiles xml files
-     * @param webForms web forms
+     * @param xmlFiles   xml files
+     * @param webForms   web forms
      * @param parameters request parameters
      * @return true iff only one form, no files and creation of new files allowed.
      */
@@ -349,7 +350,7 @@ public class IntegrationWithCDRController {
     /**
      * Redirects to edit form.
      *
-     * @param request parsed cdr request
+     * @param request  parsed cdr request
      * @param xmlFiles xml files
      * @param webForms web forms
      * @return redirect string

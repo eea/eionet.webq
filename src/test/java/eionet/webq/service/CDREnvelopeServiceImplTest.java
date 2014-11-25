@@ -20,27 +20,11 @@
  */
 package eionet.webq.service;
 
-import static java.util.Collections.singletonMap;
-import static org.hamcrest.core.IsEqual.equalTo;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyList;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
+import eionet.webq.dao.orm.UploadedFile;
+import eionet.webq.dao.orm.UserFile;
+import eionet.webq.dto.CdrRequest;
+import eionet.webq.dto.XmlSaveResult;
+import eionet.webq.service.CDREnvelopeService.XmlFile;
 import org.apache.xmlrpc.XmlRpcException;
 import org.apache.xmlrpc.client.XmlRpcClient;
 import org.apache.xmlrpc.client.XmlRpcClientConfig;
@@ -59,12 +43,26 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestOperations;
 
-import eionet.webq.dao.orm.UploadedFile;
-import eionet.webq.dao.orm.UserFile;
-import eionet.webq.dto.CdrRequest;
-import eionet.webq.dto.XmlSaveResult;
-import eionet.webq.service.CDREnvelopeService.XmlFile;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
+import static java.util.Collections.singletonMap;
+import static org.hamcrest.core.IsEqual.equalTo;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyList;
+import static org.mockito.Matchers.anyObject;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  */
@@ -115,7 +113,7 @@ public class CDREnvelopeServiceImplTest {
         Object[] firstFileData = {"file name", "file title"};
         Object[] secondFileData = {"another name", "another title"};
         String xmlSchema = "xml-schema";
-        Map<String,Object[]> expectedFormat = singletonMap(xmlSchema, new Object[]{firstFileData, secondFileData});
+        Map<String, Object[]> expectedFormat = singletonMap(xmlSchema, new Object[] {firstFileData, secondFileData});
         whenGetXmlFilesRequest().thenReturn(expectedFormat);
 
         MultiValueMap<String, XmlFile> xmlFiles = cdrEnvelopeService.getXmlFiles(parametersWithUrl);
@@ -139,7 +137,7 @@ public class CDREnvelopeServiceImplTest {
 
     @Test(expected = CDREnvelopeException.class)
     public void throwsExceptionWhenUnexpectedResponseFormat() throws Exception {
-        whenGetXmlFilesRequest().thenReturn(singletonMap("schema", new Object[]{Collections.emptyList()}));
+        whenGetXmlFilesRequest().thenReturn(singletonMap("schema", new Object[] {Collections.emptyList()}));
 
         cdrEnvelopeService.getXmlFiles(parametersWithUrl);
     }
@@ -166,6 +164,7 @@ public class CDREnvelopeServiceImplTest {
         UserFile file = new UserFile(new UploadedFile(fileName, content), "");
         file.setFromCdr(true);
         file.setAuthorization("Basic 123");
+        file.setAuthorized(true);
 
         cdrEnvelopeService.pushXmlFile(file);
 
@@ -222,7 +221,8 @@ public class CDREnvelopeServiceImplTest {
 
     @SuppressWarnings("unchecked")
     @Test
-    public void onPrepareXmlSaveParameters_IfRestrictedSetToFalse_ApplyRestrictionWillBeTrueRestrictedWillBeFalse() throws Exception {
+    public void onPrepareXmlSaveParameters_IfRestrictedSetToFalse_ApplyRestrictionWillBeTrueRestrictedWillBeFalse()
+            throws Exception {
         UserFile file = new UserFile();
         file.setApplyRestriction(true);
         file.setRestricted(false);

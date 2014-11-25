@@ -29,16 +29,22 @@ import eionet.webq.service.CDREnvelopeService;
 import eionet.webq.service.RemoteFileService;
 import eionet.webq.service.UserFileService;
 import eionet.webq.service.WebFormService;
+import eionet.webq.web.controller.util.UserFileHelper;
 import eionet.webq.web.controller.util.UserFileList;
 import eionet.webq.web.controller.util.WebformUrlProvider;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.*;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.Arrays;
 import java.util.List;
 
@@ -46,6 +52,7 @@ import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -74,6 +81,8 @@ public class PublicPageControllerTest {
     private JsonXMLBidirectionalConverter jsonXMLConverter;
     @Mock
     WebformUrlProvider webformUrlProvider;
+    @Mock
+    UserFileHelper userFileHelper;
 
     @Before
     public void setUp() throws Exception {
@@ -168,7 +177,7 @@ public class PublicPageControllerTest {
         UserFile file = new UserFile();
         when(jsonXMLConverter.convertJsonToXml(any(byte[].class)))
                 .thenReturn("xml content".getBytes());
-        when(userFileService.getById(fileId)).thenReturn(file);
+        when(userFileHelper.getUserFile(anyInt(), any(HttpServletRequest.class))).thenReturn(file);
 
         publicPageController.saveJsonAsXml(fileId, requestWillHaveContent(), model);
 
@@ -219,7 +228,8 @@ public class PublicPageControllerTest {
         UserFile userFile = new UserFile();
         userFile.setId(1);
         userFile.setFromCdr(true);
-        when(userFileService.getById(userFile.getId())).thenReturn(userFile);
+        userFile.setAuthorized(true);
+        when(userFileHelper.getUserFile(anyInt(), any(HttpServletRequest.class))).thenReturn(userFile);
         return userFile;
     }
 

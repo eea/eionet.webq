@@ -56,6 +56,10 @@ public class CdrRequest {
      */
     private String password;
     /**
+     * Cookies information.
+     */
+    private String cookies;
+    /**
      * URL of xml file stored in CDR.
      */
     private String instanceUrl;
@@ -199,11 +203,19 @@ public class CdrRequest {
         this.sessionId = sessionId;
     }
 
+    public String getCookies() {
+        return cookies;
+    }
+
+    public void setCookies(String cookies) {
+        this.cookies = cookies;
+    }
+
     /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Object#toString()
-     */
+         * (non-Javadoc)
+         *
+         * @see java.lang.Object#toString()
+         */
     @Override
     public String toString() {
         return "CdrRequest [envelopeUrl=" + envelopeUrl + ", schema=" + schema + ", newFormCreationAllowed="

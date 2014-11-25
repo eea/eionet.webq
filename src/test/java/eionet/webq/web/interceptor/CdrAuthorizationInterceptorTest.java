@@ -20,12 +20,15 @@
  */
 package eionet.webq.web.interceptor;
 
+import eionet.webq.converter.CookiesToStringBidirectionalConverter;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -33,6 +36,7 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestOperations;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
@@ -48,20 +52,22 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
  */
 public class CdrAuthorizationInterceptorTest {
+    private final String loginUrl = "login";
+    @Mock
+    CookiesToStringBidirectionalConverter cookiesConverter;
     @InjectMocks
     private CdrAuthorizationInterceptor interceptor;
     @Mock
     private RestOperations restOperations;
     @Mock
     private HttpSession session;
-
-    private final String loginUrl = "login";
 
     @Before
     public void setUp() throws Exception {
@@ -104,6 +110,14 @@ public class CdrAuthorizationInterceptorTest {
     }
 
     @Test
+    public void whenQueryForUrlThroughInterceptor_extractUrlFromInstanceRequestParameterAndUseCookies() throws Exception {
+        MockHttpServletRequest request = requestWithCookies();
+        String expectedValue = "http://cdr.eu/envelope";
+        request.setParameter("instance", "http://cdr.eu/envelope/instance.xml");
+        assertUrlIsExtractedFromCookieRequest(request, "http://cdr.eu/envelope");
+    }
+
+    @Test
     public void whenQueryForUrlThroughInterceptor_extractUrlFromInstanceRequestParameter() throws Exception {
         MockHttpServletRequest request = requestWithNonEmptyAuthHeader();
         String expectedValue = "http://cdr.eu";
@@ -132,7 +146,8 @@ public class CdrAuthorizationInterceptorTest {
     }
 
     @Test
-    public void whenQueryForUrlThroughInterceptor_IfThereWas1UnsuccessfulLoginAttemptAndThereIsAnotherFailedAttempt_FailedAttemptsCountIs2() throws Exception {
+    public void whenQueryForUrlThroughInterceptor_IfThereWas1UnsuccessfulLoginAttemptAndThereIsAnotherFailedAttempt_FailedAttemptsCountIs2()
+            throws Exception {
         when(session.getAttribute(AUTHORIZATION_TRY_COUNT)).thenReturn(1);
         restClientWillThrowException();
 
@@ -142,7 +157,8 @@ public class CdrAuthorizationInterceptorTest {
     }
 
     @Test
-    public void whenQueryForUrlThroughInterceptor_IfTUnsuccessfulLoginAttemptEqualsToAllowedFailsCount_AllowRequestToProceed() throws Exception {
+    public void whenQueryForUrlThroughInterceptor_IfTUnsuccessfulLoginAttemptEqualsToAllowedFailsCount_AllowRequestToProceed()
+            throws Exception {
         when(session.getAttribute(AUTHORIZATION_TRY_COUNT)).thenReturn(ALLOWED_AUTHORIZATION_FAILURES_COUNT);
         restClientWillThrowException();
 
@@ -150,7 +166,8 @@ public class CdrAuthorizationInterceptorTest {
     }
 
     @Test
-    public void whenQueryForUrlThroughInterceptor_IfAllowsToProceedByFailedAttemptsCount_SetRequestAttributeAndResetCounter() throws Exception {
+    public void whenQueryForUrlThroughInterceptor_IfAllowsToProceedByFailedAttemptsCount_SetRequestAttributeAndResetCounter()
+            throws Exception {
         when(session.getAttribute(AUTHORIZATION_TRY_COUNT)).thenReturn(ALLOWED_AUTHORIZATION_FAILURES_COUNT);
         restClientWillThrowException();
 
@@ -178,9 +195,29 @@ public class CdrAuthorizationInterceptorTest {
         assertThat(urlCaptor.getValue(), containsString(expectedValue));
     }
 
+    private void assertUrlIsExtractedFromCookieRequest(MockHttpServletRequest request, String expectedValue) throws Exception {
+        when(restOperations.exchange(anyString(), isA(HttpMethod.class), isA(HttpEntity.class), any(Class.class))).thenReturn(
+                new ResponseEntity(HttpStatus.FOUND));
+
+        interceptor.preHandle(request, new MockHttpServletResponse(), null);
+
+        ArgumentCaptor<String> urlCaptor = ArgumentCaptor.forClass(String.class);
+        verify(restOperations).exchange(urlCaptor.capture(), isA(HttpMethod.class), isA(HttpEntity.class), any(Class.class));
+
+        assertThat(urlCaptor.getValue(), containsString(expectedValue));
+    }
+
     private MockHttpServletRequest requestWithNonEmptyAuthHeader() {
         MockHttpServletRequest request = new MockHttpServletRequest();
         request.addHeader("Authorization", "Basic 1jkahsd==");
+        return request;
+    }
+
+    private MockHttpServletRequest requestWithCookies() {
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        Cookie cookie = new Cookie("_ZopeId", "\"68673848A6sbSTxqyEQ\"");
+        Cookie[] cookies = {cookie};
+        request.setCookies(cookies);
         return request;
     }
 

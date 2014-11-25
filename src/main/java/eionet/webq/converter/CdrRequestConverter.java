@@ -20,21 +20,20 @@
  */
 package eionet.webq.converter;
 
-import static org.apache.commons.lang3.StringUtils.isEmpty;
-import static org.apache.commons.lang3.StringUtils.isNotEmpty;
-
-import java.util.ArrayList;
-import java.util.Collection;
-
-import javax.servlet.http.HttpServletRequest;
-
+import eionet.webq.dto.CdrRequest;
+import eionet.webq.web.interceptor.CdrAuthorizationInterceptor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.net.util.Base64;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
 
-import eionet.webq.dto.CdrRequest;
-import eionet.webq.web.interceptor.CdrAuthorizationInterceptor;
+import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
+import java.util.Collection;
+
+import static org.apache.commons.lang3.StringUtils.isEmpty;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 /**
  * Converts {@link javax.servlet.http.HttpServletRequest} to {@link eionet.webq.dto.CdrRequest}.
@@ -47,6 +46,12 @@ public class CdrRequestConverter implements Converter<HttpServletRequest, CdrReq
      * Basic authorization prefix.
      */
     private static final String BASIC_AUTHORIZATION_PREFIX = "Basic ";
+
+    /**
+     * Convert cookie objects to string and vice versa.
+     */
+    @Autowired
+    CookiesToStringBidirectionalConverter cookiesConverter;
 
     @Override
     public CdrRequest convert(HttpServletRequest httpRequest) {
@@ -77,6 +82,11 @@ public class CdrRequestConverter implements Converter<HttpServletRequest, CdrReq
         String authorizationHeader = httpRequest.getHeader("Authorization");
         if (authorizationAgainstCdrSucceed(httpRequest) && hasBasicAuthorization(authorizationHeader)) {
             setAuthorizationDetails(parameters, authorizationHeader);
+        }
+        if (authorizationAgainstCdrSucceed(httpRequest) && !parameters.isAuthorizationSet()
+                && httpRequest.getAttribute(CdrAuthorizationInterceptor.PARSED_COOKIES_ATTRIBUTE) != null) {
+            parameters.setAuthorizationSet(true);
+            parameters.setCookies((String) httpRequest.getAttribute(CdrAuthorizationInterceptor.PARSED_COOKIES_ATTRIBUTE));
         }
         parameters.setAdditionalParametersAsQueryString(createQueryStringFromParametersNotRead(parametersTracker));
         return parameters;

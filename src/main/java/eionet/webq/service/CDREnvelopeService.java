@@ -23,7 +23,11 @@ package eionet.webq.service;
 import eionet.webq.dao.orm.UserFile;
 import eionet.webq.dto.CdrRequest;
 import eionet.webq.dto.XmlSaveResult;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
 import org.springframework.util.MultiValueMap;
+
+import java.net.URISyntaxException;
 
 /**
  */
@@ -45,6 +49,27 @@ public interface CDREnvelopeService {
     XmlSaveResult pushXmlFile(UserFile file);
 
     /**
+     * Download file from CDR using authorisation info stored in UserFile object.
+     *
+     * @param file          UserFile holding auth info
+     * @param remoteFileUrl remote file to download
+     * @return remote file as byte array
+     * @throws FileNotAvailableException file not found
+     */
+    public ResponseEntity<byte[]> fetchFileFromCdr(UserFile file, String remoteFileUrl)
+            throws FileNotAvailableException, URISyntaxException;
+
+    public String submitRequest(UserFile file, String uri, String body) throws URISyntaxException;
+
+    /**
+     * Create HTTP request header with auth attributes for CDR requests.
+     *
+     * @param file user file containing authorization properties
+     * @return HttpHeaders with auth info
+     */
+    HttpHeaders getAuthorizationHeader(UserFile file);
+
+    /**
      * Envelope service xml file data.
      */
     public final class XmlFile {
@@ -61,7 +86,7 @@ public interface CDREnvelopeService {
          * Constructs file.
          *
          * @param fullName file full name.
-         * @param title file title.
+         * @param title    file title.
          */
         public XmlFile(String fullName, String title) {
             this.fullName = fullName;

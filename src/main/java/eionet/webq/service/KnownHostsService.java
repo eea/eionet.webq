@@ -64,4 +64,12 @@ public interface KnownHostsService {
      * @param id id
      */
     void remove(int id);
+
+    /**
+     * Get authorization info for known hosts.
+     *
+     * @param uri URL to look for authorisation.
+     * @return KnownHost object with auth info
+     */
+    public KnownHost getKnownHost(String uri);
 }

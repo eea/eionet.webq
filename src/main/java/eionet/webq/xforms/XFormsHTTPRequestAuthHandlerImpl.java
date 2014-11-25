@@ -21,20 +21,6 @@
 
 package eionet.webq.xforms;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.Collection;
-import java.util.Map;
-
-import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.net.util.Base64;
-import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import de.betterform.connector.http.AbstractHTTPConnector;
 import de.betterform.xml.xforms.model.submission.RequestHeader;
 import de.betterform.xml.xforms.model.submission.RequestHeaders;
@@ -43,6 +29,18 @@ import eionet.webq.dao.orm.UserFile;
 import eionet.webq.dto.KnownHostAuthenticationMethod;
 import eionet.webq.service.KnownHostsService;
 import eionet.webq.service.UserFileService;
+import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.net.util.Base64;
+import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.Map;
 
 /**
  * Service handles HTTP requests done through XForms engine and adds auth info to request header if needed.
@@ -52,31 +50,94 @@ import eionet.webq.service.UserFileService;
 @Component
 public class XFormsHTTPRequestAuthHandlerImpl implements HTTPRequestAuthHandler {
 
-    /** Session id attribute name stored in HTTP request header. */
+    /**
+     * Session id attribute name stored in HTTP request header.
+     */
     public static final String HTTP_JSESSIONID_ATTRIBUTE = "JSESSIONID=";
 
-    /** Cookie attribute name stored in HTTP request header. */
+    /**
+     * Cookie attribute name stored in HTTP request header.
+     */
     public static final String HTTP_COOKIE_ATTRIBUTE = "cookie";
 
-    /** Request base URL attribute in bf context. */
+    /**
+     * Request base URL attribute in bf context.
+     */
     public static final String BF_REQUEST_URL_ATTRIBUTE = "requestURL";
 
-    /** HTTP session id attribute in bf context. */
+    /**
+     * HTTP session id attribute in bf context.
+     */
     public static final String BF_HTTP_SESSION_ATTRIBUTE = "httpSessionId";
 
-    /** WebQ authorisation attribute in bf context. */
+    /**
+     * WebQ authorisation attribute in bf context.
+     */
     public static final String WEBQ_AUTH_ATTRIBUTE = "webqAuth";
-
-    /** User XML file service. */
+    /**
+     * The logger.
+     */
+    private static final Logger LOGGER = Logger.getLogger(XFormsHTTPRequestAuthHandlerImpl.class);
+    /**
+     * User XML file service.
+     */
     @Autowired
     UserFileService userFileService;
-
-    /** Known host service. */
+    /**
+     * Known host service.
+     */
     @Autowired
     KnownHostsService knownHostsService;
 
-    /** The logger. */
-    private static final Logger LOGGER = Logger.getLogger(XFormsHTTPRequestAuthHandlerImpl.class);
+    /**
+     * Betterform engine forwards the cookie attribute found from initial request header (sent by browser) to the destination uri.
+     * The jsessionid in cookie could be invalid if Tomcat has created a new session. This methods validates the cookie header and
+     * replaces or adds the correct jsessionid if needed. Otherwise saveXml will not work if the session id is invalid.
+     *
+     * @param context   Map of context parameters
+     * @param sessionId jsessionid stored in request header.
+     */
+    public static void validateSessionIdInRequestHeader(Map<?, ?> context, String sessionId) {
+        RequestHeaders httpRequestHeaders = (RequestHeaders) context.get(AbstractHTTPConnector.HTTP_REQUEST_HEADERS);
+        RequestHeader cookieHeader = httpRequestHeaders.getRequestHeader(HTTP_COOKIE_ATTRIBUTE);
+        String newCookieHeaderValue = null;
+
+        if (cookieHeader == null || cookieHeader.getValue() == null) {
+            newCookieHeaderValue = HTTP_JSESSIONID_ATTRIBUTE + sessionId;
+            LOGGER.info("Add new cookie: " + newCookieHeaderValue);
+        } else if (!cookieHeader.getValue().contains(HTTP_JSESSIONID_ATTRIBUTE)) {
+            newCookieHeaderValue = cookieHeader.getValue() + "; " + HTTP_JSESSIONID_ATTRIBUTE + sessionId;
+            LOGGER.info("Append jsessionid to cookie: " + newCookieHeaderValue);
+        } else if (cookieHeader.getValue().contains(HTTP_JSESSIONID_ATTRIBUTE)
+                && !cookieHeader.getValue().contains(HTTP_JSESSIONID_ATTRIBUTE + sessionId)) {
+            newCookieHeaderValue =
+                    cookieHeader.getValue().replaceAll(HTTP_JSESSIONID_ATTRIBUTE + "([^;]*)",
+                            HTTP_JSESSIONID_ATTRIBUTE + sessionId);
+            LOGGER.info("Found wrong JSESSIONID from request header: " + cookieHeader.getValue());
+            LOGGER.info("Change jsessionid in cookie: " + newCookieHeaderValue);
+        }
+        if (newCookieHeaderValue != null) {
+            httpRequestHeaders.removeHeader(HTTP_COOKIE_ATTRIBUTE);
+            httpRequestHeaders.addHeader(new RequestHeader(HTTP_COOKIE_ATTRIBUTE, newCookieHeaderValue));
+        }
+    }
+
+    /**
+     * Adds authorization info as request parameter to given URI, if it is known host.
+     *
+     * @param url       URL to add authorization info.
+     * @param knownHost Host object with authorization info.
+     * @return parsed URL.
+     */
+    public static String getUrlWithAuthParam(String url, KnownHost knownHost) {
+
+        String authUrl = url;
+        if (knownHost != null && knownHost.getAuthenticationMethod() == KnownHostAuthenticationMethod.REQUEST_PARAMETER) {
+            authUrl += (url.contains("?")) ? "&" : "?";
+            authUrl += knownHost.getKey() + "=" + knownHost.getTicket();
+        }
+        return authUrl;
+    }
 
     @Override
     public void addAuthToHttpRequest(HttpRequestBase httpRequestBase, Map<Object, Object> context) {
@@ -106,7 +167,7 @@ public class XFormsHTTPRequestAuthHandlerImpl implements HTTPRequestAuthHandler 
             try {
                 URI requestURI = new URI((String) context.get(BF_REQUEST_URL_ATTRIBUTE));
                 requestURLHost =
-                            StringUtils.substringBefore(requestURI.toString(), requestURI.getHost()) + requestURI.getHost();
+                        StringUtils.substringBefore(requestURI.toString(), requestURI.getHost()) + requestURI.getHost();
                 LOGGER.info("bF requestURLHost= " + requestURLHost);
             } catch (URISyntaxException e) {
                 LOGGER.warn("requestURL is not valid URL: " + context.get(BF_REQUEST_URL_ATTRIBUTE));
@@ -167,7 +228,7 @@ public class XFormsHTTPRequestAuthHandlerImpl implements HTTPRequestAuthHandler 
                         LOGGER.info("Add basic auth from session to URL: " + uri);
                     } else {
                         // check if we have known host in db
-                        KnownHost knownHost = getKnownHost(uri);
+                        KnownHost knownHost = knownHostsService.getKnownHost(uri);
                         if (knownHost != null) {
                             // add ticket parameter to request URI if needed
                             if (knownHost.getAuthenticationMethod() == KnownHostAuthenticationMethod.REQUEST_PARAMETER) {
@@ -197,74 +258,5 @@ public class XFormsHTTPRequestAuthHandlerImpl implements HTTPRequestAuthHandler 
                 }
             }
         }
-    }
-
-    /**
-     * Betterform engine forwards the cookie attribute found from initial request header (sent by browser) to the destination uri.
-     * The jsessionid in cookie could be invalid if Tomcat has created a new session. This methods validates the cookie header and
-     * replaces or adds the correct jsessionid if needed. Otherwise saveXml will not work if the session id is invalid.
-     *
-     * @param context Map of context parameters
-     * @param sessionId jsessionid stored in request header.
-     */
-    public static void validateSessionIdInRequestHeader(Map<?, ?> context, String sessionId) {
-        RequestHeaders httpRequestHeaders = (RequestHeaders) context.get(AbstractHTTPConnector.HTTP_REQUEST_HEADERS);
-        RequestHeader cookieHeader = httpRequestHeaders.getRequestHeader(HTTP_COOKIE_ATTRIBUTE);
-        String newCookieHeaderValue = null;
-
-        if (cookieHeader == null || cookieHeader.getValue() == null) {
-            newCookieHeaderValue = HTTP_JSESSIONID_ATTRIBUTE + sessionId;
-            LOGGER.info("Add new cookie: " + newCookieHeaderValue);
-        } else if (!cookieHeader.getValue().contains(HTTP_JSESSIONID_ATTRIBUTE)) {
-            newCookieHeaderValue = cookieHeader.getValue() + "; " + HTTP_JSESSIONID_ATTRIBUTE + sessionId;
-            LOGGER.info("Append jsessionid to cookie: " + newCookieHeaderValue);
-        } else if (cookieHeader.getValue().contains(HTTP_JSESSIONID_ATTRIBUTE)
-                && !cookieHeader.getValue().contains(HTTP_JSESSIONID_ATTRIBUTE + sessionId)) {
-            newCookieHeaderValue =
-                    cookieHeader.getValue().replaceAll(HTTP_JSESSIONID_ATTRIBUTE + "([^;]*)",
-                            HTTP_JSESSIONID_ATTRIBUTE + sessionId);
-            LOGGER.info("Found wrong JSESSIONID from request header: " + cookieHeader.getValue());
-            LOGGER.info("Change jsessionid in cookie: " + newCookieHeaderValue);
-        }
-        if (newCookieHeaderValue != null) {
-            httpRequestHeaders.removeHeader(HTTP_COOKIE_ATTRIBUTE);
-            httpRequestHeaders.addHeader(new RequestHeader(HTTP_COOKIE_ATTRIBUTE, newCookieHeaderValue));
-        }
-    }
-
-    /**
-     * Get authorization info for known hosts.
-     *
-     * @param uri URL to look for authorisation.
-     * @return KnownHost object with auth info
-     */
-    private KnownHost getKnownHost(String uri) {
-
-        KnownHost knownHost = null;
-        Collection<KnownHost> hosts = knownHostsService.findAll();
-        for (KnownHost host : hosts) {
-            if (uri.startsWith(host.getHostURL())) {
-                knownHost = host;
-                break;
-            }
-        }
-        return knownHost;
-    }
-
-    /**
-     * Adds authorization info as request parameter to given URI, if it is known host.
-     *
-     * @param url URL to add authorization info.
-     * @param knownHost Host object with authorization info.
-     * @return parsed URL.
-     */
-    public static String getUrlWithAuthParam(String url, KnownHost knownHost) {
-
-        String authUrl = url;
-        if (knownHost != null && knownHost.getAuthenticationMethod() == KnownHostAuthenticationMethod.REQUEST_PARAMETER) {
-            authUrl += (url.contains("?")) ? "&" : "?";
-            authUrl += knownHost.getKey() + "=" + knownHost.getTicket();
-        }
-        return authUrl;
     }
 }
