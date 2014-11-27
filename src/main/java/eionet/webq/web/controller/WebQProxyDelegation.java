@@ -106,7 +106,8 @@ public class WebQProxyDelegation {
      * @return result request results received from uri
      */
     @RequestMapping(value = "/restProxy", method = RequestMethod.GET)
-    public @ResponseBody String restProxyGet(@RequestParam("uri") String uri, @RequestParam(required = false) Integer fileId,
+    @ResponseBody
+    public String restProxyGet(@RequestParam("uri") String uri, @RequestParam(required = false) Integer fileId,
             HttpServletRequest request)
             throws UnsupportedEncodingException, URISyntaxException, FileNotAvailableException {
 
@@ -125,7 +126,8 @@ public class WebQProxyDelegation {
      * @return result request results received from uri
      */
     @RequestMapping(value = "/restProxy", method = RequestMethod.POST)
-    public @ResponseBody String restProxyPost(@RequestParam("uri") String uri, @RequestBody String body,
+    @ResponseBody
+    public String restProxyPost(@RequestParam("uri") String uri, @RequestBody String body,
             @RequestParam(required = false) Integer fileId, HttpServletRequest request)
             throws URISyntaxException, FileNotAvailableException {
         if (fileId != null && fileId > 0) {
@@ -136,20 +138,26 @@ public class WebQProxyDelegation {
     } // end of method restProxyPost
 
     /**
+     * /**
      * This method delegates GET request to remote host using authorisation stored in UserFile.
      *
-     * @param uri the actual uri to make the request
+     * @param uri    the actual uri to make the request
+     * @param fileId user session file id
      * @return result request results received from uri
+     * @throws URISyntaxException           wrong uri of remote file
+     * @throws FileNotAvailableException    the remote file is not available
+     * @throws UnsupportedEncodingException unable to convert the remote file to UTF-8
      */
     @RequestMapping(value = "/restProxyWithAuth", method = RequestMethod.GET)
-    public @ResponseBody String restProxyGetWithAuth(@RequestParam("uri") String uri, @RequestParam int fileId,
-            HttpServletRequest request) throws URISyntaxException, FileNotAvailableException {
+    @ResponseBody
+    public String restProxyGetWithAuth(@RequestParam("uri") String uri, @RequestParam int fileId,
+            HttpServletRequest request) throws URISyntaxException, FileNotAvailableException, UnsupportedEncodingException {
 
         UserFile file = userFileHelper.getUserFile(fileId, request);
 
         if (file != null) {
             if (uri.startsWith(file.getEnvelope())) {
-                return new String(envelopeService.fetchFileFromCdr(file, uri).getBody());
+                return new String(envelopeService.fetchFileFromCdr(file, uri).getBody(), "UTF-8");
             } else if (file.isAuthorized()) {
                 // check if we have known host in db
                 KnownHost knownHost = knownHostsService.getKnownHost(uri);
@@ -184,7 +192,8 @@ public class WebQProxyDelegation {
      * @return result request results received from uri
      */
     @RequestMapping(value = "/restProxyWithAuth", method = RequestMethod.POST)
-    public @ResponseBody String restProxyPostWithAuth(@RequestParam("uri") String uri, @RequestBody String body,
+    @ResponseBody
+    public String restProxyPostWithAuth(@RequestParam("uri") String uri, @RequestBody String body,
             @RequestParam int fileId, HttpServletRequest request) throws URISyntaxException, FileNotAvailableException {
 
         UserFile file = userFileHelper.getUserFile(fileId, request);
@@ -227,7 +236,8 @@ public class WebQProxyDelegation {
      * @throws IOException        could not read file from request
      */
     @RequestMapping(value = "/restProxyFileUpload", method = RequestMethod.POST)
-    public @ResponseBody String restProxyFileUpload(@RequestParam("uri") String uri,
+    @ResponseBody
+    public String restProxyFileUpload(@RequestParam("uri") String uri,
             @RequestParam int fileId, MultipartHttpServletRequest multipartRequest)
             throws URISyntaxException, IOException {
 
@@ -257,7 +267,8 @@ public class WebQProxyDelegation {
             if (!parameter.getKey().equals("uri") && !parameter.getKey().equals("fileId") && !parameter.getKey()
                     .equals("sessionid") && !parameter.getKey()
                     .equals("restricted")) {
-                request.add(parameter.getKey(), new HttpEntity<String>(StringUtils.defaultString(parameter.getValue()[0])));
+                request.add(parameter.getKey(), new HttpEntity<String>(
+                        StringUtils.defaultString(parameter.getValue()[0])));
             }
         }
 
@@ -286,7 +297,8 @@ public class WebQProxyDelegation {
      * @throws TransformerException         error when applying xslt transformation on xml
      */
     @RequestMapping(value = "/proxyXmlWithConversion", method = RequestMethod.GET)
-    public @ResponseBody byte[] proxyXmlWithConversion(@RequestParam("xmlUri") String xmlUri,
+    @ResponseBody
+    public byte[] proxyXmlWithConversion(@RequestParam("xmlUri") String xmlUri,
             @RequestParam(required = false) Integer fileId,
             @RequestParam("xsltUri") String xsltUri, @RequestParam(required = false) String format, HttpServletRequest request
             , HttpServletResponse response)

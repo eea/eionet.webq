@@ -20,9 +20,13 @@
  */
 package eionet.webq.dto;
 
+import java.io.Serializable;
+
 /**
  */
-public class CdrRequest {
+public class CdrRequest implements Serializable {
+
+    private static final long serialVersionUID = 1L;
     /**
      * Envelope URL.
      */

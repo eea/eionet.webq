@@ -24,11 +24,13 @@ import eionet.webq.dto.CdrRequest;
 import eionet.webq.web.interceptor.CdrAuthorizationInterceptor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.net.util.Base64;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -42,6 +44,10 @@ import static org.apache.commons.lang3.StringUtils.isNotEmpty;
  */
 @Component
 public class CdrRequestConverter implements Converter<HttpServletRequest, CdrRequest> {
+    /**
+     * This class logger.
+     */
+    private static final Logger LOGGER = Logger.getLogger(CdrRequestConverter.class);
     /**
      * Basic authorization prefix.
      */
@@ -81,7 +87,11 @@ public class CdrRequestConverter implements Converter<HttpServletRequest, CdrReq
 
         String authorizationHeader = httpRequest.getHeader("Authorization");
         if (authorizationAgainstCdrSucceed(httpRequest) && hasBasicAuthorization(authorizationHeader)) {
-            setAuthorizationDetails(parameters, authorizationHeader);
+            try {
+                setAuthorizationDetails(parameters, authorizationHeader);
+            } catch (UnsupportedEncodingException e) {
+                LOGGER.error("Unable to parse authorisation details" + e.toString());
+            }
         }
         if (authorizationAgainstCdrSucceed(httpRequest) && !parameters.isAuthorizationSet()
                 && httpRequest.getAttribute(CdrAuthorizationInterceptor.PARSED_COOKIES_ATTRIBUTE) != null) {
@@ -98,7 +108,7 @@ public class CdrRequestConverter implements Converter<HttpServletRequest, CdrReq
      * @param parameters          parameters.
      * @param authorizationHeader authorization header.
      */
-    private void setAuthorizationDetails(CdrRequest parameters, String authorizationHeader) {
+    private void setAuthorizationDetails(CdrRequest parameters, String authorizationHeader) throws UnsupportedEncodingException {
         String[] credentials = extractCredentialsFromBasicAuthorization(authorizationHeader);
         if (credentials.length != 2) {
             return;
@@ -115,9 +125,9 @@ public class CdrRequestConverter implements Converter<HttpServletRequest, CdrReq
      * @param authHeader authentication header
      * @return username and password or empty array in case of error.
      */
-    private String[] extractCredentialsFromBasicAuthorization(String authHeader) {
+    private String[] extractCredentialsFromBasicAuthorization(String authHeader) throws UnsupportedEncodingException {
         String encodedCredentials = authHeader.substring(BASIC_AUTHORIZATION_PREFIX.length());
-        String credentials = new String(Base64.decodeBase64(encodedCredentials));
+        String credentials = new String(Base64.decodeBase64(encodedCredentials), "UTF-8");
         return credentials.split(":");
     }
 
