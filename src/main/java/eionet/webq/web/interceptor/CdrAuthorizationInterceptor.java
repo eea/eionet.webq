@@ -225,7 +225,4 @@ public class CdrAuthorizationInterceptor extends HandlerInterceptorAdapter {
         session.setAttribute(AUTHORIZATION_TRY_COUNT, failedAttempts != null ? failedAttempts + 1 : 1);
     }
 
-    private void authorizeCdrRequest() {
-
-    }
 }

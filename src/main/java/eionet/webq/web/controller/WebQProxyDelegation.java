@@ -20,6 +20,7 @@
  */
 package eionet.webq.web.controller;
 
+import eionet.webq.converter.JsonXMLBidirectionalConverter;
 import eionet.webq.dao.orm.KnownHost;
 import eionet.webq.dao.orm.UserFile;
 import eionet.webq.dto.KnownHostAuthenticationMethod;
@@ -43,12 +44,20 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.client.RestOperations;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.xml.transform.Source;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.stream.StreamResult;
+import javax.xml.transform.stream.StreamSource;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
@@ -78,15 +87,15 @@ public class WebQProxyDelegation {
     @Autowired
     KnownHostsService knownHostsService;
     /**
+     * Json to XML converter.
+     */
+    @Autowired
+    JsonXMLBidirectionalConverter jsonXMLConverter;
+    /**
      * Cdr envelope service.
      */
     @Autowired
     private CDREnvelopeService envelopeService;
-    /**
-     * Rest client.
-     */
-    @Autowired
-    private RestOperations restOperations;
 
     /**
      * This method delegates GET request to remote host. See:
@@ -233,10 +242,8 @@ public class WebQProxyDelegation {
         MultipartFile multipartFile = multipartRequest.getFile(fileName);
 
         HttpHeaders authorization = new HttpHeaders();
-        if (file != null) {
-            if (uri.startsWith(file.getEnvelope())) {
-                authorization = envelopeService.getAuthorizationHeader(file);
-            }
+        if (file != null && uri.startsWith(file.getEnvelope())) {
+            authorization = envelopeService.getAuthorizationHeader(file);
         }
 
         HttpHeaders fileHeaders = new HttpHeaders();
@@ -257,9 +264,72 @@ public class WebQProxyDelegation {
         HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<MultiValueMap<String, Object>>
                 (request, authorization);
 
-        LOGGER.info("/restProxy [POST] uri=" + uri);
+        LOGGER.info("/restProxyFileUpload [POST] uri=" + uri);
         return new RestTemplate().postForObject(uri, requestEntity, String.class);
     }
+
+    /**
+     * Fetches XML file from given xmlUri and applies XSLT conversion with xsltUri.
+     * The resulting xml is converted to json, if format parameter equals 'json'.
+     * Applies authorisation information to fetch XML request, if it is available through UserFile.
+     *
+     * @param xmlUri   remote xml file URI
+     * @param fileId   WebQ session file ID to be used for applying authorisation info
+     * @param xsltUri  remote xslt file URI
+     * @param format   optional response format. Only json is supported, default is xml
+     * @param request  standard HttpServletRequest
+     * @param response standard HttpServletResponse
+     * @return converted XML content
+     * @throws UnsupportedEncodingException Cannot convert xml to UTF-8
+     * @throws URISyntaxException           xmlUri or xsltUri is incorrect
+     * @throws FileNotAvailableException    xml or xslt file is not available
+     * @throws TransformerException         error when applying xslt transformation on xml
+     */
+    @RequestMapping(value = "/proxyXmlWithConversion", method = RequestMethod.GET)
+    public @ResponseBody byte[] proxyXmlWithConversion(@RequestParam("xmlUri") String xmlUri,
+            @RequestParam(required = false) Integer fileId,
+            @RequestParam("xsltUri") String xsltUri, @RequestParam(required = false) String format, HttpServletRequest request
+            , HttpServletResponse response)
+            throws UnsupportedEncodingException, URISyntaxException, FileNotAvailableException, TransformerException {
+
+        byte[] xml = null;
+        if (fileId != null && fileId > 0) {
+            xml = restProxyGetWithAuth(xmlUri, fileId, request).getBytes("UTF-8");
+        } else {
+            xml = new RestTemplate().getForObject(new URI(xmlUri), byte[].class);
+        }
+        byte[] xslt = new RestTemplate().getForObject(new URI(xsltUri), byte[].class);
+        Source xslSource = new StreamSource(new ByteArrayInputStream(xslt));
+        ByteArrayOutputStream xmlResultOutputStream = new ByteArrayOutputStream();
+
+        try {
+            Transformer transformer = TransformerFactory.newInstance().newTransformer(xslSource);
+            for (Map.Entry<String, String[]> parameter : request.getParameterMap().entrySet()) {
+                if (!parameter.getKey().equals("xmlUri") && !parameter.getKey().equals("fileId") && !parameter.getKey()
+                        .equals("xsltUri") && !parameter.getKey().equals("format")) {
+                    transformer.setParameter(parameter.getKey(),
+                            StringUtils.defaultString(parameter.getValue()[0]));
+                }
+            }
+            transformer.transform(new StreamSource(new ByteArrayInputStream(xml)), new StreamResult(xmlResultOutputStream));
+        } catch (TransformerException e1) {
+            LOGGER.error("Unable to transform xml uri=" + xmlUri + " with stylesheet=" + xsltUri);
+            e1.printStackTrace();
+            throw e1;
+        }
+        byte[] result;
+        if (StringUtils.isNotEmpty(format) && format.equals("json")) {
+            result = jsonXMLConverter.convertXmlToJson(xmlResultOutputStream.toByteArray());
+            response.setContentType(String.valueOf(MediaType.APPLICATION_JSON));
+        } else {
+            result = xmlResultOutputStream.toByteArray();
+            response.setContentType(String.valueOf(MediaType.APPLICATION_XML));
+        }
+        LOGGER.info("Converted xml uri=" + xmlUri + " with stylesheet=" + xsltUri);
+        response.setCharacterEncoding("utf-8");
+        return result;
+
+    } // end of method proxyXmlWithConversion
 
     /**
      * Create HttpHeader with basic authentication info.
@@ -267,6 +337,7 @@ public class WebQProxyDelegation {
      * @param knownHost KnownHost object
      * @return HttpHeader with authorization attribute
      */
+
     private HttpHeaders getHttpHeaderWithBasicAuthentication(KnownHost knownHost) {
         HttpHeaders authorization = new HttpHeaders();
         try {
