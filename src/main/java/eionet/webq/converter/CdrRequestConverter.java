@@ -107,6 +107,7 @@ public class CdrRequestConverter implements Converter<HttpServletRequest, CdrReq
      *
      * @param parameters          parameters.
      * @param authorizationHeader authorization header.
+     * @throws UnsupportedEncodingException Cannot convert the auth info to UTF-8
      */
     private void setAuthorizationDetails(CdrRequest parameters, String authorizationHeader) throws UnsupportedEncodingException {
         String[] credentials = extractCredentialsFromBasicAuthorization(authorizationHeader);

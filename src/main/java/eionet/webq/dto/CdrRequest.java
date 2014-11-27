@@ -26,6 +26,7 @@ import java.io.Serializable;
  */
 public class CdrRequest implements Serializable {
 
+    /** serial version UID for serialisation. */
     private static final long serialVersionUID = 1L;
     /**
      * Envelope URL.

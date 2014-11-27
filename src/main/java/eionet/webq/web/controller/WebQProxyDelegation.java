@@ -103,7 +103,12 @@ public class WebQProxyDelegation {
      * defined.
      *
      * @param uri the actual uri to make the request
+     * @param fileId optional user session file ID
+     * @param request  standard HttpServletRequest
      * @return result request results received from uri
+     * @throws UnsupportedEncodingException unable to convert the remote file to UTF-8
+     * @throws URISyntaxException           wrong uri of remote file
+     * @throws FileNotAvailableException    the remote file is not available
      */
     @RequestMapping(value = "/restProxy", method = RequestMethod.GET)
     @ResponseBody
@@ -123,7 +128,11 @@ public class WebQProxyDelegation {
      *
      * @param uri  the actual uri to make the request
      * @param body body request body to forward to remote host
+     * @param fileId optional user session file ID
+     * @param request  standard HttpServletRequest
      * @return result request results received from uri
+     * @throws URISyntaxException           wrong uri of remote file
+     * @throws FileNotAvailableException    the remote file is not available
      */
     @RequestMapping(value = "/restProxy", method = RequestMethod.POST)
     @ResponseBody
@@ -143,6 +152,7 @@ public class WebQProxyDelegation {
      *
      * @param uri    the actual uri to make the request
      * @param fileId user session file id
+     * @param request  standard HttpServletRequest
      * @return result request results received from uri
      * @throws URISyntaxException           wrong uri of remote file
      * @throws FileNotAvailableException    the remote file is not available
@@ -189,7 +199,11 @@ public class WebQProxyDelegation {
      *
      * @param uri  the actual uri to make the request
      * @param body body request body to forward to remote host
+     * @param fileId user session file id
+     * @param request  standard HttpServletRequest
      * @return result request results received from uri
+     * @throws URISyntaxException           wrong uri of remote file
+     * @throws FileNotAvailableException    the remote file is not available
      */
     @RequestMapping(value = "/restProxyWithAuth", method = RequestMethod.POST)
     @ResponseBody
