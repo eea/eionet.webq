@@ -273,4 +273,7 @@
             <column name="cookies" type="varchar(1000)"/>
         </addColumn>
     </changeSet>
+    <changeSet id="17" author="kasperen">
+        <modifyDataType columnName="remote_file_url" newDataType="varchar(2000)" tableName="project_file"/>
+    </changeSet>
 </databaseChangeLog>

@@ -20,12 +20,6 @@
  */
 package eionet.webq.service;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.zip.CRC32;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +27,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestOperations;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.zip.CRC32;
 
 /**
  * {@link eionet.webq.service.RemoteFileService} implementation.
@@ -56,9 +56,11 @@ public class RemoteFileServiceImpl implements RemoteFileService {
         } else {
             ResponseEntity<byte[]> download = null;
             try {
-                download = downloader.getForEntity(remoteFileUrl, byte[].class);
+                download = downloader.getForEntity(new URI(remoteFileUrl), byte[].class);
             } catch (RestClientException e) {
                 LOGGER.error("Unable to download remote file.", e);
+            } catch (URISyntaxException e) {
+                LOGGER.error("Remote file URI is invalid: " + remoteFileUrl, e);
             }
             if (download == null || !download.hasBody()) {
                 throw new FileNotAvailableException("Response is not OK or body not attached for " + remoteFileUrl);
@@ -76,10 +78,9 @@ public class RemoteFileServiceImpl implements RemoteFileService {
     /**
      * Calculates crc32 checksum.
      *
-     * @see java.util.zip.CRC32
-     *
      * @param bytes bytes to calculate checksum.
      * @return checksum
+     * @see java.util.zip.CRC32
      */
     private long crc32Checksum(byte[] bytes) {
         CRC32 crc32 = new CRC32();
