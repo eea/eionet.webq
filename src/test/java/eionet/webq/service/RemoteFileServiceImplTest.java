@@ -20,13 +20,6 @@
  */
 package eionet.webq.service;
 
-import static org.hamcrest.core.IsEqual.equalTo;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.mockito.Mockito.when;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
@@ -37,7 +30,17 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestOperations;
 
+import java.net.URI;
 import java.net.URL;
+
+import static org.hamcrest.core.IsEqual.equalTo;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.when;
 
 public class RemoteFileServiceImplTest {
     private final byte[] FILE_CONTENT_IN_RESPONSE = "test file content".getBytes();
@@ -117,7 +120,7 @@ public class RemoteFileServiceImplTest {
     }
 
     private void httpResponseWithBytes(byte[] responseBody) {
-        when(restOperations.getForEntity(url, byte[].class))
+        when(restOperations.getForEntity(any(URI.class), eq(byte[].class)))
                 .thenReturn(new ResponseEntity<byte[]>(responseBody, HttpStatus.OK));
     }
 }

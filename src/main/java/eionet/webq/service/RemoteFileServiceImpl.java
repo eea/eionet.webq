@@ -51,7 +51,11 @@ public class RemoteFileServiceImpl implements RemoteFileService {
 
     @Override
     public byte[] fileContent(String remoteFileUrl) throws FileNotAvailableException {
-        if (remoteFileUrl != null && remoteFileUrl.startsWith("file://")) {
+
+        if (remoteFileUrl == null) {
+            throw new FileNotAvailableException("Remote file URL is not defined.");
+        }
+        else if (remoteFileUrl != null && remoteFileUrl.startsWith("file://")) {
             return readFilesystemFile(remoteFileUrl);
         } else {
             ResponseEntity<byte[]> download = null;

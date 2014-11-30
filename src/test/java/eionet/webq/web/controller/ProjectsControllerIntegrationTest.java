@@ -46,6 +46,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestOperations;
 
+import java.net.URI;
 import java.security.Principal;
 import java.util.Collection;
 
@@ -57,7 +58,7 @@ import static org.hamcrest.core.IsNull.nullValue;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.fileUpload;
@@ -268,7 +269,7 @@ public class ProjectsControllerIntegrationTest extends AbstractProjectsControlle
     @Test
     public void checkFileChangesFromRemoteLocation() throws Exception {
         uploadFilesForDefaultProject(1);
-        when(fileDownload.getForEntity(anyString(), eq(byte[].class)))
+        when(fileDownload.getForEntity(any(URI.class), eq(byte[].class)))
                 .thenReturn(new ResponseEntity<byte[]>("test-file-content".getBytes(), HttpStatus.OK));
         ProjectFile uploadedFile = theOnlyOneUploadedFile();
 
@@ -280,7 +281,7 @@ public class ProjectsControllerIntegrationTest extends AbstractProjectsControlle
     @Test
     public void returnsMessageIfNoChangesRequired() throws Exception {
         ProjectFile file = uploadFilesForDefaultProject(1);
-        when(fileDownload.getForEntity(anyString(), eq(byte[].class)))
+        when(fileDownload.getForEntity(any(URI.class), eq(byte[].class)))
                 .thenReturn(new ResponseEntity<byte[]>(file.getFileContent(), HttpStatus.OK));
         ProjectFile uploadedFile = theOnlyOneUploadedFile();
 
@@ -294,7 +295,7 @@ public class ProjectsControllerIntegrationTest extends AbstractProjectsControlle
     @Test
     public void whenFileNotAccessibleShowsMessage() throws Exception {
         uploadFilesForDefaultProject(1);
-        when(fileDownload.getForEntity(anyString(), eq(byte[].class)))
+        when(fileDownload.getForEntity(any(URI.class), eq(byte[].class)))
                 .thenReturn(new ResponseEntity<byte[]>(HttpStatus.BAD_REQUEST));
         ProjectFile uploadedFile = theOnlyOneUploadedFile();
 
@@ -309,7 +310,7 @@ public class ProjectsControllerIntegrationTest extends AbstractProjectsControlle
     public void allowsFileUpdateFromRemote() throws Exception {
         uploadFilesForDefaultProject(1);
         byte[] newContent = "new-file-content".getBytes();
-        when(fileDownload.getForEntity(anyString(), eq(byte[].class)))
+        when(fileDownload.getForEntity(any(URI.class), eq(byte[].class)))
                 .thenReturn(new ResponseEntity<byte[]>(newContent, HttpStatus.OK));
         ProjectFile uploadedFile = theOnlyOneUploadedFile();
         request(MockMvcRequestBuilders.get("/projects/remote/update/" + DEFAULT_PROJECT_ID + "/file/" + uploadedFile.getId()));
@@ -319,9 +320,9 @@ public class ProjectsControllerIntegrationTest extends AbstractProjectsControlle
     }
 
     @Test
-    public void showsErrorMessageWhenRemoteFileNotAccesible() throws Exception {
+    public void showsErrorMessageWhenRemoteFileNotAccessible() throws Exception {
         ProjectFile testFile = uploadFilesForDefaultProject(1);
-        when(fileDownload.getForEntity(anyString(), eq(byte[].class)))
+        when(fileDownload.getForEntity(any(URI.class), eq(byte[].class)))
                 .thenReturn(new ResponseEntity<byte[]>(HttpStatus.BAD_REQUEST));
         ProjectFile uploadedFile = theOnlyOneUploadedFile();
         request(MockMvcRequestBuilders.get("/projects/remote/update/" + DEFAULT_PROJECT_ID + "/file/" + uploadedFile.getId()))
@@ -369,7 +370,7 @@ public class ProjectsControllerIntegrationTest extends AbstractProjectsControlle
         projectFile.setTitle("title");
         projectFile.setFileType(ProjectFileType.WEBFORM);
         projectFile.setFile(new UploadedFile("file-name", "test-content".getBytes()));
-        projectFile.setRemoteFileUrl("file.url");
+        projectFile.setRemoteFileUrl("http://file.url");
         projectFile.setUserName("test-user");
         return projectFile;
     }
@@ -379,6 +380,7 @@ public class ProjectsControllerIntegrationTest extends AbstractProjectsControlle
                 .file(new MockMultipartFile("file", projectFile.getFileName(), MediaType.APPLICATION_XML_VALUE, projectFile.getFileContent()))
                 .param("title", projectFile.getTitle()).param("active", Boolean.toString(projectFile.isActive()))
                 .param("description", projectFile.getDescription()).param("fileType", projectFile.getFileType().name())
+                .param("remoteFileUrl", projectFile.getRemoteFileUrl())
                 .principal(mockPrincipal(projectFile.getUserName())));
     }
 
