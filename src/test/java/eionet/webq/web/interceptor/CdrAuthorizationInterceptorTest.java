@@ -21,14 +21,16 @@
 package eionet.webq.web.interceptor;
 
 import eionet.webq.converter.CookiesToStringBidirectionalConverter;
+import org.apache.http.ProtocolVersion;
+import org.apache.http.message.BasicHttpResponse;
+import org.apache.http.message.BasicStatusLine;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -52,7 +54,8 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.isA;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -196,13 +199,14 @@ public class CdrAuthorizationInterceptorTest {
     }
 
     private void assertUrlIsExtractedFromCookieRequest(MockHttpServletRequest request, String expectedValue) throws Exception {
-        when(restOperations.exchange(anyString(), isA(HttpMethod.class), isA(HttpEntity.class), any(Class.class))).thenReturn(
-                new ResponseEntity(HttpStatus.FOUND));
 
+        interceptor = spy(interceptor);
+        doReturn(new BasicHttpResponse(new BasicStatusLine(new ProtocolVersion("HTTP", 2, 0), 200, "OK"))).
+                when(interceptor).fetchUrlWithoutRedirection(anyString(), (HttpHeaders) anyObject());
         interceptor.preHandle(request, new MockHttpServletResponse(), null);
 
         ArgumentCaptor<String> urlCaptor = ArgumentCaptor.forClass(String.class);
-        verify(restOperations).exchange(urlCaptor.capture(), isA(HttpMethod.class), isA(HttpEntity.class), any(Class.class));
+        verify(interceptor).fetchUrlWithoutRedirection(urlCaptor.capture(), any(HttpHeaders.class));
 
         assertThat(urlCaptor.getValue(), containsString(expectedValue));
     }

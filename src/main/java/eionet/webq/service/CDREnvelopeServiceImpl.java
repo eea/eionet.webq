@@ -125,6 +125,7 @@ public class CDREnvelopeServiceImpl implements CDREnvelopeService {
 
         String responseBody = entity.getBody();
         if (entity.getStatusCode() != HttpStatus.OK) {
+            LOGGER.info("Response headers from saveXml=" + entity.getHeaders());
             return XmlSaveResult.valueOfError("Service unavailable.");
         }
         LOGGER.info("Response headers from saveXml=" + entity.getHeaders());

@@ -342,6 +342,7 @@ public class UserFile {
     public String toString() {
         return "UserFile{" + "id=" + id + ", userId='" + userId + '\'' + ", file=" + file + ", xmlSchema='" + xmlSchema + '\''
                 + ", fromCdr=" + fromCdr + ", envelope='" + envelope + '\'' + ", title='" + title + '\'' + ", created=" + created
-                + ", updated=" + updated + ", downloaded=" + downloaded + ", availableConversions=" + availableConversions + '}';
+                + ", updated=" + updated + ", downloaded=" + downloaded + ", availableConversions=" + availableConversions
+                + ", authorized=" + authorized + '}';
     }
 }

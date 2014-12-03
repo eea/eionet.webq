@@ -22,12 +22,19 @@ package eionet.webq.web.interceptor;
 
 import eionet.webq.converter.CookiesToStringBidirectionalConverter;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.HttpRequest;
+import org.apache.http.HttpResponse;
+import org.apache.http.ProtocolException;
+import org.apache.http.client.RedirectStrategy;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.protocol.HttpContext;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -39,8 +46,11 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.List;
+import java.util.Map;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 
@@ -110,8 +120,9 @@ public class CdrAuthorizationInterceptor extends HandlerInterceptorAdapter {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         String authorization = request.getHeader(AUTHORIZATION_HEADER);
-        if (StringUtils.isNotEmpty(authorization)) {
-            // if Basic auth is present in the request, then try to log in to CDR to test if it is valid token for given domain
+        if (StringUtils.isNotEmpty(authorization) || request.getParameter("auth") != null) {
+            // if Basic auth is present in the request, then try to log in to CDR to test if it is valid token for given domain.
+            // "auth" parameter is just meant for testing the CDR API in development environment - WebQ asks to authenticate.
             HttpHeaders headers = new HttpHeaders();
             headers.add(AUTHORIZATION_HEADER, authorization);
             try {
@@ -137,12 +148,25 @@ public class CdrAuthorizationInterceptor extends HandlerInterceptorAdapter {
                 }
                 try {
                     String urlToFetch = extractCdrEnvelopeUrl(request) + "/" + cdrEnvelopePropertiesMethod;
-                    ResponseEntity<String> loginResponse = restOperations.exchange(urlToFetch, HttpMethod.GET,
-                            new HttpEntity<Object>(headers), String.class);
+                    //ResponseEntity<String> loginResponse = restOperations.exchange(urlToFetch, HttpMethod.GET,
+                    //        new HttpEntity<Object>(headers), String.class);
+
+                    HttpResponse responseFromCdr = fetchUrlWithoutRedirection(urlToFetch, headers);
+                    int statusCode = responseFromCdr.getStatusLine().getStatusCode();
+
                     LOGGER.info(
-                            "Response code received from CDR envelope request using cookies" + loginResponse.getStatusCode());
-                    request.setAttribute(PARSED_COOKIES_ATTRIBUTE, cookiesConverter.convertCookiesToString(cookies));
-                    return PROCEED;
+                            "Response code received from CDR envelope request using cookies " + statusCode);
+                    if (statusCode == HttpStatus.OK.value()) {
+                        request.setAttribute(PARSED_COOKIES_ATTRIBUTE, cookiesConverter.convertCookiesToString(cookies));
+                        return PROCEED;
+                    } else if ((statusCode == HttpStatus.MOVED_PERMANENTLY.value()
+                            || statusCode == HttpStatus.MOVED_TEMPORARILY.value())
+                            && responseFromCdr.getFirstHeader("Location") != null) {
+                        // redirect to CDR login page
+                        String redirectUrl = extractCdrUrl(request) + responseFromCdr.getFirstHeader("Location").getValue();
+                        LOGGER.info("Redirect to " + redirectUrl);
+                        response.sendRedirect(redirectUrl);
+                    }
                 } catch (HttpStatusCodeException e) {
                     if (e.getStatusCode() != HttpStatus.UNAUTHORIZED) {
                         LOGGER.warn("Fetching CDR envelope page failed with unexpected HTTP status code", e);
@@ -225,4 +249,36 @@ public class CdrAuthorizationInterceptor extends HandlerInterceptorAdapter {
         session.setAttribute(AUTHORIZATION_TRY_COUNT, failedAttempts != null ? failedAttempts + 1 : 1);
     }
 
+    /**
+     * Calls a resource in CDR with redirect disabled. Then it is possible to catch if the user is redirected to login page.
+     *
+     * @param url     CDR url to fetch.
+     * @param headers HTTP headers to send.
+     * @return HTTP response object
+     * @throws IOException if network error occurs
+     */
+    protected HttpResponse fetchUrlWithoutRedirection(String url, HttpHeaders headers) throws IOException {
+        DefaultHttpClient httpClient = new DefaultHttpClient();
+        httpClient.setRedirectStrategy(new RedirectStrategy() {
+            @Override
+            public boolean isRedirected(HttpRequest httpRequest, HttpResponse httpResponse, HttpContext httpContext)
+                    throws ProtocolException {
+                return false;
+            }
+
+            @Override
+            public HttpUriRequest getRedirect(HttpRequest httpRequest, HttpResponse httpResponse,
+                    HttpContext httpContext) throws ProtocolException {
+                return null;
+            }
+        });
+        HttpGet httpget = new HttpGet(url);
+
+        for (Map.Entry<String, List<String>> header : headers.entrySet()) {
+            for (String value : header.getValue()) {
+                httpget.addHeader(header.getKey(), value);
+            }
+        }
+        return httpClient.execute(httpget);
+    }
 }
