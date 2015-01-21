@@ -161,7 +161,7 @@
             <scope>compile</scope>
         </dependency>
 
-        <!-- betterFORM -->
+        <!-- betterFORM: cannot be found -->
         <dependency>
             <groupId>de.betterform</groupId>
             <artifactId>betterform</artifactId>

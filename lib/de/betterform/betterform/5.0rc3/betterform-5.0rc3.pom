@@ -13,6 +13,7 @@
 <artifactId>betterform-core</artifactId>
 <version>5.0rc3</version>
 </dependency>
+<!--version cannot be found-->
 <dependency>
 <groupId>org.directwebremoting.dwr</groupId>
 <artifactId>dwr</artifactId>
@@ -217,6 +218,7 @@
 <scope>test</scope>
 </dependency>
 <dependency>
+    <!--Version cannot be found-->
 <groupId>net.sf.saxon</groupId>
 <artifactId>saxon</artifactId>
 <version>9.4.0.7</version>
@@ -242,9 +244,9 @@
 <version>4.1.1</version>
 </dependency>
 <dependency>
-<groupId>org.apache.httpcomponents</groupId>
-<artifactId>httpcomponents-mime</artifactId>
-<version>4.1.1</version>
+    <groupId>org.apache.httpcomponents</groupId>
+    <artifactId>httpmime</artifactId>
+    <version>4.1.1</version>
 </dependency>
 <dependency>
 <groupId>commons-net</groupId>
@@ -291,6 +293,7 @@
 </exclusion>
 </exclusions>
 </dependency>
+        <!--version cannot be found-->
 <dependency>
 <groupId>xerces</groupId>
 <artifactId>xercesImpl</artifactId>
@@ -336,11 +339,13 @@
 <artifactId>commons-pool</artifactId>
 <version>1.5.6</version>
 </dependency>
+        <!--cannot be found-->
 <dependency>
 <groupId>org.exist</groupId>
 <artifactId>exist</artifactId>
 <version>2.1-trunk</version>
 </dependency>
+        <!--exact version cannot be found-->
 <dependency>
 <groupId>org.xmldb</groupId>
 <artifactId>xmldb</artifactId>
