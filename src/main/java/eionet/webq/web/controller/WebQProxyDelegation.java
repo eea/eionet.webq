@@ -27,6 +27,7 @@ import eionet.webq.dto.KnownHostAuthenticationMethod;
 import eionet.webq.service.CDREnvelopeService;
 import eionet.webq.service.FileNotAvailableException;
 import eionet.webq.service.KnownHostsService;
+import eionet.webq.web.controller.util.ProxyDelegationHelper;
 import eionet.webq.web.controller.util.UserFileHelper;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.net.util.Base64;
@@ -102,9 +103,9 @@ public class WebQProxyDelegation {
      * http://stackoverflow.com/questions/14595245/rest-service-pass-through-via-spring This method also works when a method is not
      * defined.
      *
-     * @param uri the actual uri to make the request
-     * @param fileId optional user session file ID
-     * @param request  standard HttpServletRequest
+     * @param uri     the actual uri to make the request
+     * @param fileId  optional user session file ID
+     * @param request standard HttpServletRequest
      * @return result request results received from uri
      * @throws UnsupportedEncodingException unable to convert the remote file to UTF-8
      * @throws URISyntaxException           wrong uri of remote file
@@ -126,13 +127,13 @@ public class WebQProxyDelegation {
     /**
      * This method delegates POST request to remote host.
      *
-     * @param uri  the actual uri to make the request
-     * @param body body request body to forward to remote host
-     * @param fileId optional user session file ID
-     * @param request  standard HttpServletRequest
+     * @param uri     the actual uri to make the request
+     * @param body    body request body to forward to remote host
+     * @param fileId  optional user session file ID
+     * @param request standard HttpServletRequest
      * @return result request results received from uri
-     * @throws URISyntaxException           wrong uri of remote file
-     * @throws FileNotAvailableException    the remote file is not available
+     * @throws URISyntaxException        wrong uri of remote file
+     * @throws FileNotAvailableException the remote file is not available
      */
     @RequestMapping(value = "/restProxy", method = RequestMethod.POST)
     @ResponseBody
@@ -150,9 +151,9 @@ public class WebQProxyDelegation {
      * /**
      * This method delegates GET request to remote host using authorisation stored in UserFile.
      *
-     * @param uri    the actual uri to make the request
-     * @param fileId user session file id
-     * @param request  standard HttpServletRequest
+     * @param uri     the actual uri to make the request
+     * @param fileId  user session file id
+     * @param request standard HttpServletRequest
      * @return result request results received from uri
      * @throws URISyntaxException           wrong uri of remote file
      * @throws FileNotAvailableException    the remote file is not available
@@ -165,7 +166,7 @@ public class WebQProxyDelegation {
 
         UserFile file = userFileHelper.getUserFile(fileId, request);
 
-        if (file != null) {
+        if (file != null && ProxyDelegationHelper.isCompanyIdParameterValidForBdrEnvelope(uri, file.getEnvelope())) {
             if (uri.startsWith(file.getEnvelope())) {
                 return new String(envelopeService.fetchFileFromCdr(file, uri).getBody(), "UTF-8");
             } else if (file.isAuthorized()) {
@@ -197,13 +198,13 @@ public class WebQProxyDelegation {
     /**
      * This method delegates multipart POST request to remote host using authorisation stored in UserFile.
      *
-     * @param uri  the actual uri to make the request
-     * @param body body request body to forward to remote host
-     * @param fileId user session file id
-     * @param request  standard HttpServletRequest
+     * @param uri     the actual uri to make the request
+     * @param body    body request body to forward to remote host
+     * @param fileId  user session file id
+     * @param request standard HttpServletRequest
      * @return result request results received from uri
-     * @throws URISyntaxException           wrong uri of remote file
-     * @throws FileNotAvailableException    the remote file is not available
+     * @throws URISyntaxException        wrong uri of remote file
+     * @throws FileNotAvailableException the remote file is not available
      */
     @RequestMapping(value = "/restProxyWithAuth", method = RequestMethod.POST)
     @ResponseBody
@@ -212,7 +213,7 @@ public class WebQProxyDelegation {
 
         UserFile file = userFileHelper.getUserFile(fileId, request);
 
-        if (file != null) {
+        if (file != null && ProxyDelegationHelper.isCompanyIdParameterValidForBdrEnvelope(uri, file.getEnvelope())) {
             if (uri.startsWith(file.getEnvelope())) {
                 return envelopeService.submitRequest(file, uri, body);
             } else if (file.isAuthorized()) {
@@ -319,7 +320,11 @@ public class WebQProxyDelegation {
             throws UnsupportedEncodingException, URISyntaxException, FileNotAvailableException, TransformerException {
 
         byte[] xml = null;
-        if (fileId != null && fileId > 0) {
+
+        UserFile file = userFileHelper.getUserFile(fileId, request);
+
+        if (file != null && ProxyDelegationHelper
+                .isCompanyIdParameterValidForBdrEnvelope(request.getRequestURI(), file.getEnvelope())) {
             xml = restProxyGetWithAuth(xmlUri, fileId, request).getBytes("UTF-8");
         } else {
             xml = new RestTemplate().getForObject(new URI(xmlUri), byte[].class);
