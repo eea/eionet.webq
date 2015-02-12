@@ -148,7 +148,7 @@ public class XFormsHTTPRequestAuthHandlerImpl implements HTTPRequestAuthHandler 
         String envelope = null;
         String requestURLHost = null;
         Integer fileId = null;
-        String basicAuth = null;
+        String authentication = null;
         String sessionId = null;
         String sessionIdHash = null;
 
@@ -208,24 +208,39 @@ public class XFormsHTTPRequestAuthHandlerImpl implements HTTPRequestAuthHandler 
                 if (!context.containsKey(WEBQ_AUTH_ATTRIBUTE)) {
                     // check if user is logged in - ask auth info from user_xml file table
                     UserFile userFile = userFileService.getByIdAndUser(fileId, sessionIdHash);
-                    if (userFile != null) {
-                        basicAuth = userFile.getAuthorization();
+                    if (userFile.isAuthorized()) {
+                        String authorizationInfo = userFile.getAuthorization();
+                        String cookiesInfo = userFile.getCookies();
+                        if (StringUtils.isNotEmpty(authorizationInfo)) {
+                            authentication = "Authorization=" + authorizationInfo;
+                        } else if (StringUtils.isNotEmpty(cookiesInfo)) {
+                            authentication = "Cookie=" + cookiesInfo;
+                        }
                     }
-                    context.put(WEBQ_AUTH_ATTRIBUTE, basicAuth);
+                    context.put(WEBQ_AUTH_ATTRIBUTE, authentication);
                     LOGGER.debug("Store basic auth info in context for fileId=" + fileId);
                 } else {
                     // auth info stored in context
-                    basicAuth = context.get(WEBQ_AUTH_ATTRIBUTE) != null ? (String) context.get(WEBQ_AUTH_ATTRIBUTE) : null;
+                    authentication = context.get(WEBQ_AUTH_ATTRIBUTE) != null ? (String) context.get(WEBQ_AUTH_ATTRIBUTE) : null;
                 }
                 // add auth info only if user is logged in
-                if (StringUtils.isNotEmpty(basicAuth)) {
+                if (StringUtils.isNotEmpty(authentication)) {
                     LOGGER.debug("User is logged in to get resource for fileId=" + fileId);
 
                     // if the URI starts with instance or envelope URI, then we can use the basic auth retrieved from CDR.
                     if (((StringUtils.isNotBlank(instance) && uri.startsWith(instance)) || (StringUtils.isNotBlank(envelope) && uri
                             .startsWith(envelope)))) {
-                        httpRequestBase.addHeader("Authorization", basicAuth);
-                        LOGGER.info("Add basic auth from session to URL: " + uri);
+                        String authAttribute = StringUtils.substringBefore(authentication, "=");
+                        String authAttributeValues = StringUtils.substringAfter(authentication, "=");
+
+                        if ("Cookie".equals(authAttribute)) {
+                            // prevent betterForm to overwrite cookies
+                            if (context.containsKey(AbstractHTTPConnector.REQUEST_COOKIE)) {
+                                context.remove(AbstractHTTPConnector.REQUEST_COOKIE);
+                            }
+                        }
+                        httpRequestBase.addHeader(authAttribute, authAttributeValues);
+                        LOGGER.info("Add " + authAttribute + " from session to URL: " + uri);
                     } else {
                         // check if we have known host in db
                         KnownHost knownHost = knownHostsService.getKnownHost(uri);
