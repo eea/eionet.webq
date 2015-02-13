@@ -28,7 +28,8 @@ public class ProxyDelegationHelper {
     public static boolean isCompanyIdParameterValidForBdrEnvelope(String targetUrl, String envelopeUrl) throws URISyntaxException {
         boolean result = true;
 
-        if (StringUtils.isBlank(targetUrl) || StringUtils.isBlank(envelopeUrl) || !envelopeUrl.contains("bdr")) {
+        // The check is too restrictive and the logic is not correct. Return always true until we come up with a better solution.
+        if (StringUtils.isBlank(targetUrl) || StringUtils.isBlank(envelopeUrl) || targetUrl.contains("http")) {
             return true;
         }
         URI targetURI = new URI(targetUrl);
