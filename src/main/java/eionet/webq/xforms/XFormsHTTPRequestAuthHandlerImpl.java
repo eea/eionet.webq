@@ -227,18 +227,22 @@ public class XFormsHTTPRequestAuthHandlerImpl implements HTTPRequestAuthHandler 
                 if (StringUtils.isNotEmpty(authentication)) {
                     LOGGER.debug("User is logged in to get resource for fileId=" + fileId);
 
-                    // if the URI starts with instance or envelope URI, then we can use the basic auth retrieved from CDR.
-                    if (((StringUtils.isNotBlank(instance) && uri.startsWith(instance)) || (StringUtils.isNotBlank(envelope) && uri
-                            .startsWith(envelope)))) {
-                        String authAttribute = StringUtils.substringBefore(authentication, "=");
-                        String authAttributeValues = StringUtils.substringAfter(authentication, "=");
+                    String authAttribute = StringUtils.substringBefore(authentication, "=");
 
+                    // if the URI starts with instance or envelope URI, then we can use the basic auth retrieved from CDR.
+                    if (!"Cookie".equals(authAttribute) && ((StringUtils.isNotBlank(instance) && uri.startsWith(instance))
+                            || (StringUtils.isNotBlank(envelope) && uri.startsWith(envelope)))) {
+
+                        String authAttributeValues = StringUtils.substringAfter(authentication, "=");
+                        // prevent betterForm to overwrite cookies
+                        /* Fall back to KnownHosts authorisation (qaaccount) if cookie auth mode is used.
+                        // cookie mode does not work on test server.
                         if ("Cookie".equals(authAttribute)) {
-                            // prevent betterForm to overwrite cookies
                             if (context.containsKey(AbstractHTTPConnector.REQUEST_COOKIE)) {
                                 context.remove(AbstractHTTPConnector.REQUEST_COOKIE);
                             }
                         }
+                        */
                         httpRequestBase.addHeader(authAttribute, authAttributeValues);
                         LOGGER.info("Add " + authAttribute + " from session to URL: " + uri);
                     } else {
@@ -260,13 +264,13 @@ public class XFormsHTTPRequestAuthHandlerImpl implements HTTPRequestAuthHandler 
                             } else if (knownHost.getAuthenticationMethod() == KnownHostAuthenticationMethod.BASIC) {
                                 // Add basic authorisation if needed
                                 try {
+                                    LOGGER.info("Add basic auth from known hosts to URL: " + uri);
                                     httpRequestBase.addHeader(
                                             "Authorization", "Basic " + Base64.encodeBase64String((knownHost.getKey() + ":"
-                                                    + knownHost.getTicket()).getBytes("utf-8")));
+                                                    + knownHost.getTicket()).getBytes("utf-8")).replaceAll("\n", ""));
                                 } catch (UnsupportedEncodingException e) {
                                     LOGGER.warn("UnsupportedEncodingException: utf-8");
                                 }
-                                LOGGER.info("Add basic auth from known hosts to URL: " + uri);
                             }
                         }
                     }

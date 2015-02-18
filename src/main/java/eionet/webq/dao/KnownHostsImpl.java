@@ -21,6 +21,7 @@
 package eionet.webq.dao;
 
 import eionet.webq.dao.orm.KnownHost;
+import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 
@@ -40,7 +41,7 @@ public class KnownHostsImpl extends AbstractDao<KnownHost> implements KnownHosts
     @Override
     @SuppressWarnings("unchecked")
     public Collection<KnownHost> findAll() {
-        return getCriteria().list();
+        return getCriteria().addOrder(Order.desc("hostURL")).list();
     }
 
     @Override
