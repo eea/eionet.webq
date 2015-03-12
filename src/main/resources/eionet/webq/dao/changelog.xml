@@ -276,4 +276,7 @@
     <changeSet id="17" author="kasperen">
         <modifyDataType columnName="remote_file_url" newDataType="varchar(2000)" tableName="project_file"/>
     </changeSet>
+    <changeSet id="18" author="kasperen">
+        <modifyDataType columnName="cookies" newDataType="varchar(4000)" tableName="user_xml"/>
+    </changeSet>
 </databaseChangeLog>
