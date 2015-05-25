@@ -6,6 +6,9 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd">
     <property dbms="mysql" name="blob" value="mediumblob"/>
     <property dbms="h2" name="blob" value="blob"/>
+	<property dbms="mysql" name="bigblob" value="longblob"/>
+    <property dbms="h2" name="bigblob" value="blob"/>
+
 
     <changeSet id="1" author="dmitrant">
         <preConditions onFail="MARK_RAN">
@@ -278,5 +281,8 @@
     </changeSet>
     <changeSet id="18" author="kasperen">
         <modifyDataType columnName="cookies" newDataType="varchar(4000)" tableName="user_xml"/>
+    </changeSet>
+    <changeSet id="19" author="nakasnik">
+        <modifyDataType tableName="file_content" columnName="file_content" newDataType="${bigblob}" />
     </changeSet>
 </databaseChangeLog>
