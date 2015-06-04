@@ -48,7 +48,7 @@
 
     <!-- Only needed because we require fileupload in the org.springframework.samples.mvc.fileupload package -->
     <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
-        <!--allow 5 megabytes-->
+        <!--allow 30 megabytes-->
         <property name="maxUploadSize" value="31457280"/>
     </bean>
 
