@@ -17,6 +17,7 @@
  *
  * Contributor(s):
  *        Anton Dmitrijev
+ *        Raptis Dimos
  */
 package eionet.webq.web.controller;
 
@@ -28,28 +29,29 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
 import eionet.webq.dto.UserRole;
+import eionet.webq.service.UserManagementService;
 import eionet.webq.web.AbstractContextControllerTests;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.util.Collection;
+import static org.junit.Assert.assertFalse;
 
 /**
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 public class UserControllerTest extends AbstractContextControllerTests {
     @Autowired
-    UserDetailsManager userManagementService;
+    UserManagementService userManagementService;
 
     private static final String TEST_USER = "test-user";
 
     @Test
     public void userAuthoritiesPageExist() throws Exception {
-        request(get("/users/new"));
+        request(get("/users/view"));
     }
 
     @Test
@@ -59,31 +61,46 @@ public class UserControllerTest extends AbstractContextControllerTests {
 
     @Test
     public void newUserView() throws Exception {
-        request(get("/users/new")).andExpect(view().name("new_user"));
+        request(get("/users/view")).andExpect(view().name("view_users"));
     }
 
     @Test
     public void addNewUser() throws Exception {
-        addUserWith(UserRole.DEVELOPER);
+        addUserWith(TEST_USER, UserRole.DEVELOPER);
 
-        assertUserHasOnlyOneRole(UserRole.DEVELOPER);
+        assertUserHasOnlyOneRole(TEST_USER, UserRole.DEVELOPER);
     }
 
     @Test
     public void changeUserRole() throws Exception {
-        addUserWith(UserRole.DEVELOPER);
-        assertUserHasOnlyOneRole(UserRole.DEVELOPER);
+        addUserWith(TEST_USER, UserRole.DEVELOPER);
+        assertUserHasOnlyOneRole(TEST_USER, UserRole.DEVELOPER);
 
-        addUserWith(UserRole.ADMIN);
-        assertUserHasOnlyOneRole(UserRole.ADMIN);
+        editUserTo(TEST_USER, UserRole.ADMIN);
+        assertUserHasOnlyOneRole(TEST_USER, UserRole.ADMIN);
+        
+        deleteUser(TEST_USER);
+        assertFalse("User should be deleted", UserExists(TEST_USER));
     }
 
-    private void addUserWith(UserRole role) throws Exception {
-        request(post("/users/add").param("userName", TEST_USER).param("role", role.name()));
+    private void addUserWith(String username, UserRole role) throws Exception {
+        requestWithRedirect(post("/users/add").param("userName", username).param("role", role.name()));
+    }
+    
+    private void editUserTo(String username, UserRole role) throws Exception {
+        requestWithRedirect(post("/users/edit").param("userName", username).param("role", role.name()));
+    }
+    
+    private void deleteUser(String username) throws Exception {
+        requestWithRedirect(post("/users/delete").param("userName", username));
+    }
+    
+    private boolean UserExists(String username) throws Exception {
+        return userManagementService.userExists(username);
     }
 
-    private void assertUserHasOnlyOneRole(UserRole role) {
-        Collection<? extends GrantedAuthority> authorities = userManagementService.loadUserByUsername(TEST_USER).getAuthorities();
+    private void assertUserHasOnlyOneRole(String username, UserRole role) {
+        Collection<? extends GrantedAuthority> authorities = userManagementService.loadUserByUsername(username).getAuthorities();
         assertThat(authorities.size(), equalTo(1));
         assertThat(authorities.iterator().next().getAuthority(), equalTo(role.name()));
     }

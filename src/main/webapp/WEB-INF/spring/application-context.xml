@@ -53,7 +53,7 @@
         </property>
     </bean>
 
-    <bean id="userService" class="org.springframework.security.provisioning.JdbcUserDetailsManager">
+    <bean id="userService" class="eionet.webq.service.UserManagementServiceImpl">
         <property name="dataSource" ref="dataSource"/>
     </bean>
 

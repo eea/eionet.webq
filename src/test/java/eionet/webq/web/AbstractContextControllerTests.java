@@ -48,6 +48,16 @@ public abstract class AbstractContextControllerTests {
     protected ResultActions request(RequestBuilder requestBuilder) throws Exception {
         return mvc().perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isOk());
     }
+    
+    /**
+     * Expects returning 302(Found) as http status
+     * @param requestBuilder
+     * @return
+     * @throws Exception 
+     */
+    protected ResultActions requestWithRedirect(RequestBuilder requestBuilder) throws Exception {
+        return mvc().perform(requestBuilder).andExpect(MockMvcResultMatchers.status().isFound());
+    }
 
     protected MockMultipartFile createMockMultipartFile(String fileName, byte[] content) {
         return new MockMultipartFile("userFiles", fileName, MediaType.APPLICATION_XML_VALUE, content);

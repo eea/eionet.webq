@@ -17,14 +17,15 @@
  *
  * Contributor(s):
  *        Anton Dmitrijev
+ *        Raptis Dimos
  */
 package eionet.webq.web.controller;
 
 import eionet.webq.dto.UserRole;
+import eionet.webq.service.UserManagementService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
-import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -38,40 +39,117 @@ import java.util.Arrays;
 @Controller
 @RequestMapping("/users")
 public class UserController {
+    
+    public static final String VIEW_USERS_JSP = "view_users";
+    public static final String NEW_USER_JSP = "new_user";
+    public static final String EXISTING_USER_JSP = "existing_user";
+    
     /**
      * Service for user management.
      */
     @Autowired
-    UserDetailsManager userManagementService;
+    UserManagementService userManagementService;
+    
     /**
-     * Set required model parameters and returns view name.
-     *
+     * View for all users
      * @param model model
+     * @param message
+     * @return view name
+     */
+    @RequestMapping("/view")
+    public String viewUsers(Model model, @RequestParam(required = false) String message) {
+        model.addAttribute("allUsers", userManagementService.getAllUsers());
+        if(message != null) model.addAttribute("message", message);
+        return VIEW_USERS_JSP;
+    }
+    
+    /**
+     * Form for adding a new user
+     * @param model
+     * @param message
      * @return view name
      */
     @RequestMapping("/new")
-    public String newUser(Model model) {
+    public String newUser(Model model, @RequestParam(required = false) String message) {
         model.addAttribute("allRoles", UserRole.values());
-        return "new_user";
+        if(message != null) model.addAttribute("message", message);
+        return NEW_USER_JSP;
     }
 
     /**
      * Adds new user to database.
-     *
      * @param userName user name
      * @param role role
      * @param model model
      * @return view name
      */
     @RequestMapping("/add")
-    public String addUser(@RequestParam String userName, @RequestParam UserRole role, Model model) {
+    public String addUser(@RequestParam String userName, @RequestParam UserRole role, Model model) {  
+        if( userName.trim().equals("") ){
+            model.addAttribute("message", "User's username cannot be empty");
+            model.addAttribute("allRoles", UserRole.values());
+            return "redirect:new";
+        }
+        
         User user = new User(userName, "", Arrays.asList(new SimpleGrantedAuthority(role.name())));
         if (userManagementService.userExists(userName)) {
-            userManagementService.updateUser(user);
-        } else {
-            userManagementService.createUser(user);
+            model.addAttribute("message", "User " + userName + " already exists");
+            model.addAttribute("allRoles", UserRole.values());
+            return "redirect:new";
         }
-        model.addAttribute("message", "User " + userName + " added/updated with role " + role);
-        return newUser(model);
+        
+            
+        userManagementService.createUser(user);
+        model.addAttribute("message", "User " + userName + " added with role " + role);
+        return "redirect:view";
+          
+    }
+    
+    /**
+     * Form for editing existing user
+     * @param userName
+     * @param model
+     * @param message
+     * @return view name
+     */
+    @RequestMapping("/existing")
+    public String existingUser(@RequestParam String userName, Model model, @RequestParam(required = false) String message) {
+        model.addAttribute("allRoles", UserRole.values());
+        model.addAttribute("userName", userName);
+        if(message != null) model.addAttribute("message", message);
+        return EXISTING_USER_JSP;
+    }
+    
+    /**
+     * Edit user
+     * @param userName
+     * @param role
+     * @param model
+     * @return view name
+     */
+    @RequestMapping("/edit")
+    public String editUser(@RequestParam String userName, @RequestParam UserRole role, Model model) {    
+        User user = new User(userName, "", Arrays.asList(new SimpleGrantedAuthority(role.name())));
+        userManagementService.updateUser(user);
+        model.addAttribute("message", "User " + userName + " updated with role " + role);
+        return "redirect:view";
+    }
+    
+    /**
+     * Deletes user
+     * @param userName
+     * @param model
+     * @return view name
+     */
+    @RequestMapping("/delete")
+    public String deleteUser(@RequestParam String userName, Model model) {
+        if (!userManagementService.userExists(userName)){
+            model.addAttribute("message", "User " + userName + " was not deleted, because it does not exist ");
+        }
+        else{
+            userManagementService.deleteUser(userName);
+            model.addAttribute("message", "User " + userName + " deleted ");
+        }
+        return "redirect:view";
     }
 }

@@ -8,11 +8,11 @@
         <li><a href="${contextPath}/users/view" >back to users</a></li>
     </ul>
 </div>
-<form action="add" method="post" modelAttribute="user">
+<form action="edit" method="post" modelAttribute="user">
     <table class="datatable">
         <tr>
             <th scope="row"><label for="userName">Username</label></th>
-            <td><input id="userName" name="userName" type="text"/></td>
+            <td><input id="userName" name="userName" value="${userName}" type="text" readonly/></td>
         </tr>
         <tr>
             <th scope="row"><label for="roles">Select user role</label></th>
@@ -25,5 +25,5 @@
             </td>
         </tr>
     </table>
-    <input type="submit" value="Add user"/>
+    <input type="submit" value="Edit user"/>
 </form>
