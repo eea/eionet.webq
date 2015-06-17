@@ -1,4 +1,5 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 
 <c:set var="contextPath" value="${pageContext.request.contextPath}"/>
 
@@ -12,18 +13,16 @@
     <table class="datatable">
         <tr>
             <th scope="row"><label for="userName">Username</label></th>
-            <td><input id="userName" name="userName" value="${userName}" type="text" readonly/></td>
+            <td><input id="userName" name="userName" value="${userName}" type="text" readonly></td>
         </tr>
         <tr>
             <th scope="row"><label for="roles">Select user role</label></th>
             <td>
-                <select id="roles" name="role" title="Select role">
-                    <c:forEach var="role" items="${allRoles}">
-                        <option value="${role}">${role}</option>
-                    </c:forEach>
-                </select>
+                <c:forEach var="validRole" items="${allRoles}">
+                    <input type="radio" name="role" value="${validRole}" <c:if test="${fn:contains(role, validRole)}">checked</c:if> >${validRole}<br/>
+                </c:forEach>
             </td>
         </tr>
     </table>
-    <input type="submit" value="Edit user"/>
+    <input type="submit" value="Edit user">
 </form>

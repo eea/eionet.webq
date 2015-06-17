@@ -32,6 +32,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.Arrays;
+import org.springframework.security.core.userdetails.UserDetails;
 
 /**
  * User managing controller.
@@ -116,6 +117,8 @@ public class UserController {
     public String existingUser(@RequestParam String userName, Model model, @RequestParam(required = false) String message) {
         model.addAttribute("allRoles", UserRole.values());
         model.addAttribute("userName", userName);
+        UserDetails user = userManagementService.loadUserByUsername(userName);
+        model.addAttribute("role", user.getAuthorities());
         if(message != null) model.addAttribute("message", message);
         return EXISTING_USER_JSP;
     }

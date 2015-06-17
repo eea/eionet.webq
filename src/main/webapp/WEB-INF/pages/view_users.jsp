@@ -6,11 +6,13 @@
 <c:set var="contextPath" value="${pageContext.request.contextPath}"/>
 
 <h1>Users - Roles</h1>
-<input id="add-role" type="button" href="${contextPath}/users/new" value="Add new User"/>
+<input id="add-role" type="button" href="${contextPath}/users/new" value="Add new User">
 <table class="datatable">
     <tr>
         <th>User</th>
         <th>Roles</th>
+        <th>Edit User</th>
+        <th>Delete User</th>
     </tr>
     <c:forEach var="user" items="${allUsers}">
             <tr>
@@ -22,10 +24,10 @@
                     </c:forEach>
                 </td>
                 <td>
-                    <input class="edit-button" type="button" value="Edit" href="${contextPath}/users/existing?userName=${user.username}"/>
+                    <input class="edit-button" type="button" value="Edit" href="${contextPath}/users/existing?userName=${user.username}">
                 </td>
                 <td>
-                    <input class="delete-button" type="button" value="Delete" href="${contextPath}/users/delete?userName=${user.username}"/>
+                    <input class="delete-button" type="button" value="Delete" href="${contextPath}/users/delete?userName=${user.username}">
                 </td>
             </tr>
     </c:forEach>
