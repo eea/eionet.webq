@@ -13,14 +13,13 @@
     <cache:annotation-driven/>
     <context:spring-configured/>
 
-    <bean id="cacheManager" class="org.springframework.cache.support.SimpleCacheManager">
-        <property name="caches">
-            <set>
-                <bean class="org.springframework.cache.concurrent.ConcurrentMapCacheFactoryBean">
-                    <property name="name" value="conversions"/>
-                </bean>
-            </set>
-        </property>
+    <bean id="cacheManager" class="eionet.webq.cache.GuavaCacheManager">
+        <property name="cacheBuilderSpec" ref="guavaCacheSpec" />
+        <property name="cacheNames" value="conversions" />
+    </bean>
+    
+    <bean id="guavaCacheSpec" class="com.google.common.cache.CacheBuilderSpec" factory-method="parse">
+        <constructor-arg value="maximumSize=200, expireAfterAccess=60m" />
     </bean>
 
     <bean id="sessionFactory" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean" lazy-init="true">
