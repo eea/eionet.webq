@@ -17,6 +17,7 @@
  *
  * Contributor(s):
  *        Enriko Käsper
+ *        Raptis Dimos
  */
 package eionet.webq.web.controller;
 
@@ -62,6 +63,7 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -127,7 +129,8 @@ public class PublicPageController {
     @RequestMapping(value = "/")
     public String welcome(Model model) {
         model.addAttribute("uploadedFiles", allFilesWithConversions());
-        model.addAttribute("allWebForms", allWebForms());
+        List<ProjectFile> webformsSortedList = webFormService.sortWebformsAlphabetically(allWebForms());
+        model.addAttribute("allWebForms", webformsSortedList);
         String uploadForm = "uploadForm";
         if (!model.containsAttribute(uploadForm)) {
             model.addAttribute(uploadForm, new UploadForm());

@@ -17,12 +17,14 @@
  *
  * Contributor(s):
  *        Anton Dmitrijev
+ *        Raptis Dimos
  */
 package eionet.webq.service;
 
 import java.util.Collection;
 
 import eionet.webq.dao.orm.ProjectFile;
+import java.util.List;
 
 /**
  * Operations with webForms.
@@ -59,4 +61,12 @@ public interface WebFormService {
      * @return web form
      */
     ProjectFile findWebFormById(int id);
+    
+    /**
+     * Sorts a set of webforms by their title
+     * @param webforms
+     * @return list of sorted webforms
+     */
+    List<ProjectFile> sortWebformsAlphabetically(Collection<ProjectFile> webforms);
+    
 }

@@ -17,6 +17,7 @@
  *
  * Contributor(s):
  *        Anton Dmitrijev
+ *        Raptis Dimos
  */
 package eionet.webq.service;
 
@@ -32,8 +33,11 @@ import org.mockito.runners.MockitoJUnitRunner;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
 
 import static org.hamcrest.core.IsEqual.equalTo;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyCollectionOf;
@@ -81,6 +85,27 @@ public class AbstractWebFormsServiceTest {
         assertThat(xForms.size(), equalTo(1));
         assertThat(xForms.iterator().next(), equalTo(file1));
         verify(storage).findWebFormsForSchemas(any(WebFormType.class), anyCollectionOf(String.class));
+    }
+    
+    @Test
+    public void testWebformSorting(){
+        ProjectFile p1 = new ProjectFile();
+        ProjectFile p2 = new ProjectFile();
+        ProjectFile p3 = new ProjectFile();
+        p1.setTitle("a");
+        p2.setTitle("b");
+        p3.setTitle("c");
+        
+        Collection<ProjectFile> webformsSet = new HashSet<ProjectFile>(Arrays.asList(p2,p1,p3));
+        List<ProjectFile> expectedList = new ArrayList<ProjectFile> (Arrays.asList(p1,p2,p3));
+        
+        List<ProjectFile> orderedList = webFormsService.sortWebformsAlphabetically(webformsSet);
+        
+        assertEquals("Size of ordered set of webforms does not match", expectedList.size(), webformsSet.size());
+        
+        for(int i=0; i<orderedList.size() ; i++)
+            assertEquals("Element from ordered set of webforms does not match", expectedList.get(i).getTitle(), orderedList.get(i).getTitle());
+        
     }
 
     private ProjectFile webFormWithXmlSchema(String fileName) {

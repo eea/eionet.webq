@@ -17,6 +17,7 @@
  *
  * Contributor(s):
  *        Anton Dmitrijev
+ *        Raptis Dimos
  */
 package eionet.webq.service;
 
@@ -28,6 +29,10 @@ import org.springframework.util.CollectionUtils;
 import eionet.webq.dao.WebFormStorage;
 import eionet.webq.dao.orm.ProjectFile;
 import eionet.webq.dto.WebFormType;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 /**
  */
@@ -67,4 +72,15 @@ public abstract class AbstractWebFormsService implements WebFormService {
      * @return web form type.
      */
     protected abstract WebFormType webFormsForType();
+    
+    @Override
+    public List<ProjectFile> sortWebformsAlphabetically(Collection<ProjectFile> webforms){
+        List<ProjectFile> webformsList = new ArrayList(webforms);
+        Collections.sort(webformsList, new Comparator<ProjectFile>(){
+            public int compare(ProjectFile p1, ProjectFile p2){
+                return p1.getTitle().toUpperCase().compareTo(p2.getTitle().toUpperCase());
+            }
+        });
+        return webformsList;
+    }
 }

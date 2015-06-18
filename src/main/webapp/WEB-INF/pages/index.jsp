@@ -35,7 +35,7 @@
         <div class="col1" id="startWebformArea">
         <fieldset>
             <p>
-                <label for="selectFile">Select file type:</label>
+                <label for="selectFile">Select questionnaire:</label>
                 <select id="selectFile" name="selectFile" title="Select new webform">
                     <c:forEach var="form" items="${allWebForms}">
                         <option value="<c:url value="/startWebform?formId=${form.id}"/>">${form.title}</option>
