@@ -26,6 +26,7 @@ import eionet.webq.dao.orm.ProjectEntry;
 import eionet.webq.dao.orm.ProjectFile;
 import eionet.webq.dao.orm.ProjectFileType;
 import eionet.webq.dao.orm.util.WebQFileInfo;
+import eionet.webq.service.impl.project.export.ArchiveConstants;
 import eionet.webq.service.impl.project.export.ArchiveFile;
 import eionet.webq.service.impl.project.export.ArchiveReadAdapter;
 import eionet.webq.service.impl.project.export.ArchiveWriteAdapter;
@@ -127,7 +128,7 @@ public class ProjectFileServiceImpl implements ProjectFileService {
             }
             
             ProjectMetadata projectMetadata = new ProjectMetadata(projectFiles);
-            byte[] metadataContent = this.generateExportMetadataContent(projectMetadata, writer.getCharset());
+            byte[] metadataContent = this.generateExportMetadataContent(projectMetadata);
             writer.addEntry(new ArchiveFile(PROJECT_EXPORT_METADATA_FILE, metadataContent));
         }
         finally {
@@ -146,7 +147,7 @@ public class ProjectFileServiceImpl implements ProjectFileService {
             return new ImportProjectResult(ImportProjectResult.ErrorType.ARCHIVE_METADATA_NOT_FOUND);
         }
         
-        ProjectMetadata projectMetadata = this.deserializeProjectMetadata(archiveContents.metadataFile, archiveContents.archivingCharset);
+        ProjectMetadata projectMetadata = this.deserializeProjectMetadata(archiveContents.metadataFile);
         
         if (projectMetadata == null) {
             return new ImportProjectResult(ImportProjectResult.ErrorType.MALFORMED_ARCHIVE_METADATA);
@@ -174,10 +175,10 @@ public class ProjectFileServiceImpl implements ProjectFileService {
         return new ImportProjectResult();
     }
     
-    private byte[] generateExportMetadataContent(ProjectMetadata projectMetadata, Charset charset) {
+    private byte[] generateExportMetadataContent(ProjectMetadata projectMetadata) {
         String metadata = this.projectMedatadataSerializer.serialize(projectMetadata);
         
-        return metadata.getBytes(charset);
+        return metadata.getBytes(ArchiveConstants.CHARSET);
     }
 
     private ProjectArchiveContents extractArchive(byte[] archiveContent) throws IOException {
@@ -200,13 +201,11 @@ public class ProjectFileServiceImpl implements ProjectFileService {
             reader.close();
         }
         
-        result.archivingCharset = reader.getCharset();
-        
         return result;
     }
     
-    private ProjectMetadata deserializeProjectMetadata(ArchiveFile metadataFile, Charset charset) {
-        String metadataText = new String(metadataFile.getContent(), charset);
+    private ProjectMetadata deserializeProjectMetadata(ArchiveFile metadataFile) {
+        String metadataText = new String(metadataFile.getContent(), ArchiveConstants.CHARSET);
         
         try {
             return this.projectMedatadataSerializer.deserialize(metadataText);
@@ -253,8 +252,6 @@ public class ProjectFileServiceImpl implements ProjectFileService {
         
         public ArchiveFile metadataFile;
         public Collection<ArchiveFile> archiveFiles = new ArrayList<ArchiveFile>();
-        
-        public Charset archivingCharset;
         
     }
 }

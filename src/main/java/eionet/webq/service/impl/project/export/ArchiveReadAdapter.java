@@ -25,7 +25,7 @@ public final class ArchiveReadAdapter {
      * @param archiveContent the byte content of the archived bundle.
      */
     public ArchiveReadAdapter(byte[] archiveContent) {
-        this.zin = new ZipInputStream(new ByteArrayInputStream(archiveContent), this.getCharset());
+        this.zin = new ZipInputStream(new ByteArrayInputStream(archiveContent));
     }
     
     /**
@@ -56,7 +56,4 @@ public final class ArchiveReadAdapter {
         this.zin.close();
     }
     
-    public Charset getCharset() {
-        return ArchiveConstants.CHARSET;
-    }
 }

@@ -19,7 +19,7 @@ public final class ArchiveWriteAdapter {
     
     public ArchiveWriteAdapter() {
         this.bout = new ByteArrayOutputStream();
-        this.zout = new ZipOutputStream(bout, this.getCharset());
+        this.zout = new ZipOutputStream(bout);
     }
     
     /**
@@ -47,8 +47,5 @@ public final class ArchiveWriteAdapter {
     public byte[] getArchiveContent() {
         return this.bout.toByteArray();
     }
-    
-    public Charset getCharset() {
-        return ArchiveConstants.CHARSET;
-    }
+
 }

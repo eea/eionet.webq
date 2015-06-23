@@ -6,7 +6,7 @@ import java.nio.charset.Charset;
  *
  * @author Nikolaos Nakas <nn@eworx.gr>
  */
-final class ArchiveConstants {
+public final class ArchiveConstants {
 
     public static final Charset CHARSET;
     
