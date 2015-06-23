@@ -9,7 +9,8 @@
         <li><span><a title="Add file" href="<c:url value="/projects/${projectEntry.projectId}/file/add"/>">Add file</a></span></li>
         <li><span><a title="Edit project" href="<c:url value="/projects/edit?projectId=${projectEntry.projectId}"/>">Edit project</a></span></li>
         <li><span><a href="#" onclick="removeProject();">Delete project</a></span></li>
-        <li><span><a title="Import" href="<c:url value="/projects/import?projectId=${projectEntry.projectId}"/>">Import</a></span></li>
+        <li><span><a href="<c:url value="/projects/${projectEntry.projectId}/export" />">Export project</a></span></li>
+        <li><span><a title="Import" href="<c:url value="/projects/import?projectId=${projectEntry.projectId}"/>">Import project</a></span></li>
     </ul>
 </div>
 <h1>Project: ${projectEntry.projectId}</h1>
