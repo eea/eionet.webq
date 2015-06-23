@@ -26,17 +26,32 @@ import eionet.webq.dao.orm.ProjectEntry;
 import eionet.webq.dao.orm.ProjectFile;
 import eionet.webq.dao.orm.ProjectFileType;
 import eionet.webq.dao.orm.util.WebQFileInfo;
+import eionet.webq.service.impl.project.export.ArchiveFile;
+import eionet.webq.service.impl.project.export.ArchiveReadAdapter;
+import eionet.webq.service.impl.project.export.ArchiveWriteAdapter;
+import eionet.webq.service.impl.project.export.ImportProjectResult;
+import eionet.webq.service.impl.project.export.MetadataSerializerException;
+import eionet.webq.service.impl.project.export.ProjectMetadata;
+import eionet.webq.service.impl.project.export.ProjectMetadataSerializer;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-
-import java.util.Collection;
 
 /**
  */
 @Service
 public class ProjectFileServiceImpl implements ProjectFileService {
+    
+    static final String PROJECT_EXPORT_METADATA_FILE = "webform-project-export.metadata";
+    
     /**
      * Project files storage.
      */
@@ -48,6 +63,9 @@ public class ProjectFileServiceImpl implements ProjectFileService {
     @Autowired
     XmlSchemaExtractor xmlSchemaExtractor;
 
+    @Autowired
+    ProjectMetadataSerializer projectMedatadataSerializer;
+    
     @Override
     public void saveOrUpdate(ProjectFile file, ProjectEntry project) {
         if (!WebQFileInfo.isNew(file)) {
@@ -97,6 +115,129 @@ public class ProjectFileServiceImpl implements ProjectFileService {
         projectFileStorage.update(file, project);
     }
 
+    @Transactional
+    @Override
+    public byte[] exportToArchive(ProjectEntry project) throws IOException {
+        Collection<ProjectFile> projectFiles = this.allFilesFor(project);
+        ArchiveWriteAdapter writer = new ArchiveWriteAdapter();
+        
+        try {
+            for (ProjectFile projectFile : projectFiles) {
+                writer.addEntry(new ArchiveFile(projectFile.getFileName(), projectFile.getFileContent()));
+            }
+            
+            ProjectMetadata projectMetadata = new ProjectMetadata(projectFiles);
+            byte[] metadataContent = this.generateExportMetadataContent(projectMetadata, writer.getCharset());
+            writer.addEntry(new ArchiveFile(PROJECT_EXPORT_METADATA_FILE, metadataContent));
+        }
+        finally {
+            writer.close();
+        }
+        
+        return writer.getArchiveContent();
+    }
+
+    @Transactional
+    @Override
+    public ImportProjectResult importFromArchive(ProjectEntry project, byte[] archiveContent, String userName) throws IOException {
+        ProjectArchiveContents archiveContents = this.extractArchive(archiveContent);
+        
+        if (archiveContents.metadataFile == null) {
+            return new ImportProjectResult(ImportProjectResult.ErrorType.ARCHIVE_METADATA_NOT_FOUND);
+        }
+        
+        ProjectMetadata projectMetadata = this.deserializeProjectMetadata(archiveContents.metadataFile, archiveContents.archivingCharset);
+        
+        if (projectMetadata == null) {
+            return new ImportProjectResult(ImportProjectResult.ErrorType.MALFORMED_ARCHIVE_METADATA);
+        }
+        
+        if (!projectMetadata.isValid()) {
+            return new ImportProjectResult(ImportProjectResult.ErrorType.INVALID_ARCHIVE_METADATA);
+        }
+        
+        try {
+            this.attachFileContent(projectMetadata, archiveContents.archiveFiles);
+        }
+        catch (FileNotFoundException ex) {
+            return new ImportProjectResult(ImportProjectResult.ErrorType.INVALID_ARCHIVE_STRUCTURE);
+        }
+        
+        Collection<ProjectFile> projectFiles = Arrays.asList(projectMetadata.getProjectFiles());
+        
+        for (ProjectFile projectFile : projectFiles) {
+            projectFile.setUserName(userName);
+        }
+        
+        this.projectFileStorage.cleanInsert(project, projectFiles);
+        
+        return new ImportProjectResult();
+    }
+    
+    private byte[] generateExportMetadataContent(ProjectMetadata projectMetadata, Charset charset) {
+        String metadata = this.projectMedatadataSerializer.serialize(projectMetadata);
+        
+        return metadata.getBytes(charset);
+    }
+
+    private ProjectArchiveContents extractArchive(byte[] archiveContent) throws IOException {
+        ProjectArchiveContents result = new ProjectArchiveContents();
+        ArchiveReadAdapter reader = new ArchiveReadAdapter(archiveContent);
+        
+        try {
+            ArchiveFile archiveFile;
+            
+            while ((archiveFile = reader.next()) != null) {
+                if (PROJECT_EXPORT_METADATA_FILE.equalsIgnoreCase(archiveFile.getName())) {
+                    result.metadataFile = archiveFile;
+                }
+                else {
+                    result.archiveFiles.add(archiveFile);
+                }
+            }
+        }
+        finally {
+            reader.close();
+        }
+        
+        result.archivingCharset = reader.getCharset();
+        
+        return result;
+    }
+    
+    private ProjectMetadata deserializeProjectMetadata(ArchiveFile metadataFile, Charset charset) {
+        String metadataText = new String(metadataFile.getContent(), charset);
+        
+        try {
+            return this.projectMedatadataSerializer.deserialize(metadataText);
+        }
+        catch (MetadataSerializerException ex) {
+            return null;
+        }
+    }
+    
+    private void attachFileContent(ProjectMetadata metadata, Collection<ArchiveFile> archiveFiles) throws FileNotFoundException {
+        for (ProjectFile projectFile : metadata.getProjectFiles()) {
+            ArchiveFile archiveFile = this.findByName(archiveFiles, projectFile.getFileName());
+            
+            if (archiveFile == null) {
+                throw new FileNotFoundException(projectFile.getFileName());
+            }
+            
+            projectFile.setFileContent(archiveFile.getContent());
+        }
+    }
+    
+    private ArchiveFile findByName(Collection<ArchiveFile> archiveFiles, String name) {
+        for (ArchiveFile archiveFile : archiveFiles) {
+            if (archiveFile.getName().equalsIgnoreCase(name)) {
+                return archiveFile;
+            }
+        }
+        
+        return null;
+    }
+    
     /**
      * Try to extract xml schema from file content if required.
      *
@@ -106,5 +247,14 @@ public class ProjectFileServiceImpl implements ProjectFileService {
         if (file.getFileType() == ProjectFileType.FILE) {
             file.setXmlSchema(xmlSchemaExtractor.extractXmlSchema(file.getFileContent()));
         }
+    }
+    
+    private static final class ProjectArchiveContents {
+        
+        public ArchiveFile metadataFile;
+        public Collection<ArchiveFile> archiveFiles = new ArrayList<ArchiveFile>();
+        
+        public Charset archivingCharset;
+        
     }
 }

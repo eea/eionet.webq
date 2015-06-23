@@ -71,6 +71,15 @@ public interface ProjectFileStorage {
     void remove(ProjectEntry projectEntry, int... fileIds);
 
     /**
+     * Removes all files of a specified project and adds the new ones.
+     * 
+     * @param projectEntry the project whose files will be removed.
+     * @param projectFiles the files to be added.
+     * 
+     */
+    void cleanInsert(ProjectEntry projectEntry, Collection<ProjectFile> projectFiles);
+    
+    /**
      * File content by file name and project tuple.
      *
      * @param name file name

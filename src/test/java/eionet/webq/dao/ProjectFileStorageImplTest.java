@@ -53,6 +53,11 @@ import eionet.webq.dao.orm.ProjectFile;
 import eionet.webq.dao.orm.ProjectFileType;
 import eionet.webq.dao.orm.UploadedFile;
 import eionet.webq.dao.orm.util.WebQFileInfo;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
+import util.CollectionUtil;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = {ApplicationTestContextWithMockSession.class})
@@ -296,6 +301,24 @@ public class ProjectFileStorageImplTest {
         projectFileStorage.remove(testProjectEntry(defaultProjectFile.getProjectId()), defaultProjectFile.getId());
 
         assertThat(getFileContentRowsCount(sessionFactory), equalTo(0));
+    }
+    
+    @Test
+    public void testCleanInsert() {
+        ProjectFile testFile1 = new ProjectFile();
+        testFile1.setTitle("Clean insert test file");
+        List<ProjectFile> files = Arrays.asList(testFile1);
+        
+        this.projectFileStorage.cleanInsert(this.projectEntry, files);
+        List<ProjectFile> persistedFiles = new ArrayList<ProjectFile>(this.projectFileStorage.findAllFilesFor(this.projectEntry));
+        Comparator<ProjectFile> cmp = new Comparator<ProjectFile>() {
+
+            @Override
+            public int compare(ProjectFile o1, ProjectFile o2) {
+                return o1.getTitle().compareTo(o2.getTitle());
+            }
+        };
+        assertTrue(CollectionUtil.equals(files, persistedFiles, cmp));
     }
 
     private void assertFieldsEquals(ProjectFile before, ProjectFile after) {

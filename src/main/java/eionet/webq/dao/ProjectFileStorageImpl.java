@@ -79,6 +79,16 @@ public class ProjectFileStorageImpl extends AbstractDao<ProjectFile> implements 
     }
 
     @Override
+    public void cleanInsert(ProjectEntry projectEntry, Collection<ProjectFile> projectFiles) {
+        this.removeByCriterion(eq("projectId", projectEntry.getId()));
+        this.getCurrentSession().flush();
+        
+        for (ProjectFile projectFile : projectFiles) {
+            this.save(projectFile, projectEntry);
+        }
+    }
+
+    @Override
     public ProjectFile findByNameAndProject(String name, ProjectEntry projectEntry) {
         return (ProjectFile) getCriteria()
                 .add(Restrictions.and(eq("projectId", projectEntry.getId()), eq("file.name", name))).uniqueResult();

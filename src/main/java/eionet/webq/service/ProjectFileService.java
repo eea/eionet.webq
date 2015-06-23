@@ -23,6 +23,8 @@ package eionet.webq.service;
 import eionet.webq.dao.orm.ProjectEntry;
 import eionet.webq.dao.orm.ProjectFile;
 import eionet.webq.dao.orm.ProjectFileType;
+import eionet.webq.service.impl.project.export.ImportProjectResult;
+import java.io.IOException;
 import org.springframework.util.MultiValueMap;
 
 import java.util.Collection;
@@ -89,4 +91,32 @@ public interface ProjectFileService {
      * @return project files collection
      */
     Collection<ProjectFile> allFilesFor(ProjectEntry project);
+    
+    /**
+     * Creates an archived bundle containing all the files of the specified project.
+     * The bundle must contain the metadata required so that it can be used to replicate
+     * the project structure elsewhere.
+     * 
+     * @param project the project whose files to export
+     * @return the archived bundle file content in byte form
+     * @throws IOException in case of an I/O error
+     * @see #importFromArchive(eionet.webq.dao.orm.ProjectEntry, byte[], java.lang.String) 
+     */
+    byte[] exportToArchive(ProjectEntry project) throws IOException;
+    
+    /**
+     * Using an archived bundle as an input, this process imports the archived files 
+     * into the specified project. Note that this is a clean-install operation; i.e. 
+     * any existing files within the project will be deleted, then the new ones will
+     * be imported.
+     * 
+     * @param project the project in which the archived files will be imported.
+     * @param archiveContent the archived bundle file content in byte form
+     * @param userName the name of the user who triggered the process.
+     * @return a complex object of type {@link ImportProjectResult}, describing the 
+     * result of the process.
+     * @throws IOException in case of an I/O error
+     * @see #exportToArchive(eionet.webq.dao.orm.ProjectEntry) 
+     */
+    ImportProjectResult importFromArchive(ProjectEntry project, byte[] archiveContent, String userName) throws IOException;
 }

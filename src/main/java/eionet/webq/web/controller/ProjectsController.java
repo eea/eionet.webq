@@ -28,6 +28,10 @@ import eionet.webq.service.FileNotAvailableException;
 import eionet.webq.service.ProjectFileService;
 import eionet.webq.service.ProjectService;
 import eionet.webq.service.RemoteFileService;
+import eionet.webq.service.impl.project.export.ImportProjectResult;
+import eionet.webq.web.io.HttpFileInfo;
+import eionet.webq.web.io.HttpResponseZipWriter;
+import java.io.IOException;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.support.MessageSourceAccessor;
@@ -43,6 +47,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.validation.Valid;
 import java.security.Principal;
+import javax.servlet.http.HttpServletResponse;
+import org.apache.log4j.Logger;
 
 /**
  * Spring controller to manage projects.
@@ -52,6 +58,9 @@ import java.security.Principal;
 @Controller
 @RequestMapping("projects")
 public class ProjectsController {
+    
+    private static final Logger LOGGER = Logger.getLogger(ProjectsController.class);
+    
     /**
      * Attribute name for storing project entry in model.
      */
@@ -64,6 +73,10 @@ public class ProjectsController {
      * Attribute name for storing project entry in model.
      */
     static final String ALL_PROJECT_FILES_ATTRIBUTE = "allProjectFiles";
+    /**
+     * Attribute name for storing import project archive in model.
+     */
+    static final String IMPORT_ARCHIVE_ATTRIBUTE = "httpFileInfo";
     /**
      * Message source.
      */
@@ -166,6 +179,95 @@ public class ProjectsController {
         return viewProject(projectService.getByProjectId(projectId), model);
     }
 
+    /**
+     * Export the project structure in a downloadable archive bundle file.
+     * 
+     * @param projectId the id of the project to be exported.
+     * @param model model attributes holder
+     * @param response the servlet response object.
+     * @return view name
+     */
+    @RequestMapping(value = "/{projectId}/export")
+    public String exportProjectArchive(@PathVariable String projectId, Model model, HttpServletResponse response) {
+        ProjectEntry projectEntry = this.projectService.getByProjectId(projectId);
+        byte[] archiveContent;
+        
+        try {
+            archiveContent = this.projectFileService.exportToArchive(projectEntry);
+        }
+        catch (IOException ex) {
+            LOGGER.error("Project archiving failed", ex);
+            this.displayMessage(model, "Archiving process failed, please try again later.");
+            
+            return this.viewProject(projectEntry, model);
+        }
+        
+        HttpFileInfo fileInfo = new HttpFileInfo(projectId + ".zip", archiveContent);
+        new HttpResponseZipWriter().writeFile(response, fileInfo);
+        
+        return "";
+    }
+    
+    /**
+     * Navigate to the import project action form.
+     * 
+     * @param projectId the project to which files will be imported.
+     * @param model model attributes holder
+     * @return  view name
+     */
+    @RequestMapping(value = "/import")
+    public String submitImportProjectArchive(@RequestParam String projectId, Model model) {
+        ProjectEntry projectEntry = this.projectService.getByProjectId(projectId);
+        
+        return this.submitImportProjectArchive(projectEntry, new HttpFileInfo(), model);
+    }
+    
+    /**
+     * Import project archive action target.
+     * 
+     * @param projectId the project to which files will be imported.
+     * @param archiveFile and object containing the archive file content.
+     * @param bindingResult request binding to {@link eionet.webq.web.io.HttpFileInfo}
+     * @param model model attributes holder
+     * @param principal user principal
+     * @return view name
+     */
+    @RequestMapping(value = "/{projectId}/import")
+    public String importProjectArchive(@PathVariable String projectId, @Valid @ModelAttribute HttpFileInfo archiveFile, 
+            BindingResult bindingResult, Model model, Principal principal) {
+        if (principal == null) {
+            bindingResult.rejectValue("userName", "NotEmpty.projectFile.userName");
+        }
+        
+        if (archiveFile.getContent() == null || archiveFile.getContent().length == 0) {
+            bindingResult.rejectValue("content", "import.archive.null");
+        }
+        
+        ProjectEntry projectEntry = this.projectService.getByProjectId(projectId);
+        
+        if (bindingResult.hasErrors()) {
+            return this.submitImportProjectArchive(projectEntry, archiveFile, model);
+        }
+        
+        try {
+            ImportProjectResult result = this.projectFileService.importFromArchive(projectEntry, archiveFile.getContent(), principal.getName());
+            
+            if (result.isSuccess()) {
+                this.displayMessage(model, "Project archive successfully imported.");
+            }
+            else {
+                String message = "Error: " + this.getErrorMessage(result.getErrorType());
+                this.displayMessage(model, message);
+            }
+        }
+        catch (IOException ex) {
+            LOGGER.error("Project import failed", ex);
+            model.addAttribute("message", "Import process failed, please try again later.");
+        }
+        
+        return this.viewProject(projectEntry, model);
+    }
+    
     /**
      * Allow to add new webform under project folder.
      *
@@ -332,6 +434,13 @@ public class ProjectsController {
         return "add_edit_project_file";
     }
 
+    private String submitImportProjectArchive(ProjectEntry project, HttpFileInfo archiveFile, Model model) {
+        this.addProjectToModel(model, project);
+        this.addAttributeToModelIfNotAdded(model, IMPORT_ARCHIVE_ATTRIBUTE, archiveFile);
+        
+        return "import_project_files";
+    }
+    
     /**
      * Adds project entry to model.
      *
@@ -362,6 +471,31 @@ public class ProjectsController {
     private void addAttributeToModelIfNotAdded(Model model, String attributeName, Object attribute) {
         if (!model.containsAttribute(attributeName)) {
             model.addAttribute(attributeName, attribute);
+        }
+    }
+    
+    /**
+     * Displays a message in the corresponding view placeholder.
+     * 
+     * @param model model attribute holder
+     * @param message the message to be displayed
+     */
+    private void displayMessage(Model model, String message) {
+        model.addAttribute("message", message);
+    }
+    
+    private String getErrorMessage(ImportProjectResult.ErrorType errorType) {
+        switch (errorType) {
+            case ARCHIVE_METADATA_NOT_FOUND:
+                return "Project metadata was not found in the project archive.";
+            case MALFORMED_ARCHIVE_METADATA:
+                return "Project metadata was malformed.";
+            case INVALID_ARCHIVE_METADATA:
+                return "Project metadata was invalid.";
+            case INVALID_ARCHIVE_STRUCTURE:
+                return "Project archive stracture is not valid.";
+            default:
+                throw new IllegalArgumentException();
         }
     }
 }

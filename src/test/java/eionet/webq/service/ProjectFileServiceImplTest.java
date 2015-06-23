@@ -38,28 +38,45 @@ import java.util.Arrays;
 
 import static eionet.webq.dao.orm.ProjectFileType.FILE;
 import static eionet.webq.dao.orm.ProjectFileType.WEBFORM;
+import eionet.webq.service.impl.project.export.ArchiveFile;
+import eionet.webq.service.impl.project.export.ImportProjectResult;
+import eionet.webq.service.impl.project.export.ProjectMetadata;
+import eionet.webq.service.impl.project.export.json.ProjectMetadataJsonSerializer;
+import java.nio.charset.Charset;
+import java.util.Collection;
+import java.util.List;
 import static org.hamcrest.core.IsEqual.equalTo;
+import org.junit.Assert;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
+import org.mockito.Spy;
+import util.ArchivingUtil;
 
 public class ProjectFileServiceImplTest {
+    
+    @Spy
+    private ProjectMetadataJsonSerializer projectMetadataSerializer;
+    
     @Mock
-    ProjectFileStorage projectFileStorage;
+    private ProjectFileStorage projectFileStorage;
+    
     @Mock
-    XmlSchemaExtractor xmlSchemaExtractor;
+    private XmlSchemaExtractor xmlSchemaExtractor;
+    
     @InjectMocks
-    ProjectFileServiceImpl service = new ProjectFileServiceImpl();
-    ProjectFile testFile = new ProjectFile();
-    ProjectEntry testProject = new ProjectEntry();
+    private ProjectFileService service = new ProjectFileServiceImpl();
+    
+    private ProjectFile testFile = new ProjectFile();
+    private ProjectEntry testProject = new ProjectEntry();
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
     }
-
+    
     @After
     public void tearDown() throws Exception {
         verifyNoMoreInteractions(projectFileStorage);
@@ -159,6 +176,102 @@ public class ProjectFileServiceImplTest {
 
         verify(projectFileStorage).findById(1);
         verify(projectFileStorage).update(testFile, testProject);
+    }
+    
+    @Test
+    public void testExportProject() throws Exception {
+        ProjectFile dummyProjectFile = new ProjectFile();
+        dummyProjectFile.setFileName("test.html");
+        dummyProjectFile.setFileContent(new byte[] { 1 });
+        when(projectFileStorage.findAllFilesFor(any(ProjectEntry.class))).thenReturn(Arrays.asList(dummyProjectFile));
+        byte[] archiveContent = service.exportToArchive(testProject);
+        
+        List<ArchiveFile> files = ArchivingUtil.extractArchive(archiveContent);
+        Assert.assertEquals(2, files.size());
+        
+        ArchiveFile metadataFile;
+        ArchiveFile archiveFile = files.get(0);
+        
+        if (archiveFile.getName().endsWith(".metadata")) {
+            metadataFile = archiveFile;
+            archiveFile = files.get(1);
+        }
+        else {
+            metadataFile = files.get(1);
+        }
+        
+        ProjectMetadata metadata = this.projectMetadataSerializer.deserialize(new String(metadataFile.getContent(), Charset.forName("UTF-8")));
+        Assert.assertEquals(1, metadata.getProjectFiles().length);
+        ProjectFile fileMetadata = metadata.getProjectFiles()[0];
+        Assert.assertEquals(archiveFile.getName(), fileMetadata.getFileName());
+        Assert.assertEquals(dummyProjectFile.getFileName(), fileMetadata.getFileName());
+        
+        verify(projectFileStorage).findAllFilesFor(any(ProjectEntry.class));
+    }
+    
+    @Test
+    public void testImportFailureNoMetadata() throws Exception {
+        ArchiveFile file1 = new ArchiveFile("dummy.html", new byte[] { });
+        byte[] archiveContent = ArchivingUtil.createArchive(Arrays.asList(file1));
+        ImportProjectResult result = this.service.importFromArchive(testProject, archiveContent, "user");
+        
+        Assert.assertEquals(ImportProjectResult.ErrorType.ARCHIVE_METADATA_NOT_FOUND, result.getErrorType());
+    }
+    
+    @Test
+    public void testImportFailureMalformedMetadata() throws Exception {
+        final String metadata = "{ \"projectFiles\":[ }";
+        ArchiveFile metadataFile = new ArchiveFile(ProjectFileServiceImpl.PROJECT_EXPORT_METADATA_FILE, metadata.getBytes("UTF-8"));
+        byte[] archiveContent = ArchivingUtil.createArchive(Arrays.asList(metadataFile));
+        ImportProjectResult result = this.service.importFromArchive(testProject, archiveContent, "user");
+        
+        Assert.assertEquals(ImportProjectResult.ErrorType.MALFORMED_ARCHIVE_METADATA, result.getErrorType());
+    }
+    
+    @Test
+    public void testImportFailureInvalidMetadata() throws Exception {
+        final String metadata = "{ \"projectFiles\":[ { \"file\": { \"name\": \"\" } } ] }";
+        ArchiveFile metadataFile = new ArchiveFile(ProjectFileServiceImpl.PROJECT_EXPORT_METADATA_FILE, metadata.getBytes("UTF-8"));
+        byte[] archiveContent = ArchivingUtil.createArchive(Arrays.asList(metadataFile));
+        ImportProjectResult result = this.service.importFromArchive(testProject, archiveContent, "user");
+        
+        Assert.assertEquals(ImportProjectResult.ErrorType.INVALID_ARCHIVE_METADATA, result.getErrorType());
+    }
+    
+    @Test
+    public void testImportFailureInvalidArchiveStructure() throws Exception {
+        final String metadata = "{ \"projectFiles\":[ { \"file\": { \"name\": \"somefile.html\" } } ] }";
+        ArchiveFile metadataFile = new ArchiveFile(ProjectFileServiceImpl.PROJECT_EXPORT_METADATA_FILE, metadata.getBytes("UTF-8"));
+        ArchiveFile file1 = new ArchiveFile("someotherfile.html", new byte[] { 1, 2, 3 });
+        byte[] archiveContent = ArchivingUtil.createArchive(Arrays.asList(file1, metadataFile));
+        ImportProjectResult result = this.service.importFromArchive(testProject, archiveContent, "user");
+        
+        Assert.assertEquals(ImportProjectResult.ErrorType.INVALID_ARCHIVE_STRUCTURE, result.getErrorType());
+    }
+    
+    @Test
+    public void testImportZeroFiles() throws Exception {
+        final String metadata = "{ \"projectFiles\":[] }";
+        ArchiveFile metadataFile = new ArchiveFile(ProjectFileServiceImpl.PROJECT_EXPORT_METADATA_FILE, metadata.getBytes("UTF-8"));
+        byte[] archiveContent = ArchivingUtil.createArchive(Arrays.asList(metadataFile));
+        ImportProjectResult result = this.service.importFromArchive(testProject, archiveContent, "user");
+        
+        Assert.assertEquals(ImportProjectResult.ErrorType.NONE, result.getErrorType());
+        
+        verify(this.projectFileStorage).cleanInsert(any(ProjectEntry.class), any(Collection.class));
+    }
+    
+    @Test
+    public void testImportOneFile() throws Exception {
+        final String metadata = "{ \"projectFiles\":[ { \"file\": { \"name\": \"somefile.html\" } } ] }";
+        ArchiveFile metadataFile = new ArchiveFile(ProjectFileServiceImpl.PROJECT_EXPORT_METADATA_FILE, metadata.getBytes("UTF-8"));
+        ArchiveFile file1 = new ArchiveFile("somefile.html", new byte[] { 1, 2, 3 });
+        byte[] archiveContent = ArchivingUtil.createArchive(Arrays.asList(file1, metadataFile));
+        ImportProjectResult result = this.service.importFromArchive(testProject, archiveContent, "user");
+        
+        Assert.assertEquals(ImportProjectResult.ErrorType.NONE, result.getErrorType());
+         
+        verify(this.projectFileStorage).cleanInsert(any(ProjectEntry.class), any(Collection.class));
     }
 
     private ProjectFile fileWithType(ProjectFileType type) {
