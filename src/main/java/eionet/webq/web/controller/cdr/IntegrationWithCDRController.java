@@ -360,8 +360,13 @@ public class IntegrationWithCDRController {
             Collection<ProjectFile> webForms) throws FileNotAvailableException {
         ProjectFile onlyOneAvailableForm = webForms.iterator().next();
         XmlFile onlyOneAvailableFile = xmlFiles.getFirst(onlyOneAvailableForm.getXmlSchema());
-        return editFile(onlyOneAvailableForm, onlyOneAvailableFile.getTitle(), onlyOneAvailableFile.getFullName(),
-                request);
+
+        String fileName = null;
+        if (null != onlyOneAvailableFile.getFullName() && !onlyOneAvailableFile.getFullName().isEmpty()) {
+            int index = onlyOneAvailableFile.getFullName().lastIndexOf('/');
+            fileName = onlyOneAvailableFile.getFullName().substring(index + 1);
+        }
+        return editFile(onlyOneAvailableForm, fileName , onlyOneAvailableFile.getFullName(), request);
     }
 
     /**
