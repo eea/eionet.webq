@@ -21,6 +21,7 @@
         <spring-security.version>3.1.4.RELEASE</spring-security.version>
         <env>local</env>
         <hibernate.version>4.2.4.Final</hibernate.version>
+        <maven.resources.overwrite>true</maven.resources.overwrite>
     </properties>
 
     <repositories>
