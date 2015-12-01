@@ -1,0 +1,36 @@
+<assembly xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2 http://maven.apache.org/xsd/assembly-1.1.2.xsd">
+
+<!-- This is the way to add files into the image -->
+<!--
+  <files>
+    <file>
+      <source>src/main/docker/jolokia-war-1.2.3.war</source>
+      <outputDirectory>.</outputDirectory>
+      <destName>jolokia.war</destName>
+    </file>
+  </files>
+-->
+  <dependencySets>
+    <!-- Inject the war file into the image at /maven -->
+    <dependencySet>
+      <useProjectArtifact>true</useProjectArtifact>
+      <includes>
+        <include>eionet.webq:webq2</include>
+      </includes>
+      <outputDirectory>.</outputDirectory>
+      <outputFileNameMapping>webq2.war</outputFileNameMapping>
+    </dependencySet>
+    <!-- Get the preconfigured Jolokia from the repository. Look for the dependency in pom.xml -->
+    <!--
+    <dependencySet>
+      <includes>
+        <include>eionet:jolokia:war</include>
+      </includes>
+      <outputDirectory>.</outputDirectory>
+      <outputFileNameMapping>jolokia.war</outputFileNameMapping>
+    </dependencySet>
+    -->
+  </dependencySets>
+</assembly>

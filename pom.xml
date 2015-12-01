@@ -404,4 +404,162 @@
             </resource>
         </resources>
     </build>
+
+    <!-- The Docker Maven plugin is used to create docker image with the fat jar -->
+    <profiles>
+        <profile>
+          <id>docker</id>
+          <properties>
+             <env>unittest</env>
+          </properties>
+          <!--
+          <dependencies>
+            <dependency>
+                <groupId>eionet</groupId>
+                <artifactId>jolokia</artifactId>
+                <version>1.0-SNAPSHOT</version>
+                <type>war</type>
+            </dependency>
+          </dependencies>
+          -->
+          <build>
+            <plugins>
+              <plugin>
+                <groupId>org.jolokia</groupId>
+                <artifactId>docker-maven-plugin</artifactId>
+                <version>0.13.6</version>
+                <configuration>
+                  <verbose>false</verbose>
+                  <logDate>default</logDate>
+                  <autoPull>true</autoPull>
+                  <images>
+                    <image>
+                      <alias>tomcat</alias>
+                      <name>dockerrepo.eionet.europa.eu:5000/${project.artifactId}</name>
+                      <build>
+                        <from>tomcat:7-jre7</from>
+                        <maintainer>Søren Roug &lt;soren.roug@eea.europa.eu&gt;</maintainer>
+                        <tags>
+                          <tag>latest</tag>
+                          <tag>${project.version}</tag>
+                        </tags>
+                        <assembly>
+                          <descriptor>assembly.xml</descriptor>
+                        </assembly>
+                        <runCmds>
+                          <run>rm -rf /usr/local/tomcat/webapps/*</run>
+                          <run>mv /maven/webq2.war /usr/local/tomcat/webapps/ROOT.war</run>
+                          <!-- <run>mv /maven/jolokia.war /usr/local/tomcat/webapps/jolokia.war</run> -->
+                        </runCmds>
+
+                        <!-- Expose ports -->
+                        <ports>
+                          <port>8080</port>
+                          <port>8009</port>
+                        </ports>
+                        <!-- Default command for the build image -->
+                        <!--<cmd>catalina.sh run</cmd> -->
+                      </build>
+
+                      <!-- ............................................................... -->
+                      <!-- Runtime configuration for starting/stopping/linking containers -->
+                      <!-- ............................................................... -->
+                      <run>
+                        <!-- Assign dynamically mapped ports to maven variables (which can be reused in integration tests) -->
+                        <ports>
+                          <port>tomcat.port:8080</port>
+                        </ports>
+                        <env>
+                          <CATALINA_OPTS>-Djava.security.egd=file:/dev/./urandom -Ddb.driver=com.mysql.jdbc.Driver -Ddb.url=jdbc:mysql://database/webq2 -Ddb.username=itests -Ddb.password=password</CATALINA_OPTS>
+                          <JAVA_OPTS>-Xmx3072m</JAVA_OPTS>
+                        </env>
+                        <wait>
+                          <!-- Check for this URL to return a 200 return code .... -->
+                          <url>http://${docker.host.address}:${tomcat.port}/</url>
+                          <!-- ... but at max 60 seconds -->
+                          <time>60000</time>
+                        </wait>
+                        <links>
+                          <link>database</link>
+                        </links>
+                        <log>
+                          <prefix>TC</prefix>
+                          <color>cyan</color>
+                        </log>
+                      </run>
+                    </image>
+
+                    <image>
+                      <alias>database</alias>
+                      <name>mysql:5.5</name>
+                      <run>
+                        <ports>
+                          <port>database.port:3306</port>
+                        </ports>
+                        <env>
+                          <MYSQL_ROOT_PASSWORD>toor</MYSQL_ROOT_PASSWORD>
+                          <MYSQL_DATABASE>webq2</MYSQL_DATABASE>
+                          <MYSQL_USER>itests</MYSQL_USER>
+                          <MYSQL_PASSWORD>password</MYSQL_PASSWORD>
+                        </env>
+                        <cmd>mysqld --max_allowed_packet=30M</cmd>
+<!--
+                        <wait>
+                          <tcp>
+			    <port>3306</port>
+			  </tcp>
+                          <time>6000</time>
+                        </wait>
+-->
+                      </run>
+                    </image>
+                  </images>
+                </configuration>
+
+                <!-- Hooking into the lifecycle -->
+                <executions>
+                  <execution>
+                    <id>start</id>
+                    <phase>pre-integration-test</phase>
+                    <goals>
+                      <goal>build</goal>
+                      <goal>start</goal>
+                    </goals>
+                  </execution>
+                  <execution>
+                    <id>stop</id>
+                    <phase>post-integration-test</phase>
+                    <goals>
+                      <goal>stop</goal>
+                    </goals>
+                  </execution>
+                </executions>
+              </plugin>
+
+              <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <version>2.19</version>
+                <configuration>
+                  <systemPropertyVariables>
+                    <db.url>jdbc:h2:tcp://${docker.host.address}:${database.port}//var/tmp/transferdb</db.url>
+                  </systemPropertyVariables>
+                </configuration>
+                <executions>
+                  <execution>
+                    <goals>
+                      <goal>integration-test</goal>
+                      <goal>verify</goal>
+                    </goals>
+                  </execution>
+                </executions>
+              </plugin>
+
+            </plugins>
+          </build>
+          <activation>
+            <activeByDefault/>
+          </activation>
+        </profile>
+    </profiles>
 </project>
