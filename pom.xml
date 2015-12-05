@@ -19,7 +19,6 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <spring-security.version>3.1.4.RELEASE</spring-security.version>
-        <env>local</env>
         <hibernate.version>4.2.4.Final</hibernate.version>
         <maven.resources.overwrite>true</maven.resources.overwrite>
     </properties>
@@ -387,7 +386,26 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.19</version>
+                <configuration>
+                    <systemPropertyVariables>
+                        <db.url>jdbc:h2:mem:xmlStorage;DB_CLOSE_DELAY=-1</db.url>
+                        <db.driver>org.h2.Driver</db.driver>
+                        <db.username>xml</db.username>
+                        <db.password>storage</db.password>
+                        <webq1.url>http://localhost:7080</webq1.url>
+                        <converters.api.url>http://converters-test</converters.api.url>
+                        <user.file.expiration.hours>9</user.file.expiration.hours>
+                        <cas.service>http://localhost:8080</cas.service>
+                    </systemPropertyVariables>
+                </configuration>
+            </plugin>
         </plugins>
+
+<!--
         <filters>
             <filter>config/${env}/application.properties</filter>
         </filters>
@@ -403,15 +421,13 @@
                 </includes>
             </resource>
         </resources>
+-->
     </build>
 
     <!-- The Docker Maven plugin is used to create docker image with the fat jar -->
     <profiles>
         <profile>
           <id>docker</id>
-          <properties>
-             <env>unittest</env>
-          </properties>
           <!--
           <dependencies>
             <dependency>
@@ -445,12 +461,14 @@
                         </tags>
                         <assembly>
                           <descriptor>assembly.xml</descriptor>
+                          <!--<descriptorRef>rootWar</descriptorRef> -->
                         </assembly>
                         <runCmds>
                           <run>rm -rf /usr/local/tomcat/webapps/*</run>
-                          <run>mv /maven/webq2.war /usr/local/tomcat/webapps/ROOT.war</run>
+                          <run>mv /maven/ROOT.war /usr/local/tomcat/webapps/ROOT.war</run>
                           <!-- <run>mv /maven/jolokia.war /usr/local/tomcat/webapps/jolokia.war</run> -->
                         </runCmds>
+                        <optimise>true</optimise>
 
                         <!-- Expose ports -->
                         <ports>
@@ -461,16 +479,13 @@
                         <!--<cmd>catalina.sh run</cmd> -->
                       </build>
 
-                      <!-- ............................................................... -->
-                      <!-- Runtime configuration for starting/stopping/linking containers -->
-                      <!-- ............................................................... -->
                       <run>
                         <!-- Assign dynamically mapped ports to maven variables (which can be reused in integration tests) -->
                         <ports>
                           <port>tomcat.port:8080</port>
                         </ports>
                         <env>
-                          <CATALINA_OPTS>-Djava.security.egd=file:/dev/./urandom -Ddb.driver=com.mysql.jdbc.Driver -Ddb.url=jdbc:mysql://database/webq2 -Ddb.username=itests -Ddb.password=password</CATALINA_OPTS>
+                          <CATALINA_OPTS>-Djava.security.egd=file:/dev/./urandom -Ddb.driver=com.mysql.jdbc.Driver -Ddb.url=jdbc:mysql://webqdb/webq2?maxAllowedPacket=30M -Ddb.username=itests -Ddb.password=password</CATALINA_OPTS>
                           <JAVA_OPTS>-Xmx3072m</JAVA_OPTS>
                         </env>
                         <wait>
@@ -480,7 +495,7 @@
                           <time>60000</time>
                         </wait>
                         <links>
-                          <link>database</link>
+                          <link>webqdb</link>
                         </links>
                         <log>
                           <prefix>TC</prefix>
@@ -490,7 +505,7 @@
                     </image>
 
                     <image>
-                      <alias>database</alias>
+                      <alias>webqdb</alias>
                       <name>mysql:5.5</name>
                       <run>
                         <ports>
@@ -516,7 +531,6 @@
                   </images>
                 </configuration>
 
-                <!-- Hooking into the lifecycle -->
                 <executions>
                   <execution>
                     <id>start</id>
@@ -545,7 +559,7 @@
                   <!-- note that it is the Tomcat container that runs liquibase -->
                   <systemPropertyVariables>
                     <db.driver>com.mysql.jdbc.Driver</db.driver>
-                    <db.url>jdbc:mysql://${docker.host.address}:${database.port}/webq2</db.url>
+                    <db.url>jdbc:mysql://${docker.host.address}:${database.port}/webq2?maxAllowedPacket=30M</db.url>
                     <db.username>itests</db.username>
                     <db.password>password</db.password>
                   </systemPropertyVariables>

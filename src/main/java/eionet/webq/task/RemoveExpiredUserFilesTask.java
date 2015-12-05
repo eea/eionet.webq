@@ -27,7 +27,8 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
+//import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -54,9 +55,17 @@ public class RemoveExpiredUserFilesTask {
     /**
      * Task properties.
      */
-    @Autowired
-    @Qualifier("task")
-    Properties properties;
+    //@Autowired
+    //@Qualifier("task")
+    //Properties properties;
+
+    @Value("${user.file.expiration.hours}")
+    private String expirationHours;
+
+    // For testing
+    void setExpirationHours(String property) {
+        this.expirationHours = property;
+    }
 
     /**
      * Perform removal task.
@@ -80,6 +89,7 @@ public class RemoveExpiredUserFilesTask {
     }
 
     int getExpirationHours() {
-        return Integer.valueOf(properties.getProperty("user.file.expiration.hours"));
+        return Integer.valueOf(expirationHours);
+        //return Integer.valueOf(properties.getProperty("user.file.expiration.hours"));
     }
 }

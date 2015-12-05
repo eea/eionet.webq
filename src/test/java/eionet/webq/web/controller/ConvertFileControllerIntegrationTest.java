@@ -111,6 +111,6 @@ public class ConvertFileControllerIntegrationTest extends AbstractContextControl
     }
 
     private void returnListOfConversionsFromRestApi(ListConversionResponse listOfConversions) {
-        when(restOperations.getForObject(anyString(), eq(ListConversionResponse.class), any())).thenReturn(listOfConversions);
+        when(restOperations.getForObject(anyString(), eq(ListConversionResponse.class), (Object) any())).thenReturn(listOfConversions);
     }
 }

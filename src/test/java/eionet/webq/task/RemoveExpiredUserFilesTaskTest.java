@@ -53,6 +53,9 @@ public class RemoveExpiredUserFilesTaskTest {
     private Criteria criteria;
     @Mock
     private Properties properties;
+
+    private String expirationHours = "1";
+
     @InjectMocks
     private RemoveExpiredUserFilesTask removeExpiredUserFilesTask;
     private int expirationTimeInHours = 1;
@@ -60,7 +63,7 @@ public class RemoveExpiredUserFilesTaskTest {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        when(properties.getProperty("user.file.expiration.hours")).thenReturn(Integer.toString(expirationTimeInHours));
+        //when(properties.getProperty("user.file.expiration.hours")).thenReturn(Integer.toString(expirationTimeInHours));
         when(factory.getCurrentSession()).thenReturn(session);
         when(session.createCriteria(any(Class.class))).thenReturn(criteria);
         when(criteria.add(any(Criterion.class))).thenReturn(criteria);
@@ -68,6 +71,7 @@ public class RemoveExpiredUserFilesTaskTest {
 
     @Test
     public void performsRemovalBasedOnConfiguredProperties() throws Exception {
+        removeExpiredUserFilesTask.setExpirationHours("1");
         removeExpiredUserFilesTask.removeExpiredUserFiles();
 
         ArgumentCaptor<SimpleExpression> criterionCaptor = ArgumentCaptor.forClass(SimpleExpression.class);

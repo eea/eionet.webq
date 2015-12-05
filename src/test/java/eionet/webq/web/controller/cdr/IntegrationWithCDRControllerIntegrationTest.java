@@ -79,7 +79,7 @@ public class IntegrationWithCDRControllerIntegrationTest extends AbstractContext
     @Autowired
     private MockHttpSession session;
 
-    @Value("#{ws['webq1.url']}")
+    @Value("${webq1.url}")
     private String webQFallBackUrl;
 
     private static final String ENVELOPE_URL = "http://cdr.envelope.eu";

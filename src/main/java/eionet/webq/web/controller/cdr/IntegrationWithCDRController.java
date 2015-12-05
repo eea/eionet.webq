@@ -74,7 +74,7 @@ public class IntegrationWithCDRController {
     /**
      * WebQ1 URL.
      */
-    @Value("#{ws['webq1.url']}")
+    @Value("${webq1.url}")
     String webQFallBackUrl;
     /**
      * Converts request to CdrRequest.

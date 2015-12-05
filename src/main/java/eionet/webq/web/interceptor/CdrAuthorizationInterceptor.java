@@ -104,12 +104,12 @@ public class CdrAuthorizationInterceptor extends HandlerInterceptorAdapter {
     /**
      * CDR login method name.
      */
-    @Value("#{ws['cdr.login']}")
+    @Value("${cdr.login}")
     private String cdrLoginMethod;
     /**
      * CDR envelope properties page name.
      */
-    @Value("#{ws['cdr.envelope.properties']}")
+    @Value("${cdr.envelope.properties}")
     private String cdrEnvelopePropertiesMethod;
     /**
      * Current session.

@@ -27,12 +27,24 @@ Minimum requirements are:
 
 ### Setup
 
+WebQ is configured at runtime with system properties. These can be provided to Tomcat via the CATALINA_OPTS environment variable.
+
 ###### 1. Do:
-```sh
-$ cp config/application-template.properties config/local/application.properties
-$ cp config/log4j-template.xml config/local/log4j.xml
+Set all properties needed for your environment. These are the properties you can change with their default values:
 ```
-Set all properties to your environment. Please _**do not commit**_ your local properties.
+db.driver=com.mysql.jdbc.Driver
+db.url=jdbc:mysql://webqdb/webq2?maxAllowedPacket=30M
+db.username=
+db.password=
+cas.service=http://localhost:8080/webq2
+cas.server.host=https://sso.eionet.europa.eu
+user.file.expiration.hours=12
+converters.api.url=
+webq1.url=
+log4j.configuration=classes/log4j.xml
+initial.admin.username=
+initial.admin.password=
+```
 
 ###### 2. Add the first admin user into the database:
 ```sql
@@ -41,17 +53,18 @@ insert into authorities values ('username', 'ADMIN');
 ```
 
 ###### 3. To use EEA's Central Authentication Service (CAS), 
-you need to register Eionet certificates in the JVM that runs the Tomcat. A small Java executable that does it, and a README on how to use it can be found here: https://svn.eionet.europa.eu/repositories/Reportnet/CASServer/contrib/installcert
+If you deploy on Tomcat 6, then you need to register Eionet certificates in the JVM that runs the Tomcat. A small Java executable that does it, and a README on how to use it can be found here: https://svn.eionet.europa.eu/repositories/Reportnet/CASServer/contrib/installcert
 
 ###### 4. Increase the MySql _max_allowed_packet_ variable 
-to be able to store larger files than 1MB in database. For example, to set the limit to 16MB do:
+To be able to store larger files than 1MB in the database. For example, to set the limit to 16MB in /etc/my.cnf do:
 ```sql
 SET GLOBAL max_allowed_packet=16777216;
 ```
+or run the mysql executable with the `--max_allowed_packet=16M` argument.
 
 ### Build
 
-Build with Maven `mvn -Denv=local clean install`
+Build with Maven `mvn clean install`
 
 ### Deployment
 

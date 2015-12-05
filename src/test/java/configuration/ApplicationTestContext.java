@@ -32,7 +32,7 @@ import util.CacheCleaner;
 
 @Configuration
 @ImportResource({"file:src/main/webapp/WEB-INF/spring/application-context.xml",
-        "file:src/test/resources/test-datasource-context.xml",
+        "file:src/main/webapp/WEB-INF/spring/data-source-context.xml",
         "file:src/main/webapp/WEB-INF/spring/properties-context.xml"})
 public class ApplicationTestContext {
 

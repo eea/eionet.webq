@@ -78,7 +78,7 @@ public class PublicPageControllerIntegrationTest extends AbstractContextControll
     public void mockConversionServiceApiCall() {
         ListConversionResponse listConversionResponse = new ListConversionResponse();
         listConversionResponse.setConversions(new ArrayList<Conversion>());
-        when(operations.getForObject(anyString(), eq(ListConversionResponse.class), any())).thenReturn(listConversionResponse);
+        when(operations.getForObject(anyString(), eq(ListConversionResponse.class), (Object) any())).thenReturn(listConversionResponse);
     }
 
     @Test

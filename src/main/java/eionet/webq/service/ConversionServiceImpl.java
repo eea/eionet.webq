@@ -55,27 +55,27 @@ public class ConversionServiceImpl implements ConversionService {
     /**
      * Url to converters api.
      */
-    @Value("#{ws['converters.api.url']}")
+    @Value("${converters.api.url}")
     private String converterApiUrl;
     /**
      * Template for conversions list method call.
      */
-    @Value("#{ws['list.conversions.call.template']}")
+    @Value("${list.conversions.call.template}")
     private String listConversions;
     /**
      * Template for convertPush method call.
      */
-    @Value("#{ws['convert.push.call.template']}")
+    @Value("${convert.push.call.template}")
     private String convertPush;
     /**
      * Convert push file parameter name.
      */
-    @Value("#{ws['convert.push.file.parameter']}")
+    @Value("${convert.push.file.parameter}")
     private String convertPushFileParameter;
     /**
      * Convert push file parameter name.
      */
-    @Value("#{ws['convert.push.conversion.id.parameter']}")
+    @Value("${convert.push.conversion.id.parameter}")
     private String convertPushIdParameter;
 
     @Override

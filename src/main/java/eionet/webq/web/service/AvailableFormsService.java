@@ -56,12 +56,12 @@ public class AvailableFormsService extends SpringBeanAutowiringSupport {
     /**
      * Fallback url if no schemas found.
      */
-    @Value("#{ws['webq1.rpc.url']}")
+    @Value("${webq1.rpc.url}")
     String webQ1Url;
     /**
      *
      */
-    @Value("#{ws['webq1.get.xform']}")
+    @Value("${webq1.get.xform}")
     String webQ1GetXForm;
     /**
      * XML-RPC method for querying web forms availability.

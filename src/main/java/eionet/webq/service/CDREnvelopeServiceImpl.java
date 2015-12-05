@@ -68,7 +68,7 @@ public class CDREnvelopeServiceImpl implements CDREnvelopeService {
     /**
      * Save xml files to cdr method name.
      */
-    @Value("#{ws['cdr.save.xml']}")
+    @Value("${cdr.save.xml}")
     String saveXmlFilesMethod;
     /**
      * Convert cookie objects to string and vice versa.
@@ -88,7 +88,7 @@ public class CDREnvelopeServiceImpl implements CDREnvelopeService {
     /**
      * Get envelope xml files remote method name.
      */
-    @Value("#{ws['cdr.envelope.get.xml.files']}")
+    @Value("${cdr.envelope.get.xml.files}")
     private String getEnvelopeXmlFilesMethod;
     /**
      * Conversion service.
