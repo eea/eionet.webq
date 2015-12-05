@@ -403,6 +403,46 @@
                     </systemPropertyVariables>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.apache.tomcat.maven</groupId>
+                <artifactId>tomcat7-maven-plugin</artifactId>
+                <version>2.2</version>
+                <configuration>
+                    <!-- http port -->
+                    <port>8080</port>
+                    <!-- application path always starts with /-->
+                    <path>/</path>
+                    <!-- optional path to a context file -->
+                    <!-- <contextFile>${tomcatContextXml}</contextFile> -->
+                    <warSourceDirectory>${project.build.directory}</warSourceDirectory>
+                    <!-- optional system propoerties you want to add -->
+                    <systemProperties>
+                        <java.io.tmpdir>${project.build.directory}</java.io.tmpdir>
+                        <db.url>jdbc:h2:mem:xmlStorage;DB_CLOSE_DELAY=-1</db.url>
+                        <db.driver>org.h2.Driver</db.driver>
+                        <db.username>xml</db.username>
+                        <db.password>storage</db.password>
+                        <cas.service>http://localhost:8080</cas.service>
+                        <webq1.url>http://localhost:7080</webq1.url>
+                        <converters.api.url>http://localhost:6080</converters.api.url>
+                        <user.file.expiration.hours>72</user.file.expiration.hours>
+                        <initial.admin.username>admin</initial.admin.username>
+                    </systemProperties>
+                    <!-- if you want to use test dependencies rather than only runtime -->
+                    <useTestClasspath>false</useTestClasspath>
+                    <!-- optional if you want to add some extra directories into the classloader -->
+                    <additionalClasspathDirs>
+                        <additionalClasspathDir></additionalClasspathDir>
+                    </additionalClasspathDirs>
+                </configuration>
+                <dependencies>
+                    <dependency>
+                        <groupId>com.h2database</groupId>
+                        <artifactId>h2</artifactId>
+                        <version>${h2.version}</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
         </plugins>
 
 <!--
@@ -485,7 +525,7 @@
                           <port>tomcat.port:8080</port>
                         </ports>
                         <env>
-                          <CATALINA_OPTS>-Djava.security.egd=file:/dev/./urandom -Ddb.driver=com.mysql.jdbc.Driver -Ddb.url=jdbc:mysql://webqdb/webq2?maxAllowedPacket=30M -Ddb.username=itests -Ddb.password=password</CATALINA_OPTS>
+                          <CATALINA_OPTS>-Djava.security.egd=file:/dev/./urandom -Ddb.driver=com.mysql.jdbc.Driver -Ddb.url=jdbc:mysql://webqdb/webq2?maxAllowedPacket=32212254720 -Ddb.username=itests -Ddb.password=password</CATALINA_OPTS>
                           <JAVA_OPTS>-Xmx3072m</JAVA_OPTS>
                         </env>
                         <wait>
@@ -559,7 +599,7 @@
                   <!-- note that it is the Tomcat container that runs liquibase -->
                   <systemPropertyVariables>
                     <db.driver>com.mysql.jdbc.Driver</db.driver>
-                    <db.url>jdbc:mysql://${docker.host.address}:${database.port}/webq2?maxAllowedPacket=30M</db.url>
+                    <db.url>jdbc:mysql://${docker.host.address}:${database.port}/webq2?maxAllowedPacket=32212254720</db.url>
                     <db.username>itests</db.username>
                     <db.password>password</db.password>
                   </systemPropertyVariables>
