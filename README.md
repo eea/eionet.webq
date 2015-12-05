@@ -47,10 +47,7 @@ initial.admin.password=
 ```
 
 ###### 2. Add the first admin user into the database:
-```sql
-insert into users values ('username', '', 1);
-insert into authorities values ('username', 'ADMIN');
-```
+If you set the initial.admin.username system property, then the user will get the admin role at startup.
 
 ###### 3. To use EEA's Central Authentication Service (CAS), 
 If you deploy on Tomcat 6, then you need to register Eionet certificates in the JVM that runs the Tomcat. A small Java executable that does it, and a README on how to use it can be found here: https://svn.eionet.europa.eu/repositories/Reportnet/CASServer/contrib/installcert
@@ -65,6 +62,10 @@ or run the mysql executable with the `--max_allowed_packet=16M` argument.
 ### Build
 
 Build with Maven `mvn clean install`
+
+#### Testing
+
+You can launch the application in Tomcat 7 with `mvn tomcat7:run`
 
 ### Deployment
 
