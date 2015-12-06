@@ -1,17 +1,18 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>eionet.webq</groupId>
+
+    <groupId>eionet</groupId>
     <artifactId>webq2</artifactId>
     <packaging>war</packaging>
     <version>2.0-SNAPSHOT</version>
-    <name>webq Maven Webapp</name>
-    <url>http://maven.apache.org</url>
+    <name>Eionet WebQ</name>
+    <url>http://webforms.eionet.europa.eu</url>
 
     <properties>
         <spring.version>3.2.0.RELEASE</spring.version>
         <junit.version>4.11</junit.version>
-        <jdk.version>1.6</jdk.version>
+        <jdk.version>1.7</jdk.version>
         <mysql.version>5.1.26</mysql.version>
         <h2.version>1.3.172</h2.version>
         <slf4j.version>1.7.5</slf4j.version>
@@ -444,24 +445,6 @@
                 </dependencies>
             </plugin>
         </plugins>
-
-<!--
-        <filters>
-            <filter>config/${env}/application.properties</filter>
-        </filters>
-        <resources>
-            <resource>
-                <directory>src/main/resources</directory>
-                <filtering>true</filtering>
-            </resource>
-            <resource>
-                <directory>config/${env}</directory>
-                <includes>
-                    <include>log4j.xml</include>
-                </includes>
-            </resource>
-        </resources>
--->
     </build>
 
     <!-- The Docker Maven plugin is used to create docker image with the fat jar -->
@@ -500,8 +483,8 @@
                           <tag>${project.version}</tag>
                         </tags>
                         <assembly>
-                          <descriptor>assembly.xml</descriptor>
-                          <!--<descriptorRef>rootWar</descriptorRef> -->
+                          <!-- <descriptor>assembly.xml</descriptor> -->
+                          <descriptorRef>rootWar</descriptorRef>
                         </assembly>
                         <runCmds>
                           <run>rm -rf /usr/local/tomcat/webapps/*</run>
