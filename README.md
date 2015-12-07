@@ -20,9 +20,9 @@ Installation
 ### Prerequisites
 
 Minimum requirements are:
-* Java 1.6
-* Maven 3.0.2
-* Tomcat 6
+* Java 1.6 or Java 7. Java 8 is not supported
+* Maven 3.0.4
+* Tomcat 6 or 7
 * MySql 5.5
 
 ### Setup
