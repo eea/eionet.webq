@@ -60,14 +60,14 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public ProjectEntry getByProjectId(String projectId) {
         ProjectEntry byProjectId = folders.getByProjectId(projectId);
-        LOGGER.info("Loaded project=" + byProjectId);
+        LOGGER.debug("Loaded project=" + byProjectId);
         return byProjectId;
     }
 
     @Override
     public ProjectEntry getById(int id) {
         ProjectEntry byProjectId = folders.getById(id);
-        LOGGER.info("Loaded project=" + byProjectId);
+        LOGGER.debug("Loaded project=" + byProjectId);
         return byProjectId;
     }
 
