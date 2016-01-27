@@ -16,14 +16,6 @@
 
     <!-- ### this parameter is used when the Adapter wants to specify the CSS to use ### -->
     <xsl:param name="webq-css" select="''"/>
-    <!-- ### this variable is used when deciding whether to use http or https protocel when loading resources ### -->
-    <xsl:variable name="webq-protocol">
-        <xsl:choose>
-            <xsl:when test="starts-with($baseURI, 'https')"><xsl:value-of select="'https'"/></xsl:when>
-            <xsl:otherwise><xsl:value-of select="'http'"/></xsl:otherwise>
-        </xsl:choose>
-    </xsl:variable>
-
 
     <xsl:param name="envelope" select="''"/>
     <xsl:param name="instance" select="''"/>
@@ -149,12 +141,12 @@
                 <link rel="stylesheet" type="text/css" href="{$webq-css}" media="screen"/>
             </xsl:when>
             <xsl:otherwise>
-                <link type="text/css" rel="stylesheet" media="screen" href="{$webq-protocol}://www.eionet.europa.eu/styles/eionet2007/screen.css" title="Eionet 2007 style" />
+                <link type="text/css" rel="stylesheet" media="screen" href="//www.eionet.europa.eu/styles/eionet2007/screen.css" title="Eionet 2007 style" />
             </xsl:otherwise>
         </xsl:choose>
         <!-- EIONET 2007 styles -->
-        <link rel="stylesheet" type="text/css" href="{$webq-protocol}://www.eionet.europa.eu/styles/eionet2007/print.css" media="print" />
-        <link rel="stylesheet" type="text/css" href="{$webq-protocol}://www.eionet.europa.eu/styles/eionet2007/handheld.css" media="handheld" />
+        <link rel="stylesheet" type="text/css" href="//www.eionet.europa.eu/styles/eionet2007/print.css" media="print" />
+        <link rel="stylesheet" type="text/css" href="//www.eionet.europa.eu/styles/eionet2007/handheld.css" media="handheld" />
         <style type="text/css">
             #bfLoading{
                 position: fixed;
