@@ -22,6 +22,7 @@
         <spring-security.version>3.1.4.RELEASE</spring-security.version>
         <hibernate.version>4.2.4.Final</hibernate.version>
         <maven.resources.overwrite>true</maven.resources.overwrite>
+        <maven.build.timestamp.format>yyyy-MM-dd'T'HHmm</maven.build.timestamp.format>
     </properties>
 
     <repositories>
@@ -474,13 +475,14 @@
                   <images>
                     <image>
                       <alias>tomcat</alias>
-                      <name>dockerrepo.eionet.europa.eu:5000/${project.artifactId}</name>
+                      <name>dockerrepo.eionet.europa.eu:5000/${project.groupId}/${project.artifactId}</name>
                       <build>
                         <from>tomcat:7-jre7</from>
                         <maintainer>Søren Roug &lt;soren.roug@eea.europa.eu&gt;</maintainer>
                         <tags>
                           <tag>latest</tag>
                           <tag>${project.version}</tag>
+                          <tag>${maven.build.timestamp}</tag>
                         </tags>
                         <assembly>
                           <!-- <descriptor>assembly.xml</descriptor> -->
@@ -551,6 +553,43 @@
 -->
                       </run>
                     </image>
+
+                    <image>
+                      <alias>frontend</alias>
+                      <name>dockerrepo.eionet.europa.eu:5000/${project.groupId}/${project.artifactId}-frontend</name>
+                      <build>
+                        <from>httpd:2.4.18</from>
+                        <maintainer>Søren Roug &lt;soren.roug@eea.europa.eu&gt;</maintainer>
+                        <tags>
+                          <tag>latest</tag>
+                          <tag>${project.version}</tag>
+                          <tag>${maven.build.timestamp}</tag>
+                        </tags>
+                        <assembly>
+                          <descriptor>frontend-assembly.xml</descriptor>
+                        </assembly>
+                        <runCmds>
+                          <run>mv /maven/entrypoint.sh /usr/local/bin/</run>
+                          <run>chmod 755 /usr/local/bin/entrypoint.sh</run>
+                        </runCmds>
+                        <optimise>true</optimise>
+
+                        <!-- Expose ports -->
+                        <ports>
+                          <port>80</port>
+                          <port>443</port>
+                        </ports>
+                        <cmd>entrypoint.sh</cmd>
+                      </build>
+                      <run>
+                        <ports>
+                          <port>database.port:3306</port>
+                        </ports>
+                        <env>
+                          <BACKENDS>${docker.host.address}</BACKENDS>
+                        </env>
+                      </run>
+                    </image>
                   </images>
                 </configuration>
 
@@ -599,9 +638,6 @@
 
             </plugins>
           </build>
-          <activation>
-            <activeByDefault/>
-          </activation>
         </profile>
     </profiles>
 </project>
