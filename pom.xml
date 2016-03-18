@@ -489,9 +489,8 @@
                           <descriptorRef>rootWar</descriptorRef>
                         </assembly>
                         <runCmds>
-                          <run>rm -rf /usr/local/tomcat/webapps/*</run>
+                          <run>rm -rf /usr/local/tomcat/conf/logging.properties /usr/local/tomcat/webapps/*</run>
                           <run>mv /maven/ROOT.war /usr/local/tomcat/webapps/ROOT.war</run>
-                          <!-- <run>mv /maven/jolokia.war /usr/local/tomcat/webapps/jolokia.war</run> -->
                         </runCmds>
                         <optimise>true</optimise>
 
