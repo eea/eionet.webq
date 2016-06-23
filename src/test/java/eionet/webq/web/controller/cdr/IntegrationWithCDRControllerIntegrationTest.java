@@ -55,6 +55,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static java.util.Collections.singletonMap;
+import org.apache.commons.codec.digest.DigestUtils;
+import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.hamcrest.core.StringContains.containsString;
 import static org.junit.Assert.*;
@@ -91,7 +93,7 @@ public class IntegrationWithCDRControllerIntegrationTest extends AbstractContext
     public void setUp() throws Exception {
         Mockito.reset(xmlRpcClient);
     }
-
+    
     @Test
     public void menuReturnsViewName() throws Exception {
         saveAvailableWebFormWithSchema(XML_SCHEMA);
@@ -131,7 +133,7 @@ public class IntegrationWithCDRControllerIntegrationTest extends AbstractContext
 
         assertThat(webForms.size(), equalTo(2));
     }
-
+    
     @Test
     public void editCdrFileWillSaveFileLocallyAndRedirectToXFormsEngine() throws Exception {
         byte[] fileContent = "file-content".getBytes();
@@ -151,12 +153,18 @@ public class IntegrationWithCDRControllerIntegrationTest extends AbstractContext
                         .param("remoteFileUrl", "http://remote-file.url").session(session))
                         .andExpect(status().isFound()).andReturn();
 
+        String userId = DigestUtils.md5Hex(request.getSessionId());
         String redirectedUrl = mvcResult.getResponse().getRedirectedUrl();
-
-        UserFile file = userFileService.getById(extractFileIdFromXFormRedirectUrl(redirectedUrl));
+        
+        assertThat(redirectedUrl, containsString("sessionid=" + userId));
+        
+        UserFile file = userFileService.getByIdAndUser(extractFileIdFromXFormRedirectUrl(redirectedUrl), userId);
+        
+        assertNotNull(file);
         assertNull(file.getContent());
         assertThat(file.getName(), equalTo(fileName));
         assertThat(file.getXmlSchema(), equalTo(XML_SCHEMA));
+        assertThat(file.getUserId(), is(equalTo(userId)));
     }
 
     @Test
@@ -195,7 +203,7 @@ public class IntegrationWithCDRControllerIntegrationTest extends AbstractContext
                 .andExpect(status().is(HttpStatus.MOVED_PERMANENTLY.value()))
                 .andExpect(header().string("Location", containsString(webQFallBackUrl)));
     }
-
+    
     private int saveAvailableWebFormWithSchema(String xmlSchema) {
         ProjectFile file = new ProjectFile();
         file.setXmlSchema(xmlSchema);

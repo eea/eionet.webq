@@ -69,7 +69,7 @@ public class CdrRequestConverter implements Converter<HttpServletRequest, CdrReq
         parameters.setSchema(parametersTracker.getParameter("schema"));
         parameters.setNewFormCreationAllowed(Boolean.valueOf(parametersTracker.getParameter("add")));
         parameters.setNewFileName(parametersTracker.getParameter("file_id"));
-        parameters.setSessionId(httpRequest.getSession().getId());
+        parameters.setSessionId(parameters.getEnvelopeUrl());
         String instanceUrl = parametersTracker.getParameter("instance");
         parameters.setInstanceUrl(instanceUrl);
         if (isNotEmpty(instanceUrl)) {

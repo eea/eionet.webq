@@ -20,6 +20,9 @@
  */
 package eionet.webq.service;
 
+import eionet.webq.dto.CdrRequest;
+import eionet.webq.web.controller.cdr.IntegrationWithCDRController;
+import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -30,6 +33,16 @@ import javax.servlet.http.HttpSession;
  */
 @Service
 public class EncryptedSessionBasedUserIdProvider implements UserIdProvider {
+    
+    private static final String[] CDR_PATHS;
+    
+    static {
+        CDR_PATHS = new String[] { "/WebQMenu", "/WebQEdit", "/cdr/edit/file", "/cdr/add/file" };
+    }
+    
+    @Autowired(required = false)
+    private HttpServletRequest request;
+    
     /**
      * Session.
      */
@@ -38,6 +51,41 @@ public class EncryptedSessionBasedUserIdProvider implements UserIdProvider {
 
     @Override
     public String getUserId() {
+        if (this.isCdrOrientedRequest()) {
+            CdrRequest cdrRequest = (CdrRequest) this.session.getAttribute(IntegrationWithCDRController.LATEST_CDR_REQUEST);
+            
+            return DigestUtils.md5Hex(cdrRequest.getSessionId());
+        }
+        
+        if (this.isCustomSessionOrientedRequest()) {
+            return request.getParameter("sessionid");
+        }
+        
         return DigestUtils.md5Hex(session.getId());
     }
+    
+    protected boolean isCdrOrientedRequest() {
+        if (this.request == null) {
+            return false;
+        }
+        
+        String requestUri = this.request.getRequestURI();
+        
+        for (String cdrCtxPath : CDR_PATHS) {
+            if (requestUri.contains(cdrCtxPath)) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+    
+    protected boolean isCustomSessionOrientedRequest() {
+        if (this.request == null) {
+            return false;
+        }
+        
+        return request.getParameter("sessionid") != null;
+    }
+    
 }

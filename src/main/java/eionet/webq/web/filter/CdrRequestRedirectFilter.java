@@ -41,9 +41,10 @@ public class CdrRequestRedirectFilter implements Filter {
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws IOException, ServletException {
-
         HttpServletRequest httpRequest = (HttpServletRequest) request;
         HttpServletResponse httpResponse = (HttpServletResponse) response;
+        
+        /*
         HttpSession session = httpRequest.getSession(true);
 
         // SessionId received from WebQMenu or WebQEdit request.
@@ -59,6 +60,7 @@ public class CdrRequestRedirectFilter implements Filter {
             userFileService.updateUserId(initialSessionId, current);
             LOGGER.info("User session updated successfully");
         }
+        */
         chain.doFilter(httpRequest, httpResponse);
     }
 
