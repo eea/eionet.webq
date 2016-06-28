@@ -34,18 +34,7 @@
         <servlet-name>XmlRpcServlet</servlet-name>
         <url-pattern>/RpcRouter</url-pattern>
     </servlet-mapping>
-    <!--
-    <filter>
-        <description>CDR requests come from another domain. The filter is responsible of keeping the user's sessions.</description>
-        <filter-name>cdrRequestRedirectFilter</filter-name>
-        <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
-    </filter>
-    <filter-mapping>
-        <filter-name>cdrRequestRedirectFilter</filter-name>
-        <url-pattern>/xform/*</url-pattern>
-        <url-pattern>/webform/*</url-pattern>
-    </filter-mapping>
-    -->
+    
     <!--  betterFORM XForms Filter -->
     <filter>
         <filter-name>XFormsFilter</filter-name>
