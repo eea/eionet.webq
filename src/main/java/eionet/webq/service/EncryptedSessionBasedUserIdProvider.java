@@ -22,12 +22,14 @@ package eionet.webq.service;
 
 import eionet.webq.dto.CdrRequest;
 import eionet.webq.web.controller.cdr.IntegrationWithCDRController;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpSession;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  */
@@ -48,6 +50,9 @@ public class EncryptedSessionBasedUserIdProvider implements UserIdProvider {
      */
     @Autowired
     private HttpSession session;
+    
+    @Autowired
+    private CookieValueManager cookieValueManager;
 
     @Override
     public String getUserId() {
@@ -61,7 +66,13 @@ public class EncryptedSessionBasedUserIdProvider implements UserIdProvider {
             return request.getParameter("sessionid");
         }
         
-        return DigestUtils.md5Hex(session.getId());
+        String userId = this.tryGetCookieBasedId();
+        
+        if (StringUtils.isBlank(userId)) {
+            userId = DigestUtils.md5Hex(session.getId());
+        }
+        
+        return userId;
     }
     
     protected boolean isCdrOrientedRequest() {
@@ -87,5 +98,14 @@ public class EncryptedSessionBasedUserIdProvider implements UserIdProvider {
         
         return request.getParameter("sessionid") != null;
     }
+    
+    protected String tryGetCookieBasedId() {
+        if (this.request == null) {
+            return null;
+        }
+        
+        return this.cookieValueManager.getUserId(this.request);
+    }
+    
     
 }
