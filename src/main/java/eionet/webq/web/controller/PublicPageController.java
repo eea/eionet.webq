@@ -369,8 +369,8 @@ public class PublicPageController {
         } else {
             baseUri += request.getContextPath();
         }
-
-        return "redirect:" + absolutePath;
+        
+        return "redirect:" + (StringUtils.isEmpty(absolutePath) ? "/" : absolutePath);
     }
 
     /**
