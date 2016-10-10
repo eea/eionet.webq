@@ -69,7 +69,6 @@ public class CdrRequestConverter implements Converter<HttpServletRequest, CdrReq
         parameters.setSchema(parametersTracker.getParameter("schema"));
         parameters.setNewFormCreationAllowed(Boolean.valueOf(parametersTracker.getParameter("add")));
         parameters.setNewFileName(parametersTracker.getParameter("file_id"));
-        parameters.setSessionId(parameters.getEnvelopeUrl());
         String instanceUrl = parametersTracker.getParameter("instance");
         parameters.setInstanceUrl(instanceUrl);
         if (isNotEmpty(instanceUrl)) {
@@ -84,6 +83,8 @@ public class CdrRequestConverter implements Converter<HttpServletRequest, CdrReq
         if (StringUtils.isEmpty(parameters.getEnvelopeUrl()) && StringUtils.isNotEmpty(parameters.getInstanceUrl())) {
             parameters.setEnvelopeUrl(StringUtils.substringBeforeLast(parameters.getInstanceUrl(), "/"));
         }
+        
+        parameters.setSessionId(parameters.getEnvelopeUrl());
 
         String authorizationHeader = httpRequest.getHeader("Authorization");
         if (authorizationAgainstCdrSucceed(httpRequest) && hasBasicAuthorization(authorizationHeader)) {
