@@ -97,26 +97,7 @@
         <servlet-name>inspector</servlet-name>
         <url-pattern>/inspector/*</url-pattern>
     </servlet-mapping>
-
-    <servlet>
-        <servlet-name>bfEditor</servlet-name>
-        <servlet-class>de.betterform.agent.web.servlet.XSLTServlet</servlet-class>
-        <init-param>
-            <param-name>editorHome</param-name>
-            <param-value>/forms/incubator/editor/</param-value>
-        </init-param>
-        <init-param>
-            <param-name>xsltFile</param-name>
-            <param-value>bfEditor.xsl</param-value>
-        </init-param>
-    </servlet>
-
-    <servlet-mapping>
-        <servlet-name>bfEditor</servlet-name>
-        <url-pattern>/bfEditor/*</url-pattern>
-    </servlet-mapping>
-
-
+    
     <!--
     de.betterform.agent.web.resources.ResourceServlet is responsible for loading
     all CSS, Script, XSLT and image files that are used by betterFORM.
@@ -137,15 +118,6 @@
         <servlet-name>PlainHtml</servlet-name>
         <servlet-class>de.betterform.agent.web.servlet.PlainHtmlServlet</servlet-class>
     </servlet>
-    <servlet>
-        <servlet-name>ViewServlet</servlet-name>
-        <servlet-class>de.betterform.agent.web.servlet.ViewServlet</servlet-class>
-    </servlet>
-
-    <servlet>
-        <servlet-name>UploadServlet</servlet-name>
-        <servlet-class>de.betterform.agent.web.servlet.UploadServlet</servlet-class>
-    </servlet>
 
     <servlet-mapping>
         <servlet-name>Flux</servlet-name>
@@ -153,45 +125,12 @@
     </servlet-mapping>
 
     <servlet-mapping>
-        <servlet-name>UploadServlet</servlet-name>
-        <url-pattern>/FileUpload</url-pattern>
-    </servlet-mapping>
-
-
-    <servlet-mapping>
         <servlet-name>ResourceServlet</servlet-name>
         <url-pattern>/bfResources/*</url-pattern>
     </servlet-mapping>
-    <servlet-mapping>
+  <servlet-mapping>
         <servlet-name>PlainHtml</servlet-name>
         <url-pattern>/PlainHtml/*</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>ViewServlet</servlet-name>
-        <url-pattern>/view</url-pattern>
-    </servlet-mapping>
-
-    <servlet>
-        <servlet-name>FormsServlet</servlet-name>
-        <servlet-class>de.betterform.agent.web.servlet.FormsServlet</servlet-class>
-        <init-param>
-            <param-name>ignores</param-name>
-            <param-value>css</param-value>
-        </init-param>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>FormsServlet</servlet-name>
-        <url-pattern>/FormBrowser</url-pattern>
-    </servlet-mapping>
-
-      <servlet>
-        <servlet-name>FileStoreServlet</servlet-name>
-        <servlet-class>de.betterform.agent.web.servlet.FileStoreServlet</servlet-class>
-    </servlet>
-
-     <servlet-mapping>
-        <servlet-name>FileStoreServlet</servlet-name>
-        <url-pattern>/FileStore</url-pattern>
     </servlet-mapping>
 
     <filter>
