@@ -477,7 +477,7 @@
                       <alias>tomcat</alias>
                       <name>dockerrepo.eionet.europa.eu:5000/${project.groupId}/${project.artifactId}</name>
                       <build>
-                        <from>tomcat:7-jre7</from>
+                        <from>tomcat:7.0.56-jre7</from>
                         <maintainer>Søren Roug &lt;soren.roug@eea.europa.eu&gt;</maintainer>
                         <tags>
                           <tag>latest</tag>
