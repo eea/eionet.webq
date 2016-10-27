@@ -75,8 +75,6 @@
         <url-pattern>/error/*</url-pattern>
     </servlet-mapping>
 
-
-
     <servlet>
         <servlet-name>Flux</servlet-name>
         <servlet-class>org.directwebremoting.servlet.DwrServlet</servlet-class>
@@ -86,6 +84,10 @@
         </init-param>
     </servlet>
 
+    <!-- 
+    de.betterform.agent.web.servlet.XFormsInspectorServlet 
+    creates debugging output of a XForms document.
+    -->
     <servlet>
         <servlet-name>inspector</servlet-name>
         <servlet-class>de.betterform.agent.web.servlet.XFormsInspectorServlet</servlet-class>
@@ -114,6 +116,11 @@
             <param-value>@CACHING@</param-value>
         </init-param>
     </servlet>
+    
+    <!--
+    de.betterform.agent.web.servlet.PlainHtmlServlet handles clients which 
+    accept only plain html without javascript.
+    -->
     <servlet>
         <servlet-name>PlainHtml</servlet-name>
         <servlet-class>de.betterform.agent.web.servlet.PlainHtmlServlet</servlet-class>
