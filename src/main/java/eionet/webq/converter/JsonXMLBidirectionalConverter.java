@@ -96,7 +96,7 @@ public class JsonXMLBidirectionalConverter {
         InputStream input = new ByteArrayInputStream(source);
         ByteArrayOutputStream output = new ByteArrayOutputStream();
         try {
-            XMLEventReader reader = inputFactory.createXMLEventReader(input);
+            XMLEventReader reader = inputFactory.createXMLEventReader(input, "utf-8");
             XMLEventWriter writer = outputFactory.createXMLEventWriter(output, "utf-8");
             writer = new PrettyXMLEventWriter(writer);
             writer.add(reader);
