@@ -20,11 +20,7 @@
  */
 package eionet.webq.service;
 
-import eionet.webq.dto.CdrRequest;
-import eionet.webq.web.controller.cdr.IntegrationWithCDRController;
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
-import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -35,12 +31,6 @@ import org.apache.commons.lang3.StringUtils;
  */
 @Service
 public class EncryptedSessionBasedUserIdProvider implements UserIdProvider {
-    
-//    private static final String[] CDR_PATHS;
-//    
-//    static {
-//        CDR_PATHS = new String[] { "/WebQMenu", "/WebQEdit", "/cdr/edit/file", "/cdr/add/file" };
-//    }
     
     @Autowired(required = false)
     private HttpServletRequest request;
@@ -55,17 +45,7 @@ public class EncryptedSessionBasedUserIdProvider implements UserIdProvider {
     private RequestBasedUserIdProvider requestBasedUserIdProvider;
 
     @Override
-    public String getUserId() {
-//        if (this.isCdrOrientedRequest()) {
-//            CdrRequest cdrRequest = (CdrRequest) this.session.getAttribute(IntegrationWithCDRController.LATEST_CDR_REQUEST);
-//            
-//            return DigestUtils.md5Hex(cdrRequest.getSessionId());
-//        }
-//        
-//        if (this.isCustomSessionOrientedRequest()) {
-//            return request.getParameter("sessionid");
-//        }
-        
+    public String getUserId() {        
         String userId = this.tryGetCookieBasedId();
         
         if (StringUtils.isBlank(userId)) {
@@ -74,30 +54,6 @@ public class EncryptedSessionBasedUserIdProvider implements UserIdProvider {
         
         return userId;
     }
-    
-//    protected boolean isCdrOrientedRequest() {
-//        if (this.request == null) {
-//            return false;
-//        }
-//        
-//        String requestUri = this.request.getRequestURI();
-//        
-//        for (String cdrCtxPath : CDR_PATHS) {
-//            if (requestUri.contains(cdrCtxPath)) {
-//                return true;
-//            }
-//        }
-//        
-//        return false;
-//    }
-//    
-//    protected boolean isCustomSessionOrientedRequest() {
-//        if (this.request == null) {
-//            return false;
-//        }
-//        
-//        return request.getParameter("sessionid") != null;
-//    }
     
     protected String tryGetCookieBasedId() {
         if (this.request == null) {
