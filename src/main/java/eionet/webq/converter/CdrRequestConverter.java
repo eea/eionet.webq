@@ -21,6 +21,7 @@
 package eionet.webq.converter;
 
 import eionet.webq.dto.CdrRequest;
+import eionet.webq.service.RequestBasedUserIdProvider;
 import eionet.webq.web.interceptor.CdrAuthorizationInterceptor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.net.util.Base64;
@@ -52,12 +53,14 @@ public class CdrRequestConverter implements Converter<HttpServletRequest, CdrReq
      * Basic authorization prefix.
      */
     private static final String BASIC_AUTHORIZATION_PREFIX = "Basic ";
-
-    /**
-     * Convert cookie objects to string and vice versa.
-     */
+    
     @Autowired
-    CookiesToStringBidirectionalConverter cookiesConverter;
+    private final RequestBasedUserIdProvider requestBasedUserIdProvider;
+    
+    @Autowired
+    public CdrRequestConverter(RequestBasedUserIdProvider requestBasedUserIdProvider) {
+        this.requestBasedUserIdProvider = requestBasedUserIdProvider;
+    }
 
     @Override
     public CdrRequest convert(HttpServletRequest httpRequest) {
@@ -84,7 +87,7 @@ public class CdrRequestConverter implements Converter<HttpServletRequest, CdrReq
             parameters.setEnvelopeUrl(StringUtils.substringBeforeLast(parameters.getInstanceUrl(), "/"));
         }
         
-        parameters.setSessionId(parameters.getEnvelopeUrl());
+        parameters.setSessionId(requestBasedUserIdProvider.getUserId(httpRequest));
 
         String authorizationHeader = httpRequest.getHeader("Authorization");
         if (authorizationAgainstCdrSucceed(httpRequest) && hasBasicAuthorization(authorizationHeader)) {

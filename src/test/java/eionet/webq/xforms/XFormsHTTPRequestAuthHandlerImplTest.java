@@ -136,17 +136,17 @@ public class XFormsHTTPRequestAuthHandlerImplTest {
         requestAuthHandler.addAuthToHttpRequest(httpRequest, context);
         assertThatRequestIsNotChanged(httpRequest, BASE_URI + "/resource");
         assertThatRequestHeaderContainsValidSessionId(context);
-        verify(userFileService, never()).getByIdAndUser(anyInt(), anyString());
+        verify(userFileService, never()).getById(anyInt());
     }
 
     @Test
     public void ignoreRequestsWithNoAuthInfoInUserFile() {
 
         HttpRequestBase httpRequest = new HttpGet(BASIC_AUTH_KNOWN_HOST_URL);
-        when(userFileService.getByIdAndUser(anyInt(), anyString())).thenReturn(createUserFile());
+        when(userFileService.getById(anyInt())).thenReturn(createUserFile());
         requestAuthHandler.addAuthToHttpRequest(httpRequest, createBfContextMap());
         assertThatRequestIsNotChanged(httpRequest, BASIC_AUTH_KNOWN_HOST_URL);
-        verify(userFileService, atLeastOnce()).getByIdAndUser(anyInt(), anyString());
+        verify(userFileService, atLeastOnce()).getById(anyInt());
     }
 
     @Test
@@ -156,7 +156,7 @@ public class XFormsHTTPRequestAuthHandlerImplTest {
         context.put("instance", BASIC_AUTH_KNOWN_HOST_URL + "/instance.xml");
         UserFile userFile = createUserFileWithAuth();
 
-        when(userFileService.getByIdAndUser(anyInt(), anyString())).thenReturn(userFile);
+        when(userFileService.getById(anyInt())).thenReturn(userFile);
         when(knownHostsService.getKnownHost(anyString())).thenReturn(createBasicAuthKnownHost());
         requestAuthHandler.addAuthToHttpRequest(httpRequest, context);
 
@@ -172,7 +172,7 @@ public class XFormsHTTPRequestAuthHandlerImplTest {
         context.put("instance", REQUEST_PARAM_KNOWN_HOST_URL + "/instance.xml");
         UserFile userFile = createUserFileWithAuth();
 
-        when(userFileService.getByIdAndUser(anyInt(), anyString())).thenReturn(userFile);
+        when(userFileService.getById(anyInt())).thenReturn(userFile);
         when(knownHostsService.getKnownHost(anyString())).thenReturn(createRequestParamKnownHost());
         requestAuthHandler.addAuthToHttpRequest(httpRequest, context);
 
@@ -187,7 +187,7 @@ public class XFormsHTTPRequestAuthHandlerImplTest {
         context.put("instance", REQUEST_PARAM_KNOWN_HOST_URL + "/instance.xml");
         UserFile userFile = createUserFileWithAuth();
 
-        when(userFileService.getByIdAndUser(anyInt(), anyString())).thenReturn(userFile);
+        when(userFileService.getById(anyInt())).thenReturn(userFile);
         when(knownHostsService.getKnownHost(anyString())).thenReturn(null);
         requestAuthHandler.addAuthToHttpRequest(httpRequest, context);
 
@@ -206,7 +206,7 @@ public class XFormsHTTPRequestAuthHandlerImplTest {
         requestAuthHandler.addAuthToHttpRequest(httpRequest, context);
 
         assertThat((String) context.get("webqAuth"), equalTo("Basic auth"));
-        verify(userFileService, never()).getByIdAndUser(anyInt(), anyString());
+        verify(userFileService, never()).getById(anyInt());
     }
 
     @Test

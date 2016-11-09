@@ -153,10 +153,11 @@ public class IntegrationWithCDRControllerIntegrationTest extends AbstractContext
                         .param("remoteFileUrl", "http://remote-file.url").session(session))
                         .andExpect(status().isFound()).andReturn();
 
-        String userId = DigestUtils.md5Hex(request.getSessionId());
+        String userId = DigestUtils.md5Hex(session.getId());
+        String sessionIdParamValue = request.getSessionId();
         String redirectedUrl = mvcResult.getResponse().getRedirectedUrl();
         
-        assertThat(redirectedUrl, containsString("sessionid=" + userId));
+        assertThat(redirectedUrl, containsString("sessionid=" + sessionIdParamValue));
         
         UserFile file = userFileService.getByIdAndUser(extractFileIdFromXFormRedirectUrl(redirectedUrl), userId);
         

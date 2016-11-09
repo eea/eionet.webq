@@ -36,11 +36,11 @@ import org.apache.commons.lang3.StringUtils;
 @Service
 public class EncryptedSessionBasedUserIdProvider implements UserIdProvider {
     
-    private static final String[] CDR_PATHS;
-    
-    static {
-        CDR_PATHS = new String[] { "/WebQMenu", "/WebQEdit", "/cdr/edit/file", "/cdr/add/file" };
-    }
+//    private static final String[] CDR_PATHS;
+//    
+//    static {
+//        CDR_PATHS = new String[] { "/WebQMenu", "/WebQEdit", "/cdr/edit/file", "/cdr/add/file" };
+//    }
     
     @Autowired(required = false)
     private HttpServletRequest request;
@@ -52,59 +52,59 @@ public class EncryptedSessionBasedUserIdProvider implements UserIdProvider {
     private HttpSession session;
     
     @Autowired
-    private CookieValueManager cookieValueManager;
+    private RequestBasedUserIdProvider requestBasedUserIdProvider;
 
     @Override
     public String getUserId() {
-        if (this.isCdrOrientedRequest()) {
-            CdrRequest cdrRequest = (CdrRequest) this.session.getAttribute(IntegrationWithCDRController.LATEST_CDR_REQUEST);
-            
-            return DigestUtils.md5Hex(cdrRequest.getSessionId());
-        }
-        
-        if (this.isCustomSessionOrientedRequest()) {
-            return request.getParameter("sessionid");
-        }
+//        if (this.isCdrOrientedRequest()) {
+//            CdrRequest cdrRequest = (CdrRequest) this.session.getAttribute(IntegrationWithCDRController.LATEST_CDR_REQUEST);
+//            
+//            return DigestUtils.md5Hex(cdrRequest.getSessionId());
+//        }
+//        
+//        if (this.isCustomSessionOrientedRequest()) {
+//            return request.getParameter("sessionid");
+//        }
         
         String userId = this.tryGetCookieBasedId();
         
         if (StringUtils.isBlank(userId)) {
-            userId = DigestUtils.md5Hex(session.getId());
+            userId = this.requestBasedUserIdProvider.getUserId(session);
         }
         
         return userId;
     }
     
-    protected boolean isCdrOrientedRequest() {
-        if (this.request == null) {
-            return false;
-        }
-        
-        String requestUri = this.request.getRequestURI();
-        
-        for (String cdrCtxPath : CDR_PATHS) {
-            if (requestUri.contains(cdrCtxPath)) {
-                return true;
-            }
-        }
-        
-        return false;
-    }
-    
-    protected boolean isCustomSessionOrientedRequest() {
-        if (this.request == null) {
-            return false;
-        }
-        
-        return request.getParameter("sessionid") != null;
-    }
+//    protected boolean isCdrOrientedRequest() {
+//        if (this.request == null) {
+//            return false;
+//        }
+//        
+//        String requestUri = this.request.getRequestURI();
+//        
+//        for (String cdrCtxPath : CDR_PATHS) {
+//            if (requestUri.contains(cdrCtxPath)) {
+//                return true;
+//            }
+//        }
+//        
+//        return false;
+//    }
+//    
+//    protected boolean isCustomSessionOrientedRequest() {
+//        if (this.request == null) {
+//            return false;
+//        }
+//        
+//        return request.getParameter("sessionid") != null;
+//    }
     
     protected String tryGetCookieBasedId() {
         if (this.request == null) {
             return null;
         }
         
-        return this.cookieValueManager.getUserId(this.request);
+        return this.requestBasedUserIdProvider.getUserId(this.request);
     }
     
     

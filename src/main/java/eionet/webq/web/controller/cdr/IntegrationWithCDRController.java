@@ -51,8 +51,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-import static org.apache.commons.codec.digest.DigestUtils.md5Hex;
-
 /**
  * Provides integration options with CDR.
  */
@@ -223,7 +221,7 @@ public class IntegrationWithCDRController {
                         .saveBasedOnWebForm(userFileBasedOn(parameters), webFormService.findActiveWebFormById(webform.getId()));
 
         LOGGER.info("Received ADD NEW file request from CDR with parameters: " + parameters.toString() +
-                "; sessionid=" + md5Hex(parameters.getSessionId()));
+                "; sessionid=" + parameters.getSessionId());
 
         String webformPath = webformUrlProvider.getWebformPath(webform);
 
@@ -231,7 +229,7 @@ public class IntegrationWithCDRController {
                 + parameters.getContextPath()
                 + "&envelope=" + StringUtils.defaultString(parameters.getEnvelopeUrl())
                 + StringUtils.defaultString(parameters.getAdditionalParametersAsQueryString())
-                + "&sessionid=" + md5Hex(parameters.getSessionId());
+                + "&sessionid=" + parameters.getSessionId();
 
         LOGGER.info("Redirect to: " + redirect);
 
@@ -293,7 +291,7 @@ public class IntegrationWithCDRController {
         String envelopeParam = (request.getEnvelopeUrl() != null) ? "&envelope=" + request.getEnvelopeUrl() : "";
 
         LOGGER.info("Received EDIT file request from CDR with parameters: " + request.toString() +
-                ";  sessionid=" + md5Hex(request.getSessionId()));
+                ";  sessionid=" + request.getSessionId());
 
         String webformPath = webformUrlProvider.getWebformPath(webForm);
 
@@ -301,7 +299,7 @@ public class IntegrationWithCDRController {
                 + fileId
                 + "&base_uri=" + request.getContextPath() + envelopeParam
                 + request.getAdditionalParametersAsQueryString()
-                + "&sessionid=" + md5Hex(request.getSessionId());
+                + "&sessionid=" + request.getSessionId();
 
         LOGGER.info("Redirect to: " + redirect);
 

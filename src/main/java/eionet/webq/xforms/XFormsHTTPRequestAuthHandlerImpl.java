@@ -150,7 +150,6 @@ public class XFormsHTTPRequestAuthHandlerImpl implements HTTPRequestAuthHandler 
         Integer fileId = null;
         String authentication = null;
         String sessionId = null;
-        String sessionIdHash = null;
 
         if (uri == null) {
             return;
@@ -179,26 +178,14 @@ public class XFormsHTTPRequestAuthHandlerImpl implements HTTPRequestAuthHandler 
         // http session attribute stored in betterform context
         if (context.get(BF_HTTP_SESSION_ATTRIBUTE) != null) {
             sessionId = (String) context.get(BF_HTTP_SESSION_ATTRIBUTE);
-            sessionIdHash = DigestUtils.md5Hex(sessionId);
         }
 
-        String logSessionId = (sessionIdHash != null) ? "sessionIdHash=" + sessionIdHash : "no session id found";
-        LOGGER.info("Get resource from XForm (" + logSessionId + "): " + uri);
+        LOGGER.info("Get resource from XForm: " + uri);
 
         if (uri.startsWith(requestURLHost)) {
             // check if the request on the same (webq) host is done in the same session. Fix session id if required.
             if (sessionId != null) {
                 validateSessionIdInRequestHeader(context, sessionId);
-
-                // add session id hash as request parameter for irequests on the same host.
-                uri += (uri.contains("?")) ? "&" : "?";
-                uri += "sessionid=" + sessionIdHash;
-                try {
-                    httpRequestBase.setURI(new URI(uri));
-                } catch (URISyntaxException e) {
-                    LOGGER.error("Unable change URI:" + uri);
-                    e.printStackTrace();
-                }
                 LOGGER.info("Get resource from: " + uri);
             }
         } else {
@@ -207,7 +194,7 @@ public class XFormsHTTPRequestAuthHandlerImpl implements HTTPRequestAuthHandler 
                 LOGGER.debug("Check if user is logged in to get resource for fileId=" + fileId);
                 if (!context.containsKey(WEBQ_AUTH_ATTRIBUTE)) {
                     // check if user is logged in - ask auth info from user_xml file table
-                    UserFile userFile = userFileService.getByIdAndUser(fileId, sessionIdHash);
+                    UserFile userFile = userFileService.getById(fileId);
                     if (userFile.isAuthorized()) {
                         String authorizationInfo = userFile.getAuthorization();
                         String cookiesInfo = userFile.getCookies();

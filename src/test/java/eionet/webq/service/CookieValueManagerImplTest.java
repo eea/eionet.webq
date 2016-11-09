@@ -40,6 +40,7 @@ public class CookieValueManagerImplTest {
     @Test
     public void testGetUserId() {
         Cookie userIdCookie = new Cookie(CookieValueManager.COOKIE_NAME_USER_ID, "1234567890");
+        userIdCookie.setPath("/");
         Cookie someOtherCookie = new Cookie("other", "value");
         when(this.request.getCookies()).thenReturn(new Cookie[] { someOtherCookie, userIdCookie });
         

@@ -19,6 +19,7 @@ public class CookieValueManagerImpl implements CookieValueManager {
     @Override
     public void setUserId(HttpServletResponse response, String userId) {
         Cookie userIdCookie = new Cookie(COOKIE_NAME_USER_ID, userId);
+        userIdCookie.setPath("/");
         int durationSeconds = 60 * 60 * 80; // 80 hours
         userIdCookie.setMaxAge(durationSeconds);
         response.addCookie(userIdCookie);
@@ -29,13 +30,16 @@ public class CookieValueManagerImpl implements CookieValueManager {
             return null;
         }
         
+        Cookie result = null;
+        
         for (Cookie cookie : request.getCookies()) {
             if (StringUtils.equals(cookie.getName(), cookieName)) {
-                return cookie;
+                result = cookie;
+                // Do not break in case of multple paths for the same name.
             }
         }
         
-        return null;
+        return result;
     }
     
     protected String getCookieValue(Cookie cookie) {

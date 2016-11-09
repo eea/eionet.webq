@@ -30,10 +30,9 @@ import eionet.webq.dto.UploadForm;
 import eionet.webq.dto.XmlSaveResult;
 import eionet.webq.service.CDREnvelopeService;
 import eionet.webq.service.ConversionService;
-import eionet.webq.service.CookieValueManager;
 import eionet.webq.service.FileNotAvailableException;
+import eionet.webq.service.RequestBasedUserIdProvider;
 import eionet.webq.service.UserFileService;
-import eionet.webq.service.UserIdProvider;
 import eionet.webq.service.WebFormService;
 import eionet.webq.web.controller.util.UserFileHelper;
 import eionet.webq.web.controller.util.UserFileList;
@@ -112,10 +111,7 @@ public class PublicPageController {
     private CDREnvelopeService envelopeService;
     
     @Autowired
-    private UserIdProvider userIdProvider;
-    
-    @Autowired
-    private CookieValueManager cookieValueManager;
+    private RequestBasedUserIdProvider requestBasedUserIdProvider;
     
     /**
      * Converts user xml metadata to file info object.
@@ -132,24 +128,18 @@ public class PublicPageController {
      * Action to be performed on http GET method and path '/'.
      *
      * @param model holder for model attributes
-     * @param response HTTP response object
      * @return view name
      */
     @RequestMapping(value = "/")
-    public String welcome(Model model, HttpServletResponse response) {
-        try {
-            model.addAttribute("uploadedFiles", allFilesWithConversions());
-            List<ProjectFile> webformsSortedList = webFormService.sortWebformsAlphabetically(allWebForms());
-            model.addAttribute("allWebForms", webformsSortedList);
-            String uploadForm = "uploadForm";
-            if (!model.containsAttribute(uploadForm)) {
-                model.addAttribute(uploadForm, new UploadForm());
-            }
-            return "index";
+    public String welcome(Model model) {
+        model.addAttribute("uploadedFiles", allFilesWithConversions());
+        List<ProjectFile> webformsSortedList = webFormService.sortWebformsAlphabetically(allWebForms());
+        model.addAttribute("allWebForms", webformsSortedList);
+        String uploadForm = "uploadForm";
+        if (!model.containsAttribute(uploadForm)) {
+            model.addAttribute(uploadForm, new UploadForm());
         }
-        finally {
-            this.refreshUserIdCookie(response);
-        }
+        return "index";
     }
 
     /**
@@ -157,24 +147,22 @@ public class PublicPageController {
      *
      * @param model   holder for model attributes
      * @param session http session
-     * @param response HTTP response object
      * @return view name
      */
     @RequestMapping(value = "/sessionfiles")
-    public String sessionfiles(Model model, HttpSession session, HttpServletResponse response) {
-        return welcome(model, response);
+    public String sessionfiles(Model model, HttpSession session) {
+        return welcome(model);
     }
 
     /**
      * Redirects to welcome page after login.
      *
      * @param model holder for model attributes
-     * @param response HTTP response object
      * @return view name
      */
     @RequestMapping(value = "/login")
-    public String login(Model model, HttpServletResponse response) {
-        return welcome(model, response);
+    public String login(Model model) {
+        return welcome(model);
     }
 
     /**
@@ -194,15 +182,14 @@ public class PublicPageController {
      *                   {@link org.springframework.web.multipart.MultipartFile}
      * @param result     binding result, contains validation errors
      * @param model      holder for model attributes
-     * @param response   HTTP response object
      * @return view name
      */
     @RequestMapping(value = "/uploadXml", method = RequestMethod.POST)
-    public String upload(@Valid @ModelAttribute UploadForm uploadForm, BindingResult result, Model model, HttpServletResponse response) {
+    public String upload(@Valid @ModelAttribute UploadForm uploadForm, BindingResult result, Model model) {
         if (!result.hasErrors()) {
             saveFiles(uploadForm);
         }
-        return welcome(model, response);
+        return welcome(model);
     }
 
     /**
@@ -213,12 +200,10 @@ public class PublicPageController {
      * @param result     binding result, contains validation errors
      * @param model      holder for model attributes
      * @param request    http request
-     * @param response   HTTP response object
      * @return view name
      */
     @RequestMapping(value = "/uploadXmlWithRedirect", method = RequestMethod.POST)
-    public String uploadWithRedirectToWebForm(@Valid @ModelAttribute UploadForm uploadForm, BindingResult result, Model model,
-            HttpServletRequest request, HttpServletResponse response) {
+    public String uploadWithRedirectToWebForm(@Valid @ModelAttribute UploadForm uploadForm, BindingResult result, Model model, HttpServletRequest request) {
         if (!result.hasErrors()) {
             saveFiles(uploadForm);
             Collection<UserFile> files = uploadForm.getUserFiles();
@@ -238,7 +223,7 @@ public class PublicPageController {
                 model.addAttribute("message", "File '" + file.getName() + "' uploaded successfully");
             }
         }
-        return welcome(model, response);
+        return welcome(model);
     }
 
     /**
@@ -246,16 +231,15 @@ public class PublicPageController {
      *
      * @param selectedUserFile ids of files to be removed
      * @param model            holder for model attributes
-     * @param response         HTTP response object
      * @return view name
      */
     @RequestMapping(value = "/remove/files")
-    public String removeUserFiles(@RequestParam(required = false) int[] selectedUserFile, Model model, HttpServletResponse response) {
+    public String removeUserFiles(@RequestParam(required = false) int[] selectedUserFile, Model model) {
         if (selectedUserFile != null) {
             userFileService.removeFilesById(selectedUserFile);
             model.addAttribute("message", "Selected files removed successfully");
         }
-        return welcome(model, response);
+        return welcome(model);
     }
 
     /**
@@ -263,11 +247,10 @@ public class PublicPageController {
      *
      * @param selectedUserFile ids of files to be edited
      * @param model            holder for model attributes
-     * @param response         HTTP response object
      * @return view name
      */
     @RequestMapping(value = "/edit")
-    public String editUserFile(@RequestParam(required = false) List<Integer> selectedUserFile, Model model, HttpServletResponse response) {
+    public String editUserFile(@RequestParam(required = false) List<Integer> selectedUserFile, Model model) {
         List<UserFile> userFiles = new ArrayList<UserFile>();
 
         for (Integer fileId : selectedUserFile) {
@@ -275,7 +258,7 @@ public class PublicPageController {
         }
 
         model.addAttribute("userFileList", new UserFileList(userFiles));
-        return welcome(model, response);
+        return welcome(model);
     }
 
     /**
@@ -284,12 +267,11 @@ public class PublicPageController {
      * @param userFiles     list of user files to be persisted
      * @param bindingResult validation errors
      * @param model         holder for model attributes
-     * @param response      HTTP response object
      * @return view name
      */
     @RequestMapping(value = "/save", method = RequestMethod.POST)
     @Transactional
-    public String saveUserFile(@Valid @ModelAttribute UserFileList userFiles, BindingResult bindingResult, Model model, HttpServletResponse response) {
+    public String saveUserFile(@Valid @ModelAttribute UserFileList userFiles, BindingResult bindingResult, Model model) {
 
         for (UserFile userFile : userFiles.getUserFiles()) {
             UserFile file = userFileService.getById(userFile.getId());
@@ -298,7 +280,7 @@ public class PublicPageController {
         }
         model.addAttribute("userFileList", new UserFileList());
         model.addAttribute("message", "File(s) updated successfully");
-        return welcome(model, response);
+        return welcome(model);
     }
 
     /**
@@ -313,7 +295,7 @@ public class PublicPageController {
     @Transactional
     public XmlSaveResult saveXml(@RequestParam int fileId, HttpServletRequest request) {
         try {
-            LOGGER.info("/saveXml fileId=" + fileId + "; sessionid=" + DigestUtils.md5Hex(request.getSession().getId()));
+            LOGGER.info("/saveXml fileId=" + fileId + "; sessionid=" + this.requestBasedUserIdProvider.getUserId(request));
 
             byte[] fileContent = getContentFromRequest(request);
             return updateFileContent(fileId, request, fileContent);
@@ -337,7 +319,7 @@ public class PublicPageController {
     public XmlSaveResult saveJsonAsXml(@RequestParam int fileId, HttpServletRequest request, Model model) {
 
         try {
-            LOGGER.info("/saveXml fileId=" + fileId + "; sessionid=" + DigestUtils.md5Hex(request.getSession().getId()));
+            LOGGER.info("/saveXml fileId=" + fileId + "; sessionid=" + this.requestBasedUserIdProvider.getUserId(request));
 
             byte[] xml = jsonToXMLConverter.convertJsonToXml(getContentFromRequest(request));
             XmlSaveResult xmlSaveResult = updateFileContent(fileId, request, xml);
@@ -415,10 +397,6 @@ public class PublicPageController {
             fileInfo = fileInfoConverter.convert(userFile);
         }
         return fileInfo;
-    }
-
-    protected void refreshUserIdCookie(HttpServletResponse response) {
-        this.cookieValueManager.setUserId(response, this.userIdProvider.getUserId());
     }
     
     /**

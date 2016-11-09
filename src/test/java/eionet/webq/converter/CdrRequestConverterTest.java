@@ -21,6 +21,8 @@
 package eionet.webq.converter;
 
 import eionet.webq.dto.CdrRequest;
+import eionet.webq.service.CookieValueManagerImpl;
+import eionet.webq.service.RequestBasedUserIdProviderImpl;
 import eionet.webq.web.interceptor.CdrAuthorizationInterceptor;
 import org.apache.commons.net.util.Base64;
 import org.junit.Test;
@@ -32,10 +34,9 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
-/**
- */
 public class CdrRequestConverterTest {
-    private final CdrRequestConverter cdrRequestConverter = new CdrRequestConverter();
+    
+    private CdrRequestConverter cdrRequestConverter = new CdrRequestConverter(new RequestBasedUserIdProviderImpl(new CookieValueManagerImpl()));
     private MockHttpServletRequest request = new MockHttpServletRequest();
 
     @Test

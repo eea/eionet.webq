@@ -28,6 +28,7 @@ import eionet.webq.dto.UploadForm;
 import eionet.webq.service.CDREnvelopeService;
 import eionet.webq.service.CookieValueManager;
 import eionet.webq.service.RemoteFileService;
+import eionet.webq.service.RequestBasedUserIdProvider;
 import eionet.webq.service.UserFileService;
 import eionet.webq.service.UserIdProvider;
 import eionet.webq.service.WebFormService;
@@ -86,9 +87,7 @@ public class PublicPageControllerTest {
     @Mock
     UserFileHelper userFileHelper;
     @Mock
-    UserIdProvider userIdProvider;
-    @Mock
-    private CookieValueManager cookieValueManager;
+    private RequestBasedUserIdProvider requestBasedUserIdProvider;
 
     @Before
     public void setUp() throws Exception {
@@ -170,9 +169,8 @@ public class PublicPageControllerTest {
         UserFile file1 = new UserFile(new UploadedFile("file1", "file1-content".getBytes()), "xmlSchema");
         UserFile file2 = new UserFile(new UploadedFile("file2", "file2-content".getBytes()), "xmlSchema");
         uploadForm.setUserFiles(Arrays.asList(file1, file2));
-        MockHttpServletResponse response = new MockHttpServletResponse();
 
-        publicPageController.upload(uploadForm, bindingResult, model, response);
+        publicPageController.upload(uploadForm, bindingResult, model);
 
         verify(userFileService).save(file1);
         verify(userFileService).save(file2);
@@ -203,9 +201,8 @@ public class PublicPageControllerTest {
         UserFile file5 = Mockito.mock(UserFile.class);
         when(userFileService.getById(1)).thenReturn(file1);
         when(userFileService.getById(5)).thenReturn(file5);
-        MockHttpServletResponse response = new MockHttpServletResponse();
 
-        publicPageController.editUserFile(userFiles, model, response);
+        publicPageController.editUserFile(userFiles, model);
 
         verify(model).addAttribute(eq("userFileList"), argument.capture());
         UserFileList fileList = (UserFileList) argument.getValue();
@@ -220,9 +217,8 @@ public class PublicPageControllerTest {
         UserFile file1 = mock(UserFile.class);
         when(file1.getId()).thenReturn(fileId);
         when(userFileService.getById(fileId)).thenReturn(file1);
-        MockHttpServletResponse response = new MockHttpServletResponse();
 
-        publicPageController.saveUserFile(new UserFileList(Arrays.asList(file1)), mock(BindingResult.class), model, response);
+        publicPageController.saveUserFile(new UserFileList(Arrays.asList(file1)), mock(BindingResult.class), model);
 
         verify(userFileService).update(file1);
 

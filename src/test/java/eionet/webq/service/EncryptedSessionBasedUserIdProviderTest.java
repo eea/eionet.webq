@@ -21,7 +21,6 @@
 package eionet.webq.service;
 
 import org.apache.commons.codec.digest.DigestUtils;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -40,19 +39,23 @@ import static org.mockito.Mockito.when;
 public class EncryptedSessionBasedUserIdProviderTest {
 
     private final String userId = "userId";
+    
+    @Mock
+    private HttpSession session;
+    @Mock
+    private RequestBasedUserIdProvider requestBasedUserIdProvider;
     @InjectMocks
     private EncryptedSessionBasedUserIdProvider provider;
 
-    @Mock
-    private HttpSession session;
-
-    @Before
-    public void setUp() throws Exception {
-        when(session.getId()).thenReturn(userId);
-    }
-
     @Test
     public void returnsUserIdBasedOnSessionEncryptedWithMD5() throws Exception {
-        assertThat(provider.getUserId(), equalTo(DigestUtils.md5Hex(userId)));
+        when(session.getId()).thenReturn(userId);
+        when(requestBasedUserIdProvider.getUserId(session)).thenReturn(this.hash(userId));
+        assertThat(provider.getUserId(), equalTo(this.hash(userId)));
     }
+    
+    private String hash(String userId) {
+        return DigestUtils.md5Hex(userId);
+    }
+    
 }

@@ -35,6 +35,28 @@
         </constructor-arg>
         <constructor-arg name="interceptor" ref="cdrAuthInterceptor"/>
     </bean>
+    <bean id="userIdCookieRefreshMappedInterceptor" class="org.springframework.web.servlet.handler.MappedInterceptor">
+        <constructor-arg name="includePatterns">
+            <null />
+        </constructor-arg>
+        <constructor-arg name="excludePatterns">
+            <list>
+                <value>/WebQMenu</value>
+                <value>/WebQEdit</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="interceptor" ref="userIdCookieRefreshInterceptor"/>
+    </bean>
+    <bean id="cdrSessionIdOverwriteMappedInterceptor" class="org.springframework.web.servlet.handler.MappedInterceptor">
+        <constructor-arg name="includePatterns">
+            <list>
+                <value>/webform/project/**</value>
+                <value>/xform/**</value>
+                <value>/xform</value>
+            </list>
+        </constructor-arg>
+        <constructor-arg name="interceptor" ref="cdrSessionIdOverwriteInterceptor"/>
+    </bean>
 
 
     <!-- resources exclusions from servlet mapping -->
