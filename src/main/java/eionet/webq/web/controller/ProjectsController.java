@@ -56,7 +56,7 @@ import org.apache.log4j.Logger;
  * @see Controller
  */
 @Controller
-@RequestMapping("projects")
+@RequestMapping("/projects")
 public class ProjectsController {
     
     private static final Logger LOGGER = Logger.getLogger(ProjectsController.class);

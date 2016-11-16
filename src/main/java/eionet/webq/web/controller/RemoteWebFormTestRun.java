@@ -38,7 +38,7 @@ import eionet.webq.service.WebFormService;
  * Test runner for remote form developers.
  */
 @Controller
-@RequestMapping("webform")
+@RequestMapping("/webform")
 public class RemoteWebFormTestRun {
     /**
      * User files service.

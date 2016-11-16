@@ -10,7 +10,7 @@
     <url>http://webforms.eionet.europa.eu</url>
 
     <properties>
-        <spring.version>3.2.0.RELEASE</spring.version>
+        <spring.version>3.2.1.RELEASE</spring.version>
         <junit.version>4.11</junit.version>
         <jdk.version>1.7</jdk.version>
         <mysql.version>5.1.26</mysql.version>
