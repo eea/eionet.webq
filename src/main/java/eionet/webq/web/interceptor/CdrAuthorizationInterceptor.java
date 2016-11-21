@@ -291,7 +291,12 @@ public class CdrAuthorizationInterceptor extends HandlerInterceptorAdapter {
             }
         }
         CloseableHttpClient client = httpClientBuilder.build();
-        return client.execute(httpget);
+        try {
+            CloseableHttpResponse httpResponse = client.execute(httpget);
+            return httpResponse;
+        } finally {
+            client.close();
+        }
     }
 }
 
