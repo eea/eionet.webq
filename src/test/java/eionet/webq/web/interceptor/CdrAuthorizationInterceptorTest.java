@@ -22,7 +22,7 @@ package eionet.webq.web.interceptor;
 
 import eionet.webq.converter.CookiesToStringBidirectionalConverter;
 import org.apache.http.ProtocolVersion;
-import org.apache.http.message.BasicHttpResponse;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.message.BasicStatusLine;
 import org.junit.Before;
 import org.junit.Test;
@@ -45,6 +45,7 @@ import javax.servlet.http.HttpSession;
 import static eionet.webq.web.interceptor.CdrAuthorizationInterceptor.ALLOWED_AUTHORIZATION_FAILURES_COUNT;
 import static eionet.webq.web.interceptor.CdrAuthorizationInterceptor.AUTHORIZATION_FAILED_ATTRIBUTE;
 import static eionet.webq.web.interceptor.CdrAuthorizationInterceptor.AUTHORIZATION_TRY_COUNT;
+import org.apache.http.HttpResponse;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.hamcrest.core.StringContains.containsString;
 import static org.junit.Assert.assertFalse;
@@ -55,6 +56,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -201,7 +203,9 @@ public class CdrAuthorizationInterceptorTest {
     private void assertUrlIsExtractedFromCookieRequest(MockHttpServletRequest request, String expectedValue) throws Exception {
 
         interceptor = spy(interceptor);
-        doReturn(new BasicHttpResponse(new BasicStatusLine(new ProtocolVersion("HTTP", 2, 0), 200, "OK"))).
+        CloseableHttpResponse response = mock(CloseableHttpResponse.class);
+        when(response.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 2, 0), 200, "OK"));
+        doReturn(response).
                 when(interceptor).fetchUrlWithoutRedirection(anyString(), (HttpHeaders) anyObject());
         interceptor.preHandle(request, new MockHttpServletResponse(), null);
 

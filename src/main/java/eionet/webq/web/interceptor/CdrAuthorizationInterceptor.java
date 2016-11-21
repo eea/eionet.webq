@@ -28,7 +28,6 @@ import org.apache.http.ProtocolException;
 import org.apache.http.client.RedirectStrategy;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.protocol.HttpContext;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,10 +48,16 @@ import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.Map;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.conn.ssl.SSLContexts;
+import org.apache.http.impl.client.HttpClientBuilder;
 
 /**
  * Intercepts calls to pages for CDR integration.
@@ -146,12 +151,12 @@ public class CdrAuthorizationInterceptor extends HandlerInterceptorAdapter {
                     // put ZopeId parameter to request header. It works only when the value is surrounded with quotas.
                     headers.add("Cookie", cookiesConverter.convertCookieToString(cookie));
                 }
-                try {
-                    String urlToFetch = extractCdrEnvelopeUrl(request) + "/" + cdrEnvelopePropertiesMethod;
+                String urlToFetch = extractCdrEnvelopeUrl(request) + "/" + cdrEnvelopePropertiesMethod;
                     //ResponseEntity<String> loginResponse = restOperations.exchange(urlToFetch, HttpMethod.GET,
                     //        new HttpEntity<Object>(headers), String.class);
 
-                    HttpResponse responseFromCdr = fetchUrlWithoutRedirection(urlToFetch, headers);
+                CloseableHttpResponse responseFromCdr = fetchUrlWithoutRedirection(urlToFetch, headers);
+                try {
                     int statusCode = responseFromCdr.getStatusLine().getStatusCode();
 
                     LOGGER.info(
@@ -171,6 +176,8 @@ public class CdrAuthorizationInterceptor extends HandlerInterceptorAdapter {
                     if (e.getStatusCode() != HttpStatus.UNAUTHORIZED) {
                         LOGGER.warn("Fetching CDR envelope page failed with unexpected HTTP status code", e);
                     }
+                } finally {
+                    responseFromCdr.close();
                 }
             }
         }
@@ -256,10 +263,14 @@ public class CdrAuthorizationInterceptor extends HandlerInterceptorAdapter {
      * @param headers HTTP headers to send.
      * @return HTTP response object
      * @throws IOException if network error occurs
+     * @throws java.security.NoSuchAlgorithmException
+     * @throws java.security.KeyManagementException
      */
-    protected HttpResponse fetchUrlWithoutRedirection(String url, HttpHeaders headers) throws IOException {
-        DefaultHttpClient httpClient = new DefaultHttpClient();
-        httpClient.setRedirectStrategy(new RedirectStrategy() {
+    
+     protected CloseableHttpResponse fetchUrlWithoutRedirection(String url, HttpHeaders headers) throws IOException, NoSuchAlgorithmException, KeyManagementException {
+        HttpClientBuilder httpClientBuilder = HttpClientBuilder.create();
+        httpClientBuilder.setSSLContext(SSLContexts.custom().useProtocol("TLSv1.1").build()).setRedirectStrategy(
+        new RedirectStrategy() {
             @Override
             public boolean isRedirected(HttpRequest httpRequest, HttpResponse httpResponse, HttpContext httpContext)
                     throws ProtocolException {
@@ -279,6 +290,8 @@ public class CdrAuthorizationInterceptor extends HandlerInterceptorAdapter {
                 httpget.addHeader(header.getKey(), value);
             }
         }
-        return httpClient.execute(httpget);
+        CloseableHttpClient client = httpClientBuilder.build();
+        return client.execute(httpget);
     }
 }
+
