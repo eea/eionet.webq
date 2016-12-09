@@ -97,7 +97,7 @@ public class WebQProxyDelegation {
      */
     @Autowired
     private CDREnvelopeService envelopeService;
-
+    
     /**
      * This method delegates GET request to remote host. See:
      * http://stackoverflow.com/questions/14595245/rest-service-pass-through-via-spring This method also works when a method is not
@@ -373,7 +373,7 @@ public class WebQProxyDelegation {
         HttpHeaders authorization = new HttpHeaders();
         try {
             authorization.add("Authorization", "Basic " + Base64.encodeBase64String((knownHost.getKey() + ":"
-                    + knownHost.getTicket()).getBytes("utf-8")).replaceAll("\n", ""));
+                    + knownHost.getTicket()).getBytes("utf-8")).trim());
         } catch (UnsupportedEncodingException e) {
             LOGGER.warn("UnsupportedEncodingException: utf-8");
         }
