@@ -22,6 +22,7 @@ public class WebQMvcConfigurator {
     @PostConstruct
     public void setUp() {
         this.requestMappingHandlerMapping.setPathMatcher(this.pathMatcher);
+        System.setProperty("https.protocols", "TLSv1.2");
     }
 
 }
