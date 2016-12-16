@@ -33,10 +33,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.net.util.Base64;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
+import org.springframework.http.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -113,15 +110,16 @@ public class WebQProxyDelegation {
      */
     @RequestMapping(value = "/restProxy", method = RequestMethod.GET)
     @ResponseBody
-    public String restProxyGet(@RequestParam("uri") String uri, @RequestParam(required = false) Integer fileId,
-            HttpServletRequest request)
+    public ResponseEntity<byte[]> restProxyGet(@RequestParam("uri") String uri, @RequestParam(required = false) Integer fileId,
+                                               HttpServletRequest request)
             throws UnsupportedEncodingException, URISyntaxException, FileNotAvailableException {
 
         if (fileId != null && fileId > 0) {
             return restProxyGetWithAuth(uri, fileId, request);
         }
         LOGGER.info("/restProxy [GET] uri=" + uri);
-        return new RestTemplate().getForObject(new URI(uri), String.class);
+        ResponseEntity<byte[]> response = new RestTemplate().getForEntity(new URI(uri), byte[].class );
+        return response;
     } // end of method restProxyGet
 
     /**
@@ -161,14 +159,14 @@ public class WebQProxyDelegation {
      */
     @RequestMapping(value = "/restProxyWithAuth", method = RequestMethod.GET)
     @ResponseBody
-    public String restProxyGetWithAuth(@RequestParam("uri") String uri, @RequestParam int fileId,
+    public ResponseEntity<byte[]> restProxyGetWithAuth(@RequestParam("uri") String uri, @RequestParam int fileId,
             HttpServletRequest request) throws URISyntaxException, FileNotAvailableException, UnsupportedEncodingException {
 
         UserFile file = userFileHelper.getUserFile(fileId, request);
-
+        LOGGER.info("/restProxy wAuth [GET] uri=" + uri);
         if (file != null && ProxyDelegationHelper.isCompanyIdParameterValidForBdrEnvelope(uri, file.getEnvelope())) {
             if (uri.startsWith(file.getEnvelope())) {
-                return new String(envelopeService.fetchFileFromCdr(file, uri).getBody(), "UTF-8");
+                return envelopeService.fetchFileFromCdr(file, uri);
             } else if (file.isAuthorized()) {
                 // check if we have known host in db
                 KnownHost knownHost = knownHostsService.getKnownHost(uri);
@@ -182,17 +180,15 @@ public class WebQProxyDelegation {
                         // Add basic authorisation if needed
                         HttpHeaders authorization = getHttpHeaderWithBasicAuthentication(knownHost);
                         LOGGER.info("Add basic auth from known hosts to URL: " + uri);
-                        String response = (new RestTemplate()
-                                .exchange(new URI(uri), HttpMethod.GET, new HttpEntity<Object>(authorization), String.class))
-                                .getBody();
+                        ResponseEntity<byte[]> response = new RestTemplate()
+                                .exchange(new URI(uri), HttpMethod.GET, new HttpEntity<Object>(authorization), byte[].class);
                         return response;
                     }
                 }
             }
         }
 
-        LOGGER.info("/restProxy [GET] uri=" + uri);
-        return new RestTemplate().getForObject(new URI(uri), String.class);
+        return new RestTemplate().getForEntity(new URI(uri), byte[].class);
     }
 
     /**
@@ -325,7 +321,7 @@ public class WebQProxyDelegation {
 
         if (file != null && ProxyDelegationHelper
                 .isCompanyIdParameterValidForBdrEnvelope(request.getRequestURI(), file.getEnvelope())) {
-            xml = restProxyGetWithAuth(xmlUri, fileId, request).getBytes("UTF-8");
+            xml = restProxyGetWithAuth(xmlUri, fileId, request).getBody();
         } else {
             xml = new RestTemplate().getForObject(new URI(xmlUri), byte[].class);
         }
