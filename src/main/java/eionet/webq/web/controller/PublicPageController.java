@@ -28,12 +28,7 @@ import eionet.webq.dao.orm.UserFile;
 import eionet.webq.dto.FileInfo;
 import eionet.webq.dto.UploadForm;
 import eionet.webq.dto.XmlSaveResult;
-import eionet.webq.service.CDREnvelopeService;
-import eionet.webq.service.ConversionService;
-import eionet.webq.service.FileNotAvailableException;
-import eionet.webq.service.RequestBasedUserIdProvider;
-import eionet.webq.service.UserFileService;
-import eionet.webq.service.WebFormService;
+import eionet.webq.service.*;
 import eionet.webq.web.controller.util.UserFileHelper;
 import eionet.webq.web.controller.util.UserFileList;
 import eionet.webq.web.controller.util.WebformUrlProvider;
@@ -64,6 +59,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+
+import static org.apache.commons.lang.StringUtils.isEmpty;
 
 /**
  * Base controller for front page actions.
@@ -122,6 +119,9 @@ public class PublicPageController {
      */
     @Autowired
     private JsonXMLBidirectionalConverter jsonToXMLConverter;
+
+    @Autowired
+    private CookieValueManager cookieValueManager;
 
     /**
      * Action to be performed on http GET method and path '/'.
@@ -365,7 +365,26 @@ public class PublicPageController {
      */
     @RequestMapping(value = "/xform")
     @Transactional
-    public void startWebFormWriteFormToResponse(@RequestParam int formId, HttpServletResponse response) throws IOException {
+    public void startWebFormWriteFormToResponse(@RequestParam int formId, HttpServletRequest request, HttpServletResponse response) throws IOException {
+
+        String webCookie = cookieValueManager.getUserId(request);
+        if (isEmpty(webCookie)){
+            // redirect to the exact same page if there is no webq cookie written yet
+            // this solves the problem of xforms modules not recognizing the user, because they are rendered server-side
+            // this way the cookie will be injected by the interceptor and the user will be recognized after the redirect
+            LOGGER.info("WebQCookie not found, redirecting....");
+            String redirect;
+            StringBuffer requestURL = request.getRequestURL();
+            String queryString = request.getQueryString();
+            if (queryString == null) {
+                redirect=  requestURL.toString();
+            } else {
+                redirect = requestURL.append('?').append(queryString).toString();
+            }
+            response.sendRedirect(redirect);
+            return;
+        }
+
         ProjectFile webForm = webFormService.findWebFormById(formId);
         byte[] fileContent = webForm.getFileContent();
         response.setContentLength(fileContent.length);

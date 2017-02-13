@@ -20,30 +20,24 @@
  */
 package eionet.webq.web.controller;
 
+import configuration.ApplicationTestContextWithMockSession;
 import eionet.webq.converter.JsonXMLBidirectionalConverter;
 import eionet.webq.dao.orm.ProjectFile;
 import eionet.webq.dao.orm.UploadedFile;
 import eionet.webq.dao.orm.UserFile;
 import eionet.webq.dto.UploadForm;
-import eionet.webq.service.CDREnvelopeService;
-import eionet.webq.service.CookieValueManager;
-import eionet.webq.service.RemoteFileService;
-import eionet.webq.service.RequestBasedUserIdProvider;
-import eionet.webq.service.UserFileService;
-import eionet.webq.service.UserIdProvider;
-import eionet.webq.service.WebFormService;
+import eionet.webq.service.*;
 import eionet.webq.web.controller.util.UserFileHelper;
 import eionet.webq.web.controller.util.UserFileList;
 import eionet.webq.web.controller.util.WebformUrlProvider;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
+import org.junit.runner.RunWith;
+import org.mockito.*;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 
@@ -57,12 +51,12 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  */
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration(classes = {ApplicationTestContextWithMockSession.class})
 public class PublicPageControllerTest {
 
     public static final int WEB_FORM_ID = 1;
@@ -88,11 +82,14 @@ public class PublicPageControllerTest {
     UserFileHelper userFileHelper;
     @Mock
     private RequestBasedUserIdProvider requestBasedUserIdProvider;
+    @Mock
+    private CookieValueManager cookieValueManager;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         when(webformUrlProvider.getWebformPath(any(ProjectFile.class))).thenReturn("/xform/");
+        when(cookieValueManager.getUserId(any(HttpServletRequest.class))).thenReturn("Som3r4nd0mc00ki3");
     }
 
     @Test
@@ -156,7 +153,8 @@ public class PublicPageControllerTest {
         when(webFormService.findWebFormById(WEB_FORM_ID)).thenReturn(projectFile);
 
         MockHttpServletResponse response = new MockHttpServletResponse();
-        publicPageController.startWebFormWriteFormToResponse(WEB_FORM_ID, response);
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        publicPageController.startWebFormWriteFormToResponse(WEB_FORM_ID, request, response);
 
         assertThat(response.getContentType(), equalTo("application/xhtml+xml;charset=utf-8"));
         assertThat(response.getContentLength(), equalTo(testContent.length));
