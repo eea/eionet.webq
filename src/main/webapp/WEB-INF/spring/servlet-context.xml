@@ -21,6 +21,7 @@
 
     <bean id="tilesViewResolver" class="org.springframework.web.servlet.view.tiles3.TilesViewResolver">
         <property name="order" value="0"/>
+        <property name="redirectHttp10Compatible" value="false" />
     </bean>
 
     <bean id="tilesConfigurer" class="org.springframework.web.servlet.view.tiles3.TilesConfigurer"/>
