@@ -1,0 +1,31 @@
+##
+# @author George Sofianos
+##
+
+version: '2'
+services:
+
+  ## Webforms service
+  tomcat:
+      image: sofiageo/webq2:latest
+      environment:
+          - CATALINA_OPTS=-Djava.security.egd=file:/dev/./urandom -Ddb.driver=com.mysql.jdbc.Driver -Ddb.url=jdbc:mysql://webqdb/webq2?maxAllowedPacket=32212254720 -Ddb.username=itests -Ddb.password=password -Dcas.service=http://localhost:8080/ -Dinitial.admin.username=sofiageo
+          - JAVA_OPTS=-Xmx3072m
+  #    ports:
+  #        - "8080:8080"
+      links:
+          - database
+
+  # MySQL Service
+  database:
+      image: mysql:5.5
+      environment:
+          - MYSQL_ROOT_PASSWORD=toor
+          - MYSQL_DATABASE=webq2
+          - MYSQL_USER=itests
+          - MYSQL_PASSWORD=password
+      command: mysqld --max_allowed_packet=30M
+      volumes:
+        - webq2-database:/var/lib/mysql
+      labels:
+        io.rancher.scheduler.affinity:host_label: "haspublicip=yes"
