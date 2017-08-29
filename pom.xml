@@ -10,6 +10,7 @@
     <url>http://webforms.eionet.europa.eu</url>
 
     <properties>
+        <env>default</env>
         <spring.version>4.3.10.RELEASE</spring.version>
         <junit.version>4.12</junit.version>
         <jdk.version>1.8</jdk.version>
@@ -166,14 +167,6 @@
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-validator</artifactId>
             <version>4.3.2.Final</version>
-        </dependency>
-
-        <!--CAS client-->
-        <dependency>
-            <groupId>org.jasig.cas.client</groupId>
-            <artifactId>cas-client-core</artifactId>
-            <version>3.1.12</version>
-            <scope>compile</scope>
         </dependency>
 
         <!-- betterFORM -->
@@ -335,13 +328,46 @@
         <dependency>
             <groupId>com.jayway.jsonpath</groupId>
             <artifactId>json-path</artifactId>
-            <version>0.9.1</version>
+            <version>2.4.0</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
     <build>
         <finalName>webq2</finalName>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>1.8</version>
+                <executions>
+                <execution>
+                    <id>copy-local-properties</id>
+                    <phase>prepare-package</phase>
+                    <goals>
+                        <goal>run</goal>
+                    </goals>
+                    <configuration>
+                        <tasks>
+                            <copy file="${basedir}/${env}.properties"
+                                  toFile="${project.build.directory}/classes/env.properties" />
+                        </tasks>
+                    </configuration>
+                </execution>
+                <execution>
+                    <id>pre-test</id>
+                    <phase>process-test-resources</phase>
+                    <configuration>
+                        <tasks>
+                            <copy file="${basedir}/${env}.properties"
+                                  toFile="${project.build.directory}/test-classes/env.properties" />
+                        </tasks>
+                    </configuration>
+                    <goals>
+                        <goal>run</goal>
+                    </goals>
+                </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>

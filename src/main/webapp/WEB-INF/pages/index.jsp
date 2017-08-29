@@ -125,8 +125,8 @@
                             <c:if test="${not isWebformAvailableForFile}">
                                 <div class="alert"><p><strong>No webforms available. Check the XML Schema of the file ['${file.xmlSchema}']</strong></p></div>
                             </c:if>
-                            <sec:authorize access="hasRole('DEVELOPER')" var="isDeveloper"/>
-                            <sec:authorize access="hasRole('ADMIN')" var="isAdmin"/>
+                            <sec:authorize access="hasAuthority('DEVELOPER')" var="isDeveloper"/>
+                            <sec:authorize access="hasAuthority('ADMIN')" var="isAdmin"/>
                             <c:set var="developerOrAdmin" value="${isAdmin or isDeveloper}"/>
                             <c:set var="advancedConversionFound" value="${false}"/>
 

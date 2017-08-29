@@ -25,11 +25,11 @@
     <!--Security information is required-->
     <security:http entry-point-ref="casEntryPoint" pattern="/**" use-expressions="true">
         <security:intercept-url pattern="/login" access="isAuthenticated()"/>
-        <security:intercept-url pattern="/projects/**" access="hasAnyRole('DEVELOPER', 'ADMIN')"/>
-        <security:intercept-url pattern="/merge/**" access="hasAnyRole('DEVELOPER', 'ADMIN')"/>
-        <security:intercept-url pattern="/webform/test/**" access="hasAnyRole('DEVELOPER', 'ADMIN')"/>
-        <security:intercept-url pattern="/users/**" access="hasRole('ADMIN')"/>
-        <security:intercept-url pattern="/known_hosts/**" access="hasRole('ADMIN')"/>
+        <security:intercept-url pattern="/projects/**" access="hasAnyAuthority('DEVELOPER', 'ADMIN')"/>
+        <security:intercept-url pattern="/merge/**" access="hasAnyAuthority('DEVELOPER', 'ADMIN')"/>
+        <security:intercept-url pattern="/webform/test/**" access="hasAnyAuthority('DEVELOPER', 'ADMIN')"/>
+        <security:intercept-url pattern="/users/**" access="hasAuthority('ADMIN')"/>
+        <security:intercept-url pattern="/known_hosts/**" access="hasAuthority('ADMIN')"/>
         <security:intercept-url pattern="/**" access="permitAll()"/>
         <security:custom-filter position="CAS_FILTER" ref="casFilter" />
         <security:logout logout-success-url="/logout"/>
@@ -39,7 +39,7 @@
 
     <bean id="serviceProperties"
           class="org.springframework.security.cas.ServiceProperties">
-        <property name="service" value="${cas.service}/j_spring_cas_security_check"/>
+        <property name="service" value="${cas.service}/login/cas"/>
         <property name="sendRenew" value="false"/>
     </bean>
 
@@ -77,6 +77,6 @@
         <constructor-arg>
             <bean class="org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler"/>
         </constructor-arg>
-        <property name="filterProcessesUrl" value="/j_spring_cas_security_logout"/>
+        <property name="filterProcessesUrl" value="/logout"/>
     </bean>
 </beans>

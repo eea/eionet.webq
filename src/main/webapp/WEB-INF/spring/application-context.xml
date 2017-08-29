@@ -22,7 +22,8 @@
             location="classpath:task.properties,
                       classpath:web_service.properties,
                       classpath:cas.properties,
-                      classpath:db.properties"
+                      classpath:db.properties,
+                      classpath:env.properties"
             ignore-unresolvable="true"/>
     <context:component-scan base-package="eionet.webq"/>
     <mvc:annotation-driven conversion-service="conversionService"/>
