@@ -16,6 +16,7 @@
 package eionet.webq.cache;
 
 import java.io.Serializable;
+import java.util.concurrent.Callable;
 
 import org.springframework.cache.Cache;
 import org.springframework.cache.support.SimpleValueWrapper;
@@ -89,8 +90,23 @@ public class GuavaCache implements Cache {
     }
 
     @Override
+    public <T> T get(Object o, Class<T> aClass) {
+        return null;
+    }
+
+    @Override
+    public <T> T get(Object o, Callable<T> callable) {
+        return null;
+    }
+
+    @Override
     public void put(Object key, Object value) {
         this.cache.put(key, toStoreValue(value));
+    }
+
+    @Override
+    public ValueWrapper putIfAbsent(Object o, Object o1) {
+        return null;
     }
 
     @Override

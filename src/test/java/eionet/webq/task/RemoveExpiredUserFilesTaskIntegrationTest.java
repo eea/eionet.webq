@@ -24,7 +24,7 @@ import configuration.ApplicationTestContextWithMockSession;
 import eionet.webq.dao.orm.UploadedFile;
 import eionet.webq.dao.orm.UserFile;
 import eionet.webq.service.UserFileService;
-import org.apache.commons.lang.time.DateUtils;
+import org.apache.commons.lang3.time.DateUtils;
 import org.hibernate.SessionFactory;
 import org.junit.Before;
 import org.junit.Test;

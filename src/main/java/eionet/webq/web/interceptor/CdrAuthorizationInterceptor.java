@@ -29,6 +29,7 @@ import org.apache.http.client.RedirectStrategy;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.protocol.HttpContext;
+import org.apache.http.ssl.SSLContexts;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -55,7 +56,6 @@ import java.util.Map;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.conn.ssl.SSLContexts;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.springframework.web.client.RestOperations;
 
@@ -125,11 +125,13 @@ public class CdrAuthorizationInterceptor extends HandlerInterceptorAdapter {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         String authorization = request.getHeader(AUTHORIZATION_HEADER);
+//        if (true) return PROCEED;
         if (StringUtils.isNotEmpty(authorization) || request.getParameter("auth") != null) {
             // if Basic auth is present in the request, then try to log in to CDR to test if it is valid token for given domain.
             // "auth" parameter is just meant for testing the CDR API in development environment - WebQ asks to authenticate.
             HttpHeaders headers = new HttpHeaders();
             headers.add(AUTHORIZATION_HEADER, authorization);
+//            return PROCEED;
             try {
                 ResponseEntity<String> loginResponse
                         = restOperations.postForEntity(extractCdrUrl(request) + "/" + cdrLoginMethod,
@@ -148,7 +150,7 @@ public class CdrAuthorizationInterceptor extends HandlerInterceptorAdapter {
             if (cookies != null) {
                 HttpHeaders headers = new HttpHeaders();
                 for (Cookie cookie : cookies) {
-                    // put ZopeId parameter to request header. It works only when the value is surrounded with quotas.
+                    // put ZopeId parameter to request header. It works only when the value is surrounded with quotes.
                     headers.add("Cookie", cookiesConverter.convertCookieToString(cookie));
                 }
                 String urlToFetch = extractCdrEnvelopeUrl(request) + "/" + cdrEnvelopePropertiesMethod;

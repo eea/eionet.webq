@@ -111,6 +111,8 @@ public class IntegrationWithCDRController {
 
         LOGGER.info("Received WebQMenu request with parameters:" + parameters.toString());
 
+        // For local tests
+        //MultiValueMap<String, XmlFile> xmlFiles = new LinkedMultiValueMap<>();
         MultiValueMap<String, XmlFile> xmlFiles = envelopeService.getXmlFiles(parameters);
         Collection<String> requiredSchemas =
                 StringUtils.isNotEmpty(parameters.getSchema()) ? Arrays.asList(parameters.getSchema()) : xmlFiles.keySet();
