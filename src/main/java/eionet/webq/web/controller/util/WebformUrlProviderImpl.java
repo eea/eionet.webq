@@ -25,6 +25,7 @@ import eionet.webq.dao.orm.ProjectFile;
 import eionet.webq.service.ProjectService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 /**
@@ -37,6 +38,11 @@ public class WebformUrlProviderImpl implements WebformUrlProvider {
      */
     @Autowired
     private ProjectService projectService;
+    /**
+     * TODO FIX - change name
+     */
+    @Value("${cas.service}")
+    String webqUrl;
 
     @Override
     public String getWebformPath(ProjectFile webform) {
@@ -48,11 +54,11 @@ public class WebformUrlProviderImpl implements WebformUrlProvider {
                     webform.setProjectIdentifier(project.getProjectId());
                 }
             }
-            webformPath =
+            webformPath = webqUrl +
                     "/webform/project/" + webform.getProjectIdentifier() + "/file/"
                             + webform.getFileName() + "?";
         } else {
-            webformPath = "/xform/?formId=" + webform.getId() + "&";
+            webformPath = webqUrl + "/xform/?formId=" + webform.getId() + "&";
         }
         return webformPath;
     }
