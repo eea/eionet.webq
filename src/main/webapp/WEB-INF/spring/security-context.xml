@@ -35,6 +35,8 @@
         <security:logout logout-success-url="/logout"/>
         <security:custom-filter ref="requestSingleLogoutFilter" before="LOGOUT_FILTER"/>
         <security:custom-filter ref="singleLogoutFilter" before="CAS_FILTER"/>
+        <!-- TODO: FIX CSRF - THIS ALSO AFFECTS XFORMS -->
+        <security:csrf disabled="true" />
     </security:http>
 
     <bean id="serviceProperties"

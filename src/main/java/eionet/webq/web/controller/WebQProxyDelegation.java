@@ -167,7 +167,7 @@ public class WebQProxyDelegation {
         UserFile file = userFileHelper.getUserFile(fileId, request);
 
         if (file != null && ProxyDelegationHelper.isCompanyIdParameterValidForBdrEnvelope(uri, file.getEnvelope())) {
-            if (uri.startsWith(file.getEnvelope())) {
+            if (StringUtils.startsWith(uri, file.getEnvelope())) {
                 return new String(envelopeService.fetchFileFromCdr(file, uri).getBody(), "UTF-8");
             } else if (file.isAuthorized()) {
                 // check if we have known host in db
@@ -214,7 +214,7 @@ public class WebQProxyDelegation {
         UserFile file = userFileHelper.getUserFile(fileId, request);
 
         if (file != null && ProxyDelegationHelper.isCompanyIdParameterValidForBdrEnvelope(uri, file.getEnvelope())) {
-            if (uri.startsWith(file.getEnvelope())) {
+            if (StringUtils.startsWith(uri, file.getEnvelope())) {
                 return envelopeService.submitRequest(file, uri, body);
             } else if (file.isAuthorized()) {
                 // check if we have known host in db
@@ -267,7 +267,7 @@ public class WebQProxyDelegation {
         MultipartFile multipartFile = multipartRequest.getFile(fileName);
 
         HttpHeaders authorization = new HttpHeaders();
-        if (file != null && uri.startsWith(file.getEnvelope())) {
+        if (file != null && StringUtils.startsWith(uri, file.getEnvelope())) {
             authorization = envelopeService.getAuthorizationHeader(file);
         }
 

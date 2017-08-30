@@ -1,0 +1,16 @@
+# Set the default behavior, in case people don't have core.autocrlf set.
+* text eol=lf
+
+*.xml text
+*.java text
+*.jsp text
+*.properties text
+
+#Binary files
+*.png binary
+*.gif binary
+*.odt binary
+*.ods binary
+*.jpg binary
+*.mdb binary
+*.accdb binary

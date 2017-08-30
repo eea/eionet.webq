@@ -8,3 +8,4 @@ webq2.iml
 *.cmd
 /.settings
 /*.iml
+/local.properties
