@@ -14,3 +14,4 @@
 *.jpg binary
 *.mdb binary
 *.accdb binary
+*.jar binary
