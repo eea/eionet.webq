@@ -32,6 +32,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.mock.web.MockMultipartFile;
@@ -74,6 +75,9 @@ public class PublicPageControllerIntegrationTest extends AbstractContextControll
     @Autowired
     MockHttpSession session;
 
+    @Value("${cas.service}")
+    private String webqUrl;
+
     @Before
     public void mockConversionServiceApiCall() {
         ListConversionResponse listConversionResponse = new ListConversionResponse();
@@ -95,7 +99,7 @@ public class PublicPageControllerIntegrationTest extends AbstractContextControll
                         fileUpload("/uploadXmlWithRedirect").file(createMockMultipartFile("file.name")).session(mockHttpSession))
                         .andExpect(status().isFound()).andReturn();
         String viewName = result.getModelAndView().getViewName();
-        assertTrue(viewName.matches("redirect:/xform/\\?formId=\\d+&fileId=\\d+&instance=.*&base_uri=.*"));
+        assertTrue(viewName.matches("redirect:" + webqUrl + "/xform/\\?formId=\\d+&fileId=\\d+&instance=.*&base_uri=.*"));
     }
 
     @Test

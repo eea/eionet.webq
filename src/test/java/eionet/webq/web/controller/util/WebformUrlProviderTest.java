@@ -29,6 +29,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.springframework.beans.factory.annotation.Value;
 
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertThat;
@@ -43,13 +44,16 @@ public class WebformUrlProviderTest extends AbstractProjectsControllerTests {
     @InjectMocks
     private WebformUrlProviderImpl webformUrlProvider;
 
+    @Value("${cas.service}")
+    private String webqUrl;
+
     @Test
     public void getXFormUrl() {
         ProjectFile webformFile = new ProjectFile();
         webformFile.setId(1);
         webformFile.setFileName("xform.xhtml");
 
-        assertThat(webformUrlProvider.getWebformPath(webformFile), equalTo("/xform/?formId=1&"));
+        assertThat(webformUrlProvider.getWebformPath(webformFile), equalTo(webqUrl + "/xform/?formId=1&"));
     }
 
     @Test
@@ -58,10 +62,10 @@ public class WebformUrlProviderTest extends AbstractProjectsControllerTests {
         webformFile.setId(1);
         webformFile.setFileName("webform.html");
         webformFile.setProjectIdentifier("projectId");
-        assertThat(webformUrlProvider.getWebformPath(webformFile), equalTo("/webform/project/projectId/file/webform.html?"));
+        assertThat(webformUrlProvider.getWebformPath(webformFile), equalTo(webqUrl + "/webform/project/projectId/file/webform.html?"));
 
         webformFile.setFileName("webform.htm");
-        assertThat(webformUrlProvider.getWebformPath(webformFile), equalTo("/webform/project/projectId/file/webform.htm?"));
+        assertThat(webformUrlProvider.getWebformPath(webformFile), equalTo(webqUrl + "/webform/project/projectId/file/webform.htm?"));
     }
 
     @Test
@@ -77,7 +81,7 @@ public class WebformUrlProviderTest extends AbstractProjectsControllerTests {
 
         when(projectService.getById(1)).thenReturn(projectEntry);
 
-        assertThat(webformUrlProvider.getWebformPath(webformFile), equalTo("/webform/project/projectId/file/webform.html?"));
+        assertThat(webformUrlProvider.getWebformPath(webformFile), equalTo(webqUrl + "/webform/project/projectId/file/webform.html?"));
 
     }
 }

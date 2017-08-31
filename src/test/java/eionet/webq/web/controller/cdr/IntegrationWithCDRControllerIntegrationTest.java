@@ -81,6 +81,9 @@ public class IntegrationWithCDRControllerIntegrationTest extends AbstractContext
     @Autowired
     private MockHttpSession session;
 
+    @Value("${cas.service}")
+    private String webqUrl;
+
     @Value("${webq1.url}")
     private String webQFallBackUrl;
 
@@ -176,7 +179,7 @@ public class IntegrationWithCDRControllerIntegrationTest extends AbstractContext
         MvcResult mvcResult =
                 mvc().perform(post("/WebQMenu").param("envelope", ENVELOPE_URL)).andExpect(status().isFound()).andReturn();
 
-        assertTrue(mvcResult.getResponse().getRedirectedUrl().startsWith("/xform"));
+        assertTrue(mvcResult.getResponse().getRedirectedUrl().startsWith(webqUrl + "/xform"));
     }
 
     @Test
@@ -188,7 +191,7 @@ public class IntegrationWithCDRControllerIntegrationTest extends AbstractContext
                 mvc().perform(post("/WebQMenu").param("envelope", ENVELOPE_URL).param("add", "true").param("schema", XML_SCHEMA))
                         .andExpect(status().isFound()).andReturn();
 
-        assertTrue(mvcResult.getResponse().getRedirectedUrl().startsWith("/xform"));
+        assertTrue(mvcResult.getResponse().getRedirectedUrl().startsWith(webqUrl + "/xform"));
     }
 
     @Test
