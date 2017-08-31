@@ -20,9 +20,9 @@ Installation
 ### Prerequisites
 
 Minimum requirements are:
-* Java 1.6 or Java 7. Java 8 is not supported
-* Maven 3.0.4
-* Tomcat 6 or 7 (<= 7.0.56; 7.0.70 onward is not supported)
+* Java 8
+* Maven 3.3.9
+* Tomcat 8.5.20
 * MySql 5.5
 
 ### Setup
@@ -49,10 +49,7 @@ initial.admin.password=
 ###### 2. Add the first admin user into the database:
 If you set the initial.admin.username system property, then the user will get the admin role at startup.
 
-###### 3. To use EEA's Central Authentication Service (CAS), 
-If you deploy on Tomcat 6, then you need to register Eionet certificates in the JVM that runs the Tomcat. A small Java executable that does it, and a README on how to use it can be found here: https://svn.eionet.europa.eu/repositories/Reportnet/CASServer/contrib/installcert
-
-###### 4. Increase the MySql _max_allowed_packet_ variable 
+###### 3. Increase the MySql _max_allowed_packet_ variable 
 To be able to store larger files than 1MB in the database. For example, to set the limit to 16MB in /etc/my.cnf do:
 ```sql
 SET GLOBAL max_allowed_packet=16777216;
@@ -62,11 +59,3 @@ or run the mysql executable with the `--max_allowed_packet=16M` argument.
 ### Build
 
 Build with Maven `mvn clean install`
-
-#### Testing
-
-You can launch the application in Tomcat 7 with `mvn tomcat7:run`
-
-### Deployment
-
-Copy webq2.war into _webapps_ directory of your Servlet container.
