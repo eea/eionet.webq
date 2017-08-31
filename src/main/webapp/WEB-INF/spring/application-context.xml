@@ -62,9 +62,9 @@
           class="org.springframework.context.support.ConversionServiceFactoryBean">
         <property name="converters">
             <set>
-                <bean class="eionet.webq.converter.MultipartFileToUserFileConverter"/>
-                <bean class="eionet.webq.converter.MultipartToByteArray"/>
-                <bean class="eionet.webq.converter.MultipartFileToUploadedFile"/>
+                <ref bean="multipartFileToUserFileConverter" />
+                <ref bean="multipartToByteArray" />
+                <ref bean="multipartFileToUploadedFile" />
             </set>
         </property>
     </bean>
