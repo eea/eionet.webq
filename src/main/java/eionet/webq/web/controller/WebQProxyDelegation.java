@@ -111,7 +111,7 @@ public class WebQProxyDelegation {
      * @throws URISyntaxException           wrong uri of remote file
      * @throws FileNotAvailableException    the remote file is not available
      */
-    @RequestMapping(value = "/restProxy", method = RequestMethod.GET)
+    @RequestMapping(value = "/restProxy", method = RequestMethod.GET, produces = "text/html;charset=utf-8")
     @ResponseBody
     public String restProxyGet(@RequestParam("uri") String uri, @RequestParam(required = false) Integer fileId,
             HttpServletRequest request)
@@ -135,7 +135,7 @@ public class WebQProxyDelegation {
      * @throws URISyntaxException        wrong uri of remote file
      * @throws FileNotAvailableException the remote file is not available
      */
-    @RequestMapping(value = "/restProxy", method = RequestMethod.POST)
+    @RequestMapping(value = "/restProxy", method = RequestMethod.POST, produces = "text/html;charset=utf-8")
     @ResponseBody
     public String restProxyPost(@RequestParam("uri") String uri, @RequestBody String body,
             @RequestParam(required = false) Integer fileId, HttpServletRequest request)
