@@ -4,7 +4,7 @@
     <title></title>
 </head>
 <body>
-    Technical error. Please try again later. If error repeats, please contact support.
-    Technical info: ${exception.message}
+    <p>Technical error. Please try again later. If error repeats, please contact support.</p>
+    <p>Technical info: ${exception.statusCode} - ${exception.responseBodyAsString}</p>
 </body>
 </html>
