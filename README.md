@@ -40,7 +40,6 @@ cas.service=http://localhost:8080/webq2
 cas.server.host=https://sso.eionet.europa.eu
 user.file.expiration.hours=12
 converters.api.url=
-webq1.url=
 log4j.configuration=classes/log4j.xml
 initial.admin.username=
 initial.admin.password=

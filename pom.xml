@@ -479,7 +479,6 @@
                         <db.driver>org.h2.Driver</db.driver>
                         <db.username>xml</db.username>
                         <db.password>storage</db.password>
-                        <webq1.url>http://localhost:7080</webq1.url>
                         <converters.api.url>http://converters-test</converters.api.url>
                         <user.file.expiration.hours>9</user.file.expiration.hours>
                         <cas.service>http://localhost:8080</cas.service>
@@ -506,7 +505,6 @@
                         <db.username>xml</db.username>
                         <db.password>storage</db.password>
                         <cas.service>http://localhost:8080</cas.service>
-                        <webq1.url>http://localhost:7080</webq1.url>
                         <converters.api.url>http://localhost:6080</converters.api.url>
                         <user.file.expiration.hours>72</user.file.expiration.hours>
                         <initial.admin.username>admin</initial.admin.username>

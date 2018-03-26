@@ -84,9 +84,6 @@ public class IntegrationWithCDRControllerIntegrationTest extends AbstractContext
     @Value("${cas.service}")
     private String webqUrl;
 
-    @Value("${webq1.url}")
-    private String webQFallBackUrl;
-
     private static final String ENVELOPE_URL = "http://cdr.envelope.eu";
     private static final String XML_SCHEMA = "cdr-specific-schema";
 
@@ -195,17 +192,15 @@ public class IntegrationWithCDRControllerIntegrationTest extends AbstractContext
     }
 
     @Test
-    public void webQMenu_ifNoWebFormsAvailable_SendRedirectToWebQ1() throws Exception {
+    public void webQMenu_ifNoWebFormsAvailable_Error() throws Exception {
         mvc().perform(post("/WebQMenu").param("envelope", ENVELOPE_URL))
-                .andExpect(status().is(HttpStatus.MOVED_PERMANENTLY.value()))
-                .andExpect(header().string("Location", containsString(webQFallBackUrl)));
+                .andExpect(status().is(HttpStatus.INTERNAL_SERVER_ERROR.value()));
     }
 
     @Test
-    public void webQEdit_IfNoWebFormsAvailable_SendRedirectToWebQ1() throws Exception {
+    public void webQEdit_IfNoWebFormsAvailable_Error() throws Exception {
         mvc().perform(post("/WebQEdit"))
-                .andExpect(status().is(HttpStatus.MOVED_PERMANENTLY.value()))
-                .andExpect(header().string("Location", containsString(webQFallBackUrl)));
+                .andExpect(status().is(HttpStatus.INTERNAL_SERVER_ERROR.value()));
     }
     
     private int saveAvailableWebFormWithSchema(String xmlSchema) {

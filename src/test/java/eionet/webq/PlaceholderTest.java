@@ -74,28 +74,6 @@ public class PlaceholderTest extends AbstractContextControllerTests {
     /**
      * Defined in the pom as a system property.
      */
-    @Value("${webq1.url}")
-    private String webq1Url;
-
-    @Test
-    public void testWebq1Url() {
-        assertEquals("http://localhost:7080", webq1Url);
-    }
-
-    /**
-     * Derived from webq1.url
-     */
-    @Value("${webq1.rpc.url}")
-    private String webq1RpcUrl;
-
-    @Test
-    public void testWebq1RpcUrl() {
-        assertEquals("http://localhost:7080/RpcRouter", webq1RpcUrl);
-    }
-
-    /**
-     * Defined in the pom as a system property.
-     */
     @Value("${converters.api.url}")
     private String convertersUrl;
 

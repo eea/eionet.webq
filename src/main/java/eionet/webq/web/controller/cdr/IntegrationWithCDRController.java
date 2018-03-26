@@ -69,11 +69,7 @@ public class IntegrationWithCDRController {
      */
     @Autowired
     WebformUrlProvider webformUrlProvider;
-    /**
-     * WebQ1 URL.
-     */
-    @Value("${webq1.url}")
-    String webQFallBackUrl;
+
     /**
      * Converts request to CdrRequest.
      */
@@ -163,16 +159,16 @@ public class IntegrationWithCDRController {
     }
 
     /**
-     * IllegalArgumentException handler for this class. If request parameters cannot be handled by this application, redirect to
-     * webQ1.
+     * IllegalArgumentException handler for this class. If request parameters cannot be handled by this application, respond with an error.
      *
      * @param request  current request
      * @param response http response
      */
     @ExceptionHandler(IllegalArgumentException.class)
-    @ResponseStatus(HttpStatus.MOVED_PERMANENTLY)
-    public void redirectToWebQ(HttpServletRequest request, HttpServletResponse response) {
-        response.addHeader("Location", webQFallBackUrl + request.getServletPath() + '?' + request.getQueryString());
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    // TODO: remove if not needed any more
+    public void formUnavailable(HttpServletRequest request, HttpServletResponse response) {
+        LOGGER.info("tst");
     }
 
     /**
