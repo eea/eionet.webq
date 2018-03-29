@@ -25,6 +25,7 @@ import eionet.webq.dao.orm.KnownHost;
 import eionet.webq.dao.orm.UserFile;
 import eionet.webq.dto.CdrRequest;
 import eionet.webq.dto.XmlSaveResult;
+import eionet.webq.web.CustomURI;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.utils.URIUtils;
 import org.apache.log4j.Logger;
@@ -144,8 +145,9 @@ public class CDREnvelopeServiceImpl implements CDREnvelopeService {
         }
         ResponseEntity<byte[]> download = null;
         try {
+            CustomURI customURI = new CustomURI("", remoteFileUrl);
             download = restOperations
-                    .exchange(new URI(remoteFileUrl), HttpMethod.GET, new HttpEntity<Object>(authorization), byte[].class);
+                    .exchange(customURI.getHttpURL(), HttpMethod.GET, new HttpEntity<Object>(authorization), byte[].class);
         } catch (RestClientException e) {
             LOGGER.error("Unable to download remote file.", e);
         }
@@ -164,7 +166,7 @@ public class CDREnvelopeServiceImpl implements CDREnvelopeService {
             authorization = getAuthorizationHeader(file);
         }
         HttpEntity<String> httpEntity = new HttpEntity<String>(body, authorization);
-        return new RestTemplate().postForObject(new URI(uri), httpEntity, String.class);
+        return restOperations.postForObject(new URI(uri), httpEntity, String.class);
     }
 
     /**

@@ -192,8 +192,9 @@ public class WebQProxyDelegation {
                         // Add basic authorisation if needed
                         HttpHeaders authorization = getHttpHeaderWithBasicAuthentication(knownHost);
                         LOGGER.info("Add basic auth from known hosts to URL: " + uri);
-                        String response = (new RestTemplate()
-                                .exchange(new URI(uri), HttpMethod.GET, new HttpEntity<Object>(authorization), String.class))
+                        CustomURI customURI = new CustomURI(webqUrl, uri);
+                        String response = (restTemplate
+                                .exchange(customURI.getHttpURL(), HttpMethod.GET, new HttpEntity<Object>(authorization), String.class))
                                 .getBody();
                         return response;
                     }
