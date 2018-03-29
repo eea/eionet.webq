@@ -26,7 +26,11 @@
                       classpath:env.properties"
             ignore-unresolvable="true"/>
     <context:component-scan base-package="eionet.webq"/>
-    <mvc:annotation-driven conversion-service="conversionService"/>
+    <mvc:annotation-driven conversion-service="conversionService">
+        <mvc:message-converters>
+            <ref bean="stringHttpMessageConverter" />
+        </mvc:message-converters>
+    </mvc:annotation-driven>
     <cache:annotation-driven/>
     <context:spring-configured/>
 
@@ -88,17 +92,30 @@
     <bean id="jsonMessageConverter"
           class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
         <property name="supportedMediaTypes" value="application/json" />
+        <property name="defaultCharset" value="UTF-8" />
     </bean>
 
     <bean id="jaxbHttpMessageConverter" class="org.springframework.http.converter.xml.MarshallingHttpMessageConverter">
         <constructor-arg ref="jaxbMarshaller" index="0"/>
         <constructor-arg ref="jaxbMarshaller" index="1"/>
+        <property name="defaultCharset" value="UTF-8" />
         <property name="supportedMediaTypes">
             <list>
                 <value>application/xml</value>
                 <value>text/xml</value>
             </list>
         </property>
+    </bean>
+
+    <bean id="stringHttpMessageConverter" class="org.springframework.http.converter.StringHttpMessageConverter">
+        <property name="supportedMediaTypes">
+            <list>
+                <value>application/xml</value>
+                <value>text/xml</value>
+                <value>text/html</value>
+            </list>
+        </property>
+        <property name="defaultCharset" value="UTF-8" />
     </bean>
 
     <bean id="jaxbMarshaller" class="org.springframework.oxm.jaxb.Jaxb2Marshaller">
@@ -120,6 +137,19 @@
         <property name="userManagementService" ref="userService"/>
         <property name="initialUsername" value="${initial.admin.username}"/>
         <property name="initialPassword" value="${initial.admin.password}"/>
+    </bean>
+
+    <bean id="restTemplate" class="org.springframework.web.client.RestTemplate" primary="false">
+        <property name="messageConverters">
+            <list>
+                <bean class="org.springframework.http.converter.ByteArrayHttpMessageConverter">
+                    <property name="defaultCharset" value="UTF-8" />
+                </bean>
+                <ref bean="stringHttpMessageConverter" />
+                <ref bean="jaxbHttpMessageConverter" />
+                <ref bean="jsonMessageConverter" />
+            </list>
+        </property>
     </bean>
 
 </beans>

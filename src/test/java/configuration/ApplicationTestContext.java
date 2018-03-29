@@ -26,6 +26,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportResource;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.context.annotation.Primary;
 import org.springframework.web.client.RestOperations;
 import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 import util.CacheCleaner;
@@ -37,6 +38,7 @@ import util.CacheCleaner;
 public class ApplicationTestContext {
 
     @Bean
+    @Primary
     public RestOperations mockRestOperations() {
         return Mockito.mock(RestOperations.class);
     }

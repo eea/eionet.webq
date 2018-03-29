@@ -27,12 +27,14 @@ import eionet.webq.dto.KnownHostAuthenticationMethod;
 import eionet.webq.service.CDREnvelopeService;
 import eionet.webq.service.FileNotAvailableException;
 import eionet.webq.service.KnownHostsService;
+import eionet.webq.web.CustomURI;
 import eionet.webq.web.controller.util.ProxyDelegationHelper;
 import eionet.webq.web.controller.util.UserFileHelper;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.net.util.Base64;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -97,6 +99,12 @@ public class WebQProxyDelegation {
      */
     @Autowired
     private CDREnvelopeService envelopeService;
+
+    @Autowired
+    private RestTemplate restTemplate;
+
+    @Value("${cas.service}")
+    String webqUrl;
     
     /**
      * This method delegates GET request to remote host. See:
@@ -111,7 +119,7 @@ public class WebQProxyDelegation {
      * @throws URISyntaxException           wrong uri of remote file
      * @throws FileNotAvailableException    the remote file is not available
      */
-    @RequestMapping(value = "/restProxy", method = RequestMethod.GET, produces = "text/html;charset=utf-8")
+    @RequestMapping(value = "/restProxy", method = RequestMethod.GET)
     @ResponseBody
     public String restProxyGet(@RequestParam("uri") String uri, @RequestParam(required = false) Integer fileId,
             HttpServletRequest request)
@@ -120,8 +128,9 @@ public class WebQProxyDelegation {
         if (fileId != null && fileId > 0) {
             return restProxyGetWithAuth(uri, fileId, request);
         }
-        LOGGER.info("/restProxy [GET] uri=" + uri);
-        return new RestTemplate().getForObject(new URI(uri), String.class);
+        CustomURI customURI = new CustomURI(webqUrl, uri);
+        LOGGER.info("/restProxy [GET] uri=" + customURI.getHttpURL());
+        return restTemplate.getForObject(customURI.getHttpURL(), String.class);
     } // end of method restProxyGet
 
     /**
@@ -135,7 +144,7 @@ public class WebQProxyDelegation {
      * @throws URISyntaxException        wrong uri of remote file
      * @throws FileNotAvailableException the remote file is not available
      */
-    @RequestMapping(value = "/restProxy", method = RequestMethod.POST, produces = "text/html;charset=utf-8")
+    @RequestMapping(value = "/restProxy", method = RequestMethod.POST)
     @ResponseBody
     public String restProxyPost(@RequestParam("uri") String uri, @RequestBody String body,
             @RequestParam(required = false) Integer fileId, HttpServletRequest request)
@@ -143,8 +152,9 @@ public class WebQProxyDelegation {
         if (fileId != null && fileId > 0) {
             return restProxyPostWithAuth(uri, body, fileId, request);
         }
-        LOGGER.info("/restProxy [POST] uri=" + uri);
-        return new RestTemplate().postForObject(new URI(uri), body, String.class);
+        CustomURI customURI = new CustomURI(webqUrl, uri);
+        LOGGER.info("/restProxy [POST] uri=" + customURI.getHttpURL());
+        return restTemplate.postForObject(customURI.getHttpURL(), body, String.class);
     } // end of method restProxyPost
 
     /**
@@ -190,9 +200,9 @@ public class WebQProxyDelegation {
                 }
             }
         }
-
-        LOGGER.info("/restProxy [GET] uri=" + uri);
-        return new RestTemplate().getForObject(new URI(uri), String.class);
+        CustomURI customURI = new CustomURI(webqUrl, uri);
+        LOGGER.info("/restProxy [GET] uri=" + customURI.getHttpURL());
+        return restTemplate.getForObject(customURI.getHttpURL(), String.class);
     }
 
     /**
@@ -235,9 +245,9 @@ public class WebQProxyDelegation {
                 }
             }
         }
-
-        LOGGER.info("/restProxy [POST] uri=" + uri);
-        return new RestTemplate().postForObject(new URI(uri), body, String.class);
+        CustomURI customURI = new CustomURI(webqUrl, uri);
+        LOGGER.info("/restProxy [POST] uri=" + customURI.getHttpURL());
+        return restTemplate.postForObject(customURI.getHttpURL(), body, String.class);
     }
 
     /**
@@ -291,7 +301,7 @@ public class WebQProxyDelegation {
                 (request, authorization);
 
         LOGGER.info("/restProxyFileUpload [POST] uri=" + uri);
-        return new RestTemplate().postForObject(uri, requestEntity, String.class);
+        return restTemplate.postForObject(uri, requestEntity, String.class);
     }
 
     /**
