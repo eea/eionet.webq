@@ -181,7 +181,6 @@ public class CDREnvelopeServiceImpl implements CDREnvelopeService {
         HttpHeaders authorization = getAuthorizationHeader(file);
 
         HttpHeaders fileHeaders = new HttpHeaders();
-        LOGGER.info("PARAMETERS: " + file.toString());
         fileHeaders.setContentDispositionFormData("file", file.getName());
         fileHeaders.setContentType(MediaType.TEXT_XML);
 
