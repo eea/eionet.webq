@@ -65,6 +65,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 /**
@@ -201,9 +202,14 @@ public class WebQProxyDelegation {
                 }
             }
         }
-        CustomURI customURI = new CustomURI(webqUrl, uri);
-        LOGGER.info("/restProxy [GET] uri=" + customURI.getHttpURL());
-        return restTemplate.getForObject(customURI.getHttpURL(), String.class);
+
+        LOGGER.info("/restProxy [GET] uri=" + uri);
+        if (new URI(uri).isAbsolute()) {
+            return restTemplate.getForObject(uri, String.class);
+        } else {
+            CustomURI customURI = new CustomURI(webqUrl, uri);
+            return new RestTemplate().getForObject(customURI.getHttpURL(), String.class);
+        }
     }
 
     /**

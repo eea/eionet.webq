@@ -1,7 +1,5 @@
 package eionet.webq.web;
 
-import org.springframework.beans.factory.annotation.Value;
-
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;

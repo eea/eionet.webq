@@ -145,9 +145,8 @@ public class CDREnvelopeServiceImpl implements CDREnvelopeService {
         }
         ResponseEntity<byte[]> download = null;
         try {
-            CustomURI customURI = new CustomURI("", remoteFileUrl);
             download = restOperations
-                    .exchange(customURI.getHttpURL(), HttpMethod.GET, new HttpEntity<Object>(authorization), byte[].class);
+                    .exchange(new URI(remoteFileUrl), HttpMethod.GET, new HttpEntity<Object>(authorization), byte[].class);
         } catch (RestClientException e) {
             LOGGER.error("Unable to download remote file.", e);
         }
@@ -180,6 +179,7 @@ public class CDREnvelopeServiceImpl implements CDREnvelopeService {
         HttpHeaders authorization = getAuthorizationHeader(file);
 
         HttpHeaders fileHeaders = new HttpHeaders();
+        LOGGER.info("PARAMETERS: " + file.toString());
         fileHeaders.setContentDispositionFormData("file", file.getName());
         fileHeaders.setContentType(MediaType.TEXT_XML);
 

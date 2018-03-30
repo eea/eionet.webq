@@ -29,6 +29,8 @@
     <mvc:annotation-driven conversion-service="conversionService">
         <mvc:message-converters>
             <ref bean="stringHttpMessageConverter" />
+            <ref bean="jsonMessageConverter" />
+            <ref bean="jaxbHttpMessageConverter" />
         </mvc:message-converters>
     </mvc:annotation-driven>
     <cache:annotation-driven/>
@@ -113,6 +115,7 @@
                 <value>application/xml</value>
                 <value>text/xml</value>
                 <value>text/html</value>
+                <value>application/json</value>
             </list>
         </property>
         <property name="defaultCharset" value="UTF-8" />
