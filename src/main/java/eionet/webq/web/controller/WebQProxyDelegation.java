@@ -34,6 +34,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.net.util.Base64;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -102,6 +103,7 @@ public class WebQProxyDelegation {
     private CDREnvelopeService envelopeService;
 
     @Autowired
+    @Qualifier("restTemplate")
     private RestTemplate restTemplate;
 
     @Value("${cas.service}")
@@ -208,7 +210,7 @@ public class WebQProxyDelegation {
             return restTemplate.getForObject(uri, String.class);
         } else {
             CustomURI customURI = new CustomURI(webqUrl, uri);
-            return new RestTemplate().getForObject(customURI.getHttpURL(), String.class);
+            return restTemplate.getForObject(customURI.getHttpURL(), String.class);
         }
     }
 

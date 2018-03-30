@@ -34,6 +34,7 @@ import org.apache.xmlrpc.client.XmlRpcClient;
 import org.apache.xmlrpc.client.XmlRpcClientConfig;
 import org.apache.xmlrpc.client.XmlRpcClientConfigImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -85,6 +86,7 @@ public class CDREnvelopeServiceImpl implements CDREnvelopeService {
      * Rest client.
      */
     @Autowired
+    @Qualifier("defaultRestTemplate")
     private RestOperations restOperations;
     /**
      * Get envelope xml files remote method name.

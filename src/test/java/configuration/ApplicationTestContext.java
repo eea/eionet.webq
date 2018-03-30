@@ -39,7 +39,7 @@ public class ApplicationTestContext {
 
     @Bean
     @Primary
-    public RestOperations mockRestOperations() {
+    public RestOperations defaultRestTemplate() {
         return Mockito.mock(RestOperations.class);
     }
 

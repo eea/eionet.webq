@@ -7,6 +7,6 @@
         http://www.springframework.org/schema/beans/spring-beans.xsd
         http://www.springframework.org/schema/context
         http://www.springframework.org/schema/context/spring-context.xsd">
-    <!--<bean id="restTemplate" class="org.springframework.web.client.RestTemplate"/>-->
+    <bean id="defaultRestTemplate" class="org.springframework.web.client.RestTemplate" primary="true"/>
     <bean id="xmlRpcClient" class="org.apache.xmlrpc.client.XmlRpcClient"/>
 </beans>
