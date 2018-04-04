@@ -27,7 +27,6 @@ import eionet.webq.dto.KnownHostAuthenticationMethod;
 import eionet.webq.service.CDREnvelopeService;
 import eionet.webq.service.FileNotAvailableException;
 import eionet.webq.service.KnownHostsService;
-import eionet.webq.web.CustomURI;
 import eionet.webq.web.controller.util.ProxyDelegationHelper;
 import eionet.webq.web.controller.util.UserFileHelper;
 import org.apache.commons.lang3.StringUtils;
@@ -122,7 +121,7 @@ public class WebQProxyDelegation {
      * @throws URISyntaxException           wrong uri of remote file
      * @throws FileNotAvailableException    the remote file is not available
      */
-    @RequestMapping(value = "/restProxy", method = RequestMethod.GET)
+    @RequestMapping(value = "/restProxy", method = RequestMethod.GET, produces = "text/html;charset=utf-8")
     @ResponseBody
     public String restProxyGet(@RequestParam("uri") String uri, @RequestParam(required = false) Integer fileId,
             HttpServletRequest request)
@@ -131,9 +130,8 @@ public class WebQProxyDelegation {
         if (fileId != null && fileId > 0) {
             return restProxyGetWithAuth(uri, fileId, request);
         }
-        CustomURI customURI = new CustomURI(webqUrl, uri);
-        LOGGER.info("/restProxy [GET] uri=" + customURI.getHttpURL());
-        return restTemplate.getForObject(customURI.getHttpURL(), String.class);
+        LOGGER.info("/restProxy [GET] uri=" + uri);
+        return restTemplate.getForObject(new URI(uri), String.class);
     } // end of method restProxyGet
 
     /**
@@ -147,7 +145,7 @@ public class WebQProxyDelegation {
      * @throws URISyntaxException        wrong uri of remote file
      * @throws FileNotAvailableException the remote file is not available
      */
-    @RequestMapping(value = "/restProxy", method = RequestMethod.POST)
+    @RequestMapping(value = "/restProxy", method = RequestMethod.POST, produces = "text/html;charset=utf-8")
     @ResponseBody
     public String restProxyPost(@RequestParam("uri") String uri, @RequestBody String body,
             @RequestParam(required = false) Integer fileId, HttpServletRequest request)
@@ -155,9 +153,8 @@ public class WebQProxyDelegation {
         if (fileId != null && fileId > 0) {
             return restProxyPostWithAuth(uri, body, fileId, request);
         }
-        CustomURI customURI = new CustomURI(webqUrl, uri);
-        LOGGER.info("/restProxy [POST] uri=" + customURI.getHttpURL());
-        return restTemplate.postForObject(customURI.getHttpURL(), body, String.class);
+        LOGGER.info("/restProxy [POST] uri=" + uri);
+        return restTemplate.postForObject(new URI(uri), body, String.class);
     } // end of method restProxyPost
 
     /**
@@ -172,7 +169,7 @@ public class WebQProxyDelegation {
      * @throws FileNotAvailableException    the remote file is not available
      * @throws UnsupportedEncodingException unable to convert the remote file to UTF-8
      */
-    @RequestMapping(value = "/restProxyWithAuth", method = RequestMethod.GET)
+    @RequestMapping(value = "/restProxyWithAuth", method = RequestMethod.GET, produces = "text/html;charset=utf-8")
     @ResponseBody
     public String restProxyGetWithAuth(@RequestParam("uri") String uri, @RequestParam int fileId,
             HttpServletRequest request) throws URISyntaxException, FileNotAvailableException, UnsupportedEncodingException {
@@ -195,9 +192,8 @@ public class WebQProxyDelegation {
                         // Add basic authorisation if needed
                         HttpHeaders authorization = getHttpHeaderWithBasicAuthentication(knownHost);
                         LOGGER.info("Add basic auth from known hosts to URL: " + uri);
-                        CustomURI customURI = new CustomURI(webqUrl, uri);
                         String response = (restTemplate
-                                .exchange(customURI.getHttpURL(), HttpMethod.GET, new HttpEntity<Object>(authorization), String.class))
+                                .exchange(new URI(uri), HttpMethod.GET, new HttpEntity<Object>(authorization), String.class))
                                 .getBody();
                         return response;
                     }
@@ -209,8 +205,8 @@ public class WebQProxyDelegation {
         if (new URI(uri).isAbsolute()) {
             return restTemplate.getForObject(uri, String.class);
         } else {
-            CustomURI customURI = new CustomURI(webqUrl, uri);
-            return restTemplate.getForObject(customURI.getHttpURL(), String.class);
+            // todo fix for local /download/file_id=
+            return restTemplate.getForObject(new URI(uri), String.class);
         }
     }
 
@@ -225,7 +221,7 @@ public class WebQProxyDelegation {
      * @throws URISyntaxException        wrong uri of remote file
      * @throws FileNotAvailableException the remote file is not available
      */
-    @RequestMapping(value = "/restProxyWithAuth", method = RequestMethod.POST)
+    @RequestMapping(value = "/restProxyWithAuth", method = RequestMethod.POST, produces = "text/html;charset=utf-8")
     @ResponseBody
     public String restProxyPostWithAuth(@RequestParam("uri") String uri, @RequestBody String body,
             @RequestParam int fileId, HttpServletRequest request) throws URISyntaxException, FileNotAvailableException {
@@ -254,9 +250,8 @@ public class WebQProxyDelegation {
                 }
             }
         }
-        CustomURI customURI = new CustomURI(webqUrl, uri);
-        LOGGER.info("/restProxy [POST] uri=" + customURI.getHttpURL());
-        return restTemplate.postForObject(customURI.getHttpURL(), body, String.class);
+        LOGGER.info("/restProxy [POST] uri=" + uri);
+        return restTemplate.postForObject(new URI(uri), body, String.class);
     }
 
     /**
@@ -269,7 +264,7 @@ public class WebQProxyDelegation {
      * @throws URISyntaxException provide URI is incorrect
      * @throws IOException        could not read file from request
      */
-    @RequestMapping(value = "/restProxyFileUpload", method = RequestMethod.POST)
+    @RequestMapping(value = "/restProxyFileUpload", method = RequestMethod.POST, produces = "text/html;charset=utf-8")
     @ResponseBody
     public String restProxyFileUpload(@RequestParam("uri") String uri,
             @RequestParam int fileId, MultipartHttpServletRequest multipartRequest)
@@ -330,7 +325,7 @@ public class WebQProxyDelegation {
      * @throws FileNotAvailableException    xml or xslt file is not available
      * @throws TransformerException         error when applying xslt transformation on xml
      */
-    @RequestMapping(value = "/proxyXmlWithConversion", method = RequestMethod.GET)
+    @RequestMapping(value = "/proxyXmlWithConversion", method = RequestMethod.GET, produces = "text/html;charset=utf-8")
     @ResponseBody
     public byte[] proxyXmlWithConversion(@RequestParam("xmlUri") String xmlUri,
             @RequestParam(required = false) Integer fileId,

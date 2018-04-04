@@ -26,13 +26,16 @@
                       classpath:env.properties"
             ignore-unresolvable="true"/>
     <context:component-scan base-package="eionet.webq"/>
-    <mvc:annotation-driven conversion-service="conversionService">
-        <mvc:message-converters>
+    <mvc:annotation-driven conversion-service="conversionService"/>
+
+    <!-- The following setting is a nice generic approach for content conversion, but it has to be implemented for all methods.
+     this can be added in the future if we decide to refactor the custom WebQProxyDelegation methods -->
+      <!--  <mvc:message-converters>
             <ref bean="stringHttpMessageConverter" />
             <ref bean="jsonMessageConverter" />
             <ref bean="jaxbHttpMessageConverter" />
         </mvc:message-converters>
-    </mvc:annotation-driven>
+    </mvc:annotation-driven>-->
     <cache:annotation-driven/>
     <context:spring-configured/>
 
