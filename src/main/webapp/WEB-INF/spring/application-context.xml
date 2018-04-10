@@ -151,6 +151,10 @@
                 <bean class="org.springframework.http.converter.ByteArrayHttpMessageConverter">
                     <property name="defaultCharset" value="UTF-8" />
                 </bean>
+                <bean class="org.springframework.http.converter.support.AllEncompassingFormHttpMessageConverter">
+                    <property name="multipartCharset" value="UTF-8"/>
+                    <property name="charset" value="UTF-8" />
+                </bean>
                 <ref bean="stringHttpMessageConverter" />
                 <ref bean="jaxbHttpMessageConverter" />
                 <ref bean="jsonMessageConverter" />
