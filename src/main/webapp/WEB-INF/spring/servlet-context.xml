@@ -9,16 +9,6 @@
         http://www.springframework.org/schema/mvc
         http://www.springframework.org/schema/mvc/spring-mvc.xsd">
 
-    <bean id="exceptionHandler" class="org.springframework.web.servlet.handler.SimpleMappingExceptionResolver">
-        <property name="warnLogCategory" value="webq2"/>
-        <property name="exceptionMappings">
-            <props>
-                <prop key="org.springframework.web.multipart.MaxUploadSizeExceededException">max_upload_size_exceeded</prop>
-                <prop key="java.lang.Exception">technical_error</prop>
-            </props>
-        </property>
-    </bean>
-
     <bean id="tilesViewResolver" class="org.springframework.web.servlet.view.tiles3.TilesViewResolver">
         <property name="order" value="0"/>
         <property name="redirectHttp10Compatible" value="false" />
