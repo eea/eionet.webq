@@ -5,11 +5,38 @@ pipeline {
     jdk 'Java8'
   }
   options {
+    disableConcurrentBuilds()
     buildDiscarder(logRotator(numToKeepStr: '4', artifactNumToKeepStr: '2'))
     timeout(time: 60, unit: 'MINUTES')
   }
   stages {
     stage('Project Build') {
+      steps {
+        sh 'mvn clean -B -V verify'
+      }
+      post {
+        success {
+            archive 'target/*.war'
+        }
+      }
+    }
+    stage('Docker push') {
+      when {
+          branch 'master'
+          beforeAgent true
+      }
+      steps {
+        script {
+          def date = sh(returnStdout: true, script: 'echo $(date "+%Y-%m-%dT%H%M")').trim()
+          image = docker.build("eworxeea/webq2:latest")
+          docker.withRegistry('https://index.docker.io/v1/', 'sofiageo-hub') {
+            image.push()
+            image.push(date)
+          }
+        }
+      }
+    }
+    stage('Static analysis') {
       steps {
         sh 'mvn clean -B -V -Pcobertura verify cobertura:cobertura pmd:pmd pmd:cpd findbugs:findbugs checkstyle:checkstyle'
       }
