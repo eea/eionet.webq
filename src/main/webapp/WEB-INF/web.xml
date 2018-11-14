@@ -184,4 +184,9 @@
     <session-config>
         <session-timeout>540</session-timeout>
     </session-config>
+
+    <mime-mapping>
+        <extension>ico</extension>
+        <mime-type>image/vnd.microsoft.icon</mime-type>
+    </mime-mapping>
 </web-app>

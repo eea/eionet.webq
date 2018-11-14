@@ -24,12 +24,6 @@
         <a id="fullscreenlink" href="javascript:toggleFullScreenMode()" title="Switch to/from full screen mode"><span>Switch to/from full screen mode</span></a>
         <%--TODO about page--%>
         <a id="acronymlink" href="about.action" title="About ${initParam.appDispName}"><span>About</span></a>
-        <form action="http://search.eionet.europa.eu/search.jsp" method="get">
-            <div id="freesrchform"><label for="freesrchfld">Search</label>
-                <input type="text" id="freesrchfld" name="query"/>
-                <input id="freesrchbtn" type="image" src="<c:url value="/images/button_go.gif"/>" alt="Go"/>
-            </div>
-        </form>
     </div>
 </div>
 
