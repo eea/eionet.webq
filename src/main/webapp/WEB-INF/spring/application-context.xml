@@ -134,11 +134,6 @@
         </property>
     </bean>
 
-    <bean id="liquibase" class="liquibase.integration.spring.SpringLiquibase">
-        <property name="dataSource" ref="dataSource" />
-        <property name="changeLog" value="classpath:eionet/webq/dao/changelog.xml" />
-    </bean>
-
     <bean id="initialUser" class="eionet.webq.service.InitialUser" init-method="createUser">
         <property name="userManagementService" ref="userService"/>
         <property name="initialUsername" value="${initial.admin.username}"/>
