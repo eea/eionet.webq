@@ -13,7 +13,7 @@
         </servlet-class>
         <init-param>
             <param-name>contextConfigLocation</param-name>
-            <param-value>/WEB-INF/spring/*-context.xml</param-value>
+            <param-value>/WEB-INF/spring/servlet-context.xml</param-value>
         </init-param>
         <load-on-startup>1</load-on-startup>
     </servlet>
@@ -168,7 +168,14 @@
 
     <context-param>
         <param-name>contextConfigLocation</param-name>
-        <param-value>/WEB-INF/spring/*-context.xml, /WEB-INF/spring/tasks.xml</param-value>
+        <param-value>
+            /WEB-INF/spring/application-context.xml
+            /WEB-INF/spring/data-source-context.xml
+            /WEB-INF/spring/properties-context.xml
+            /WEB-INF/spring/security-context.xml
+            /WEB-INF/spring/tasks.xml
+            /WEB-INF/spring/ws-context.xml
+        </param-value>
     </context-param>
 
     <listener>
