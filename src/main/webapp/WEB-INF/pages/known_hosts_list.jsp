@@ -1,5 +1,6 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
 
 <div id="drop-operations">
     <h2>Operations</h2>
@@ -22,31 +23,31 @@
         <c:forEach items="${allKnownHosts}" var="host">
             <c:set var="popup_id" value="host_${host.id}"/>
             <tr>
-                <td><a href="#" onclick="viewHost('${popup_id}')">${host.hostName}</a></td>
-                <td>${host.hostURL}</td>
-                <td>${host.key}</td>
+                <td><a href="#" onclick="viewHost('${popup_id}')">${fn:escapeXml(host.hostName)}</a></td>
+                <td>${fn:escapeXml(host.hostURL)}</td>
+                <td>${fn:escapeXml(host.key)}</td>
                 <td class="dialogTemplate">
                     <div title="Host information" id="${popup_id}">
                         <table class="datatable" style="width:100%">
                             <tr>
                                 <th scope="row">Host name</th>
-                                <td>${host.hostName}</td>
+                                <td>${fn:escapeXml(host.hostName)}</td>
                             </tr>
                             <tr>
                                 <th scope="row">Host URL</th>
-                                <td>${host.hostURL}</td>
+                                <td>${fn:escapeXml(host.hostURL)}</td>
                             </tr>
                             <tr>
                                 <th scope="row">Authentication method</th>
-                                <td>${host.authenticationMethod}</td>
+                                <td>${fn:escapeXml(host.authenticationMethod)}</td>
                             </tr>
                             <tr>
                                 <th scope="row">Key/Username</th>
-                                <td>${host.key}</td>
+                                <td>${fn:escapeXml(host.key)}</td>
                             </tr>
                             <tr>
                                 <th scope="row">Ticket/password</th>
-                                <td>${host.ticket}</td>
+                                <td>${fn:escapeXml(host.ticket)}</td>
                             </tr>
                         </table>
                         <input type="button" onclick="window.location = '<c:url value="/known_hosts/update/${host.id}"/>'" value="Edit"/>
@@ -63,4 +64,3 @@
         <p>This host will be deleted. Are you sure?</p>
     </div>
 </c:if>
-

@@ -13,13 +13,13 @@
     <table class="datatable">
         <tr>
             <th scope="row"><label for="userName">Username</label></th>
-            <td><input id="userName" name="userName" value="${userName}" type="text" readonly></td>
+            <td><input id="userName" name="userName" value="${fn:escapeXml(userName)}" type="text" readonly></td>
         </tr>
         <tr>
             <th scope="row"><label for="roles">Select user role</label></th>
             <td>
                 <c:forEach var="validRole" items="${allRoles}">
-                    <input type="radio" name="role" value="${validRole}" <c:if test="${fn:contains(role, validRole)}">checked</c:if> >${validRole}<br/>
+                    <input type="radio" name="role" value="${fn:escapeXml(validRole)}" <c:if test="${fn:contains(role, validRole)}">checked</c:if> >${fn:escapeXml(validRole)}<br/>
                 </c:forEach>
             </td>
         </tr>

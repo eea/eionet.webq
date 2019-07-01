@@ -18,7 +18,7 @@
             <th scope="row"><label for="roles">Select user role</label></th>
             <td>
                 <c:forEach var="validRole" items="${allRoles}">
-                    <input type="radio" name="role" value="${validRole}" >${validRole}<br/>
+                    <input type="radio" name="role" value="<c:out value="${validRole}" />" ><c:out value="${validRole}" /><br/>
                 </c:forEach>
             </td>
         </tr>

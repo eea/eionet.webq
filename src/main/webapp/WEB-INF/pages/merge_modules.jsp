@@ -1,6 +1,7 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib prefix="s" uri="http://www.springframework.org/tags" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
 
 <div id="drop-operations">
     <h2>Operations</h2>
@@ -33,26 +34,26 @@
                             <c:out value="${xmlSchema.xmlSchema}" escapeXml="true"/> <br />
                         </c:forEach>
                     </td>
-                    <td>${module.userName}</td>
+                    <td>${fn:escapeXml(module.userName)}</td>
                     <td><fmt:formatDate pattern="dd MMM yyyy HH:mm:ss" value="${module.updated}" /></td>
                 </tr>
                 <tr class="dialogTemplate">
                     <td>
-                        <div title="File for project '${module.title}'" id="${popup_id}">
+                        <div title="File for project '${fn:escapeXml(module.title)}'" id="${popup_id}">
                             <table class="datatable" style="width:100%">
                                 <tr>
                                     <th scope="row">Title</th>
-                                    <td>${module.title}</td>
+                                    <td>${fn:escapeXml(module.title)}</td>
                                 </tr>
                                 <tr>
                                     <th scope="row">Xsl file</th>
-                                    <td><a href="<c:url var="downloadLink" value="/download/merge/file/${module.xslFile.name}"/>">${module.xslFile.name}</a>
+                                    <td><a href="<c:url var="downloadLink" value="/download/merge/file/${fn:escapeXml(module.xslFile.name)}"/>">${fn:escapeXml(module.xslFile.name)}</a>
                                         <button onclick="viewFileSource('${downloadLink}');">View Source</button> </td>
                                 </tr>
                                 <tr>
                                     <th scope="row">File size</th>
                                     <s:eval expression="T(org.apache.commons.io.FileUtils).byteCountToDisplaySize(module.xslFile.sizeInBytes)" var="humanReadableFileSize"/>
-                                    <td>${humanReadableFileSize} (${module.xslFile.sizeInBytes} bytes)</td>
+                                    <td>${fn:escapeXml(humanReadableFileSize)} (${module.xslFile.sizeInBytes} bytes)</td>
                                 </tr>
                                 <tr>
                                     <th scope="row">Created</th>
@@ -67,12 +68,12 @@
                                 <c:forEach var="schema" items="${module.xmlSchemas}">
                                     <tr>
                                         <th>Xml Schema</th>
-                                        <td>${schema.xmlSchema}</td>
+                                        <td>${fn:escapeXml(schema.xmlSchema)}</td>
                                     </tr>
                                 </c:forEach>
                                 <tr>
                                     <th scope="row">Username</th>
-                                    <td>${module.userName}</td>
+                                    <td>${fn:escapeXml(module.userName)}</td>
                                 </tr>
                             </table>
                             <input type="button" onclick="window.location = '<c:url value="/merge/module/edit/${module.id}"/>'" value="Edit"/>

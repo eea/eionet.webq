@@ -6,20 +6,19 @@
 
 <form id="mergeForm" action="<c:url value="/download/merge/files"/>" method="POST">
     <ul>
-    <c:forEach items="${userFiles}" var="file">
-        <li> ${file.name} </li>
-        <input name="selectedUserFile" type="text" hidden="hidden" value="${file.id}"/>
-    </c:forEach>
+        <c:forEach items="${userFiles}" var="file">
+            <li><c:out value="${file.name}" /></li>
+            <input name="selectedUserFile" type="text" hidden="hidden" value="${file.id}"/>
+        </c:forEach>
     </ul>
 
     <h2>Select merging module:</h2>
     <select name="mergeModule">
         <c:forEach items="${mergeModules}" var="module">
-            <option value="${module.id}">'${module.title}' module</option>
+            <option value="${module.id}">'<c:out value="${module.title}" />' module</option>
         </c:forEach>
     </select>
 
     <div style="clear: both;"></div>
     <input type="submit" value="Merge"/>
 </form>
-

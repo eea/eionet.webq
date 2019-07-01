@@ -2,6 +2,7 @@
 <%@ taglib prefix="f" uri="http://www.springframework.org/tags/form" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib prefix="s" uri="http://www.springframework.org/tags" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
 
 <c:choose>
     <c:when test="${projectFile.fileType == 'WEBFORM'}">
@@ -16,7 +17,7 @@
 <h1>Save ${fileTypeLabel}</h1>
     <c:url var="saveUrl" value="/projects/${projectEntry.projectId}/webform/save"/>
     <s:eval expression="T(org.apache.commons.io.FileUtils).byteCountToDisplaySize(projectFile.fileSizeInBytes)" var="humanReadableFileSize"/>
-    <f:form modelAttribute="projectFile" action="${saveUrl}" method="post" enctype="multipart/form-data">
+    <f:form modelAttribute="projectFile" action="${fn:escapeXml(saveUrl)}" method="post" enctype="multipart/form-data">
         <f:errors path="*" element="div" cssClass="error-msg"/>
         <table class="datatable">
             <tr>
@@ -33,7 +34,7 @@
                 <tr>
                     <th scope="row">Current file</th>
                     <td>
-                        <a href="<c:url value="/download/project/${projectEntry.projectId}/file/${projectFile.fileName}"/>">${projectFile.fileName}</a>
+                        <a href="<c:url value="/download/project/${fn:escapeXml(projectEntry.projectId)}/file/${fn:escapeXml(projectFile.fileName)}"/>">${fn:escapeXml(projectFile.fileName)}</a>
                     </td>
                 </tr>
                 <tr>
@@ -45,7 +46,7 @@
                 <tr>
                     <th scope="row">Size</th>
                     <td>
-                        ${humanReadableFileSize} (${projectFile.fileSizeInBytes} bytes)
+                        ${fn:escapeXml(humanReadableFileSize)} (${projectFile.fileSizeInBytes} bytes)
                     </td>
                 </tr>
             </c:if>
@@ -87,6 +88,6 @@
         <f:hidden path="id"/>
         <f:hidden path="fileType"/>
         <input type="submit" value="Save ${fileTypeLabel}"/>
-        <input type="button" onclick="window.location = '<c:url value="/projects/${projectEntry.projectId}/view"/>'" value="Cancel"/>
+        <input type="button" onclick="window.location = '<c:url value="/projects/${fn:escapeXml(projectEntry.projectId)}/view"/>'" value="Cancel"/>
     </f:form>
 

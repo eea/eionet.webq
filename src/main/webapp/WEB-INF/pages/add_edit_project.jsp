@@ -1,5 +1,6 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="f" uri="http://www.springframework.org/tags/form" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
 
 <h1>Save project</h1>
 <f:form modelAttribute="projectEntry" action="save" method="post">
@@ -33,5 +34,5 @@
         </c:otherwise>
     </c:choose>
 
-    <input type="button" onclick="window.location = '<c:url value="${cancelLink}"/>'" value="Cancel"/>
+    <input type="button" onclick="window.location = '<c:url value="${fn:escapeXml(cancelLink)}"/>'" value="Cancel"/>
 </f:form>

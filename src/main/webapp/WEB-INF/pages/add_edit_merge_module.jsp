@@ -2,6 +2,7 @@
 <%@ taglib prefix="f" uri="http://www.springframework.org/tags/form" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib prefix="s" uri="http://www.springframework.org/tags" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
 
 <h1>Save merging module</h1>
 <c:url value="/merge/module/save" var="actionUrl"/>
@@ -51,13 +52,13 @@
                 <th scope="row">Current file</th>
                 <td>
                     <s:eval expression="T(org.apache.commons.io.FileUtils).byteCountToDisplaySize(mergeModule.xslFile.sizeInBytes)" var="humanReadableFileSize"/>
-                    <a href="<c:url value="/download/merge/file/${mergeModule.xslFile.name}"/>">${mergeModule.xslFile.name}</a>
+                    <a href="<c:url value="/download/merge/file/${fn:escapeXml(mergeModule.xslFile.name)}"/>">${fn:escapeXml(mergeModule.xslFile.name)}</a>
                 </td>
             </tr>
             <tr>
                 <th scope="row">Size</th>
                 <td>
-                        ${humanReadableFileSize} (${mergeModule.xslFile.sizeInBytes} bytes)
+                        ${fn:escapeXml(humanReadableFileSize)} (${mergeModule.xslFile.sizeInBytes} bytes)
                 </td>
             </tr>
             <tr>

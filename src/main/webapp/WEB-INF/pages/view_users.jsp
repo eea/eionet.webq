@@ -1,4 +1,6 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
+
 <script type="text/javascript" src="<c:url value="/js/jquery-1.10.2.min.js"/>"></script>
 <script type="text/javascript" src="<c:url value="/js/jquery-ui-1.10.3.custom.min.js"/>"></script>
 <link rel="stylesheet" type="text/css" href="<c:url value="/css/jquery-ui-1.10.3.custom.min.css"/>">
@@ -16,18 +18,18 @@
     </tr>
     <c:forEach var="user" items="${allUsers}">
             <tr>
-                <td>${user.username}</td>
+                <td>${fn:escapeXml(user.username)}</td>
                 <td>
                     <c:forEach var="authority" items="${user.authorities}" varStatus="loopStatus">
-                        ${authority}
+                        ${fn:escapeXml(authority)}
                         <c:if test="${!loopStatus.last}"> , </c:if>
                     </c:forEach>
                 </td>
                 <td>
-                    <input class="edit-button" type="button" value="Edit" href="${contextPath}/users/existing?userName=${user.username}">
+                    <input class="edit-button" type="button" value="Edit" href="${contextPath}/users/existing?userName=${fn:escapeXml(user.username)}">
                 </td>
                 <td>
-                    <input class="delete-button" type="button" value="Delete" href="${contextPath}/users/delete?userName=${user.username}">
+                    <input class="delete-button" type="button" value="Delete" href="${contextPath}/users/delete?userName=${fn:escapeXml(user.username)}">
                 </td>
             </tr>
     </c:forEach>
