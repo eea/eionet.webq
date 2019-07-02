@@ -221,8 +221,8 @@
             </div>
         </div> <!-- container -->
         <div id="pagefoot">
-            <p><a href="http://www.eea.europa.eu/"><b>European Environment Agency</b></a>
-            <br/>Kgs. Nytorv 6, DK-1050 Copenhagen K, Denmark - Phone: +45 3336 7100</p>
+            <p><a href="https://www.eea.europa.eu/"><b>European Environment Agency</b></a>
+            <br/>Kgs. Nytorv 6, DK-1050 Copenhagen K, Denmark</p>
         </div>
         <div style="display:none">baseURI: <xsl:value-of select="$baseURI"/></div>
         <div style="display:none">envelope: <xsl:value-of select="$envelope"/></div>
