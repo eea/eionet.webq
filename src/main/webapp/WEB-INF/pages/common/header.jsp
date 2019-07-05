@@ -23,8 +23,7 @@
         </c:choose>
         <a id="printlink" title="Print this page" href="javascript:this.print();"><span>Print</span></a>
         <a id="fullscreenlink" href="javascript:toggleFullScreenMode()" title="Switch to/from full screen mode"><span>Switch to/from full screen mode</span></a>
-        <%--TODO about page--%>
-        <a id="acronymlink" href="about.action" title="About ${fn:escapeXml(initParam.appDispName)}"><span>About</span></a>
+        <a id="eionetlink" title="Go to Eionet portal" href="https://www.eionet.europa.eu/"><span>Eionet portal</span></a>
     </div>
 </div>
 
@@ -37,9 +36,7 @@
     <div id="sitetagline">This service is part of Reportnet</div>
 </div>
 
-<div id="menuribbon">
-    <%@ include file="/WEB-INF/pages/dropdownmenus.txt" %>
-</div>
+<div id="menuribbon"></div>
 
 <div class="breadcrumbtrail">
     <div class="breadcrumbhead">You are here:</div>
