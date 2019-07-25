@@ -36,7 +36,6 @@ import eionet.webq.service.impl.project.export.ProjectMetadata;
 import eionet.webq.service.impl.project.export.ProjectMetadataSerializer;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
