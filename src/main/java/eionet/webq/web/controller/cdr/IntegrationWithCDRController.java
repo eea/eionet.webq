@@ -34,19 +34,14 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -156,19 +151,6 @@ public class IntegrationWithCDRController {
             return deliverMenu(webForms, xmlFiles, parameters, model);
         }
         return editFile(webForms.iterator().next(), fileName, instanceUrl, parameters);
-    }
-
-    /**
-     * IllegalArgumentException handler for this class. If request parameters cannot be handled by this application, respond with an error.
-     *
-     * @param request  current request
-     * @param response http response
-     */
-    @ExceptionHandler(IllegalArgumentException.class)
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    // TODO: remove if not needed any more
-    public void formUnavailable(HttpServletRequest request, HttpServletResponse response) {
-        LOGGER.info("tst");
     }
 
     /**
