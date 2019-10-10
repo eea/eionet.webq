@@ -33,6 +33,7 @@ import org.apache.http.ssl.SSLContexts;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -64,7 +65,6 @@ import org.springframework.web.client.RestOperations;
  */
 @Component
 public class CdrAuthorizationInterceptor extends HandlerInterceptorAdapter {
-
 
     public static final String BYPASS_AUTH_HEADER="ByPassCDRInterceptorAuth";
 
@@ -128,6 +128,10 @@ public class CdrAuthorizationInterceptor extends HandlerInterceptorAdapter {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+        String ByPassAuth = request.getHeader(CdrAuthorizationInterceptor.BYPASS_AUTH_HEADER);
+        if(ByPassAuth!=null && ByPassAuth.equals("true")){
+            return true;
+        }
         String authorization = request.getHeader(AUTHORIZATION_HEADER);
 //        if (true) return PROCEED;
         if (StringUtils.isNotEmpty(authorization) || request.getParameter("auth") != null) {
@@ -158,10 +162,10 @@ public class CdrAuthorizationInterceptor extends HandlerInterceptorAdapter {
                     headers.add("Cookie", cookiesConverter.convertCookieToString(cookie));
                 }
                 String urlToFetch = extractCdrEnvelopeUrl(request) + "/" + cdrEnvelopePropertiesMethod;
-                    //ResponseEntity<String> loginResponse = restOperations.exchange(urlToFetch, HttpMethod.GET,
-                    //        new HttpEntity<Object>(headers), String.class);
+                //ResponseEntity<String> loginResponse = restOperations.exchange(urlToFetch, HttpMethod.GET,
+                //        new HttpEntity<Object>(headers), String.class);
 
-                 HttpResponse responseFromCdr = fetchUrlWithoutRedirection(urlToFetch, headers);
+                HttpResponse responseFromCdr = fetchUrlWithoutRedirection(urlToFetch, headers);
                 try {
                     int statusCode = responseFromCdr.getStatusLine().getStatusCode();
 
@@ -270,34 +274,34 @@ public class CdrAuthorizationInterceptor extends HandlerInterceptorAdapter {
      * @throws java.security.NoSuchAlgorithmException
      * @throws java.security.KeyManagementException
      */
-    
+
     protected CloseableHttpResponse fetchUrlWithoutRedirection(String url, HttpHeaders headers) throws IOException, NoSuchAlgorithmException, KeyManagementException {
-         HttpClientBuilder httpClientBuilder = HttpClientBuilder.create();
-         httpClientBuilder.setSSLContext(SSLContexts.custom().useProtocol("TLSv1.2").build()).setRedirectStrategy(
-                 new RedirectStrategy() {
-             @Override
-             public boolean isRedirected(HttpRequest httpRequest, HttpResponse httpResponse, HttpContext httpContext)
-                     throws ProtocolException {
-                 return false;
-             }
+        HttpClientBuilder httpClientBuilder = HttpClientBuilder.create();
+        httpClientBuilder.setSSLContext(SSLContexts.custom().useProtocol("TLSv1.2").build()).setRedirectStrategy(
+                new RedirectStrategy() {
+                    @Override
+                    public boolean isRedirected(HttpRequest httpRequest, HttpResponse httpResponse, HttpContext httpContext)
+                            throws ProtocolException {
+                        return false;
+                    }
 
-             @Override
-             public HttpUriRequest getRedirect(HttpRequest httpRequest, HttpResponse httpResponse,
-                     HttpContext httpContext) throws ProtocolException {
-                 return null;
-             }
-         });
-         HttpGet httpget = new HttpGet(url);
+                    @Override
+                    public HttpUriRequest getRedirect(HttpRequest httpRequest, HttpResponse httpResponse,
+                                                      HttpContext httpContext) throws ProtocolException {
+                        return null;
+                    }
+                });
+        HttpGet httpget = new HttpGet(url);
 
-         for (Map.Entry<String, List<String>> header : headers.entrySet()) {
-             for (String value : header.getValue()) {
-                 httpget.addHeader(header.getKey(), value);
-             }
-         }
-         CloseableHttpClient client = httpClientBuilder.build();
-         CloseableHttpResponse httpResponse = client.execute(httpget);
-         return httpResponse;
-     }   
+        for (Map.Entry<String, List<String>> header : headers.entrySet()) {
+            for (String value : header.getValue()) {
+                httpget.addHeader(header.getKey(), value);
+            }
+        }
+        CloseableHttpClient client = httpClientBuilder.build();
+        CloseableHttpResponse httpResponse = client.execute(httpget);
+        return httpResponse;
+    }
 }
 
 

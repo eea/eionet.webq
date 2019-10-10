@@ -29,6 +29,7 @@ import eionet.webq.service.CDREnvelopeService.XmlFile;
 import eionet.webq.service.ProjectFileService;
 import eionet.webq.service.UserFileService;
 import eionet.webq.web.AbstractContextControllerTests;
+import eionet.webq.web.interceptor.CdrAuthorizationInterceptor;
 import org.apache.xmlrpc.XmlRpcException;
 import org.apache.xmlrpc.client.XmlRpcClient;
 import org.apache.xmlrpc.client.XmlRpcClientConfig;
@@ -69,6 +70,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @Transactional
+
 public class IntegrationWithCDRControllerIntegrationTest extends AbstractContextControllerTests {
     @Autowired
     private XmlRpcClient xmlRpcClient;
@@ -92,6 +94,7 @@ public class IntegrationWithCDRControllerIntegrationTest extends AbstractContext
     @Before
     public void setUp() throws Exception {
         Mockito.reset(xmlRpcClient);
+
     }
     
     @Test
@@ -150,7 +153,7 @@ public class IntegrationWithCDRControllerIntegrationTest extends AbstractContext
 
         MvcResult mvcResult =
                 mvc().perform(post("/cdr/edit/file").param("formId", String.valueOf(formId)).param("fileName", fileName)
-                        .param("remoteFileUrl", "http://remote-file.url").session(session))
+                        .param("remoteFileUrl", "http://remote-file.url").header(CdrAuthorizationInterceptor.BYPASS_AUTH_HEADER,"true").session(session))
                         .andExpect(status().isFound()).andReturn();
 
         String userId = DigestUtils.md5Hex(session.getId());
@@ -174,7 +177,7 @@ public class IntegrationWithCDRControllerIntegrationTest extends AbstractContext
         saveAvailableWebFormWithSchema(XML_SCHEMA);
 
         MvcResult mvcResult =
-                mvc().perform(post("/WebQMenu").param("envelope", ENVELOPE_URL)).andExpect(status().isFound()).andReturn();
+                mvc().perform(post("/WebQMenu").param("envelope", ENVELOPE_URL).header(CdrAuthorizationInterceptor.BYPASS_AUTH_HEADER,"true")).andExpect(status().isFound()).andReturn();
 
         assertTrue(mvcResult.getResponse().getRedirectedUrl().startsWith(webqUrl + "/xform"));
     }
@@ -185,7 +188,7 @@ public class IntegrationWithCDRControllerIntegrationTest extends AbstractContext
         saveAvailableWebFormWithSchema(XML_SCHEMA);
 
         MvcResult mvcResult =
-                mvc().perform(post("/WebQMenu").param("envelope", ENVELOPE_URL).param("add", "true").param("schema", XML_SCHEMA))
+                mvc().perform(post("/WebQMenu").param("envelope", ENVELOPE_URL).header(CdrAuthorizationInterceptor.BYPASS_AUTH_HEADER,"true").param("add", "true").param("schema", XML_SCHEMA))
                         .andExpect(status().isFound()).andReturn();
 
         assertTrue(mvcResult.getResponse().getRedirectedUrl().startsWith(webqUrl + "/xform"));
@@ -193,13 +196,13 @@ public class IntegrationWithCDRControllerIntegrationTest extends AbstractContext
 
     @Test
     public void webQMenu_ifNoWebFormsAvailable_Error() throws Exception {
-        mvc().perform(post("/WebQMenu").param("envelope", ENVELOPE_URL))
+        mvc().perform(post("/WebQMenu").param("envelope", ENVELOPE_URL).header(CdrAuthorizationInterceptor.BYPASS_AUTH_HEADER,"true"))
                 .andExpect(status().is(HttpStatus.INTERNAL_SERVER_ERROR.value()));
     }
 
     @Test
     public void webQEdit_IfNoWebFormsAvailable_Error() throws Exception {
-        mvc().perform(post("/WebQEdit"))
+        mvc().perform(post("/WebQEdit").header(CdrAuthorizationInterceptor.BYPASS_AUTH_HEADER,"true"))
                 .andExpect(status().is(HttpStatus.INTERNAL_SERVER_ERROR.value()));
     }
     
@@ -235,7 +238,7 @@ public class IntegrationWithCDRControllerIntegrationTest extends AbstractContext
     }
 
     private ResultActions requestWebQMenu() throws Exception {
-        return request(post("/WebQMenu").param("envelope", ENVELOPE_URL));
+        return request(post("/WebQMenu").param("envelope", ENVELOPE_URL).header(CdrAuthorizationInterceptor.BYPASS_AUTH_HEADER,"true"));
     }
 
     private int extractFileIdFromXFormRedirectUrl(String redirectUrl) {
@@ -246,3 +249,4 @@ public class IntegrationWithCDRControllerIntegrationTest extends AbstractContext
         return Integer.valueOf(matcher.group(1));
     }
 }
+
