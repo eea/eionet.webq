@@ -61,5 +61,5 @@ Build with Maven `mvn clean install`
 
 ### Run locally
 
-The developer's eionet username and password must be inserted in the 'users' table.
+The developer's eionet username and password '' must be inserted in the 'users' table.
 The developer's username and authority (e.g. 'ADMIN') must be inserted in the 'authorities' table.
