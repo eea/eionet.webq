@@ -153,10 +153,13 @@ public class CdrAuthorizationInterceptor extends HandlerInterceptorAdapter {
             Cookie[] cookies = request.getCookies();
             if (cookies != null) {
                 HttpHeaders headers = new HttpHeaders();
+                 String cookieHeader ="";
                 for (Cookie cookie : cookies) {
+
                     // put ZopeId parameter to request header. It works only when the value is surrounded with quotes.
-                    headers.add("Cookie", cookiesConverter.convertCookieToString(cookie));
+                    cookieHeader = cookieHeader.concat(cookiesConverter.convertCookieToString(cookie)+" ");
                 }
+                headers.add("Cookie",cookieHeader);
                 String urlToFetch = extractCdrEnvelopeUrl(request) + "/" + cdrEnvelopePropertiesMethod;
                     //ResponseEntity<String> loginResponse = restOperations.exchange(urlToFetch, HttpMethod.GET,
                     //        new HttpEntity<Object>(headers), String.class);
@@ -270,7 +273,7 @@ public class CdrAuthorizationInterceptor extends HandlerInterceptorAdapter {
      * @throws java.security.NoSuchAlgorithmException
      * @throws java.security.KeyManagementException
      */
-    
+
     protected CloseableHttpResponse fetchUrlWithoutRedirection(String url, HttpHeaders headers) throws IOException, NoSuchAlgorithmException, KeyManagementException {
          HttpClientBuilder httpClientBuilder = HttpClientBuilder.create();
          httpClientBuilder.setSSLContext(SSLContexts.custom().useProtocol("TLSv1.2").build()).setRedirectStrategy(
@@ -297,7 +300,7 @@ public class CdrAuthorizationInterceptor extends HandlerInterceptorAdapter {
          CloseableHttpClient client = httpClientBuilder.build();
          CloseableHttpResponse httpResponse = client.execute(httpget);
          return httpResponse;
-     }   
+     }
 }
 
 
