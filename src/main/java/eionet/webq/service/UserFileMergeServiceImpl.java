@@ -23,8 +23,10 @@ package eionet.webq.service;
 import eionet.webq.dao.orm.MergeModule;
 import eionet.webq.dao.orm.UserFile;
 import org.apache.log4j.Logger;
+import org.apache.tools.ant.util.XmlConstants;
 import org.springframework.stereotype.Service;
 
+import javax.xml.XMLConstants;
 import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerConfigurationException;
@@ -88,7 +90,9 @@ public class UserFileMergeServiceImpl implements UserFileMergeService {
 
         Transformer transformer = null;
         try {
-            transformer = TransformerFactory.newInstance().newTransformer(xslSource);
+            TransformerFactory transformerFactory = TransformerFactory.newInstance();
+            transformerFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+            transformer = transformerFactory.newTransformer(xslSource);
             transformer.setURIResolver(resolver);
         } catch (TransformerConfigurationException e) {
             LOGGER.warn("Unable to create transformer for user files merge", e);
