@@ -52,6 +52,8 @@ import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -160,6 +162,13 @@ public class CdrAuthorizationInterceptor extends HandlerInterceptorAdapter {
                     cookieHeader = cookieHeader.concat(cookiesConverter.convertCookieToString(cookie)+" ");
                 }
                 headers.add("Cookie",cookieHeader);
+
+                String instanceUrl = this.extractCdrEnvelopeUrl(request);
+                if(!this.isInstanceURLWhiteListed(instanceUrl)){
+                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+                    return STOP_REQUEST_PROPAGATION;
+                }
+
                 String urlToFetch = extractCdrEnvelopeUrl(request) + "/" + cdrEnvelopePropertiesMethod;
                     //ResponseEntity<String> loginResponse = restOperations.exchange(urlToFetch, HttpMethod.GET,
                     //        new HttpEntity<Object>(headers), String.class);
@@ -232,8 +241,7 @@ public class CdrAuthorizationInterceptor extends HandlerInterceptorAdapter {
         if (StringUtils.isNotEmpty(request.getParameter("envelope"))) {
             return request.getParameter("envelope");
         } else if (StringUtils.isNotEmpty(request.getParameter("instance"))) {
-            int fileNameSeparatorIndex = request.getParameter("instance").lastIndexOf("/");
-            return request.getParameter("instance").substring(0, fileNameSeparatorIndex);
+          return this.extractCdrInstanceUrlWithoutFileName(request);
         } else {
             return null;
         }
@@ -301,6 +309,23 @@ public class CdrAuthorizationInterceptor extends HandlerInterceptorAdapter {
          CloseableHttpResponse httpResponse = client.execute(httpget);
          return httpResponse;
      }
+
+     private boolean isInstanceURLWhiteListed(String instanceUrl){
+
+         String pattern ="^(?:https:\\/\\/)?(?:[^@\\/\\n]+@)?(?:www\\.)?([^:\\/?\\n]+)?(\\.eionet\\.europa\\.eu$)";
+         Matcher matcher = Pattern.compile(pattern).matcher(instanceUrl);
+       if(instanceUrl.startsWith("https://")&&instanceUrl.endsWith("eionet.europa.eu")){
+           return true;
+       }else{
+           return false;
+       }
+     }
+
+     private String extractCdrInstanceUrlWithoutFileName(HttpServletRequest request){
+         int fileNameSeparatorIndex = request.getParameter("instance").lastIndexOf("/");
+         return request.getParameter("instance").substring(0, fileNameSeparatorIndex);
+     }
+
 }
 
 
