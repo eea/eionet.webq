@@ -47,6 +47,8 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
@@ -69,6 +71,8 @@ public class CdrAuthorizationInterceptor extends HandlerInterceptorAdapter {
 
 
     public static final String BYPASS_AUTH_HEADER="ByPassCDRInterceptorAuth";
+
+    public static final String EIONET_DOMAIN="eionet.europa.eu";
 
     /**
      * Authorization failed attribute.
@@ -310,11 +314,10 @@ public class CdrAuthorizationInterceptor extends HandlerInterceptorAdapter {
          return httpResponse;
      }
 
-     private boolean isInstanceURLWhiteListed(String instanceUrl){
-
-         String pattern ="^(?:https:\\/\\/)?(?:[^@\\/\\n]+@)?(?:www\\.)?([^:\\/?\\n]+)?(\\.eionet\\.europa\\.eu$)";
-         Matcher matcher = Pattern.compile(pattern).matcher(instanceUrl);
-       if(instanceUrl.startsWith("https://")&&instanceUrl.endsWith("eionet.europa.eu")){
+     protected boolean isInstanceURLWhiteListed(String instanceUrl) throws URISyntaxException {
+         URI uri = new URI(instanceUrl);
+         String domain = uri.getHost();
+         if(domain.endsWith(EIONET_DOMAIN)){
            return true;
        }else{
            return false;
