@@ -63,6 +63,8 @@ public class JsonXMLBidirectionalConverter {
                 .autoPrimitive(true)
                 .build();
         XMLInputFactory reader = XMLInputFactory.newInstance();
+        reader.setProperty(XMLInputFactory.SUPPORT_DTD,false);
+
         JsonXMLOutputFactory writer = new JsonXMLOutputFactory(config);
         return convert(reader, writer, xml);
     }
@@ -79,6 +81,8 @@ public class JsonXMLBidirectionalConverter {
             .multiplePI(false)
             .build();
         XMLInputFactory reader = new JsonXMLInputFactory(config);
+        reader.setProperty(XMLInputFactory.SUPPORT_DTD,false);
+
         XMLOutputFactory writer = XMLOutputFactory.newInstance();
         return convert(reader, writer, json);
     }

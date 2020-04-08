@@ -59,6 +59,7 @@ public class XmlSchemaExtractor {
      */
     public String extractXmlSchema(byte[] source) {
         XMLInputFactory xmlInputFactory = XMLInputFactory.newInstance();
+        xmlInputFactory.setProperty(XMLInputFactory.SUPPORT_DTD,false);
         ByteArrayInputStream bais = new ByteArrayInputStream(source);
         XMLStreamReader xmlStreamReader = null;
         try {

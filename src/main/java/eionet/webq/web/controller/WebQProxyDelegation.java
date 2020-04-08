@@ -53,6 +53,7 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.xml.XMLConstants;
 import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
@@ -348,7 +349,9 @@ public class WebQProxyDelegation {
         ByteArrayOutputStream xmlResultOutputStream = new ByteArrayOutputStream();
 
         try {
-            Transformer transformer = TransformerFactory.newInstance().newTransformer(xslSource);
+            TransformerFactory transformerFactory = TransformerFactory.newInstance();
+            transformerFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING,true);
+               Transformer transformer = transformerFactory.newTransformer(xslSource);
             for (Map.Entry<String, String[]> parameter : request.getParameterMap().entrySet()) {
                 if (!parameter.getKey().equals("xmlUri") && !parameter.getKey().equals("fileId") && !parameter.getKey()
                         .equals("xsltUri") && !parameter.getKey().equals("format")) {
