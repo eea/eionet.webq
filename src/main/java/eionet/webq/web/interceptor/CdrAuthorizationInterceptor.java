@@ -47,11 +47,15 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -67,6 +71,8 @@ public class CdrAuthorizationInterceptor extends HandlerInterceptorAdapter {
 
 
     public static final String BYPASS_AUTH_HEADER="ByPassCDRInterceptorAuth";
+
+    public static final String EIONET_DOMAIN="eionet.europa.eu";
 
     /**
      * Authorization failed attribute.
@@ -160,6 +166,13 @@ public class CdrAuthorizationInterceptor extends HandlerInterceptorAdapter {
                     cookieHeader = cookieHeader.concat(cookiesConverter.convertCookieToString(cookie)+" ");
                 }
                 headers.add("Cookie",cookieHeader);
+
+                String instanceUrl = this.extractCdrEnvelopeUrl(request);
+                if(!this.isInstanceURLWhiteListed(instanceUrl)){
+                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+                    return STOP_REQUEST_PROPAGATION;
+                }
+
                 String urlToFetch = extractCdrEnvelopeUrl(request) + "/" + cdrEnvelopePropertiesMethod;
                     //ResponseEntity<String> loginResponse = restOperations.exchange(urlToFetch, HttpMethod.GET,
                     //        new HttpEntity<Object>(headers), String.class);
@@ -232,8 +245,7 @@ public class CdrAuthorizationInterceptor extends HandlerInterceptorAdapter {
         if (StringUtils.isNotEmpty(request.getParameter("envelope"))) {
             return request.getParameter("envelope");
         } else if (StringUtils.isNotEmpty(request.getParameter("instance"))) {
-            int fileNameSeparatorIndex = request.getParameter("instance").lastIndexOf("/");
-            return request.getParameter("instance").substring(0, fileNameSeparatorIndex);
+          return this.extractCdrInstanceUrlWithoutFileName(request);
         } else {
             return null;
         }
@@ -301,6 +313,22 @@ public class CdrAuthorizationInterceptor extends HandlerInterceptorAdapter {
          CloseableHttpResponse httpResponse = client.execute(httpget);
          return httpResponse;
      }
+
+     protected boolean isInstanceURLWhiteListed(String instanceUrl) throws URISyntaxException {
+         URI uri = new URI(instanceUrl);
+         String domain = uri.getHost();
+         if(domain.endsWith(EIONET_DOMAIN)){
+           return true;
+       }else{
+           return false;
+       }
+     }
+
+     private String extractCdrInstanceUrlWithoutFileName(HttpServletRequest request){
+         int fileNameSeparatorIndex = request.getParameter("instance").lastIndexOf("/");
+         return request.getParameter("instance").substring(0, fileNameSeparatorIndex);
+     }
+
 }
 
 

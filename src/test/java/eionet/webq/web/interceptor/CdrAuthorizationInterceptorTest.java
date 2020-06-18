@@ -24,6 +24,7 @@ import eionet.webq.converter.CookiesToStringBidirectionalConverter;
 import org.apache.http.ProtocolVersion;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.message.BasicStatusLine;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -117,9 +118,9 @@ public class CdrAuthorizationInterceptorTest {
     @Test
     public void whenQueryForUrlThroughInterceptor_extractUrlFromInstanceRequestParameterAndUseCookies() throws Exception {
         MockHttpServletRequest request = requestWithCookies();
-        String expectedValue = "http://cdr.eu/envelope";
-        request.setParameter("instance", "http://cdr.eu/envelope/instance.xml");
-        assertUrlIsExtractedFromCookieRequest(request, "http://cdr.eu/envelope");
+        String expectedValue = "https://cdr.eionet.europa.eu/envelope";
+        request.setParameter("instance", "https://cdr.eionet.europa.eu/envelope/instance.xml");
+        assertUrlIsExtractedFromCookieRequest(request, "https://cdr.eionet.europa.eu/envelope");
     }
 
     @Test
@@ -183,6 +184,20 @@ public class CdrAuthorizationInterceptorTest {
         verify(session).removeAttribute(AUTHORIZATION_TRY_COUNT);
     }
 
+
+    @Test
+    public void testIsInstanceUrlWhiteListedWithCorrectUrl() throws Exception{
+        String correctUrl = "https://cdr.eionet.europa.eu";
+        boolean result = interceptor.isInstanceURLWhiteListed(correctUrl);
+        Assert.assertTrue(result);
+    }
+
+    @Test
+    public void testIsInstanceUrlWhiteListedWithMalformedURL() throws Exception{
+        String correctUrl = "https://example.com/testFile.xml";
+        boolean result = interceptor.isInstanceURLWhiteListed(correctUrl);
+        Assert.assertFalse(result);
+    }
     private void restClientWillThrowException() {
         when(restOperations.postForEntity(anyString(), anyObject(), any(Class.class)))
                 .thenThrow(new HttpClientErrorException(HttpStatus.UNAUTHORIZED));
