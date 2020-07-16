@@ -21,7 +21,7 @@
         <checkstyle.config.location>${basedir}/docs/checkstyle.xml</checkstyle.config.location>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <spring-security.version>4.2.13.RELEASE</spring-security.version>
+        <spring-security.version>4.2.17.RELEASE</spring-security.version>
         <hibernate.version>4.2.4.Final</hibernate.version>
         <maven.resources.overwrite>true</maven.resources.overwrite>
         <maven.build.timestamp.format>yyyy-MM-dd'T'HHmm</maven.build.timestamp.format>
@@ -166,7 +166,7 @@
         <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-validator</artifactId>
-            <version>4.3.2.Final</version>
+            <version>5.0.0.Final</version>
         </dependency>
 
         <!-- betterFORM -->
@@ -278,7 +278,7 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>15.0</version>
+            <version>24.1.1-jre</version>
         </dependency>
 
         <!--Logging-->
