@@ -135,6 +135,12 @@ public class CdrAuthorizationInterceptor extends HandlerInterceptorAdapter {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         String authorization = request.getHeader(AUTHORIZATION_HEADER);
+
+        String instanceUrl = this.extractCdrEnvelopeUrl(request);
+        if(!this.isInstanceURLWhiteListed(instanceUrl)){
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+            return STOP_REQUEST_PROPAGATION;
+        }
 //        if (true) return PROCEED;
         if (StringUtils.isNotEmpty(authorization) || request.getParameter("auth") != null) {
             // if Basic auth is present in the request, then try to log in to CDR to test if it is valid token for given domain.
@@ -167,11 +173,6 @@ public class CdrAuthorizationInterceptor extends HandlerInterceptorAdapter {
                 }
                 headers.add("Cookie",cookieHeader);
 
-                String instanceUrl = this.extractCdrEnvelopeUrl(request);
-                if(!this.isInstanceURLWhiteListed(instanceUrl)){
-                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
-                    return STOP_REQUEST_PROPAGATION;
-                }
 
                 String urlToFetch = extractCdrEnvelopeUrl(request) + "/" + cdrEnvelopePropertiesMethod;
                     //ResponseEntity<String> loginResponse = restOperations.exchange(urlToFetch, HttpMethod.GET,
