@@ -5,4 +5,4 @@
 
 <div class="error-msg">Technical info: <c:out value="${status}" /> - <c:out value="${errorMessage}" /></div>
 
-<p>The error has been logged and it will be addressed by the development team. For assistance please contact the helpdesk.</p>
+<p>The error has been logged and it will be addressed by the development team. For assistance please contact the <a href="mailto:helpdesk@eionet.europa.eu">Eionet helpdesk</a></p>
