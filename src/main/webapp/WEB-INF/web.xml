@@ -81,6 +81,10 @@
         <url-pattern>/error/*</url-pattern>
     </servlet-mapping>
 
+    <error-page>
+        <location>/general/errors</location>
+    </error-page>
+
     <servlet>
         <servlet-name>Flux</servlet-name>
         <servlet-class>org.directwebremoting.servlet.DwrServlet</servlet-class>
