@@ -39,11 +39,7 @@ stage ('Unit Tests and Sonarqube') {
              sh '''mvn clean -B -V -P docker verify  '''
 
       }
-      post {
-        always {
-            junit 'target/failsafe-reports/*.xml'
-        }
-      }
+
     }
 
 
