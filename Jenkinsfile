@@ -36,10 +36,8 @@ stage ('Unit Tests and Sonarqube') {
         not { buildingTag() }
       }
       steps {
-                withSonarQubeEnv('Sonarqube') {
-                    sh '''mvn clean -B -V -P docker verify  '''
+             sh '''mvn clean -B -V -P docker verify  '''
 
-                }
       }
       post {
         always {
