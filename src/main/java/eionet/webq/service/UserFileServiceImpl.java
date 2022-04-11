@@ -148,7 +148,6 @@ public class UserFileServiceImpl implements UserFileService {
     public Collection<UserFile> allUploadedFiles() {
         String userId = userId();
         Collection<UserFile> userFiles = storage.findAllUserFiles(userId);
-        LOGGER.info("Loaded " + userFiles.size() + " files for user=" + userId);
         return userFiles;
     }
 
