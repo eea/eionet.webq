@@ -20,7 +20,6 @@ pipeline {
   tools {
     maven 'maven3'
     jdk 'Java8'
-    jdk 'Java11'
   }
 
   stages {
