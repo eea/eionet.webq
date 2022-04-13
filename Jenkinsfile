@@ -69,7 +69,7 @@ pipeline {
          not { buildingTag() }
        }
        tools {
-          maven 'SonarQubeScanner'
+          tool 'SonarQubeScanner'
           jdk 'Java11'
        }       
        steps {
