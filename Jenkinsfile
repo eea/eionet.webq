@@ -69,6 +69,7 @@ pipeline {
          not { buildingTag() }
        }
        tools {
+          maven 'maven3'
           jdk 'Java11'
        }       
        steps {
