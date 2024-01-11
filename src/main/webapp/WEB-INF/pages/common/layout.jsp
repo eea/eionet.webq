@@ -37,16 +37,5 @@
             </div>
             <tiles:insertAttribute name="footer" />
         </div>
-        <%-- FIXME log server info for debugging. --%>
-        <div style="display:none">java.net.InetAddress.getLocalHost(): <%=java.net.InetAddress.getLocalHost() %></div>
-        <div style="display:none">request.getRemoteAddr(): <%=request.getRemoteAddr() %></div>
-        <div style="display:none">request.getContextPath(): <%=request.getContextPath() %></div>
-        <div style="display:none">request.getPathInfo(): <%=request.getPathInfo() %></div>
-        <div style="display:none">request.getRequestURL(): <%=request.getRequestURL() %></div>
-        <div style="display:none">request.getRequestURI(): <%=request.getRequestURI() %></div>
-        <div style="display:none">request.getRemoteHost(): <%=request.getRemoteHost() %></div>
-        <div style="display:none">request.getServerName(): <%=request.getServerName() %></div>
-        <div style="display:none">request.getScheme(): <%=request.getScheme() %></div>
-        <div style="display:none">session.getId(): <%=session.getId() %></div>
     </body>
 </html>
