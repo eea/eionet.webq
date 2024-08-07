@@ -70,7 +70,7 @@ pipeline {
        }
        tools {
           maven 'maven3'
-          jdk 'Java11'
+          jdk 'Java17'
        }       
        steps {
             script {
