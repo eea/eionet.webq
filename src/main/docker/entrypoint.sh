@@ -141,7 +141,7 @@ function create_https {
     SSLSessionCacheTimeout  300
 
     <VirtualHost _default_:443>
-    ServerAdmin bdr.helpdesk@eea.europa.eu
+    ServerAdmin ServiceDesk@eea.europa.eu
 
     SSLEngine on
     SSLCertificateFile $CONFDIR/server.crt
@@ -181,7 +181,7 @@ function create_https {
 #####################################################
 function create_lb {
 cat >> $CONFIGFILE <<!!
-ServerAdmin bdr.helpdesk@eea.europa.eu
+ServerAdmin ServiceDesk@eea.europa.eu
 Header add Set-Cookie "ROUTEID=.%{BALANCER_WORKER_ROUTE}e; path=/" env=BALANCER_ROUTE_CHANGED
 
 <Proxy balancer://mycluster>
