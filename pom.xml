@@ -16,7 +16,7 @@
         <jdk.version>1.8</jdk.version>
         <mysql.version>5.1.43</mysql.version>
         <jackson.version>2.10.3</jackson.version>
-        <h2.version>1.3.172</h2.version>
+        <h2.version>2.1.210</h2.version>
         <slf4j.version>1.7.25</slf4j.version>
         <checkstyle.config.location>${basedir}/docs/checkstyle.xml</checkstyle.config.location>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
