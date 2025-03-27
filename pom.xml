@@ -14,7 +14,6 @@
         <spring.version>4.3.24.RELEASE</spring.version>
         <junit.version>4.12</junit.version>
         <jdk.version>1.8</jdk.version>
-        <mysql.version>5.1.43</mysql.version>
         <jackson.version>2.10.3</jackson.version>
         <h2.version>1.3.172</h2.version>
         <slf4j.version>1.7.25</slf4j.version>
@@ -48,16 +47,16 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
-            <version>${mysql.version}</version>
+            <groupId>com.mysql</groupId>
+            <artifactId>mysql-connector-j</artifactId>
+            <version>8.4.0</version>
         </dependency>
 
         <!--Liquibase-->
         <dependency>
             <groupId>org.liquibase</groupId>
             <artifactId>liquibase-core</artifactId>
-            <version>3.0.5</version>
+            <version>4.8.0</version>
         </dependency>
 
         <!-- Spring 4 dependencies -->
@@ -441,7 +440,7 @@
             <plugin>
                 <groupId>org.liquibase</groupId>
                 <artifactId>liquibase-maven-plugin</artifactId>
-                <version>3.0.5</version>
+                <version>4.8.0</version>
                 <configuration>
                     <propertyFile>target/classes/liquibase.properties</propertyFile>
                     <changeLogFile>src/main/resources/eionet/webq/dao/changelog.xml</changeLogFile>
@@ -623,7 +622,7 @@
                           <port>tomcat.port:8080</port>
                         </ports>
                         <env>
-                          <CATALINA_OPTS>-Djava.security.egd=file:/dev/./urandom -Ddb.driver=com.mysql.jdbc.Driver -Ddb.url=jdbc:mysql://webqdb/webq2?maxAllowedPacket=32212254720 -Ddb.username=itests -Ddb.password=password</CATALINA_OPTS>
+                          <CATALINA_OPTS>-Djava.security.egd=file:/dev/./urandom -Ddb.driver=com.mysql.cj.jdbc.Driver -Ddb.url=jdbc:mysql://webqdb/webq2?maxAllowedPacket=32212254720 -Ddb.username=itests -Ddb.password=password</CATALINA_OPTS>
                           <JAVA_OPTS>-Xmx3072m</JAVA_OPTS>
                         </env>
                         <wait>
@@ -733,7 +732,7 @@
                   <!-- properties for the integration tests -->
                   <!-- note that it is the Tomcat container that runs liquibase -->
                   <systemPropertyVariables>
-                    <db.driver>com.mysql.jdbc.Driver</db.driver>
+                    <db.driver>com.mysql.cj.jdbc.Driver</db.driver>
                     <db.url>jdbc:mysql://${docker.host.address}:${database.port}/webq2?maxAllowedPacket=32212254720</db.url>
                     <db.username>itests</db.username>
                     <db.password>password</db.password>

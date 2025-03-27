@@ -32,7 +32,7 @@ WebQ is configured at runtime with system properties. These can be provided to T
 ###### 1. Do:
 Set all properties needed for your environment. These are the properties you can change with their default values:
 ```
-db.driver=com.mysql.jdbc.Driver
+db.driver=com.mysql.cj.jdbc.Driver
 db.url=jdbc:mysql://webqdb/webq2?maxAllowedPacket=32212254720
 db.username=
 db.password=

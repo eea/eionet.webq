@@ -1,7 +1,7 @@
 app:
     image: dockerrepo.eionet.europa.eu:5000/webq2
     environment:
-        - CATALINA_OPTS=-Djava.security.egd=file:/dev/./urandom -Ddb.driver=com.mysql.jdbc.Driver -Ddb.url=jdbc:mysql://webqdb/webq2?maxAllowedPacket=32212254720 -Ddb.username=itests -Ddb.password=password -Dcas.service=http://localhost:8080/ -Dinitial.admin.username=roug
+        - CATALINA_OPTS=-Djava.security.egd=file:/dev/./urandom -Ddb.driver=com.mysql.cj.jdbc.Driver -Ddb.url=jdbc:mysql://webqdb/webq2?maxAllowedPacket=32212254720 -Ddb.username=itests -Ddb.password=password -Dcas.service=http://localhost:8080/ -Dinitial.admin.username=roug
         - JAVA_OPTS=-Xmx3072m
     ports:
         - "8080:8080"

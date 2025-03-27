@@ -9,7 +9,7 @@ services:
   tomcat:
       image: sofiageo/webq2:latest
       environment:
-          - CATALINA_OPTS=-Djava.security.egd=file:/dev/./urandom -Ddb.driver=com.mysql.jdbc.Driver -Ddb.url=jdbc:mysql://webqdb/webq2?maxAllowedPacket=32212254720 -Ddb.username=itests -Ddb.password=password -Dcas.service=http://localhost:8080/ -Dinitial.admin.username=sofiageo
+          - CATALINA_OPTS=-Djava.security.egd=file:/dev/./urandom -Ddb.driver=com.mysql.cj.jdbc.Driver -Ddb.url=jdbc:mysql://webqdb/webq2?maxAllowedPacket=32212254720 -Ddb.username=itests -Ddb.password=password -Dcas.service=http://localhost:8080/ -Dinitial.admin.username=sofiageo
           - JAVA_OPTS=-Xmx3072m
   #    ports:
   #        - "8080:8080"
