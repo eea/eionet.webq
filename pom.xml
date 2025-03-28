@@ -11,7 +11,7 @@
 
     <properties>
         <env>default</env>
-        <spring.version>4.3.24.RELEASE</spring.version>
+        <spring.version>6.0.0</spring.version>
         <junit.version>4.12</junit.version>
         <jdk.version>1.8</jdk.version>
         <jackson.version>2.10.3</jackson.version>
