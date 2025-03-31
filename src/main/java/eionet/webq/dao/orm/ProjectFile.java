@@ -48,12 +48,12 @@ public class ProjectFile {
      * Auto generated id.
      */
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
     /**
      * {@link eionet.webq.dao.orm.ProjectEntry#id} connected with this file.
      */
-    @Column(updatable = false)
+    @Column(name = "project_id", updatable = false)
     private int projectId;
     /**
      * Form title.
@@ -68,14 +68,17 @@ public class ProjectFile {
     /**
      * Remote file location(typically VCS link).
      */
+    @Column(name = "remote_file_url")
     private String remoteFileUrl;
     /**
      * New xml file name for web form.
      */
+    @Column(name = "new_xml_file_name")
     private String newXmlFileName;
     /**
      * The location of empty instance XML file.
      */
+    @Column(name = "empty_instance_url")
     private String emptyInstanceUrl;
     /**
      * details about the webform.
@@ -84,6 +87,7 @@ public class ProjectFile {
     /**
      * xml schema connected with this file.
      */
+    @Column(name = "xml_schema")
     private String xmlSchema;
     /**
      * form status.
@@ -92,21 +96,24 @@ public class ProjectFile {
     /**
      * form is available for webq users.
      */
+    @Column(name = "local_form")
     private boolean localForm;
     /**
      * form is available for remote usage(e.g. CDR).
      */
+    @Column(name = "remote_form")
     private boolean remoteForm;
 
     /**
      * Project file type.
      */
     @Enumerated(value = EnumType.STRING)
-    @Column(updatable = false)
+    @Column(name = "file_type", updatable = false)
     private ProjectFileType fileType;
     /**
      * User name of user who uploaded web form.
      */
+    @Column(name = "user_name")
     private String userName;
     /**
      * timestamp of first upload of the file.

@@ -96,7 +96,7 @@ public class FileDownloadControllerIntegrationTest extends AbstractContextContro
                 .session(session))
                 .andExpect(jsonPath("$.html.head", IsEqual.equalTo("headText")))
                 .andExpect(jsonPath("$.html.body", IsEqual.equalTo("bodyText")))
-                .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_JSON));
+                .andExpect(MockMvcResultMatchers.content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON));
     }
 
     @Test
@@ -106,7 +106,7 @@ public class FileDownloadControllerIntegrationTest extends AbstractContextContro
         request(get("/download/converted_user_file?fileId={id}", id)
                 .accept(MediaType.APPLICATION_XML)
                 .session(session))
-                .andExpect(MockMvcResultMatchers.content().contentType(MediaType.APPLICATION_XML))
+                .andExpect(MockMvcResultMatchers.content().contentTypeCompatibleWith(MediaType.APPLICATION_XML))
                 .andExpect(MockMvcResultMatchers.handler().methodName("downloadUserFileJsonToXml"));
     }
 

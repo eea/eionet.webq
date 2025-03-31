@@ -11,7 +11,7 @@
 
     <properties>
         <env>default</env>
-        <spring.version>4.3.24.RELEASE</spring.version>
+        <spring.version>5.3.39</spring.version>
         <junit.version>4.12</junit.version>
         <jdk.version>1.8</jdk.version>
         <jackson.version>2.10.3</jackson.version>
@@ -20,8 +20,8 @@
         <checkstyle.config.location>${basedir}/docs/checkstyle.xml</checkstyle.config.location>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <spring-security.version>4.2.17.RELEASE</spring-security.version>
-        <hibernate.version>4.2.4.Final</hibernate.version>
+        <spring-security.version>5.8.16</spring-security.version>
+        <hibernate.version>5.3.37.Final</hibernate.version>
         <maven.resources.overwrite>true</maven.resources.overwrite>
         <maven.build.timestamp.format>yyyy-MM-dd'T'HHmm</maven.build.timestamp.format>
     </properties>
@@ -56,10 +56,10 @@
         <dependency>
             <groupId>org.liquibase</groupId>
             <artifactId>liquibase-core</artifactId>
-            <version>4.8.0</version>
+            <version>4.24.0</version>
         </dependency>
 
-        <!-- Spring 4 dependencies -->
+        <!-- Spring 5 dependencies -->
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-core</artifactId>
@@ -165,7 +165,19 @@
         <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-validator</artifactId>
-            <version>5.0.0.Final</version>
+            <version>5.4.3.Final</version>
+        </dependency>
+
+        <dependency>
+            <groupId>javax.el</groupId>
+            <artifactId>javax.el-api</artifactId>
+            <version>3.0.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.glassfish</groupId>
+            <artifactId>javax.el</artifactId>
+            <version>3.0.0</version>
         </dependency>
 
         <!-- betterFORM -->
@@ -440,7 +452,7 @@
             <plugin>
                 <groupId>org.liquibase</groupId>
                 <artifactId>liquibase-maven-plugin</artifactId>
-                <version>4.8.0</version>
+                <version>4.24.0</version>
                 <configuration>
                     <propertyFile>target/classes/liquibase.properties</propertyFile>
                     <changeLogFile>src/main/resources/eionet/webq/dao/changelog.xml</changeLogFile>
@@ -474,7 +486,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.19.1</version>
+                <version>3.5.2</version>
                 <configuration>
                     <reportFormat>xml</reportFormat>
                     <systemPropertyVariables>

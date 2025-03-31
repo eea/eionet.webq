@@ -43,7 +43,7 @@ public class ProjectEntry {
      * project id in storage.
      */
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
     /**
      * project entry id.

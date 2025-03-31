@@ -126,13 +126,13 @@ public class UploadedFile {
          * Id.
          */
         @Id
-        @GeneratedValue(strategy = GenerationType.AUTO)
+        @GeneratedValue(strategy = GenerationType.IDENTITY)
         private int id;
         /**
          * File content.
          */
         @Lob
-        @Column(nullable = false)
+        @Column(name = "file_content", nullable = false)
         private byte[] fileContent;
 
         /**

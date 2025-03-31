@@ -48,22 +48,19 @@
         <constructor-arg value="maximumSize=200, expireAfterAccess=60m" />
     </bean>
 
-    <bean id="sessionFactory" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean" lazy-init="true">
+    <bean id="sessionFactory" class="org.springframework.orm.hibernate5.LocalSessionFactoryBean" lazy-init="true">
         <property name="dataSource" ref="dataSource"/>
         <property name="packagesToScan">
             <list>
                 <value>eionet.webq.dao.orm</value>
             </list>
         </property>
-        <property name="namingStrategy">
-            <bean class="org.hibernate.cfg.ImprovedNamingStrategy"/>
-        </property>
         <property name="hibernateProperties" ref="hibernate_properties"/>
     </bean>
 
     <tx:annotation-driven proxy-target-class="true"/>
 
-    <bean id="transactionManager" class="org.springframework.orm.hibernate4.HibernateTransactionManager">
+    <bean id="transactionManager" class="org.springframework.orm.hibernate5.HibernateTransactionManager">
         <property name="sessionFactory" ref="sessionFactory"/>
     </bean>
 

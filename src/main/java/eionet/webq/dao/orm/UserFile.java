@@ -37,7 +37,7 @@ public class UserFile {
      * File id in data storage.
      */
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
     /**
      * User id.
@@ -118,7 +118,7 @@ public class UserFile {
     /**
      * User agent on upload time.
      */
-    @Column
+    @Column(name = "user_agent")
     private String userAgent;
     /**
      * Last download date.

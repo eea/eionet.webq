@@ -107,7 +107,7 @@ public class PublicPageControllerIntegrationTest extends AbstractContextControll
 
         UserFile userFile = uploadFileAndTakeFirstUploadedFile();
 
-        downloadFile(userFile.getId()).andExpect(content().contentType(MediaType.APPLICATION_XML))
+        downloadFile(userFile.getId()).andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_XML))
                 .andExpect(content().bytes(FILE_CONTENT)).andReturn();
     }
 
