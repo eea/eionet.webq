@@ -11,6 +11,7 @@
 
 
     <changeSet id="1" author="dmitrant">
+        <validCheckSum>7:311f2f972f3815a9e2f2d80b62180e3d</validCheckSum>
         <preConditions onFail="MARK_RAN">
             <not>
                 <tableExists tableName="user_xml"/>
@@ -35,6 +36,7 @@
     </changeSet>
 
     <changeSet id="2" author="dmitrant">
+        <validCheckSum>7:feb65ca590a020f52b6f94bac45a3c9d</validCheckSum>
         <preConditions onFail="MARK_RAN">
             <not>
                 <tableExists tableName="file_content"/>
@@ -52,6 +54,7 @@
     </changeSet>
 
     <changeSet id="3" author="dmitrant">
+        <validCheckSum>7:c80e409d70e60877e0619083468ede44</validCheckSum>
         <preConditions onFail="MARK_RAN">
             <not>
                 <tableExists tableName="project_folder"/>
@@ -73,6 +76,7 @@
     </changeSet>
 
     <changeSet id="4" author="dmitrant">
+        <validCheckSum>7:f9fa9622cbc05b623647d4b171d09821</validCheckSum>
         <preConditions onFail="MARK_RAN">
             <not>
                 <tableExists tableName="project_file"/>
@@ -115,6 +119,7 @@
         </createIndex>
     </changeSet>
     <changeSet id="6" author="dmitrant">
+        <validCheckSum>7:6b9886a09de5cee7ad29ede0a3937cef</validCheckSum>
         <preConditions onFail="MARK_RAN">
             <not>
                 <tableExists tableName="users"/>
@@ -133,6 +138,7 @@
     </changeSet>
 
     <changeSet id="7" author="dmitrant">
+        <validCheckSum>7:567719dfd5176bd9525d22686ac7e895</validCheckSum>
         <preConditions onFail="MARK_RAN">
             <not>
                 <tableExists tableName="authorities"/>
