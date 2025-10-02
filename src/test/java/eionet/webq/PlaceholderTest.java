@@ -55,7 +55,7 @@ public class PlaceholderTest extends AbstractContextControllerTests {
 
     @Test
     public void testDbUrl() {
-        assertEquals("jdbc:h2:mem:xmlStorage;DB_CLOSE_DELAY=-1", dbUrl);
+        assertEquals("jdbc:h2:mem:xmlStorage;DB_CLOSE_DELAY=-1;MODE=MySQL;NON_KEYWORDS=AUTHORIZATION", dbUrl);
         assertEquals(System.getProperty("db.url"), dbUrl);
     }
 
