@@ -42,11 +42,7 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
@@ -66,8 +62,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.nio.charset.StandardCharsets;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Base controller for WebQ proxy delegations.
@@ -306,6 +301,31 @@ public class WebQProxyDelegation {
                 (request, authorization);
 
         LOGGER.info("/restProxyFileUpload [POST] uri=" + uri);
+        return restTemplate.postForObject(uri, requestEntity, String.class);
+    }
+
+    @PostMapping(value = "/restProxyDeleteFileUpload",
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces =  MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public String restProxyDeleteFileUpload(@RequestParam("uri") String uri,
+                                      @RequestParam int fileId,
+                                      @RequestBody Map<String, List<String>> jsonBody,
+                                      HttpServletRequest request) {
+        List<String> files = jsonBody.get("files");
+        if (files == null || files.isEmpty()) {
+            throw new IllegalArgumentException("Files list cannot be null or empty.");
+        }
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        UserFile file = userFileHelper.getUserFile(fileId, request);
+        if (file != null && StringUtils.startsWith(uri, file.getEnvelope())) {
+            headers.addAll(envelopeService.getAuthorizationHeader(file));
+        }
+
+        HttpEntity<Map<String, List<String>>> requestEntity = new HttpEntity<>(jsonBody, headers);
+        LOGGER.info("/restProxyDeleteFileUpload [POST] uri=" + uri + ", files=" + files);
         return restTemplate.postForObject(uri, requestEntity, String.class);
     }
 
