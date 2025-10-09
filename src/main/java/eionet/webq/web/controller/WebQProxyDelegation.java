@@ -304,6 +304,17 @@ public class WebQProxyDelegation {
         return restTemplate.postForObject(uri, requestEntity, String.class);
     }
 
+    /**
+     * The method proxies POST requests in order to delete uploaded file(s).
+     * If the request target is a CDR envelope, then UserFile authorization info is used.
+     *
+     * @param uri              the address to forward the request
+     * @param fileId           UserFile id stored in session
+     * @param jsonBody         json request body to forward to remote host with the list of files for deletion,
+     *                         should have the following format {"files": ["file_id_1", "file_id_2"]}
+     * @param request          standard HttpServletRequest
+     * @return response from remote host
+     */
     @PostMapping(value = "/restProxyDeleteFileUpload",
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces =  MediaType.APPLICATION_JSON_VALUE)
