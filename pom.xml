@@ -16,7 +16,7 @@
         <jdk.version>1.8</jdk.version>
         <jackson.version>2.18.3</jackson.version>
         <h2.version>2.2.224</h2.version>
-        <slf4j.version>1.7.25</slf4j.version>
+        <slf4j.version>1.7.36</slf4j.version>
         <checkstyle.config.location>${basedir}/docs/checkstyle.xml</checkstyle.config.location>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -567,7 +567,7 @@
             <plugin>
                 <groupId>org.sonarsource.scanner.maven</groupId>
                 <artifactId>sonar-maven-plugin</artifactId>
-                <version>3.9.1.2184</version>
+                <version>5.5.0.6356</version>
             </plugin>
         </plugins>
     </build>
