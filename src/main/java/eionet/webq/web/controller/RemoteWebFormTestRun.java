@@ -20,8 +20,12 @@
  */
 package eionet.webq.web.controller;
 
-import javax.servlet.http.HttpServletRequest;
-
+import eionet.webq.dao.orm.ProjectFile;
+import eionet.webq.dao.orm.UserFile;
+import eionet.webq.service.FileNotAvailableException;
+import eionet.webq.service.UserFileService;
+import eionet.webq.service.WebFormService;
+import eionet.webq.web.controller.util.WebformUrlProvider;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -29,10 +33,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import eionet.webq.dao.orm.UserFile;
-import eionet.webq.service.FileNotAvailableException;
-import eionet.webq.service.UserFileService;
-import eionet.webq.service.WebFormService;
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * Test runner for remote form developers.
@@ -40,6 +41,9 @@ import eionet.webq.service.WebFormService;
 @Controller
 @RequestMapping("/webform")
 public class RemoteWebFormTestRun {
+
+    @Autowired
+    WebformUrlProvider webformUrlProvider;
     /**
      * User files service.
      */
@@ -55,10 +59,10 @@ public class RemoteWebFormTestRun {
     /**
      * Test run for remote web forms.
      *
-     * @param webFormId web form id
-     * @param instance form instance URL
+     * @param webFormId            web form id
+     * @param instance             form instance URL
      * @param additionalParameters additional request parameters
-     * @param request request
+     * @param request              request
      * @return redirect to web form
      * @throws FileNotAvailableException if web form's default instance is not available.
      */
@@ -66,8 +70,10 @@ public class RemoteWebFormTestRun {
     public String webFormTestRun(@RequestParam int webFormId, @RequestParam(required = false) String instance,
                                  @RequestParam(required = false) String additionalParameters,
                                  HttpServletRequest request) throws FileNotAvailableException {
-        int fileId = userFileService.saveBasedOnWebForm(new UserFile(), webFormService.findActiveWebFormById(webFormId));
-        String redirect = "redirect:/xform/?formId=" + webFormId + "&fileId=" + fileId + "&base_uri=" + request.getContextPath();
+        ProjectFile webform = webFormService.findActiveWebFormById(webFormId);
+        int fileId = userFileService.saveBasedOnWebForm(new UserFile(), webform);
+        String webformPath = webformUrlProvider.getWebformPath(webform);
+        String redirect = "redirect:" + webformPath + "fileId=" + fileId + "&base_uri=" + request.getContextPath();
         if (StringUtils.isNotEmpty(instance)) {
             redirect += "&instance=" + instance;
         }

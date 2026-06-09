@@ -24,6 +24,7 @@ import eionet.webq.dao.orm.ProjectFile;
 import eionet.webq.dao.orm.UserFile;
 import eionet.webq.service.UserFileService;
 import eionet.webq.service.WebFormService;
+import eionet.webq.web.controller.util.WebformUrlProvider;
 import org.hamcrest.core.StringContains;
 import org.hamcrest.core.StringStartsWith;
 import org.junit.Test;
@@ -51,6 +52,8 @@ public class RemoteWebFormTestRunTest {
     UserFileService userFileService;
     @Mock
     WebFormService webFormService;
+    @Mock
+    private WebformUrlProvider webformUrlProvider;
 
     @Test
     public void whenStartingRemoteForm_loadsFormByGivenId() throws Exception {
@@ -70,10 +73,12 @@ public class RemoteWebFormTestRunTest {
     }
 
     @Test
-    public void whenStartingRemoteForm_redirectToXFormEngine() throws Exception {
+    public void whenStartingRemoteForm_redirectToFormEngine() throws Exception {
+        when(webformUrlProvider.getWebformPath(any(ProjectFile.class)))
+                .thenReturn("/webform/project/projectId/file/webform.html?");
         String redirect = controller.webFormTestRun(2, null, null, request);
 
-        assertThat(redirect, StringStartsWith.startsWith("redirect:/xform/"));
+        assertThat(redirect, StringStartsWith.startsWith("redirect:/webform/project/"));
     }
 
     @Test
