@@ -52,7 +52,7 @@ public class AvailableFormsService extends SpringBeanAutowiringSupport {
      * Expected that xmlSchemas array should contain strings.
      *
      * @param xmlSchemas xmlSchema array
-     * @return map of xml schema to XForm file name
+     * @return map of xml schema to webform file name
      */
     @SuppressWarnings("unchecked")
     public Map<String, String> getForm(Object[] xmlSchemas) {

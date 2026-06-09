@@ -93,7 +93,7 @@ public class IntegrationWithCDRController {
      * @param request parameters of this action
      * @param model   model
      * @return view name
-     * @throws eionet.webq.service.FileNotAvailableException if one redirect to xform remote file not found.
+     * @throws eionet.webq.service.FileNotAvailableException if one redirect to webform remote file not found.
      */
     @RequestMapping("/WebQMenu")
     public String webQMenu(HttpServletRequest request, Model model)

@@ -65,7 +65,7 @@ public class AvailableFormsServiceTest {
 
     @Test
     @SuppressWarnings("unchecked")
-    public void nullArrayReferenceToGetXFormParameterTransformedToEmptyListOfXmlSchemas() throws Exception {
+    public void nullArrayReferenceToGetFormParameterTransformedToEmptyListOfXmlSchemas() throws Exception {
         availableFormsService.getForm(null);
     
         ArgumentCaptor<Collection> xmlSchemasCollection = ArgumentCaptor.forClass(Collection.class);
@@ -75,7 +75,7 @@ public class AvailableFormsServiceTest {
 
     @Test
     @SuppressWarnings("unchecked")
-    public void emptyArrayParameterToGetXFormWillBeTransformedToEmptyCollection() throws Exception {
+    public void emptyArrayParameterToGetFormWillBeTransformedToEmptyCollection() throws Exception {
         availableFormsService.getForm(new Object[0]);
 
         ArgumentCaptor<Collection> xmlSchemasCollection = ArgumentCaptor.forClass(Collection.class);
@@ -84,7 +84,7 @@ public class AvailableFormsServiceTest {
     }
 
     @Test
-    public void arrayWithValuesPassedToGetXFormWillBeTransformedToCollectionWithValues() throws Exception {
+    public void arrayWithValuesPassedToGetFormWillBeTransformedToCollectionWithValues() throws Exception {
         availableFormsService.getForm(new Object[] {file1.getXmlSchema()});
 
         ArgumentCaptor<Collection> xmlSchemasCollection = ArgumentCaptor.forClass(Collection.class);
@@ -125,7 +125,7 @@ public class AvailableFormsServiceTest {
     }
 
     @Test
-    public void whenGetXForm_ifWebFormsFound_doNotAskWebQ1() throws Exception {
+    public void whenGetForm_ifWebFormsFound_doNotAskWebQ1() throws Exception {
         when(webFormService.findWebFormsForSchemas(anyCollectionOf(String.class)))
                 .thenReturn(Arrays.asList(file1));
 

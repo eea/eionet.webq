@@ -161,7 +161,7 @@ public class IntegrationWithCDRControllerIntegrationTest extends AbstractContext
 
         assertTrue(redirectedUrl.contains("sessionid=" + sessionIdParamValue));
 
-        UserFile file = userFileService.getByIdAndUser(extractFileIdFromXFormRedirectUrl(redirectedUrl), userId);
+        UserFile file = userFileService.getByIdAndUser(extractFileIdFromFormRedirectUrl(redirectedUrl), userId);
 
         assertNotNull(file);
         assertNull(file.getContent());
@@ -241,7 +241,7 @@ public class IntegrationWithCDRControllerIntegrationTest extends AbstractContext
         return request(post("/WebQMenu").param("envelope", ENVELOPE_URL).header(CdrAuthorizationInterceptor.BYPASS_AUTH_HEADER,"true"));
     }
 
-    private int extractFileIdFromXFormRedirectUrl(String redirectUrl) {
+    private int extractFileIdFromFormRedirectUrl(String redirectUrl) {
         String redirectUrlRegex = webqUrl + "/webform/project/projectId/file/0-form.html\\?instance=.*&fileId=(\\d+)+&base_uri=.*";
         Matcher matcher = Pattern.compile(redirectUrlRegex).matcher(redirectUrl);
 

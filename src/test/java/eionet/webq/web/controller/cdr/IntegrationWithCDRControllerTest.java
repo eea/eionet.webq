@@ -78,11 +78,11 @@ public class IntegrationWithCDRControllerTest {
     CdrRequest cdrRequest = new CdrRequest();
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         MockitoAnnotations.initMocks(this);
         when(converter.convert(any(HttpServletRequest.class))).thenReturn(cdrRequest);
         cdrRequest.setSessionId("sessionId");
-        when(webformUrlProvider.getWebformPath(any(ProjectFile.class))).thenReturn("/xform/");
+        when(webformUrlProvider.getWebformPath(any(ProjectFile.class))).thenReturn("/webform/");
     }
 
     @Test
@@ -146,7 +146,7 @@ public class IntegrationWithCDRControllerTest {
         thereWillBeWebFormsAmountOf(1);
         when(webFormService.findActiveWebFormById(anyInt())).thenReturn(new ProjectFile());
 
-        assertThat(controller.webQMenu(mockRequest, model), startsWith("redirect:/xform/"));
+        assertThat(controller.webQMenu(mockRequest, model), startsWith("redirect:/webform/"));
     }
 
     @Test
@@ -156,7 +156,7 @@ public class IntegrationWithCDRControllerTest {
         when(webFormService.findActiveWebFormById(anyInt())).thenReturn(new ProjectFile());
         cdrRequest.setNewFormCreationAllowed(true);
 
-        assertThat(controller.webQMenu(mockRequest, model), startsWith("redirect:/xform"));
+        assertThat(controller.webQMenu(mockRequest, model), startsWith("redirect:/webform"));
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -177,7 +177,7 @@ public class IntegrationWithCDRControllerTest {
         thereWillBeWebFormsAmountOf(1);
         cdrRequestWillContainXmlSchemaAndInstanceUrl();
 
-        assertThat(controller.webQEdit(mockRequest, model), startsWith("redirect:/xform/"));
+        assertThat(controller.webQEdit(mockRequest, model), startsWith("redirect:/webform/"));
     }
 
     @Test

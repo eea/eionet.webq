@@ -88,7 +88,6 @@ public class PublicPageControllerTest {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        when(webformUrlProvider.getWebformPath(any(ProjectFile.class))).thenReturn("/xform/");
         when(cookieValueManager.getUserId(any(HttpServletRequest.class))).thenReturn("Som3r4nd0mc00ki3");
     }
 
