@@ -57,8 +57,6 @@ public class WebformUrlProviderImpl implements WebformUrlProvider {
             webformPath = webqUrl +
                     "/webform/project/" + webform.getProjectIdentifier() + "/file/"
                             + webform.getFileName() + "?";
-        } else {
-            webformPath = webqUrl + "/xform/?formId=" + webform.getId() + "&";
         }
         return webformPath;
     }

@@ -99,7 +99,7 @@ public class PublicPageControllerIntegrationTest extends AbstractContextControll
                         fileUpload("/uploadXmlWithRedirect").file(createMockMultipartFile("file.name")).session(mockHttpSession))
                         .andExpect(status().isFound()).andReturn();
         String viewName = result.getModelAndView().getViewName();
-        assertTrue(viewName.matches("redirect:" + webqUrl + "/xform/\\?formId=\\d+&fileId=\\d+&instance=.*&base_uri=.*"));
+        assertTrue(viewName.matches("redirect:" + webqUrl + "/webform/project/projectId/file/webform.html\\?fileId=\\d+&instance=.*&base_uri=.*"));
     }
 
     @Test
@@ -189,7 +189,8 @@ public class PublicPageControllerIntegrationTest extends AbstractContextControll
         testFile.setTitle("test-title");
         testFile.setFileType(ProjectFileType.WEBFORM);
         testFile.setUserName("test-user");
-        testFile.setFileName("webform.xhtml");
+        testFile.setProjectIdentifier("projectId");
+        testFile.setFileName("webform.html");
 
         projectFileService.saveOrUpdate(testFile, project);
         return testFile;

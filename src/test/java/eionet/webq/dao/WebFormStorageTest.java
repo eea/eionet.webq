@@ -70,7 +70,7 @@ public class WebFormStorageTest {
     }
 
     @Test
-    public void allowsToFetchAllLocalWebformsFromRepository() throws Exception {
+    public void allowsToFetchAllLocalWebformsFromRepository() {
         Collection<ProjectFile> activeWebForms = webFormStorage.getAllActiveWebForms(WebFormType.LOCAL);
 
         assertThat(activeWebForms.size(), equalTo(2));
@@ -80,7 +80,7 @@ public class WebFormStorageTest {
     }
 
     @Test
-    public void allowsToFetchAllRemoteWebformsFromRepository() throws Exception {
+    public void allowsToFetchAllRemoteWebformsFromRepository() {
         Collection<ProjectFile> remoteWebForms = webFormStorage.getAllActiveWebForms(WebFormType.REMOTE);
         assertThat(remoteWebForms.size(), equalTo(1));
 
@@ -89,7 +89,7 @@ public class WebFormStorageTest {
     }
 
     @Test
-    public void localAndRemoteWebFormsMustBeActiveToBeFetched() throws Exception {
+    public void localAndRemoteWebFormsMustBeActiveToBeFetched() {
         saveAsInactive(getFirstActiveFormOfType(WebFormType.LOCAL));
         saveAsInactive(getFirstActiveFormOfType(WebFormType.REMOTE));
 
@@ -102,7 +102,7 @@ public class WebFormStorageTest {
     }
 
     @Test
-    public void xmlSchemaMustBeSet() throws Exception {
+    public void xmlSchemaMustBeSet() {
         saveWithoutXmlSchema(getFirstActiveFormOfType(WebFormType.LOCAL));
         saveWithoutXmlSchema(getFirstActiveFormOfType(WebFormType.REMOTE));
 
@@ -115,28 +115,28 @@ public class WebFormStorageTest {
     }
 
     @Test
-    public void getLocalWebFormById() throws Exception {
+    public void getLocalWebFormById() {
         ProjectFile webForm = webFormStorage.getActiveWebFormById(WebFormType.LOCAL, localFormId);
         assertIsLocalWebForm(webForm);
         assertThat(webForm.getId(), equalTo(localFormId));
     }
 
     @Test
-    public void getRemoteWebFormById() throws Exception {
+    public void getRemoteWebFormById() {
         ProjectFile webForm = webFormStorage.getActiveWebFormById(WebFormType.REMOTE, remoteFormId);
         assertIsRemoteWebForm(webForm);
         assertThat(webForm.getId(), equalTo(remoteFormId));
     }
 
     @Test
-    public void getWebFormById() throws Exception {
+    public void getWebFormById() {
         ProjectFile webForm = webFormStorage.getWebFormById(localFormId);
         assertIsLocalWebForm(webForm);
         assertThat(webForm.getId(), equalTo(localFormId));
     }
 
     @Test
-    public void fetchWebFormsByXmlSchemaAndType() throws Exception {
+    public void fetchWebFormsByXmlSchemaAndType() {
         String xmlSchema = ANOTHER_TEST_SCHEMA;
         saveWithXmlSchema(getFirstActiveFormOfType(WebFormType.LOCAL), xmlSchema);
         saveWithXmlSchema(createRemoteWebform(), xmlSchema);
@@ -151,12 +151,12 @@ public class WebFormStorageTest {
     }
 
     @Test
-    public void allowToSpecifyMoreThanOneXmlSchema() throws Exception {
+    public void allowToSpecifyMoreThanOneXmlSchema() {
         saveWithXmlSchema(getFirstActiveFormOfType(WebFormType.LOCAL), ANOTHER_TEST_SCHEMA);
-        Collection<ProjectFile> xForms = webFormStorage.findWebFormsForSchemas(WebFormType.LOCAL,
+        Collection<ProjectFile> forms = webFormStorage.findWebFormsForSchemas(WebFormType.LOCAL,
                 Arrays.asList(TEST_SCHEMA, ANOTHER_TEST_SCHEMA));
 
-        assertThat(xForms.size(), equalTo(2));
+        assertThat(forms.size(), equalTo(2));
     }
 
     private ProjectFile getFirstActiveFormOfType(WebFormType type) {

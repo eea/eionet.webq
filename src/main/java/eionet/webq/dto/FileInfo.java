@@ -31,7 +31,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
 
 /**
- * Object for transferring {@link eionet.webq.dao.orm.UserFile} public data and related conversions into XML format for XForms. The
+ * Object for transferring {@link eionet.webq.dao.orm.UserFile} public data and related conversions into XML format for webforms. The
  * returned object contains also user-friendly formatted dates and links to download, delete and convert the file.
  *
  * @author Enriko Käsper

@@ -32,7 +32,7 @@ import java.util.Map;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 
 /**
- * Object for transferring XML save result messages to XForms. The object is marshaled into XML in HTTP response.
+ * Object for transferring XML save result messages to webforms. The object is marshaled into XML in HTTP response.
  *
  * @author Enriko Käsper
  */

@@ -52,9 +52,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
-import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -283,7 +281,7 @@ public class PublicPageController {
     }
 
     /**
-     * Update file content action. The action is called from XForms and it returns XML formatted result.
+     * Update file content action. The action is called from webforms and it returns XML formatted result.
      *
      * @param fileId  file id to update
      * @param request current request
@@ -352,46 +350,6 @@ public class PublicPageController {
         }
         
         return "redirect:" + (StringUtils.isEmpty(absolutePath) ? "/" : absolutePath);
-    }
-
-    /**
-     * This is STEP 2 in generating new WebForm. Form content will be loaded from storage and written to response. After that
-     * response must be handled by {@link de.betterform.agent.web.filter.XFormsFilter}. Filter mapping in web.xml should match with
-     * mapping of this method.
-     *
-     * @param formId   webform id
-     * @param response current response
-     * @throws IOException in case if writing of xForm to response failed
-     */
-    @RequestMapping(value = "/xform")
-    @Transactional
-    public void startWebFormWriteFormToResponse(@RequestParam int formId, HttpServletRequest request, HttpServletResponse response) throws IOException {
-
-        String webCookie = cookieValueManager.getUserId(request);
-        if (isEmpty(webCookie)){
-            // redirect to the exact same page if there is no webq cookie written yet
-            // this solves the problem of xforms modules not recognizing the user, because they are rendered server-side
-            // this way the cookie will be injected by the interceptor and the user will be recognized after the redirect
-            LOGGER.info("WebQCookie not found, redirecting....");
-            String redirect;
-            StringBuffer requestURL = request.getRequestURL();
-            String queryString = request.getQueryString();
-            if (queryString == null) {
-                redirect=  requestURL.toString();
-            } else {
-                redirect = requestURL.append('?').append(queryString).toString();
-            }
-            response.sendRedirect(redirect);
-            return;
-        }
-
-        ProjectFile webForm = webFormService.findWebFormById(formId);
-        byte[] fileContent = webForm.getFileContent();
-        response.setContentLength(fileContent.length);
-        response.setContentType("application/xhtml+xml;charset=utf-8");
-        OutputStream outputStream = response.getOutputStream();
-        IOUtils.write(fileContent, outputStream);
-        outputStream.flush();
     }
 
     /**

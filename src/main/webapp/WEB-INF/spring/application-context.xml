@@ -188,8 +188,6 @@
         <constructor-arg name="includePatterns">
             <list>
                 <value>/webform/project/**</value>
-                <value>/xform/**</value>
-                <value>/xform</value>
             </list>
         </constructor-arg>
         <constructor-arg name="interceptor" ref="cdrSessionIdOverwriteInterceptor"/>

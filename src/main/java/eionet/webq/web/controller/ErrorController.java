@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 
 @Controller
 @RequestMapping("/general")
@@ -21,8 +20,6 @@ public class ErrorController {
 
     @GetMapping("/errors")
     public ModelAndView renderDefaultErrorPage(HttpServletRequest httpRequest) {
-        HttpSession session = httpRequest.getSession();
-        System.out.println(session);
         int errorStatus = getErrorCode(httpRequest);
         String errorMsg = getErrorMessage(errorStatus);
 

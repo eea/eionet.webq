@@ -27,8 +27,7 @@ import eionet.webq.dao.orm.ProjectFile;
  */
 public interface WebformUrlProvider {
     /**
-     * Creates webform file URL depending on webform type. If it is a xform, then the request is forwarded to betterForm URL,
-     * otherwise plain HTML is used.
+     * Creates webform file URL depending on webform type (currently only plain HTML is used).
      *
      * @param webform Project file
      * @return path to webform

@@ -17,10 +17,8 @@
     <bean id="tilesConfigurer" class="org.springframework.web.servlet.view.tiles3.TilesConfigurer"/>
 
     <!-- resources exclusions from servlet mapping -->
-    <mvc:resources mapping="/bfResources/**" location="/bfResources/" />
     <mvc:resources mapping="/*.html" location="/*.html" />
     <mvc:resources mapping="/favicon.ico" location="/favicon.ico" cache-period="86400" />
-    <mvc:resources mapping="/forms/**" location="/forms/" />
     <mvc:resources mapping="/js/**" location="/js/" cache-period="86400" />
     <mvc:resources mapping="/css/**" location="/css/" cache-period="86400" />
     <mvc:resources mapping="/images/**" location="/images/" cache-period="86400" />

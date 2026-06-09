@@ -23,7 +23,6 @@ package eionet.webq.service;
 import eionet.webq.dao.orm.MergeModule;
 import eionet.webq.dao.orm.UserFile;
 import org.apache.log4j.Logger;
-import org.apache.tools.ant.util.XmlConstants;
 import org.springframework.stereotype.Service;
 
 import javax.xml.XMLConstants;

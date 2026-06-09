@@ -66,7 +66,7 @@ public class AvailableFormsServiceTest {
     @Test
     @SuppressWarnings("unchecked")
     public void nullArrayReferenceToGetXFormParameterTransformedToEmptyListOfXmlSchemas() throws Exception {
-        availableFormsService.getXForm(null);
+        availableFormsService.getForm(null);
     
         ArgumentCaptor<Collection> xmlSchemasCollection = ArgumentCaptor.forClass(Collection.class);
         verify(webFormService).findWebFormsForSchemas(xmlSchemasCollection.capture());
@@ -76,7 +76,7 @@ public class AvailableFormsServiceTest {
     @Test
     @SuppressWarnings("unchecked")
     public void emptyArrayParameterToGetXFormWillBeTransformedToEmptyCollection() throws Exception {
-        availableFormsService.getXForm(new Object[0]);
+        availableFormsService.getForm(new Object[0]);
 
         ArgumentCaptor<Collection> xmlSchemasCollection = ArgumentCaptor.forClass(Collection.class);
         verify(webFormService).findWebFormsForSchemas(xmlSchemasCollection.capture());
@@ -85,7 +85,7 @@ public class AvailableFormsServiceTest {
 
     @Test
     public void arrayWithValuesPassedToGetXFormWillBeTransformedToCollectionWithValues() throws Exception {
-        availableFormsService.getXForm(new Object[] {file1.getXmlSchema()});
+        availableFormsService.getForm(new Object[] {file1.getXmlSchema()});
 
         ArgumentCaptor<Collection> xmlSchemasCollection = ArgumentCaptor.forClass(Collection.class);
         verify(webFormService).findWebFormsForSchemas(xmlSchemasCollection.capture());
@@ -97,9 +97,9 @@ public class AvailableFormsServiceTest {
     public void returnsMapContainingXmlSchemaAsAKeyAndFileNameAsValue() throws Exception {
         when(webFormService.findWebFormsForSchemas(anyCollectionOf(String.class))).thenReturn(Arrays.asList(file1));
 
-        Map<String, String> xForms = availableFormsService.getXForm(null);
-        assertThat(xForms.size(), equalTo(1));
-        assertThat(xForms.get(file1.getXmlSchema()), equalTo(file1.getFileName()));
+        Map<String, String> forms = availableFormsService.getForm(null);
+        assertThat(forms.size(), equalTo(1));
+        assertThat(forms.get(file1.getXmlSchema()), equalTo(file1.getFileName()));
     }
 
     @Test
@@ -108,10 +108,10 @@ public class AvailableFormsServiceTest {
         when(webFormService.findWebFormsForSchemas(anyCollectionOf(String.class)))
                 .thenReturn(Arrays.asList(file1, fileWithSameSchemaAsFile1));
 
-        Map<String, String> xForms = availableFormsService.getXForm(null);
+        Map<String, String> forms = availableFormsService.getForm(null);
 
-        assertThat(xForms.size(), equalTo(1));
-        assertThat(xForms.get(file1.getXmlSchema()), equalTo(file1.getFileName()));
+        assertThat(forms.size(), equalTo(1));
+        assertThat(forms.get(file1.getXmlSchema()), equalTo(file1.getFileName()));
     }
 
     @Test
@@ -121,7 +121,7 @@ public class AvailableFormsServiceTest {
         when(webFormService.findWebFormsForSchemas(anyCollectionOf(String.class)))
                 .thenReturn(Collections.<ProjectFile>emptyList());
 
-        availableFormsService.getXForm(null);
+        availableFormsService.getForm(null);
     }
 
     @Test

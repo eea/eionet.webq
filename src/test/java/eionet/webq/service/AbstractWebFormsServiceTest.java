@@ -56,34 +56,34 @@ public class AbstractWebFormsServiceTest {
         }
     };
 
-    private ProjectFile file1 = webFormWithXmlSchema("1");
-    private ProjectFile file2 = webFormWithXmlSchema("2");
-    private ProjectFile file3 = webFormWithXmlSchema("3");
+    private final ProjectFile file1 = webFormWithXmlSchema("1");
+    private final ProjectFile file2 = webFormWithXmlSchema("2");
+    private final ProjectFile file3 = webFormWithXmlSchema("3");
 
 
     @Test
-    public void returnsAllAvailableFormsIfProvidedXmlSchemasArrayIsEmpty() throws Exception {
+    public void returnsAllAvailableFormsIfProvidedXmlSchemasArrayIsEmpty() {
         when(webFormsService.getAllActiveWebForms()).thenReturn(Arrays.asList(file1, file2, file3));
 
         assertThat(webFormsService.findWebFormsForSchemas(new ArrayList<String>()).size(), equalTo(3));
     }
 
     @Test
-    public void forNullXmlSchemasArgumentReturnTheSameResultAsForEmptyArray() throws Exception {
+    public void forNullXmlSchemasArgumentReturnTheSameResultAsForEmptyArray() {
         when(webFormsService.getAllActiveWebForms()).thenReturn(Arrays.asList(file1, file2));
 
         assertThat(webFormsService.findWebFormsForSchemas(null), equalTo(webFormsService.findWebFormsForSchemas(new ArrayList<String>())));
     }
 
     @Test
-    public void findWebFormsForSchemasReturnSpecificResultForSchemaInParameter() throws Exception {
+    public void findWebFormsForSchemasReturnSpecificResultForSchemaInParameter() {
         when(storage.findWebFormsForSchemas(any(WebFormType.class), anyCollectionOf(String.class)))
                 .thenReturn(Arrays.asList(file1));
 
-        Collection<ProjectFile> xForms = webFormsService.findWebFormsForSchemas(Arrays.asList(file1.getXmlSchema()));
+        Collection<ProjectFile> forms = webFormsService.findWebFormsForSchemas(Arrays.asList(file1.getXmlSchema()));
 
-        assertThat(xForms.size(), equalTo(1));
-        assertThat(xForms.iterator().next(), equalTo(file1));
+        assertThat(forms.size(), equalTo(1));
+        assertThat(forms.iterator().next(), equalTo(file1));
         verify(storage).findWebFormsForSchemas(any(WebFormType.class), anyCollectionOf(String.class));
     }
     

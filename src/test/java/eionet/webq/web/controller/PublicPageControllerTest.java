@@ -146,22 +146,6 @@ public class PublicPageControllerTest {
     }
 
     @Test
-    public void writesWebFormContentForResponseWithRightHeaders() throws Exception {
-        ProjectFile projectFile = new ProjectFile();
-        byte[] testContent = "test-content".getBytes();
-        projectFile.setFileContent(testContent);
-        when(webFormService.findWebFormById(WEB_FORM_ID)).thenReturn(projectFile);
-
-        MockHttpServletResponse response = new MockHttpServletResponse();
-        MockHttpServletRequest request = new MockHttpServletRequest();
-        publicPageController.startWebFormWriteFormToResponse(WEB_FORM_ID, request, response);
-
-        assertThat(response.getContentType(), equalTo("application/xhtml+xml;charset=utf-8"));
-        assertThat(response.getContentLength(), equalTo(testContent.length));
-        assertThat(response.getContentAsByteArray(), equalTo(testContent));
-    }
-
-    @Test
     public void whenUploadingFile_ifMultipleFilesGiven_saveThemToStorage() throws Exception {
         UploadForm uploadForm = new UploadForm();
         UserFile file1 = new UserFile(new UploadedFile("file1", "file1-content".getBytes()), "xmlSchema");

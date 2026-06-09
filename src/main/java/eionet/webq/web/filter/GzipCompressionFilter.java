@@ -10,7 +10,7 @@ public class GzipCompressionFilter extends GzipFilter {
     
     @Override
     public void doFilter(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws Exception {
-        String path = ((HttpServletRequest) request).getServletPath();
+        String path = request.getServletPath();
 
         Pattern pattern = Pattern.compile("/projects/.+/export"); // exclude project zip archive from gzip compression
         if (pattern.matcher(path).matches()) {

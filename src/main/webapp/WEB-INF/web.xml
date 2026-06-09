@@ -43,24 +43,6 @@
         <url-pattern>/*</url-pattern>
     </filter-mapping>
 
-    <!--  betterFORM XForms Filter -->
-    <filter>
-        <filter-name>XFormsFilter</filter-name>
-        <filter-class>de.betterform.agent.web.filter.XFormsFilter</filter-class>
-    </filter>
-
-    <!--  XForms filter mapping
-        maps the XFormsFilter to a specified Servlet or url-pattern. This example uses a
-        url-pattern that matches all document under the forms directory. Other examples would be:
-        - <url-pattern>*.xhtml</url-pattern> to match all xhtml files
-        - <servlet-name>XFormsRequest</servlet-name> to match all requests to Servlet XFormsRequest
-    -->
-    <filter-mapping>
-        <filter-name>XFormsFilter</filter-name>
-        <url-pattern>/xform/*</url-pattern>
-        <url-pattern>/forms/*</url-pattern>
-    </filter-mapping>
-
     <!-- Spring security-->
     <filter>
         <filter-name>springSecurityFilterChain</filter-name>
@@ -71,83 +53,9 @@
         <url-pattern>/*</url-pattern>
     </filter-mapping>
 
-    <servlet>
-        <servlet-name>error</servlet-name>
-        <servlet-class>de.betterform.agent.web.servlet.ErrorServlet</servlet-class>
-    </servlet>
-
-    <servlet-mapping>
-        <servlet-name>error</servlet-name>
-        <url-pattern>/error/*</url-pattern>
-    </servlet-mapping>
-
     <error-page>
         <location>/general/errors</location>
     </error-page>
-
-    <servlet>
-        <servlet-name>Flux</servlet-name>
-        <servlet-class>org.directwebremoting.servlet.DwrServlet</servlet-class>
-        <init-param>
-            <param-name>debug</param-name>
-            <param-value>true</param-value>
-        </init-param>
-    </servlet>
-
-    <!-- 
-    de.betterform.agent.web.servlet.XFormsInspectorServlet 
-    creates debugging output of a XForms document.
-    -->
-    <servlet>
-        <servlet-name>inspector</servlet-name>
-        <servlet-class>de.betterform.agent.web.servlet.XFormsInspectorServlet</servlet-class>
-    </servlet>
-
-    <servlet-mapping>
-        <servlet-name>inspector</servlet-name>
-        <url-pattern>/inspector/*</url-pattern>
-    </servlet-mapping>
-    
-    <!--
-    de.betterform.agent.web.resources.ResourceServlet is responsible for loading
-    all CSS, Script, XSLT and image files that are used by betterFORM.
-
-    To turn caching off please the value of the init-param 'caching' to 'false'.
-    Otherwise caching will always be turned on and to see changes to resources
-    the Java VM needs to be restarted!
-    -->
-    <servlet>
-        <servlet-name>ResourceServlet</servlet-name>
-        <servlet-class>de.betterform.agent.web.resources.ResourceServlet</servlet-class>
-        <init-param>
-            <param-name>caching</param-name>
-            <param-value>@CACHING@</param-value>
-        </init-param>
-    </servlet>
-    
-    <!--
-    de.betterform.agent.web.servlet.PlainHtmlServlet handles clients which 
-    accept only plain html without javascript.
-    -->
-    <servlet>
-        <servlet-name>PlainHtml</servlet-name>
-        <servlet-class>de.betterform.agent.web.servlet.PlainHtmlServlet</servlet-class>
-    </servlet>
-
-    <servlet-mapping>
-        <servlet-name>Flux</servlet-name>
-        <url-pattern>/Flux/*</url-pattern>
-    </servlet-mapping>
-
-    <servlet-mapping>
-        <servlet-name>ResourceServlet</servlet-name>
-        <url-pattern>/bfResources/*</url-pattern>
-    </servlet-mapping>
-
-    <servlet-mapping>
-        <servlet-name>PlainHtml</servlet-name>
-        <url-pattern>/PlainHtml/*</url-pattern>
-    </servlet-mapping>
 
     <filter>
         <filter-name>characterEncodingFilter</filter-name>
@@ -166,16 +74,6 @@
     <listener>
         <listener-class>org.jasig.cas.client.session.SingleSignOutHttpSessionListener</listener-class>
     </listener>
-
-    <listener>
-        <listener-class>de.betterform.agent.web.servlet.BfServletContextListener</listener-class>
-    </listener>
-
-    <!--  CONTEXT PARAMS -->
-    <context-param>
-        <param-name>betterform.configfile</param-name>
-        <param-value>WEB-INF/betterform/betterform-config.xml</param-value>
-    </context-param>
 
     <context-param>
         <param-name>contextConfigLocation</param-name>

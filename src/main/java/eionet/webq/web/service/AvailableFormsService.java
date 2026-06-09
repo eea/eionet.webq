@@ -55,7 +55,7 @@ public class AvailableFormsService extends SpringBeanAutowiringSupport {
      * @return map of xml schema to XForm file name
      */
     @SuppressWarnings("unchecked")
-    public Map<String, String> getXForm(Object[] xmlSchemas) {
+    public Map<String, String> getForm(Object[] xmlSchemas) {
         Map<String, String> files =
                 transformToSchemaFileNameMap(webFormService.findWebFormsForSchemas(xmlSchemasToList(xmlSchemas)));
         return files;

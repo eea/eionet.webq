@@ -48,15 +48,6 @@ public class WebformUrlProviderTest extends AbstractProjectsControllerTests {
     private String webqUrl;
 
     @Test
-    public void getXFormUrl() {
-        ProjectFile webformFile = new ProjectFile();
-        webformFile.setId(1);
-        webformFile.setFileName("xform.xhtml");
-
-        assertThat(webformUrlProvider.getWebformPath(webformFile), equalTo(webqUrl + "/xform/?formId=1&"));
-    }
-
-    @Test
     public void getHtmlFormWithProjectUrl() {
         ProjectFile webformFile = new ProjectFile();
         webformFile.setId(1);

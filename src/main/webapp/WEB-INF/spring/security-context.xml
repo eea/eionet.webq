@@ -35,7 +35,7 @@
         <security:logout logout-success-url="/logout"/>
         <security:custom-filter ref="requestSingleLogoutFilter" before="LOGOUT_FILTER"/>
         <security:custom-filter ref="singleLogoutFilter" before="CAS_FILTER"/>
-        <!-- TODO: FIX CSRF - THIS ALSO AFFECTS XFORMS -->
+        <!-- TODO: FIX CSRF -->
         <security:csrf disabled="true" />
     </security:http>
 

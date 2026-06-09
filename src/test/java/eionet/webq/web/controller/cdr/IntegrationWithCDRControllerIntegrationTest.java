@@ -92,9 +92,8 @@ public class IntegrationWithCDRControllerIntegrationTest extends AbstractContext
     private int fileNameCounter = 0;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         Mockito.reset(xmlRpcClient);
-
     }
     
     @Test
@@ -113,7 +112,7 @@ public class IntegrationWithCDRControllerIntegrationTest extends AbstractContext
 
         MultiValueMap<String, XmlFile> files = (MultiValueMap<String, XmlFile>) requestToWebQMenuAndGetModelAttribute("xmlFiles");
 
-        assertThat(files.size(), equalTo(1));
+        assertEquals(1, files.size());
         assertTrue(files.containsKey(XML_SCHEMA));
     }
 
@@ -122,7 +121,7 @@ public class IntegrationWithCDRControllerIntegrationTest extends AbstractContext
         saveAvailableWebFormWithSchema(XML_SCHEMA);
         CdrRequest parameters = (CdrRequest) requestToWebQMenuAndGetModelAttribute("parameters");
 
-        assertThat(parameters.getEnvelopeUrl(), equalTo(ENVELOPE_URL));
+        assertEquals(ENVELOPE_URL, parameters.getEnvelopeUrl());
     }
 
     @SuppressWarnings("unchecked")
@@ -134,11 +133,11 @@ public class IntegrationWithCDRControllerIntegrationTest extends AbstractContext
 
         Collection<ProjectFile> webForms = (Collection<ProjectFile>) requestToWebQMenuAndGetModelAttribute("availableWebForms");
 
-        assertThat(webForms.size(), equalTo(2));
+        assertEquals(2, webForms.size());
     }
     
     @Test
-    public void editCdrFileWillSaveFileLocallyAndRedirectToXFormsEngine() throws Exception {
+    public void editCdrFileWillSaveFileLocallyAndRedirectToFormsEngine() throws Exception {
         byte[] fileContent = "file-content".getBytes();
         when(restOperations.getForEntity(anyString(), any(Class.class)))
                 .thenReturn(new ResponseEntity<byte[]>(fileContent, HttpStatus.OK));
@@ -159,16 +158,16 @@ public class IntegrationWithCDRControllerIntegrationTest extends AbstractContext
         String userId = DigestUtils.md5Hex(session.getId());
         String sessionIdParamValue = request.getSessionId();
         String redirectedUrl = mvcResult.getResponse().getRedirectedUrl();
-        
-        assertThat(redirectedUrl, containsString("sessionid=" + sessionIdParamValue));
-        
+
+        assertTrue(redirectedUrl.contains("sessionid=" + sessionIdParamValue));
+
         UserFile file = userFileService.getByIdAndUser(extractFileIdFromXFormRedirectUrl(redirectedUrl), userId);
-        
+
         assertNotNull(file);
         assertNull(file.getContent());
-        assertThat(file.getName(), equalTo(fileName));
-        assertThat(file.getXmlSchema(), equalTo(XML_SCHEMA));
-        assertThat(file.getUserId(), is(equalTo(userId)));
+        assertEquals(fileName, file.getName());
+        assertEquals(XML_SCHEMA, file.getXmlSchema());
+        assertEquals(userId, file.getUserId());
     }
 
     @Test
@@ -179,7 +178,7 @@ public class IntegrationWithCDRControllerIntegrationTest extends AbstractContext
         MvcResult mvcResult =
                 mvc().perform(post("/WebQMenu").param("envelope", ENVELOPE_URL).header(CdrAuthorizationInterceptor.BYPASS_AUTH_HEADER,"true")).andExpect(status().isFound()).andReturn();
 
-        assertTrue(mvcResult.getResponse().getRedirectedUrl().startsWith(webqUrl + "/xform"));
+        assertTrue(mvcResult.getResponse().getRedirectedUrl().startsWith(webqUrl + "/webform/project/"));
     }
 
     @Test
@@ -191,7 +190,7 @@ public class IntegrationWithCDRControllerIntegrationTest extends AbstractContext
                 mvc().perform(post("/WebQMenu").param("envelope", ENVELOPE_URL).header(CdrAuthorizationInterceptor.BYPASS_AUTH_HEADER,"true").param("add", "true").param("schema", XML_SCHEMA))
                         .andExpect(status().isFound()).andReturn();
 
-        assertTrue(mvcResult.getResponse().getRedirectedUrl().startsWith(webqUrl + "/xform"));
+        assertTrue(mvcResult.getResponse().getRedirectedUrl().startsWith(webqUrl + "/webform/project/"));
     }
 
     @Test
@@ -212,7 +211,8 @@ public class IntegrationWithCDRControllerIntegrationTest extends AbstractContext
         file.setActive(true);
         file.setRemoteForm(true);
         file.setTitle("web form");
-        file.setFileName((fileNameCounter++) + "-xform.xhtml");
+        file.setProjectIdentifier("projectId");
+        file.setFileName((fileNameCounter++) + "-form.html");
         file.setFileContent("content".getBytes());
         file.setFileType(ProjectFileType.WEBFORM);
         projectFileService.saveOrUpdate(file, new ProjectEntry());
@@ -242,11 +242,11 @@ public class IntegrationWithCDRControllerIntegrationTest extends AbstractContext
     }
 
     private int extractFileIdFromXFormRedirectUrl(String redirectUrl) {
-        String redirectUrlRegex = "/xform/\\?formId=\\d+&instance=.*&fileId=(\\d+)&base_uri=";
+        String redirectUrlRegex = webqUrl + "/webform/project/projectId/file/0-form.html\\?instance=.*&fileId=(\\d+)+&base_uri=.*";
         Matcher matcher = Pattern.compile(redirectUrlRegex).matcher(redirectUrl);
 
         assertTrue(matcher.find());
-        return Integer.valueOf(matcher.group(1));
+        return Integer.parseInt(matcher.group(1));
     }
 }
 

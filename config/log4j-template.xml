@@ -25,20 +25,6 @@
         <priority value="INFO"/>
     </category>
 
-    <category name="org.directwebremoting">
-        <priority value="FATAL"/>
-    </category>
-
-    <!-- custom log level -->
-
-    <category name="de.betterform">
-        <priority value="INFO"/>
-    </category>
-
-    <logger name="net.sf.ehcache">
-        <level value="ERROR"/>
-    </logger>
-
     <root>
         <priority value="INFO"/>
         <appender-ref ref="SHELL"/>
