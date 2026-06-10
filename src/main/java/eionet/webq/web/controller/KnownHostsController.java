@@ -61,6 +61,7 @@ public class KnownHostsController {
     @RequestMapping({ "/", "" })
     public String listKnownHosts(Model model) {
         model.addAttribute("allKnownHosts", knownHostsService.findAll());
+        model.addAttribute("specific_header", "known_hosts_list_head.jsp");
         return "known_hosts_list";
     }
 

@@ -21,7 +21,9 @@
         <link rel="stylesheet" type="text/css" href="https://www.eionet.europa.eu/styles/eionet2007/screen.css" media="screen" title="Eionet 2007 style" />
         <link rel="stylesheet" type="text/css" href="<c:url value="/css/eionet2007.css"/>" media="screen" title="Eionet 2007 style" />
         <script type="text/javascript" src="<c:url value="/js/pageops.js"/>"></script>
-        <tiles:insertAttribute name="specific_header" ignore="true"/>
+        <c:if test="${not empty specific_header}">
+            <jsp:include page="/WEB-INF/pages/${specific_header}" />
+        </c:if>
     </head>
 
     <sec:authorize access="isAuthenticated()" var="authenticated"/>

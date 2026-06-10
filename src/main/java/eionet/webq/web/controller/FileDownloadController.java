@@ -302,6 +302,7 @@ public class FileDownloadController {
         }
         model.put("mergeModules", modules);
         model.put("userFiles", e.getUserFiles());
+        model.put("specific_header", "merge_options_head.jsp");
         return new ModelAndView("merge_options", model);
     }
 

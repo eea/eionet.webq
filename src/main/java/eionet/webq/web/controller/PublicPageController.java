@@ -136,6 +136,7 @@ public class PublicPageController {
         if (!model.containsAttribute(uploadForm)) {
             model.addAttribute(uploadForm, new UploadForm());
         }
+        model.addAttribute("specific_header", "index_head.jsp");
         return "index";
     }
 

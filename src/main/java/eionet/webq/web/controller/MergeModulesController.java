@@ -46,6 +46,7 @@ public class MergeModulesController {
      * Edit view name.
      */
     public static final String ADD_EDIT_MERGE_MODULE_VIEW = "add_edit_merge_module";
+    public static final String ADD_EDIT_MERGE_MODULE_VIEW_HEAD_JSP = "add_edit_merge_module_head.jsp";
     /**
      * Merge modules storage.
      */
@@ -61,6 +62,7 @@ public class MergeModulesController {
     @RequestMapping(value = "/modules", method = RequestMethod.GET)
     public String listMergeModules(Model model) {
         model.addAttribute("allMergeModules", mergeModulesStorage.findAll());
+        model.addAttribute("specific_header", "merge_modules_head.jsp");
         return "merge_modules";
     }
 
@@ -73,6 +75,7 @@ public class MergeModulesController {
     @RequestMapping("/module/add")
     public String addModule(Model model) {
         model.addAttribute("mergeModule", new MergeModule());
+        model.addAttribute("specific_header", ADD_EDIT_MERGE_MODULE_VIEW_HEAD_JSP);
         return ADD_EDIT_MERGE_MODULE_VIEW;
     }
 
@@ -93,6 +96,7 @@ public class MergeModulesController {
             bindingResult.rejectValue("xslFile", "mergeFile.empty.on.save");
         }
         if (bindingResult.hasErrors()) {
+            model.addAttribute("specific_header", ADD_EDIT_MERGE_MODULE_VIEW_HEAD_JSP);
             return ADD_EDIT_MERGE_MODULE_VIEW;
         }
         mergeModule.setUserName(principal.getName());
@@ -104,6 +108,7 @@ public class MergeModulesController {
             }
         } catch (ConstraintViolationException e) {
             bindingResult.rejectValue("name", "merge.module.duplicate.name");
+            model.addAttribute("specific_header", ADD_EDIT_MERGE_MODULE_VIEW_HEAD_JSP);
             return ADD_EDIT_MERGE_MODULE_VIEW;
         }
 
@@ -122,6 +127,7 @@ public class MergeModulesController {
     public String edit(@PathVariable int id, Model model) {
         MergeModule module = mergeModulesStorage.findById(id);
         model.addAttribute("mergeModule", module);
+        model.addAttribute("specific_header", ADD_EDIT_MERGE_MODULE_VIEW_HEAD_JSP);
         return ADD_EDIT_MERGE_MODULE_VIEW;
     }
 

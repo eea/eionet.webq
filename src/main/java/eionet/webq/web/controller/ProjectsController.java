@@ -417,6 +417,7 @@ public class ProjectsController {
     private String viewProject(ProjectEntry entry, Model model) {
         addProjectToModel(model, entry);
         model.addAttribute(ALL_PROJECT_FILES_ATTRIBUTE, projectFileService.filesDividedByTypeFor(entry));
+        model.addAttribute("specific_header", "view_project_head.jsp");
         return "view_project";
     }
 
@@ -437,6 +438,7 @@ public class ProjectsController {
     private String submitImportProjectArchive(ProjectEntry project, HttpFileInfo archiveFile, Model model) {
         this.addProjectToModel(model, project);
         this.addAttributeToModelIfNotAdded(model, IMPORT_ARCHIVE_ATTRIBUTE, archiveFile);
+        this.addAttributeToModelIfNotAdded(model, "specific_header", "import_project_files_head.jsp");
         
         return "import_project_files";
     }
