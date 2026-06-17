@@ -19,12 +19,6 @@
 <h1>Project: ${fn:escapeXml(projectEntry.projectId)}</h1>
 <p><strong>${fn:escapeXml(projectEntry.description)}</strong> (created <fmt:formatDate pattern="dd MMM yyyy" value="${projectEntry.created}" />)</p>
 
-<c:if test="${not empty fileToUpdate}">
-    <div class="system-msg">File ${fn:escapeXml(fileToUpdate)} could be updated from remote storage.
-        <a href="<c:url value="/projects/remote/update/${fn:escapeXml(projectEntry.projectId)}/file/${fileToUpdateId}"/>">Click here to update it</a>
-    </div>
-</c:if>
-
 <c:if test="${empty allProjectFiles}">
     <h2>Project files</h2>
     <div>No project files yet.</div>
@@ -47,7 +41,6 @@
                     <th>Remote</th>
                 </c:if>
                 <th>Username</th>
-                <th>Remote location</th>
             </tr>
         </thead>
         <tbody>
@@ -65,16 +58,6 @@
                         <td><input type="checkbox" ${projectFile.remoteForm ? 'checked="checked"' : ''} disabled="disabled"/></td>
                     </c:if>
                     <td>${fn:escapeXml(projectFile.userName)}</td>
-                    <td>
-                        <c:choose>
-                            <c:when test="${not empty projectFile.remoteFileUrl}">
-                                <input type="button" title="${fn:escapeXml(projectFile.remoteFileUrl)}" onclick="window.location = '<c:url value="/projects/remote/check/updates/${fn:escapeXml(projectEntry.projectId)}/file/${projectFile.id}"/>'" value="Check for updates">
-                            </c:when>
-                            <c:otherwise>
-                                No remote file URL
-                            </c:otherwise>
-                        </c:choose>
-                    </td>
                 </tr>
                 <tr class="dialogTemplate">
                     <td colspan="5">

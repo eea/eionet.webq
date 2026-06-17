@@ -66,11 +66,6 @@ public class ProjectFile {
     @Embedded
     private UploadedFile file = new UploadedFile();
     /**
-     * Remote file location(typically VCS link).
-     */
-    @Column(name = "remote_file_url")
-    private String remoteFileUrl;
-    /**
      * New xml file name for web form.
      */
     @Column(name = "new_xml_file_name")
@@ -231,14 +226,6 @@ public class ProjectFile {
 
     public void setFile(UploadedFile file) {
         this.file = file;
-    }
-
-    public String getRemoteFileUrl() {
-        return remoteFileUrl;
-    }
-
-    public void setRemoteFileUrl(String remoteFileUrl) {
-        this.remoteFileUrl = remoteFileUrl;
     }
 
     public String getDescription() {

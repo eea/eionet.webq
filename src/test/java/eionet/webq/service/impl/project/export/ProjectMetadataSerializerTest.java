@@ -36,7 +36,6 @@ public class ProjectMetadataSerializerTest {
         originalFile.setNewXmlFileName("newxml.xml");
         originalFile.setProjectId(10);
         originalFile.setProjectIdentifier("proj-id");
-        originalFile.setRemoteFileUrl("http://some.remote.file");
         originalFile.setRemoteForm(true);
         originalFile.setTitle("title");
         originalFile.setUpdated(new Date());
@@ -58,7 +57,6 @@ public class ProjectMetadataSerializerTest {
         Assert.assertEquals(originalFile.getFileName(), deserializedFile.getFileName());
         Assert.assertEquals(originalFile.isLocalForm(), deserializedFile.isLocalForm());
         Assert.assertEquals(originalFile.getNewXmlFileName(), deserializedFile.getNewXmlFileName());
-        Assert.assertEquals(originalFile.getRemoteFileUrl(), deserializedFile.getRemoteFileUrl());
         Assert.assertEquals(originalFile.isRemoteForm(), deserializedFile.isRemoteForm());
         Assert.assertEquals(originalFile.getTitle(), deserializedFile.getTitle());
         Assert.assertEquals(originalFile.getXmlSchema(), deserializedFile.getXmlSchema());

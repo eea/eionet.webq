@@ -183,7 +183,6 @@ public class ProjectFoldersAndFilesTest {
         projectFile.setDescription("Main web form for questionnaire");
         projectFile.setUserName("User Name");
         projectFile.setFile(new UploadedFile("test-webform.html", "Web-form content".getBytes()));
-        projectFile.setRemoteFileUrl("localhost/test-webform.html");
         projectFile.setEmptyInstanceUrl("empty-instance-url");
         projectFile.setNewXmlFileName("new-xml-file-name");
         projectFile.setXmlSchema("test-xml-schema");
@@ -196,7 +195,6 @@ public class ProjectFoldersAndFilesTest {
         projectFile.setTitle("Simple file");
         projectFile.setUserName("User Name");
         projectFile.setFile(new UploadedFile("test-file.xml", "Web-form content".getBytes()));
-        projectFile.setRemoteFileUrl("localhost/test-file.xml");
         return projectFile;
     }
 

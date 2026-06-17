@@ -67,8 +67,6 @@ public class PublicPageControllerTest {
     @InjectMocks
     private PublicPageController publicPageController = new PublicPageController();
     @Mock
-    private RemoteFileService remoteFileService;
-    @Mock
     private CDREnvelopeService envelopeService;
     @Mock
     private BindingResult bindingResult;

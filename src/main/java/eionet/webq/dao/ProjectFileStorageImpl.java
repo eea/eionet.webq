@@ -141,7 +141,7 @@ public class ProjectFileStorageImpl extends AbstractDao<ProjectFile> implements 
     private void updateWithoutChangingContent(ProjectFile projectFile) {
         getCurrentSession().createQuery("UPDATE ProjectFile SET title=:title, xmlSchema=:xmlSchema, "
                 + " description=:description, userName=:userName, "
-                + " active=:active, localForm=:localForm, remoteForm=:remoteForm, remoteFileUrl=:remoteFileUrl, "
+                + " active=:active, localForm=:localForm, remoteForm=:remoteForm, "
                 + " newXmlFileName=:newXmlFileName, emptyInstanceUrl=:emptyInstanceUrl, updated=CURRENT_TIMESTAMP() "
                 + " WHERE id=:id").setProperties(projectFile).executeUpdate();
     }

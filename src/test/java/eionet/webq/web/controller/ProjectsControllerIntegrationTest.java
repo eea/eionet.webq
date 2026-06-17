@@ -266,73 +266,6 @@ public class ProjectsControllerIntegrationTest extends AbstractProjectsControlle
                 content().bytes(testWebFormUpload().getFileContent()));
     }
 
-    @Test
-    public void checkFileChangesFromRemoteLocation() throws Exception {
-        uploadFilesForDefaultProject(1);
-        when(fileDownload.getForEntity(any(URI.class), eq(byte[].class)))
-                .thenReturn(new ResponseEntity<byte[]>("test-file-content".getBytes(), HttpStatus.OK));
-        ProjectFile uploadedFile = theOnlyOneUploadedFile();
-
-        request(MockMvcRequestBuilders.get("/projects/remote/check/updates/" + DEFAULT_PROJECT_ID + "/file/" + uploadedFile.getId()))
-                .andExpect(model().attribute("fileToUpdate", uploadedFile.getFileName()))
-                .andExpect(model().attribute("fileToUpdateId", uploadedFile.getId()));
-    }
-
-    @Test
-    public void returnsMessageIfNoChangesRequired() throws Exception {
-        ProjectFile file = uploadFilesForDefaultProject(1);
-        when(fileDownload.getForEntity(any(URI.class), eq(byte[].class)))
-                .thenReturn(new ResponseEntity<byte[]>(file.getFileContent(), HttpStatus.OK));
-        ProjectFile uploadedFile = theOnlyOneUploadedFile();
-
-        request(MockMvcRequestBuilders.get("/projects/remote/check/updates/" + DEFAULT_PROJECT_ID + "/file/" + uploadedFile.getId()))
-                .andExpect(model().attribute("fileToUpdate", nullValue()))
-                .andExpect(model().attribute("fileToUpdateId", nullValue()))
-                .andExpect(model().attribute("message",
-                        messages.getMessage("no.updates.for.file", new Object[]{uploadedFile.getFileName()})));
-    }
-
-    @Test
-    public void whenFileNotAccessibleShowsMessage() throws Exception {
-        uploadFilesForDefaultProject(1);
-        when(fileDownload.getForEntity(any(URI.class), eq(byte[].class)))
-                .thenReturn(new ResponseEntity<byte[]>(HttpStatus.BAD_REQUEST));
-        ProjectFile uploadedFile = theOnlyOneUploadedFile();
-
-        request(MockMvcRequestBuilders.get("/projects/remote/check/updates/" + DEFAULT_PROJECT_ID + "/file/" + uploadedFile.getId()))
-                .andExpect(model().attribute("fileToUpdate", nullValue()))
-                .andExpect(model().attribute("fileToUpdateId", nullValue()))
-                .andExpect(model().attribute("message", messages.getMessage("remote.file.not.available",
-                        new Object[]{uploadedFile.getFileName()})));
-    }
-
-    @Test
-    public void allowsFileUpdateFromRemote() throws Exception {
-        uploadFilesForDefaultProject(1);
-        byte[] newContent = "new-file-content".getBytes();
-        when(fileDownload.getForEntity(any(URI.class), eq(byte[].class)))
-                .thenReturn(new ResponseEntity<byte[]>(newContent, HttpStatus.OK));
-        ProjectFile uploadedFile = theOnlyOneUploadedFile();
-        request(MockMvcRequestBuilders.get("/projects/remote/update/" + DEFAULT_PROJECT_ID + "/file/" + uploadedFile.getId()));
-
-        ProjectEntry defaultProject = projectFolders.getByProjectId(DEFAULT_PROJECT_ID);
-        assertThat(projectFileService.fileContentBy(uploadedFile.getFileName(), defaultProject).getFileContent(), equalTo(newContent));
-    }
-
-    @Test
-    public void showsErrorMessageWhenRemoteFileNotAccessible() throws Exception {
-        ProjectFile testFile = uploadFilesForDefaultProject(1);
-        when(fileDownload.getForEntity(any(URI.class), eq(byte[].class)))
-                .thenReturn(new ResponseEntity<byte[]>(HttpStatus.BAD_REQUEST));
-        ProjectFile uploadedFile = theOnlyOneUploadedFile();
-        request(MockMvcRequestBuilders.get("/projects/remote/update/" + DEFAULT_PROJECT_ID + "/file/" + uploadedFile.getId()))
-                .andExpect(model().attribute("message", messages.getMessage("unable.to.update.file")));
-
-        ProjectEntry defaultProject = projectFolders.getByProjectId(DEFAULT_PROJECT_ID);
-        assertThat(projectFileService.fileContentBy(uploadedFile.getFileName(), defaultProject).getFileContent(),
-                equalTo(testFile.getFileContent()));
-    }
-
     private ProjectFile theOnlyOneUploadedFile() {
         Collection<ProjectFile> projectFiles = allFilesForDefaultProject();
         assertThat(projectFiles.size(), equalTo(1));
@@ -370,7 +303,6 @@ public class ProjectsControllerIntegrationTest extends AbstractProjectsControlle
         projectFile.setTitle("title");
         projectFile.setFileType(ProjectFileType.WEBFORM);
         projectFile.setFile(new UploadedFile("file-name", "test-content".getBytes()));
-        projectFile.setRemoteFileUrl("http://file.url");
         projectFile.setUserName("test-user");
         return projectFile;
     }
@@ -380,7 +312,6 @@ public class ProjectsControllerIntegrationTest extends AbstractProjectsControlle
                 .file(new MockMultipartFile("file", projectFile.getFileName(), MediaType.APPLICATION_XML_VALUE, projectFile.getFileContent()))
                 .param("title", projectFile.getTitle()).param("active", Boolean.toString(projectFile.isActive()))
                 .param("description", projectFile.getDescription()).param("fileType", projectFile.getFileType().name())
-                .param("remoteFileUrl", projectFile.getRemoteFileUrl())
                 .principal(mockPrincipal(projectFile.getUserName())));
     }
 

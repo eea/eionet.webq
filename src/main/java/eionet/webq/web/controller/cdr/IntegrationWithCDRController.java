@@ -261,8 +261,7 @@ public class IntegrationWithCDRController {
      * @return redirect url
      * @throws FileNotAvailableException if remote file not available
      */
-    private String editFile(ProjectFile webForm, String fileName, String remoteFileUrl, CdrRequest request)
-            throws FileNotAvailableException {
+    private String editFile(ProjectFile webForm, String fileName, String remoteFileUrl, CdrRequest request) {
         UserFile userFile = userFileBasedOn(request);
         userFile.setName(fileName);
         userFile.setXmlSchema(webForm.getXmlSchema());

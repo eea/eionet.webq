@@ -19,7 +19,6 @@ final class ProjectFileFieldExclusionStrategy implements ExclusionStrategy {
     static {
         FIELD_WHITELIST_PROJECT_FILE = Arrays.asList(
             "title",
-            "remoteFileUrl",
             "newXmlFileName",
             "emptyInstanceUrl",
             "description",

@@ -291,4 +291,7 @@
     <changeSet id="19" author="nakasnik">
         <modifyDataType tableName="file_content" columnName="file_content" newDataType="${bigblob}" />
     </changeSet>
+    <changeSet id="20" author="stamojoh">
+        <dropColumn columnName="remote_file_url" tableName="project_file" />
+    </changeSet>
 </databaseChangeLog>
