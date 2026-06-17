@@ -20,14 +20,11 @@
  */
 package eionet.webq.dao;
 
-import static org.hibernate.criterion.Restrictions.and;
-import static org.hibernate.criterion.Restrictions.eq;
-import static org.hibernate.criterion.Restrictions.in;
-import static org.hibernate.criterion.Restrictions.isNotNull;
-
-import java.sql.Timestamp;
-import java.util.Collection;
-
+import eionet.webq.dao.orm.ProjectEntry;
+import eionet.webq.dao.orm.ProjectFile;
+import eionet.webq.dao.orm.ProjectFileType;
+import eionet.webq.dao.orm.util.WebQFileInfo;
+import eionet.webq.dto.WebFormType;
 import org.apache.commons.lang3.ArrayUtils;
 import org.hibernate.Session;
 import org.hibernate.criterion.Conjunction;
@@ -36,11 +33,10 @@ import org.hibernate.criterion.Restrictions;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import eionet.webq.dao.orm.ProjectEntry;
-import eionet.webq.dao.orm.ProjectFile;
-import eionet.webq.dao.orm.ProjectFileType;
-import eionet.webq.dao.orm.util.WebQFileInfo;
-import eionet.webq.dto.WebFormType;
+import java.sql.Timestamp;
+import java.util.Collection;
+
+import static org.hibernate.criterion.Restrictions.*;
 
 /**
  * ProjectFileStorage implementation.
@@ -52,6 +48,7 @@ public class ProjectFileStorageImpl extends AbstractDao<ProjectFile> implements 
     @Override
     public int save(final ProjectFile projectFile, final ProjectEntry project) {
         projectFile.setProjectId(project.getId());
+        projectFile.setUpdated(new Timestamp(System.currentTimeMillis()));
         getCurrentSession().save(projectFile);
         return projectFile.getId();
     }
@@ -82,7 +79,7 @@ public class ProjectFileStorageImpl extends AbstractDao<ProjectFile> implements 
     public void cleanInsert(ProjectEntry projectEntry, Collection<ProjectFile> projectFiles) {
         this.removeByCriterion(eq("projectId", projectEntry.getId()));
         this.getCurrentSession().flush();
-        
+
         for (ProjectFile projectFile : projectFiles) {
             this.save(projectFile, projectEntry);
         }
