@@ -20,7 +20,7 @@ Installation
 ### Prerequisites
 
 Minimum requirements are:
-* Java 8
+* Java 11
 * Maven 3.3.9
 * Tomcat 8.5.20
 * MySql 5.5
