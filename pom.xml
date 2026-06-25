@@ -7,7 +7,7 @@
     <packaging>war</packaging>
     <version>2.0-SNAPSHOT</version>
     <name>Eionet WebQ</name>
-    <url>http://webforms.eionet.europa.eu</url>
+    <url>https://webforms.eionet.europa.eu</url>
 
     <properties>
         <env>default</env>
