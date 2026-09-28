@@ -56,11 +56,8 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyList;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
+;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -68,7 +65,7 @@ import static org.mockito.Mockito.when;
  */
 public class CDREnvelopeServiceImplTest {
 
-    private CdrRequest parametersWithUrl = createWebQMenuParameters("http://cdr-envelope-service.eu");
+    private CdrRequest parametersWithUrl;
     @InjectMocks
     private CDREnvelopeServiceImpl cdrEnvelopeService;
     @Mock
@@ -80,7 +77,8 @@ public class CDREnvelopeServiceImplTest {
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
+        MockitoAnnotations.openMocks(this);
+        parametersWithUrl = createWebQMenuParameters("http://cdr-envelope-service.eu");
     }
 
     @Test
@@ -88,7 +86,7 @@ public class CDREnvelopeServiceImplTest {
         cdrEnvelopeService.getXmlFiles(parametersWithUrl);
 
         ArgumentCaptor<XmlRpcClientConfigImpl> configCaptor = ArgumentCaptor.forClass(XmlRpcClientConfigImpl.class);
-        verify(xmlRpcClient).execute(configCaptor.capture(), anyString(), anyList());
+        verify(xmlRpcClient).execute(configCaptor.capture(), nullable(String.class), anyList());
         XmlRpcClientConfigImpl config = configCaptor.getValue();
 
         assertThat(config.getServerURL().toString(), equalTo(parametersWithUrl.getEnvelopeUrl()));
@@ -101,7 +99,7 @@ public class CDREnvelopeServiceImplTest {
         cdrEnvelopeService.getXmlFiles(cdrRequest);
 
         ArgumentCaptor<XmlRpcClientConfigImpl> configCaptor = ArgumentCaptor.forClass(XmlRpcClientConfigImpl.class);
-        verify(xmlRpcClient).execute(configCaptor.capture(), anyString(), anyList());
+        verify(xmlRpcClient).execute(configCaptor.capture(), nullable(String.class), anyList());
         XmlRpcClientConfigImpl config = configCaptor.getValue();
 
         assertThat(config.getBasicUserName(), equalTo(cdrRequest.getUserName()));
@@ -143,7 +141,7 @@ public class CDREnvelopeServiceImplTest {
     }
 
     @Test
-    public void onSaveXmlUseEnvelopeUrlWithRemoteMethodName() throws Exception {
+    public void onSaveXmlUseEnvelopeUrlWithRemoteMethodName() {
         restOperationWillReturnResponseStringAndStatus(HttpStatus.OK);
         cdrEnvelopeService.saveXmlFilesMethod = "save";
 
@@ -151,12 +149,12 @@ public class CDREnvelopeServiceImplTest {
         file.setEnvelope(parametersWithUrl.getEnvelopeUrl());
         cdrEnvelopeService.pushXmlFile(file);
 
-        verify(restOperations).postForEntity(eq(file.getEnvelope() + "/save"), anyObject(), any(Class.class));
+        verify(restOperations).postForEntity(eq(file.getEnvelope() + "/save"), any(), any(Class.class));
     }
 
     @SuppressWarnings("unchecked")
     @Test
-    public void setRequiredParametersAndAuthorizationHeaderOnSaveXml() throws Exception {
+    public void setRequiredParametersAndAuthorizationHeaderOnSaveXml() {
         restOperationWillReturnResponseStringAndStatus(HttpStatus.OK);
         byte[] content = "file-content".getBytes();
         String fileName = "file.name";
@@ -182,7 +180,7 @@ public class CDREnvelopeServiceImplTest {
     }
 
     @Test
-    public void saveXmlWillReturnXmlSaveResult() throws Exception {
+    public void saveXmlWillReturnXmlSaveResult() {
         restOperationWillReturnResponseStringAndStatus(HttpStatus.OK);
 
         XmlSaveResult xmlSaveResult = cdrEnvelopeService.pushXmlFile(fileFromCdr());
@@ -192,7 +190,7 @@ public class CDREnvelopeServiceImplTest {
     }
 
     @Test
-    public void ifResponseStatusIsNotHttpOkReturnResultWithError() throws Exception {
+    public void ifResponseStatusIsNotHttpOkReturnResultWithError() {
         restOperationWillReturnResponseStringAndStatus(HttpStatus.BAD_REQUEST);
 
         XmlSaveResult xmlSaveResult = cdrEnvelopeService.pushXmlFile(fileFromCdr());
@@ -201,13 +199,13 @@ public class CDREnvelopeServiceImplTest {
     }
 
     @Test(expected = CDREnvelopeException.class)
-    public void throwsExceptionWhenUrlIsMalformed() throws Exception {
+    public void throwsExceptionWhenUrlIsMalformed() {
         cdrEnvelopeService.getXmlFiles(createWebQMenuParameters("malformed-url"));
     }
 
     @SuppressWarnings("unchecked")
     @Test
-    public void onPrepareXmlSaveParameters_IfFileRestrictedParametersSetToTrue_AddRestrictionParametersForCdr() throws Exception {
+    public void onPrepareXmlSaveParameters_IfFileRestrictedParametersSetToTrue_AddRestrictionParametersForCdr() {
         UserFile file = new UserFile();
         file.setApplyRestriction(true);
         file.setRestricted(true);
@@ -221,8 +219,7 @@ public class CDREnvelopeServiceImplTest {
 
     @SuppressWarnings("unchecked")
     @Test
-    public void onPrepareXmlSaveParameters_IfRestrictedSetToFalse_ApplyRestrictionWillBeTrueRestrictedWillBeFalse()
-            throws Exception {
+    public void onPrepareXmlSaveParameters_IfRestrictedSetToFalse_ApplyRestrictionWillBeTrueRestrictedWillBeFalse() {
         UserFile file = new UserFile();
         file.setApplyRestriction(true);
         file.setRestricted(false);
@@ -235,7 +232,7 @@ public class CDREnvelopeServiceImplTest {
     }
 
     @Test
-    public void onPrepareSaveXmlParameters_IfApplyRestrictionsSetToFalse_NoRestrictionParametersWillBeSet() throws Exception {
+    public void onPrepareSaveXmlParameters_IfApplyRestrictionsSetToFalse_NoRestrictionParametersWillBeSet() {
         HttpEntity<MultiValueMap<String, Object>> request = cdrEnvelopeService.prepareXmlSaveRequestParameters(new UserFile());
 
         assertNull(request.getBody().getFirst("applyRestriction"));
@@ -244,7 +241,7 @@ public class CDREnvelopeServiceImplTest {
 
     @SuppressWarnings("unchecked")
     @Test
-    public void onPrepareXmlSaveParameters_IfConversionParameterSpecified_ConvertFileContent() throws Exception {
+    public void onPrepareXmlSaveParameters_IfConversionParameterSpecified_ConvertFileContent() {
         UserFile file = new UserFile();
         file.setContent("file-content".getBytes());
         file.setConversionId("1");
@@ -264,12 +261,12 @@ public class CDREnvelopeServiceImplTest {
     }
 
     private void restOperationWillReturnResponseStringAndStatus(HttpStatus status) {
-        when(restOperations.postForEntity(anyString(), anyObject(), any(Class.class)))
+        when(restOperations.postForEntity(anyString(), any(), any(Class.class)))
                 .thenReturn(new ResponseEntity<String>("1file.xml", status));
     }
 
     private OngoingStubbing<Object> whenGetXmlFilesRequest() throws XmlRpcException {
-        return when(xmlRpcClient.execute(any(XmlRpcClientConfig.class), anyString(), anyList()));
+        return when(xmlRpcClient.execute(any(XmlRpcClientConfig.class), nullable(String.class), anyList()));
     }
 
     private CdrRequest createWebQMenuParameters(String url) {

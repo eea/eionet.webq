@@ -26,7 +26,7 @@ public class CookieValueManagerImplTest {
     
     @Before
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
+        MockitoAnnotations.openMocks(this);
         this.cookieValueManager = new CookieValueManagerImpl();
     }
     

@@ -52,12 +52,10 @@ import static org.hamcrest.core.IsEqual.equalTo;
 import static org.hamcrest.core.StringStartsWith.startsWith;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.*;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-/**
- */
 public class IntegrationWithCDRControllerTest {
     private static final String XML_SCHEMA = "schema";
     private final MockHttpServletRequest mockRequest = new MockHttpServletRequest();
@@ -79,7 +77,7 @@ public class IntegrationWithCDRControllerTest {
 
     @Before
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
+        MockitoAnnotations.openMocks(this);
         when(converter.convert(any(HttpServletRequest.class))).thenReturn(cdrRequest);
         cdrRequest.setSessionId("sessionId");
         when(webformUrlProvider.getWebformPath(any(ProjectFile.class))).thenReturn("/webform/");
@@ -96,7 +94,7 @@ public class IntegrationWithCDRControllerTest {
     @Test(expected = IllegalArgumentException.class)
     public void throwsExceptionIfWebFormsAmountIsZero() throws Exception {
         getXmlFilesWillReturnFilesAmountOf(1);
-        when(webFormService.findWebFormsForSchemas(anyCollectionOf(String.class))).thenReturn(
+        when(webFormService.findWebFormsForSchemas(anyCollection())).thenReturn(
                 Collections.<ProjectFile>emptyList());
 
         controller.webQMenu(mockRequest, model);
@@ -124,7 +122,7 @@ public class IntegrationWithCDRControllerTest {
 
         ProjectFile webFormForAnotherSchema = new ProjectFile();
         webFormForAnotherSchema.setXmlSchema(XML_SCHEMA + "-another-schema");
-        when(webFormService.findWebFormsForSchemas(anyCollectionOf(String.class))).thenReturn(
+        when(webFormService.findWebFormsForSchemas(anyCollection())).thenReturn(
                 Arrays.asList(webFormForAnotherSchema));
 
         assertNoRedirectOnMenuCall();
@@ -197,6 +195,7 @@ public class IntegrationWithCDRControllerTest {
 
         prepareRedirectToNewWebFormCase();
 
+        when(webFormService.findActiveWebFormById(anyInt())).thenReturn(new ProjectFile());
         controller.webQMenu(mockRequest, model);
 
         ArgumentCaptor<UserFile> userFileArgument = ArgumentCaptor.forClass(UserFile.class);
@@ -258,7 +257,7 @@ public class IntegrationWithCDRControllerTest {
         for (int i = 0; i < amount; i++) {
             projectFiles.add(file);
         }
-        when(webFormService.findWebFormsForSchemas(anyCollectionOf(String.class))).thenReturn(projectFiles);
+        when(webFormService.findWebFormsForSchemas(anyCollection())).thenReturn(projectFiles);
     }
 
     private void assertNoRedirectOnMenuCall() throws FileNotAvailableException {

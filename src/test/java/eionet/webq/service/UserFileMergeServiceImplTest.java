@@ -34,6 +34,7 @@ import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static org.custommonkey.xmlunit.XMLAssert.assertXMLEqual;
@@ -85,7 +86,7 @@ public class UserFileMergeServiceImplTest {
 
     @Test
     public void ifMerging1File_returnFileContent() throws Exception {
-        byte[] mergeResult = service.mergeFiles(Arrays.asList(file1), testMergeModule);
+        byte[] mergeResult = service.mergeFiles(Collections.singletonList(file1), testMergeModule);
         assertXMLEqual(createSource(file1.getContent()),
                 createSource(mergeResult));
     }

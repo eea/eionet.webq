@@ -44,11 +44,12 @@ import eionet.webq.service.impl.project.export.ProjectMetadata;
 import eionet.webq.service.impl.project.export.json.ProjectMetadataJsonSerializer;
 import java.nio.charset.Charset;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import static org.hamcrest.core.IsEqual.equalTo;
 import org.junit.Assert;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -74,7 +75,7 @@ public class ProjectFileServiceImplTest {
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
+        MockitoAnnotations.openMocks(this);
     }
     
     @After
@@ -212,7 +213,7 @@ public class ProjectFileServiceImplTest {
     @Test
     public void testImportFailureNoMetadata() throws Exception {
         ArchiveFile file1 = new ArchiveFile("dummy.html", new byte[] { });
-        byte[] archiveContent = ArchivingUtil.createArchive(Arrays.asList(file1));
+        byte[] archiveContent = ArchivingUtil.createArchive(Collections.singletonList(file1));
         ImportProjectResult result = this.service.importFromArchive(testProject, archiveContent, "user");
         
         Assert.assertEquals(ImportProjectResult.ErrorType.ARCHIVE_METADATA_NOT_FOUND, result.getErrorType());

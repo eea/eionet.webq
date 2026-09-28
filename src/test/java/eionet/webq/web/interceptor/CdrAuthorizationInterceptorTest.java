@@ -46,24 +46,20 @@ import javax.servlet.http.HttpSession;
 import static eionet.webq.web.interceptor.CdrAuthorizationInterceptor.ALLOWED_AUTHORIZATION_FAILURES_COUNT;
 import static eionet.webq.web.interceptor.CdrAuthorizationInterceptor.AUTHORIZATION_FAILED_ATTRIBUTE;
 import static eionet.webq.web.interceptor.CdrAuthorizationInterceptor.AUTHORIZATION_TRY_COUNT;
-import org.apache.http.HttpResponse;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.hamcrest.core.StringContains.containsString;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-/**
- */
 public class CdrAuthorizationInterceptorTest {
     private final String loginUrl = "login";
     @Mock
@@ -77,7 +73,7 @@ public class CdrAuthorizationInterceptorTest {
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
+        MockitoAnnotations.openMocks(this);
         interceptor.setCdrLoginMethod(loginUrl);
     }
 
@@ -93,7 +89,7 @@ public class CdrAuthorizationInterceptorTest {
     @Test
     public void whenQueryForUrlThroughInterceptor_ifAuthorizationNotEmptyAndResponseCodeIsFound_AllowToProceed() throws Exception {
         MockHttpServletRequest request = requestWithNonEmptyAuthHeader();
-        when(restOperations.postForEntity(anyString(), anyObject(), any(Class.class))).thenReturn(
+        when(restOperations.postForEntity(anyString(), any(), any(Class.class))).thenReturn(
                 new ResponseEntity(HttpStatus.FOUND));
 
         assertTrue(interceptor.preHandle(request, new MockHttpServletResponse(), null));
@@ -199,18 +195,18 @@ public class CdrAuthorizationInterceptorTest {
         Assert.assertFalse(result);
     }
     private void restClientWillThrowException() {
-        when(restOperations.postForEntity(anyString(), anyObject(), any(Class.class)))
+        when(restOperations.postForEntity(anyString(), any(), any(Class.class)))
                 .thenThrow(new HttpClientErrorException(HttpStatus.UNAUTHORIZED));
     }
 
     private void assertUrlIsExtracted(MockHttpServletRequest request, String expectedValue) throws Exception {
-        when(restOperations.postForEntity(anyString(), anyObject(), any(Class.class))).thenReturn(
+        when(restOperations.postForEntity(anyString(), any(), any(Class.class))).thenReturn(
                 new ResponseEntity(HttpStatus.FOUND));
 
         interceptor.preHandle(request, new MockHttpServletResponse(), null);
 
         ArgumentCaptor<String> urlCaptor = ArgumentCaptor.forClass(String.class);
-        verify(restOperations).postForEntity(urlCaptor.capture(), anyObject(), any(Class.class));
+        verify(restOperations).postForEntity(urlCaptor.capture(), any(), any(Class.class));
 
         assertThat(urlCaptor.getValue(), containsString(expectedValue));
     }
@@ -221,7 +217,7 @@ public class CdrAuthorizationInterceptorTest {
         CloseableHttpResponse response = mock(CloseableHttpResponse.class);
         when(response.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 2, 0), 200, "OK"));
         doReturn(response).
-                when(interceptor).fetchUrlWithoutRedirection(anyString(), (HttpHeaders) anyObject());
+                when(interceptor).fetchUrlWithoutRedirection(anyString(), (HttpHeaders) any());
         interceptor.preHandle(request, new MockHttpServletResponse(), null);
 
         ArgumentCaptor<String> urlCaptor = ArgumentCaptor.forClass(String.class);

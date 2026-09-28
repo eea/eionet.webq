@@ -30,7 +30,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.web.servlet.ModelAndView;
@@ -42,9 +42,9 @@ import java.util.List;
 import static eionet.webq.web.controller.FileDownloadController.MergeModuleChoiceRequiredException;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.anyCollectionOf;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.anyCollection;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -81,14 +81,14 @@ public class FileDownloadControllerTest {
         byte[] mergeResult = "merge-result".getBytes();
 
         when(userFileService.getById(anyInt())).thenReturn(userFile, userFile);
-        when(mergeModules.findByXmlSchemas(anyCollectionOf(String.class))).thenReturn(Arrays.asList(mergeModule));
-        when(userFileMergeService.mergeFiles(anyCollectionOf(UserFile.class), eq(mergeModule)))
+        when(mergeModules.findByXmlSchemas(anyCollection())).thenReturn(Arrays.asList(mergeModule));
+        when(userFileMergeService.mergeFiles(anyCollection(), eq(mergeModule)))
                 .thenReturn(mergeResult);
         MockHttpServletResponse response = new MockHttpServletResponse();
 
         controller.mergeFiles(Arrays.asList(1,2), null, new MockHttpServletRequest(), response);
 
-        verify(userFileMergeService).mergeFiles(anyCollectionOf(UserFile.class), eq(mergeModule));
+        verify(userFileMergeService).mergeFiles(anyCollection(), eq(mergeModule));
         assertThat(response.getContentAsByteArray(), equalTo(mergeResult));
     }
 
@@ -122,16 +122,14 @@ public class FileDownloadControllerTest {
     public void whenMergingFiles_ifMergeModuleSpecified_useItToMergeFiles() throws Exception {
         int mergeModuleId = 5;
         MergeModule mergeModule = new MergeModule();
-
-        when(userFileService.getById(anyInt())).thenReturn(new UserFile(), new UserFile());
         when(mergeModules.findById(mergeModuleId)).thenReturn(mergeModule);
-        when(userFileMergeService.mergeFiles(anyCollectionOf(UserFile.class), eq(mergeModule)))
+        when(userFileMergeService.mergeFiles(anyCollection(), eq(mergeModule)))
                 .thenReturn("merge-result".getBytes());
 
         controller.mergeFiles(Arrays.asList(1, 2), mergeModuleId, new MockHttpServletRequest(), new MockHttpServletResponse());
 
         verify(mergeModules).findById(mergeModuleId);
-        verify(userFileMergeService).mergeFiles(anyCollectionOf(UserFile.class), eq(mergeModule));
+        verify(userFileMergeService).mergeFiles(anyCollection(), eq(mergeModule));
     }
 
     @SuppressWarnings("unchecked")

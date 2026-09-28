@@ -23,7 +23,6 @@ package eionet.webq.web.service;
 import eionet.webq.dao.orm.ProjectFile;
 import eionet.webq.service.WebFormService;
 import org.apache.xmlrpc.client.XmlRpcClient;
-import org.apache.xmlrpc.client.XmlRpcClientConfigImpl;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -40,15 +39,11 @@ import java.util.Map;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyCollectionOf;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-/**
- */
 public class AvailableFormsServiceTest {
     @InjectMocks
     private AvailableFormsService availableFormsService;
@@ -59,13 +54,13 @@ public class AvailableFormsServiceTest {
     private ProjectFile file1 = webFormWithXmlSchemaAndName("1");
 
     @Before
-    public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
+    public void setUp() {
+        MockitoAnnotations.openMocks(this);
     }
 
     @Test
     @SuppressWarnings("unchecked")
-    public void nullArrayReferenceToGetFormParameterTransformedToEmptyListOfXmlSchemas() throws Exception {
+    public void nullArrayReferenceToGetFormParameterTransformedToEmptyListOfXmlSchemas() {
         availableFormsService.getForm(null);
     
         ArgumentCaptor<Collection> xmlSchemasCollection = ArgumentCaptor.forClass(Collection.class);
@@ -75,7 +70,7 @@ public class AvailableFormsServiceTest {
 
     @Test
     @SuppressWarnings("unchecked")
-    public void emptyArrayParameterToGetFormWillBeTransformedToEmptyCollection() throws Exception {
+    public void emptyArrayParameterToGetFormWillBeTransformedToEmptyCollection() {
         availableFormsService.getForm(new Object[0]);
 
         ArgumentCaptor<Collection> xmlSchemasCollection = ArgumentCaptor.forClass(Collection.class);
@@ -84,7 +79,7 @@ public class AvailableFormsServiceTest {
     }
 
     @Test
-    public void arrayWithValuesPassedToGetFormWillBeTransformedToCollectionWithValues() throws Exception {
+    public void arrayWithValuesPassedToGetFormWillBeTransformedToCollectionWithValues() {
         availableFormsService.getForm(new Object[] {file1.getXmlSchema()});
 
         ArgumentCaptor<Collection> xmlSchemasCollection = ArgumentCaptor.forClass(Collection.class);
@@ -94,8 +89,8 @@ public class AvailableFormsServiceTest {
     }
 
     @Test
-    public void returnsMapContainingXmlSchemaAsAKeyAndFileNameAsValue() throws Exception {
-        when(webFormService.findWebFormsForSchemas(anyCollectionOf(String.class))).thenReturn(Arrays.asList(file1));
+    public void returnsMapContainingXmlSchemaAsAKeyAndFileNameAsValue() {
+        when(webFormService.findWebFormsForSchemas(anyCollection())).thenReturn(Collections.singletonList(file1));
 
         Map<String, String> forms = availableFormsService.getForm(null);
         assertThat(forms.size(), equalTo(1));
@@ -103,9 +98,9 @@ public class AvailableFormsServiceTest {
     }
 
     @Test
-    public void returnsOnlyFirstFileNameForTheSameSchema() throws Exception {
+    public void returnsOnlyFirstFileNameForTheSameSchema() {
         ProjectFile fileWithSameSchemaAsFile1 = webFormWithXmlSchemaAndName("fileWithSameSchemaAsFile1", file1.getXmlSchema());
-        when(webFormService.findWebFormsForSchemas(anyCollectionOf(String.class)))
+        when(webFormService.findWebFormsForSchemas(anyCollection()))
                 .thenReturn(Arrays.asList(file1, fileWithSameSchemaAsFile1));
 
         Map<String, String> forms = availableFormsService.getForm(null);
@@ -117,17 +112,17 @@ public class AvailableFormsServiceTest {
     @Test
     @Ignore
     // TODO: make this check for 404 error
-    public void whenGetXFrom_ifNoFormsFound_askFormsFromWebQ1() throws Exception {
-        when(webFormService.findWebFormsForSchemas(anyCollectionOf(String.class)))
+    public void whenGetXFrom_ifNoFormsFound_askFormsFromWebQ1() {
+        when(webFormService.findWebFormsForSchemas(anyCollection()))
                 .thenReturn(Collections.<ProjectFile>emptyList());
 
         availableFormsService.getForm(null);
     }
 
     @Test
-    public void whenGetForm_ifWebFormsFound_doNotAskWebQ1() throws Exception {
-        when(webFormService.findWebFormsForSchemas(anyCollectionOf(String.class)))
-                .thenReturn(Arrays.asList(file1));
+    public void whenGetForm_ifWebFormsFound_doNotAskWebQ1() {
+        when(webFormService.findWebFormsForSchemas(anyCollection()))
+                .thenReturn(Collections.singletonList(file1));
 
         verifyNoMoreInteractions(xmlRpcClient);
     }

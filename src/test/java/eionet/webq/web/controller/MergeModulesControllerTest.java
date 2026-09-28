@@ -25,9 +25,11 @@ import eionet.webq.dao.orm.MergeModule;
 import org.hibernate.exception.ConstraintViolationException;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 
@@ -37,14 +39,13 @@ import java.util.List;
 
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-/**
- */
+@RunWith(MockitoJUnitRunner.class)
 public class MergeModulesControllerTest {
     @InjectMocks
     private MergeModulesController controller;
@@ -56,11 +57,6 @@ public class MergeModulesControllerTest {
     private BindingResult bindingResult;
     @Mock
     private Principal principal;
-
-    @Before
-    public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
-    }
 
     @Test
     public void whenListingAllModules_loadsAllModulesToModel() throws Exception {

@@ -28,63 +28,71 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyCollectionOf;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AbstractWebFormsServiceTest {
+
     @Mock
-    private WebFormStorage storage;
+    private WebFormStorage webFormStorage ;
+
     @InjectMocks
-    private AbstractWebFormsService webFormsService = new AbstractWebFormsService() {
-        @Override
-        protected WebFormType webFormsForType() {
-            return null;
-        }
-    };
+    private TestWebFormsService webFormsService;
 
     private final ProjectFile file1 = webFormWithXmlSchema("1");
     private final ProjectFile file2 = webFormWithXmlSchema("2");
     private final ProjectFile file3 = webFormWithXmlSchema("3");
 
+    private static class TestWebFormsService extends AbstractWebFormsService {
+        private List<ProjectFile> mockActiveForms = Collections.emptyList();
+
+        public void setMockActiveForms(List<ProjectFile> mockActiveForms) {
+            this.mockActiveForms = mockActiveForms;
+        }
+
+        @Override
+        public List<ProjectFile> getAllActiveWebForms() {
+            return this.mockActiveForms;
+        }
+
+        @Override
+        protected WebFormType webFormsForType() {
+            return WebFormType.LOCAL;
+        }
+    }
 
     @Test
     public void returnsAllAvailableFormsIfProvidedXmlSchemasArrayIsEmpty() {
-        when(webFormsService.getAllActiveWebForms()).thenReturn(Arrays.asList(file1, file2, file3));
-
+        webFormsService.setMockActiveForms(Arrays.asList(file1, file2, file3));
         assertThat(webFormsService.findWebFormsForSchemas(new ArrayList<String>()).size(), equalTo(3));
     }
 
     @Test
     public void forNullXmlSchemasArgumentReturnTheSameResultAsForEmptyArray() {
-        when(webFormsService.getAllActiveWebForms()).thenReturn(Arrays.asList(file1, file2));
-
+        webFormsService.setMockActiveForms(Arrays.asList(file1, file2));
         assertThat(webFormsService.findWebFormsForSchemas(null), equalTo(webFormsService.findWebFormsForSchemas(new ArrayList<String>())));
     }
 
     @Test
     public void findWebFormsForSchemasReturnSpecificResultForSchemaInParameter() {
-        when(storage.findWebFormsForSchemas(any(WebFormType.class), anyCollectionOf(String.class)))
-                .thenReturn(Arrays.asList(file1));
+        when(webFormStorage.findWebFormsForSchemas(any(WebFormType.class), anyCollection()))
+                .thenReturn(Collections.singletonList(file1));
 
-        Collection<ProjectFile> forms = webFormsService.findWebFormsForSchemas(Arrays.asList(file1.getXmlSchema()));
+        Collection<ProjectFile> forms = webFormsService.findWebFormsForSchemas(Collections.singletonList(file1.getXmlSchema()));
 
         assertThat(forms.size(), equalTo(1));
         assertThat(forms.iterator().next(), equalTo(file1));
-        verify(storage).findWebFormsForSchemas(any(WebFormType.class), anyCollectionOf(String.class));
+        verify(webFormStorage).findWebFormsForSchemas(any(WebFormType.class), anyCollection());
     }
     
     @Test

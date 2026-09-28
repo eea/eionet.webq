@@ -27,48 +27,52 @@ import eionet.webq.service.WebFormService;
 import eionet.webq.web.controller.util.WebformUrlProvider;
 import org.hamcrest.core.StringContains;
 import org.hamcrest.core.StringStartsWith;
+import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.MockitoAnnotations;
 import org.springframework.mock.web.MockHttpServletRequest;
 
 import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-/**
- */
-@RunWith(MockitoJUnitRunner.class)
 public class RemoteWebFormTestRunTest {
+
     private final MockHttpServletRequest request = new MockHttpServletRequest();
+
     @InjectMocks
     RemoteWebFormTestRun controller;
+
     @Mock
     UserFileService userFileService;
+
     @Mock
     WebFormService webFormService;
+
     @Mock
     private WebformUrlProvider webformUrlProvider;
+
+    private final ProjectFile webForm = new ProjectFile();
+
+    @Before
+    public void setUp() throws Exception {
+        MockitoAnnotations.openMocks(this);
+        when(webFormService.findActiveWebFormById(anyInt())).thenReturn(webForm);
+        when(userFileService.saveBasedOnWebForm(any(UserFile.class), any(ProjectFile.class))).thenReturn(123);
+    }
 
     @Test
     public void whenStartingRemoteForm_loadsFormByGivenId() throws Exception {
         controller.webFormTestRun(4, null, null, request);
-
         verify(webFormService).findActiveWebFormById(4);
     }
 
     @Test
     public void whenStartingRemoteForm_savesUserFileBasedOnWebForm() throws Exception {
-        ProjectFile webForm = new ProjectFile();
-        when(webFormService.findActiveWebFormById(anyInt())).thenReturn(webForm);
-
         controller.webFormTestRun(4, null, null, request);
-
         verify(userFileService).saveBasedOnWebForm(any(UserFile.class), eq(webForm));
     }
 
@@ -77,7 +81,6 @@ public class RemoteWebFormTestRunTest {
         when(webformUrlProvider.getWebformPath(any(ProjectFile.class)))
                 .thenReturn("/webform/project/projectId/file/webform.html?");
         String redirect = controller.webFormTestRun(2, null, null, request);
-
         assertThat(redirect, StringStartsWith.startsWith("redirect:/webform/project/"));
     }
 

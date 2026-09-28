@@ -25,7 +25,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import javax.servlet.http.HttpSession;
 
@@ -48,8 +48,7 @@ public class EncryptedSessionBasedUserIdProviderTest {
     private EncryptedSessionBasedUserIdProvider provider;
 
     @Test
-    public void returnsUserIdBasedOnSessionEncryptedWithMD5() throws Exception {
-        when(session.getId()).thenReturn(userId);
+    public void returnsUserIdBasedOnSessionEncryptedWithMD5() {
         when(requestBasedUserIdProvider.getUserId(session)).thenReturn(this.hash(userId));
         assertThat(provider.getUserId(), equalTo(this.hash(userId)));
     }

@@ -43,14 +43,15 @@ import org.springframework.validation.BindingResult;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 /**
@@ -85,7 +86,7 @@ public class PublicPageControllerTest {
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
+        MockitoAnnotations.openMocks(this);
         when(cookieValueManager.getUserId(any(HttpServletRequest.class))).thenReturn("Som3r4nd0mc00ki3");
     }
 
@@ -197,7 +198,7 @@ public class PublicPageControllerTest {
         when(file1.getId()).thenReturn(fileId);
         when(userFileService.getById(fileId)).thenReturn(file1);
 
-        publicPageController.saveUserFile(new UserFileList(Arrays.asList(file1)), mock(BindingResult.class), model);
+        publicPageController.saveUserFile(new UserFileList(Collections.singletonList(file1)), mock(BindingResult.class), model);
 
         verify(userFileService).update(file1);
 

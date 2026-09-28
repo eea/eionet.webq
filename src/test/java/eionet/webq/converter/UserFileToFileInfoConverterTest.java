@@ -20,31 +20,29 @@
  */
 package eionet.webq.converter;
 
+import eionet.webq.dao.orm.UserFile;
+import eionet.webq.dto.Conversion;
+import eionet.webq.dto.FileInfo;
+import eionet.webq.service.ConversionService;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.hamcrest.core.IsNull.notNullValue;
 import static org.hamcrest.core.IsNull.nullValue;
 import static org.hamcrest.core.StringContains.containsString;
 import static org.hamcrest.core.StringEndsWith.endsWith;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-
-import eionet.webq.dao.orm.UserFile;
-import eionet.webq.dto.Conversion;
-import eionet.webq.dto.FileInfo;
-import eionet.webq.service.ConversionService;
-
+@RunWith(MockitoJUnitRunner.class)
 public class UserFileToFileInfoConverterTest {
 
     @InjectMocks
@@ -57,13 +55,8 @@ public class UserFileToFileInfoConverterTest {
 
     private static final Date NOW = new Date();
 
-    @Before
-    public void prepare() {
-        MockitoAnnotations.initMocks(this);
-    }
-
     @Test
-    public void getFileInfoWithData() throws Exception {
+    public void getFileInfoWithData() {
         UserFile userFile = new UserFile();
         userFile.setId(FILE_ID);
         userFile.setContent("0123456789".getBytes());
@@ -133,6 +126,6 @@ public class UserFileToFileInfoConverterTest {
         FileInfo fileInfo = fileInfoConverter.convert(userFile);
         assertThat(fileInfo.getConversions().size(), equalTo(2));
 
-        verifyZeroInteractions(conversionService);
+        verifyNoInteractions(conversionService);
     }
 }

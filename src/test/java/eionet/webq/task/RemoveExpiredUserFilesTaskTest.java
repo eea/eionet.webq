@@ -38,7 +38,7 @@ import java.util.Date;
 import java.util.Properties;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -62,7 +62,7 @@ public class RemoveExpiredUserFilesTaskTest {
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
+        MockitoAnnotations.openMocks(this);
         //when(properties.getProperty("user.file.expiration.hours")).thenReturn(Integer.toString(expirationTimeInHours));
         when(factory.getCurrentSession()).thenReturn(session);
         when(session.createCriteria(any(Class.class))).thenReturn(criteria);
