@@ -453,48 +453,6 @@
                     </systemPropertyVariables>
                 </configuration>
             </plugin>
-            <plugin>
-                <groupId>org.apache.tomcat.maven</groupId>
-                <artifactId>tomcat7-maven-plugin</artifactId>
-                <version>2.2</version>
-                <configuration>
-                    <!-- http port -->
-                    <port>8080</port>
-                    <!-- application path always starts with /-->
-                    <path>/</path>
-                    <!-- optional path to a context file -->
-                    <!-- <contextFile>${tomcatContextXml}</contextFile> -->
-			        <httpsPort>8443</httpsPort>
-			        <keystoreFile>${basedir}/certificates/keystore.jks</keystoreFile>
-			        <keystorePass>password</keystorePass>                    
-                    <warSourceDirectory>${project.build.directory}</warSourceDirectory>
-                    <!-- optional system propoerties you want to add -->
-<!--                     <systemProperties> -->
-<!--                         <java.io.tmpdir>${project.build.directory}</java.io.tmpdir> -->
-<!--                         <db.url>jdbc:h2:mem:xmlStorage;DB_CLOSE_DELAY=-1</db.url> -->
-<!--                         <db.driver>org.h2.Driver</db.driver> -->
-<!--                         <db.username>xml</db.username> -->
-<!--                         <db.password>storage</db.password> -->
-<!--                         <cas.service>http://localhost:8080</cas.service> -->
-<!--                         <converters.api.url>http://localhost:6080</converters.api.url> -->
-<!--                         <user.file.expiration.hours>72</user.file.expiration.hours> -->
-<!--                         <initial.admin.username>admin</initial.admin.username> -->
-<!--                     </systemProperties> -->
-                    <!-- if you want to use test dependencies rather than only runtime -->
-                    <useTestClasspath>false</useTestClasspath>
-                    <!-- optional if you want to add some extra directories into the classloader -->
-                    <additionalClasspathDirs>
-                        <additionalClasspathDir></additionalClasspathDir>
-                    </additionalClasspathDirs>
-                </configuration>
-                <dependencies>
-                    <dependency>
-                        <groupId>com.h2database</groupId>
-                        <artifactId>h2</artifactId>
-                        <version>${h2.version}</version>
-                    </dependency>
-                </dependencies>
-            </plugin>
 
             <plugin>
                 <groupId>org.jacoco</groupId>
